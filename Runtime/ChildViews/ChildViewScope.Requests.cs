@@ -7,6 +7,8 @@ namespace MUI.ChildViews
     {
         // 每个自有句柄至多一个请求；数量受 Scope 当前实例数约束。
         private readonly HashSet<ChildViewHandle> synchronousCloseRequests = new HashSet<ChildViewHandle>();
+        private readonly List<ChildViewHandle> closeRequestSnapshot = new List<ChildViewHandle>();
+        private readonly List<ChildViewHandle> childRequestSnapshot = new List<ChildViewHandle>();
         private bool pumpingCloseRequests;
 
         internal void RequestSynchronousClose(ChildViewHandle handle)
@@ -55,7 +57,9 @@ namespace MUI.ChildViews
             try
             {
                 // 本轮只处理入口快照；回调新增的请求留给下一次显式派发。
-                foreach (var handle in new List<ChildViewHandle>(synchronousCloseRequests))
+                closeRequestSnapshot.Clear();
+                closeRequestSnapshot.AddRange(synchronousCloseRequests);
+                foreach (var handle in closeRequestSnapshot)
                 {
                     if (!IsActive)
                     {
@@ -84,7 +88,9 @@ namespace MUI.ChildViews
                 }
 
                 // 请求活跃性通过 Tick 注册向祖先传播，但派发不受隐藏暂停策略限制。
-                foreach (var handle in new List<ChildViewHandle>(tickHandles))
+                childRequestSnapshot.Clear();
+                childRequestSnapshot.AddRange(tickHandles);
+                foreach (var handle in childRequestSnapshot)
                 {
                     if (!IsActive)
                     {
@@ -108,6 +114,8 @@ namespace MUI.ChildViews
             }
             finally
             {
+                closeRequestSnapshot.Clear();
+                childRequestSnapshot.Clear();
                 pumpingCloseRequests = false;
                 RefreshTicks();
             }

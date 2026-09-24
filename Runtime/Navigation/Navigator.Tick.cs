@@ -7,38 +7,48 @@ namespace MUI.Navigation
     {
         private readonly List<ViewInstance> tickInstances = new List<ViewInstance>();
         private readonly List<ViewInstance> tickSnapshot = new List<ViewInstance>();
+        private readonly List<ViewInstance> childRequestSnapshot = new List<ViewInstance>();
         private bool ticking;
 
         private void PumpChildRequests()
         {
             // 使用独立快照，关闭回调可以修改注册表；这里不应用隐藏或覆盖暂停策略。
-            foreach (var instance in new List<ViewInstance>(tickInstances))
+            childRequestSnapshot.Clear();
+            childRequestSnapshot.AddRange(tickInstances);
+            try
             {
-                if (IsShutdown)
+                foreach (var instance in childRequestSnapshot)
                 {
-                    break;
-                }
-
-                if (!instance.IsActive || !instance.ActivationCommitted || instance.IsRebinding || instance.IsUpdatingArgs || instance.IsExecutingBindingCommand ||
-                    !entries.TryGetValue(instance.Handle, out var current) || !ReferenceEquals(current, instance))
-                {
-                    continue;
-                }
-
-                try
-                {
-                    if (instance.View is IChildRequestHost children)
+                    if (IsShutdown)
                     {
-                        using (EnterCallback(instance))
+                        break;
+                    }
+
+                    if (!instance.IsActive || !instance.ActivationCommitted || instance.IsRebinding || instance.IsUpdatingArgs || instance.IsExecutingBindingCommand ||
+                        !entries.TryGetValue(instance.Handle, out var current) || !ReferenceEquals(current, instance))
+                    {
+                        continue;
+                    }
+
+                    try
+                    {
+                        if (instance.View is IChildRequestHost children)
                         {
-                            children.PumpChildRequests();
+                            using (EnterCallback(instance))
+                            {
+                                children.PumpChildRequests();
+                            }
                         }
                     }
+                    catch (Exception error)
+                    {
+                        UIErrors.Report(error);
+                    }
                 }
-                catch (Exception error)
-                {
-                    UIErrors.Report(error);
-                }
+            }
+            finally
+            {
+                childRequestSnapshot.Clear();
             }
         }
 

@@ -268,9 +268,9 @@ namespace MUI.UGUI
             try
             {
                 preparing = true;
-                candidate = targetScope.Prepare(template, provider, Unit.Value, model);
+                candidate = await targetScope.PrepareAsync(template, provider, Unit.Value, model, token);
                 token.ThrowIfCancellationRequested();
-                if (!IsAlive || request != version || !targetScope.IsActive)
+                if (!IsAlive || request != version || !ReferenceEquals(scope, targetScope) || !targetScope.IsActive)
                 {
                     throw new OperationCanceledException(token);
                 }
@@ -318,7 +318,13 @@ namespace MUI.UGUI
                 try
                 {
                     preparing = true;
-                    restored = targetScope.Prepare(template, provider, Unit.Value, previousModel);
+                    restored = await targetScope.PrepareAsync(template, provider, Unit.Value, previousModel, token);
+                    token.ThrowIfCancellationRequested();
+                    if (!IsAlive || request != version || !ReferenceEquals(scope, targetScope) || !targetScope.IsActive)
+                    {
+                        throw new OperationCanceledException(token);
+                    }
+
                     restored.Commit();
                     childHandle = restored;
                     displayedModel = previousModel;

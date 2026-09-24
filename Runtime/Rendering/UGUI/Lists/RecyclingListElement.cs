@@ -282,6 +282,7 @@ namespace MUI.UGUI
             lifetime = parentLifetime;
             pending = null;
             Error = null;
+            running = false;
             dirty = false;
             ++revision;
             parentLifetime.OnDispose(() =>
@@ -294,6 +295,7 @@ namespace MUI.UGUI
                     snapshot.Clear();
                     pending = null;
                     Error = null;
+                    running = false;
                     dirty = false;
                     ++revision;
                     DetachSource();
@@ -565,12 +567,21 @@ namespace MUI.UGUI
             }
             catch (Exception failure)
             {
-                Error = failure;
+                if (ReferenceEquals(lifetime, activation) && ReferenceEquals(pending, completion.Task) &&
+                    !activation.IsEnded)
+                {
+                    Error = failure;
+                }
+
                 completion.TrySetException(failure);
             }
             finally
             {
-                running = false;
+                // 旧任务的完成可能晚于父级释放及下一次激活，不能覆盖新激活的刷新状态。
+                if (ReferenceEquals(lifetime, activation) && ReferenceEquals(pending, completion.Task))
+                {
+                    running = false;
+                }
             }
         }
 

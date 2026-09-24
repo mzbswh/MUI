@@ -382,7 +382,7 @@ Unity 示例已验证从万条数据定位并实际选中 Item 9000（仍仅 9 �
 
 两类列表内部通过 IChildViewElement.Preparation 协调异步条目准备，避免误用面向业务的 PendingChange 自身等待保护。公开 PendingChange 检查当前调用链是否来自池内条目；虚拟列表的 RetryAsync/ScrollToKeyAsync 也拒绝这类业务循环等待。同步模式在条目命令内收到集合变化时只标记待刷新，下一次 LateUpdate 直接同步协调，不启动任务；同步准备检查将该待刷新状态报告为尚未完成。此协议允许按钮修改集合后直接返回，但不承诺命令尚在执行时自身节点就已销毁；列表未启用时延后至恢复帧驱动。
 
-集合变化按完整快照协调，回调重入提交新快照后丢弃旧轮后续工作；同步及异步执行器都有收敛次数上限。空闲条目解绑后隐藏留池，池最多达到配置容量；父激活结束退订来源，最终释放销毁池。它不提供整批原子提交或键身份复用，失败由 Error 和准备边界暴露，修正后 Refresh 重试。Navigation 示例包含 RewardsViewModel 的生成绑定与 SynchronousRecyclingListDemo；当前仅离线编译/源码证据，不代表 Unity 原生布局、异步清理及复用运行验收完成。
+集合变化按完整快照协调，回调重入提交新快照后丢弃旧轮后续工作；同步及异步执行器都有收敛次数上限。空闲条目解绑后隐藏留池，池最多达到配置容量；父激活结束退订来源，最终释放销毁池。异步刷新收尾仅能改写所属激活和任务的状态，避免旧任务完成后覆盖新激活。异步 NestedViewElement 使用 ChildViewScope.PrepareAsync，等待子视图及其必需资源准备后复核代际再提交；失败恢复也遵守相同入口。它不提供整批原子提交或键身份复用，失败由 Error 和准备边界暴露，修正后 Refresh 重试。Navigation 示例包含 RewardsViewModel 的生成绑定与 SynchronousRecyclingListDemo；同步增删、异步条目加载/快切/关闭、复用和凭证归还已在 Unity 运行验收，跨激活旧任务收尾做了编辑器内存探针；故障恢复、缓存复开与长期性能仍待验收。
 
 VirtualListElement.Selection.cs 管理 SelectedKey/SelectedIndex、条目根按钮监听及高亮更新。SelectedKey 支持生成器双向绑定；null 表示无选择，非 null 必须存在于当前快照。聚焦/滚动不会自动改变业务选择，项目可独立决定这两种状态的关系。
 

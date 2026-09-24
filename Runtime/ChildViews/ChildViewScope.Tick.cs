@@ -7,6 +7,7 @@ namespace MUI.ChildViews
     {
         private readonly List<ChildViewHandle> tickHandles = new List<ChildViewHandle>();
         private readonly List<ChildViewHandle> tickSnapshot = new List<ChildViewHandle>();
+        private readonly List<ChildViewHandle> refreshSnapshot = new List<ChildViewHandle>();
         private bool ticking;
         private bool refreshingTicks;
         private bool refreshTicksPending;
@@ -41,7 +42,9 @@ namespace MUI.ChildViews
                     tickHandles.Clear();
                     if (IsActive)
                     {
-                        foreach (var handle in handles.ToArray())
+                        refreshSnapshot.Clear();
+                        refreshSnapshot.AddRange(handles);
+                        foreach (var handle in refreshSnapshot)
                         {
                             try
                             {
@@ -86,6 +89,7 @@ namespace MUI.ChildViews
             }
             finally
             {
+                refreshSnapshot.Clear();
                 refreshingTicks = false;
             }
         }

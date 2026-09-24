@@ -153,6 +153,7 @@ namespace MUI.UGUI
             snapshot.Clear();
             pending = null;
             Error = null;
+            running = false;
             dirty = false;
             var failures = new List<Exception>();
             try

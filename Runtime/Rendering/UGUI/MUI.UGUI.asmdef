@@ -1,0 +1,12 @@
+{
+  "name": "MUI.UGUI",
+  "rootNamespace": "MUI.UGUI",
+  "references": [
+    "MUI.Core",
+    "MUI.Resources",
+    "Unity.ugui",
+    "MUI.Navigation",
+    "MUI.ChildViews"
+  ],
+  "autoReferenced": true
+}

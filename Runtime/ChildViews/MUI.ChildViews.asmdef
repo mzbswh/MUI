@@ -1,0 +1,7 @@
+{
+  "name": "MUI.ChildViews",
+  "rootNamespace": "MUI.ChildViews",
+  "references": ["MUI.Core", "MUI.Resources"],
+  "autoReferenced": true,
+  "noEngineReferences": true
+}

@@ -1,0 +1,7 @@
+<Project>
+  <PropertyGroup>
+    <!-- 与 Unity asmdef 一致，只使用显式声明的项目引用，避免传递引用掩盖缺项。 -->
+    <DisableTransitiveProjectReferences>true</DisableTransitiveProjectReferences>
+    <BaseIntermediateOutputPath>obj/$(MSBuildProjectName)/</BaseIntermediateOutputPath>
+  </PropertyGroup>
+</Project>

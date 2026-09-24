@@ -1,0 +1,6 @@
+.mui-host-diagnostics { margin-top: 8px; }
+.mui-host-summary { white-space: normal; margin-top: 6px; margin-bottom: 6px; }
+.mui-host-instances { height: 240px; }
+.mui-host-row { padding-left: 4px; }
+.mui-host-details { max-height: 560px; margin-top: 6px; }
+.mui-host-detail { white-space: normal; margin-bottom: 4px; }

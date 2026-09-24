@@ -104,3 +104,13 @@ InitTestScene*.unity*
 
 # Auto-generated cache in Assets folder
 /[Aa]ssets/[Ss]ceneDependencyCache*
+
+# Hand-maintained foundation build projects; keep generated output out of git.
+!Tools~/Build/*.csproj
+**/bin/
+**/obj/
+!Generators~/**/*.csproj
+!Tools~/CodeStyle/*.csproj
+
+# Local review index.
+.code-review-graph/

@@ -1,0 +1,9 @@
+{
+  "name": "MUI.Localization",
+  "rootNamespace": "MUI.Localization",
+  "references": [
+    "MUI.Core"
+  ],
+  "autoReferenced": true,
+  "noEngineReferences": true
+}

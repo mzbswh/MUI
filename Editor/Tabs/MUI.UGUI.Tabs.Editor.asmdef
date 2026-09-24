@@ -1,0 +1,15 @@
+{
+  "name": "MUI.UGUI.Tabs.Editor",
+  "rootNamespace": "MUI.UGUI.Tabs.Editor",
+  "references": [
+    "MUI.Core",
+    "MUI.UGUI",
+    "MUI.Editor",
+    "MUI.UGUI.Tabs",
+    "Unity.ugui"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "autoReferenced": true
+}

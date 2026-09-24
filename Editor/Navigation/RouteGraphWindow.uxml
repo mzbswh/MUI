@@ -1,0 +1,21 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements">
+    <ui:Style src="RouteGraphWindow.uss" />
+    <ui:VisualElement class="route-graph-root">
+        <ui:VisualElement class="route-graph-toolbar">
+            <ui:DropdownField name="roots" label="校验根" class="route-graph-roots" />
+            <ui:Button name="rootButton" text="返回根节点" />
+            <ui:Button name="copyButton" text="复制报告" />
+            <ui:Button name="clearButton" text="清空快照" />
+        </ui:VisualElement>
+        <ui:Label name="summary" class="route-graph-summary" />
+        <ui:HelpBox text="仅校验静态声明；运行时参数冲突、资源可用性及跨根共享组合仍需运行验证。快照不会自动更新，请由项目入口重新采集。" message-type="Info" />
+        <ui:Label name="empty" text="尚未提供路由。项目编辑器入口可调用 MUI.Navigation.Editor.RouteGraphWindow.Show(rootRoute)。同步共享示例组件也提供“查看路由依赖图”右键菜单。" class="route-graph-empty" />
+        <ui:TwoPaneSplitView name="split" fixed-pane-index="0" fixed-pane-initial-dimension="280" orientation="Horizontal" class="route-graph-split">
+            <ui:VisualElement class="route-graph-sidebar">
+                <uie:ToolbarSearchField name="search" />
+                <ui:ListView name="nodes" selection-type="Single" fixed-item-height="44" class="route-graph-list" />
+            </ui:VisualElement>
+            <ui:ScrollView name="details" class="route-graph-details" />
+        </ui:TwoPaneSplitView>
+    </ui:VisualElement>
+</ui:UXML>

@@ -1,0 +1,449 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+
+namespace MUI.Navigation
+{
+    public sealed partial class Navigator
+    {
+        internal bool CanAwaitShutdown => !IsReentrant && !IsSourceCommandRunning && !HasCloseEvaluation;
+
+        public ValueTask<CloseOutcome> CloseAsync(ViewHandle handle, CancellationToken cancellationToken = default) => CloseAsyncTraced(handle, false, cancellationToken);
+
+        public ValueTask<CloseOutcome> ForceCloseAsync(ViewHandle handle, CancellationToken cancellationToken = default) => CloseAsyncTraced(handle, true, cancellationToken);
+
+        private ValueTask<CloseOutcome> CloseAsyncCore(ViewHandle handle, bool force, CancellationToken cancellationToken)
+        {
+            AssertThread();
+            RequireAsyncNavigation();
+            if (WouldWaitForSelf(handle))
+            {
+                return new ValueTask<CloseOutcome>(new CloseOutcome(CloseStatus.Reentrant));
+            }
+
+            if (entries.TryGetValue(handle, out var instance))
+            {
+                return new ValueTask<CloseOutcome>(WaitForCloseAsync(force ? BeginClose(instance, DismissReason.Forced) : BeginRequestedClose(instance, DismissReason.Closed), cancellationToken));
+            }
+
+            if (terminal.TryGetValue(handle, out var previous))
+            {
+                return new ValueTask<CloseOutcome>(new CloseOutcome(CloseStatus.AlreadyClosed, previous.Error, previous.Cleanup));
+            }
+
+            return new ValueTask<CloseOutcome>(new CloseOutcome(IsExpired(handle) ? CloseStatus.UnknownOrExpired : CloseStatus.NotFound));
+        }
+
+        public ValueTask<CloseOutcome> CloseAsync<TResult>(ViewHandle<TResult> handle, CancellationToken cancellationToken = default) => CloseAsync(handle.Identity, cancellationToken);
+
+        internal void RequestClose(ViewInstance instance, DismissReason reason)
+        {
+            AssertThread();
+            if (instance.Mode == LifetimeMode.Synchronous)
+            {
+                RequestSynchronousClose(instance, reason);
+                return;
+            }
+
+            Observe(BeginRequestedClose(instance, reason));
+        }
+
+        internal void RequestCompletion(ViewInstance instance, Action acceptResult)
+        {
+            AssertThread();
+            if (instance.State != ViewState.Open || instance.HasCloseStarted || instance.CloseRequest != null)
+            {
+                throw new OperationCanceledException("View already entered closing.");
+            }
+
+            if (instance.Mode == LifetimeMode.Synchronous)
+            {
+                RequestSynchronousClose(instance, DismissReason.Closed, acceptResult);
+                return;
+            }
+
+            Observe(BeginRequestedClose(instance, DismissReason.Closed, acceptResult));
+        }
+
+        private Task<CloseOutcome> BeginClose(ViewInstance instance,
+                    DismissReason reason,
+                    Action acceptResult = null,
+                    ViewInstance replacement = null)
+        {
+            if (dependencyClosures.TryGetValue(instance.Handle, out var pendingClose))
+            {
+                return pendingClose;
+            }
+            if (!instance.HasCloseStarted && ownership.HasOwners(instance.Handle))
+            {
+                if (instance.Mode == LifetimeMode.Synchronous)
+                {
+                    return Task.FromResult(BeginCloseSynchronous(instance, reason, acceptResult, replacement));
+                }
+                return CloseOwnedDependencyAsync(instance, reason, acceptResult, replacement);
+            }
+            return BeginCloseCore(instance, reason, acceptResult, replacement);
+        }
+
+        private Task<CloseOutcome> BeginCloseCore(ViewInstance instance, DismissReason reason,
+                    Action acceptResult, ViewInstance replacement)
+        {
+            if (instance.HasCloseStarted)
+            {
+                if (reason == DismissReason.HostShutdown || reason == DismissReason.Forced)
+                {
+                    FinishExit(instance);
+                }
+
+                return instance.Closing;
+            }
+
+            if (instance.Mode == LifetimeMode.Synchronous)
+            {
+                return Task.FromResult(BeginCloseSynchronous(instance, reason, acceptResult, replacement));
+            }
+
+            acceptResult?.Invoke();
+            var completion = new TaskCompletionSource<CloseOutcome>(TaskCreationOptions.RunContinuationsAsynchronously);
+            var cleanupCompletion = new TaskCompletionSource<CloseOutcome>(TaskCreationOptions.RunContinuationsAsynchronously);
+            instance.Closing = completion.Task;
+            instance.CleanupCompletion = cleanupCompletion.Task;
+            instance.BeginCleanup();
+            var activationWasCommitted = instance.ActivationCommitted;
+            var wasCommitted = CommitClose(instance, reason, replacement);
+            var canAnimate = wasCommitted && activationWasCommitted && instance.HostVisible &&
+                (reason == DismissReason.Closed || reason == DismissReason.Back || reason == DismissReason.Replaced);
+
+            var errors = new List<Exception>();
+            var visualExit = StartExit(instance, canAnimate, errors);
+            try
+            {
+                // 先切断模型到控件的数据流，再取消业务任务；取消回调或
+                // OnClose 内发布的状态不应写回已经退役的界面。
+                using (EnterCallback(instance))
+                {
+                    instance.FreezeBindings();
+                }
+            }
+            catch (Exception failure)
+            {
+                errors.Add(failure);
+            }
+
+            try
+            {
+                FinishEnter(instance);
+            }
+            catch (Exception failure)
+            {
+                errors.Add(failure);
+            }
+
+            try
+            {
+                instance.CancelActivation();
+            }
+            catch (Exception failure)
+            {
+                errors.Add(failure);
+            }
+
+            if (!instance.ExitPending)
+            {
+                CompleteVisualExit(instance, errors);
+            }
+            else
+            {
+                try
+                {
+                    RecomputePresentation();
+                }
+                catch (Exception failure)
+                {
+                    errors.Add(failure);
+                    FinishExit(instance);
+                }
+            }
+
+            DispatchLifecycleEvents();
+            using (EnterCallback(instance))
+            {
+                instance.PublishReadinessObservers();
+            }
+            _ = FinishCloseAsync(instance, reason, wasCommitted, errors, completion, cleanupCompletion, visualExit);
+            return completion.Task;
+        }
+
+        private bool CommitClose(ViewInstance instance, DismissReason reason, ViewInstance replacement)
+        {
+            var wasCommitted = instance.State == ViewState.Open;
+            ownership.ReleaseExplicit(instance.Handle);
+            instance.State = ViewState.Closing;
+            instance.ActivationCommitted = false;
+            instance.EndReadiness();
+            instance.CommitVersion = ++commitVersion;
+            tickInstances.Remove(instance);
+            history.Remove(instance.Handle);
+            QueueLifecycleEvent(instance, NavigationEventKind.CloseCommitted, reason);
+            // 调用任何外部代码前，先提交双方的逻辑状态。
+            if (replacement != null)
+            {
+                CommitOpen(replacement);
+            }
+
+            return wasCommitted;
+        }
+
+        private async Task FinishCloseAsync(ViewInstance instance,
+                    DismissReason reason,
+                    bool wasCommitted,
+                    List<Exception> errors,
+                    TaskCompletionSource<CloseOutcome> completion,
+                    TaskCompletionSource<CloseOutcome> cleanupCompletion,
+                    Task visualExit)
+        {
+            await visualExit;
+            CloseOutcome result;
+            using (var stopDeadline = new CancellationTokenSource())
+            {
+                Task deadline = Task.CompletedTask;
+                try
+                {
+                    var started = System.Diagnostics.Stopwatch.GetTimestamp();
+                    var release = instance.ReleaseAsync(reason, wasCommitted, errors);
+                    deadline = ObserveCloseDeadlineAsync(instance, reason, release, completion, started, stopDeadline.Token);
+                    result = await release;
+                }
+                catch (Exception failure)
+                {
+                    errors.Add(failure);
+                    result = new CloseOutcome(CloseStatus.Failed, failure, CleanupStatus.Failed);
+                    instance.PublishCloseResult(reason, failure, CleanupStatus.Failed, faulted: true);
+                    instance.State = ViewState.Failed;
+                }
+                finally
+                {
+                    stopDeadline.Cancel();
+                    await deadline;
+                }
+            }
+
+            // 取消回调可内联完成清理，再抛出错误；在取消调用完全退出后重新收集。
+            if (instance.CleanupCancellationFailure != null &&
+                !ContainsCleanupError(result.Error, instance.CleanupCancellationFailure))
+            {
+                var error = result.Error == null ? instance.CleanupCancellationFailure :
+                    new AggregateException("Close cleanup and cancellation failed.", result.Error, instance.CleanupCancellationFailure);
+                result = new CloseOutcome(CloseStatus.Failed, error, CleanupStatus.Failed);
+                instance.State = ViewState.Failed;
+            }
+
+            instance.EndCleanup();
+            if (instance.CleanupTimedOut)
+            {
+                --pendingCleanupCount;
+            }
+
+            CompleteClose(instance, reason, result, completion, cleanupCompletion);
+        }
+
+        private void CompleteClose(ViewInstance instance, DismissReason reason, CloseOutcome result,
+                    TaskCompletionSource<CloseOutcome> completion, TaskCompletionSource<CloseOutcome> cleanupCompletion)
+        {
+            if (result.Error != null && !ReferenceEquals(result.Error, instance.Failure))
+            {
+                UIErrors.Report(result.Error);
+            }
+
+            instance.CompletedCloseOutcome = result;
+            ownership.Remove(instance.Handle);
+            entries.Remove(instance.Handle);
+            terminal[instance.Handle] = result;
+            terminalOrder.Enqueue(instance.Handle);
+            while (terminalOrder.Count > terminalCapacity)
+            {
+                terminal.Remove(terminalOrder.Dequeue());
+            }
+
+            QueueLifecycleEvent(instance, NavigationEventKind.Closed, reason, result);
+            DispatchLifecycleEvents();
+            cleanupCompletion?.TrySetResult(result);
+            completion?.TrySetResult(result);
+            instance.SynchronousCloseCompletion?.TrySetResult(result);
+            using (EnterCallback(instance))
+            {
+                instance.PublishResultObservers();
+            }
+        }
+
+        private static async Task<CloseOutcome> WaitForCloseAsync(Task<CloseOutcome> task, CancellationToken token)
+        {
+            try
+            {
+                return await AsyncWait.WithCancellation(task, token);
+            }
+            catch (OperationCanceledException)
+            {
+                return new CloseOutcome(CloseStatus.WaitCancelled, cleanup: CleanupStatus.Pending);
+            }
+        }
+
+        private static void Observe(Task<CloseOutcome> completion)
+        {
+            _ = ObserveCloseAsync(completion);
+        }
+
+        private static async Task ObserveCloseAsync(Task<CloseOutcome> completion)
+        {
+            try
+            {
+                await completion;
+            }
+            catch (Exception failure)
+            {
+                UIErrors.Report(failure);
+            }
+        }
+
+        private ValueTask ShutdownAsyncUntraced()
+        {
+            AssertThread();
+            if (Mode == LifetimeMode.Synchronous)
+            {
+                Shutdown();
+                return default;
+            }
+
+            if (!CanAwaitShutdown)
+            {
+                return new ValueTask(Task.FromException(new InvalidOperationException("A lifecycle hook or source command cannot await its own host shutdown.")));
+            }
+
+            return new ValueTask(RequestShutdownForHostUntraced());
+        }
+
+        private Task RequestShutdownForHostUntraced()
+        {
+            AssertThread();
+            if (Mode == LifetimeMode.Synchronous)
+            {
+                Shutdown();
+                return Task.CompletedTask;
+            }
+
+            if (shutdownTask != null)
+            {
+                return shutdownTask;
+            }
+
+            var completion = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+            shutdownTask = completion.Task;
+            try
+            {
+                shutdown.Cancel(throwOnFirstException: false);
+            }
+            catch (Exception failure)
+            {
+                UIErrors.Report(failure);
+            }
+
+            posted.Clear();
+            var preloadClearing = StartPreloadClear();
+            // 立即使活动 UI 失效，即使准备中的提供方尚未返回。
+            var activeCleanup = entries.Values.Where(entry => entry.State == ViewState.Open || entry.State == ViewState.Closing).ToArray().Select(entry => BeginCloseForCleanup(entry, DismissReason.HostShutdown)).ToArray();
+            _ = ShutdownCoreAsync(completion, activeCleanup, preloadClearing);
+            return completion.Task;
+        }
+
+        private async Task ShutdownCoreAsync(TaskCompletionSource<bool> completion, Task<CloseOutcome>[] activeCleanup, Task preloadClearing)
+        {
+            var errors = new List<Exception>();
+            try
+            {
+                // 请求等待确认期间可以释放队列许可，因此队列可用
+                // 不代表候选准备或其回滚已经结束。
+                await WaitForNavigationRequestsAsync();
+                var closing = new HashSet<Task<CloseOutcome>>(activeCleanup);
+                foreach (var entry in entries.Values.ToArray())
+                {
+                    closing.Add(BeginCloseForCleanup(entry, DismissReason.HostShutdown));
+                }
+
+                foreach (var operation in closing)
+                {
+                    var result = await operation;
+                    if (result.Error != null)
+                    {
+                        errors.Add(result.Error);
+                    }
+                }
+            }
+            catch (Exception failure)
+            {
+                errors.Add(failure);
+            }
+
+            try
+            {
+                await FinishPreloadShutdownAsync(preloadClearing);
+            }
+            catch (Exception failure)
+            {
+                errors.Add(failure);
+            }
+
+            try
+            {
+                await BeginCacheClear();
+            }
+            catch (Exception failure)
+            {
+                // 本次失败通常已经登记，避免同时报告聚合异常及其重复副本。
+                if (!IsRecordedCacheFailure(failure))
+                {
+                    errors.Add(failure);
+                }
+            }
+
+            try
+            {
+                if (inactiveContentClearing != null)
+                {
+                    await inactiveContentClearing;
+                }
+            }
+            catch (Exception failure)
+            {
+                if (!IsRecordedInactiveCleanup(failure))
+                {
+                    errors.Add(failure);
+                }
+            }
+
+            // 显式清理过的失败也保留到宿主关闭，不能因缓存集合已经清空而遗失诊断。
+            errors.AddRange(cacheReleaseErrors);
+            cacheReleaseErrors.Clear();
+            if (omittedCacheReleaseErrors != 0)
+            {
+                errors.Add(new InvalidOperationException(
+                    $"Additional navigation cache cleanup failures omitted: {omittedCacheReleaseErrors}."));
+                omittedCacheReleaseErrors = 0;
+            }
+
+            LifecycleChanged = null;
+            lifecycleEvents.Clear();
+            if (errors.Count == 0)
+            {
+                completion.TrySetResult(true);
+            }
+            else
+            {
+                completion.TrySetException(new AggregateException("Navigator shutdown failed.", errors));
+            }
+        }
+
+        public ValueTask DisposeAsync() => ShutdownAsync();
+    }
+}

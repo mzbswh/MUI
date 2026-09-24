@@ -1,0 +1,49 @@
+{
+  "name": "com.mzbswh.mui",
+  "version": "0.1.0",
+  "displayName": "MUI",
+  "description": "A Unity UI framework with explicit lifetimes and resource ownership.",
+  "unity": "2022.3",
+  "unityRelease": "62f3",
+  "author": {
+    "name": "mzbswh"
+  },
+  "dependencies": {
+    "com.unity.ugui": "1.0.0",
+    "com.unity.modules.screencapture": "1.0.0",
+    "com.unity.modules.imageconversion": "1.0.0",
+    "com.unity.modules.jsonserialize": "1.0.0"
+  },
+  "samples": [
+    {
+      "displayName": "Resource Integration",
+      "description": "项目资源后端接入示例；运行 Navigation 示例前导入。不是框架资源管理实现。",
+      "path": "Samples~/ResourceIntegration"
+    },
+    {
+      "displayName": "Settings",
+      "description": "Generated observable state and two-way uGUI binding. Add SettingsDemo to an empty scene.",
+      "path": "Samples~/Settings"
+    },
+    {
+      "displayName": "Navigation",
+      "description": "Typed synchronous/asynchronous navigation, presenter hooks, command results and cleanup.",
+      "path": "Samples~/Navigation"
+    },
+    {
+      "displayName": "Dialogs",
+      "description": "完全同步的确认框与提示框：同步打开、一次性结果订阅、后续界面及宿主清理。",
+      "path": "Samples~/Dialogs"
+    },
+    {
+      "displayName": "Tabs",
+      "description": "Asynchronous tab selection, content-only loading/error states, retry and cancellation.",
+      "path": "Samples~/Tabs"
+    },
+    {
+      "displayName": "DragDrop",
+      "description": "类型化同步/异步拖放、接受/拒绝/失败、悬停反馈与被动影子。向空场景添加 DragDropDemo，默认同步模式。",
+      "path": "Samples~/DragDrop"
+    }
+  ]
+}

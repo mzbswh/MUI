@@ -1,0 +1,13 @@
+{
+  "name": "MUI.UGUI.Dialogs",
+  "rootNamespace": "MUI.UGUI",
+  "references": [
+    "MUI.Core",
+    "MUI.UGUI",
+    "MUI.Dialogs",
+    "Unity.ugui",
+    "MUI.Navigation",
+    "MUI.Resources"
+  ],
+  "autoReferenced": true
+}

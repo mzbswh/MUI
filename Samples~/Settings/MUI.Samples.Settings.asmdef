@@ -1,0 +1,6 @@
+{
+  "name": "MUI.Samples.Settings",
+  "rootNamespace": "MUI.Samples.Settings",
+  "references": ["MUI.Core", "MUI.Resources", "MUI.UGUI", "Unity.ugui"],
+  "autoReferenced": true
+}

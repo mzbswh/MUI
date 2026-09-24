@@ -1,0 +1,66 @@
+.route-graph-root {
+    flex-grow: 1;
+    padding: 8px;
+}
+.route-graph-toolbar {
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 6px;
+}
+.route-graph-roots {
+    flex-grow: 1;
+    margin-right: 8px;
+}
+.route-graph-summary {
+    white-space: normal;
+    margin-top: 4px;
+    margin-bottom: 6px;
+}
+.route-graph-split {
+    flex-grow: 1;
+    min-height: 180px;
+}
+.route-graph-sidebar {
+    min-width: 190px;
+    padding-right: 8px;
+}
+.route-graph-list {
+    flex-grow: 1;
+}
+.route-graph-node {
+    padding: 4px;
+    border-left-width: 3px;
+    border-left-color: transparent;
+}
+.route-graph-node.is-error {
+    border-left-color: rgb(210, 117, 42);
+}
+.route-graph-details {
+    flex-grow: 1;
+    padding-left: 8px;
+}
+.route-graph-heading {
+    -unity-font-style: bold;
+    font-size: 14px;
+    white-space: normal;
+    margin-top: 8px;
+    margin-bottom: 6px;
+}
+.route-graph-text {
+    white-space: normal;
+    margin-bottom: 4px;
+}
+.route-graph-edge {
+    white-space: normal;
+    -unity-text-align: middle-left;
+    min-height: 30px;
+    margin-bottom: 4px;
+}
+.route-graph-empty {
+    white-space: normal;
+    margin-top: 12px;
+    margin-bottom: 12px;
+}
+.route-graph-hidden {
+    display: none;
+}

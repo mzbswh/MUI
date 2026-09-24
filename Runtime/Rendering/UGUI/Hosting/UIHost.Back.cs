@@ -1,0 +1,116 @@
+using System;
+using System.Threading.Tasks;
+using MUI.Navigation;
+using UnityEngine;
+
+namespace MUI.UGUI
+{
+    public sealed partial class UIHost
+    {
+        private bool backInputPending;
+        private int lastBackInputFrame = -1;
+
+        /// <summary>已接纳的返回输入完成后发布；状态可能是关闭、已处理、阻止或没有目标。</summary>
+        public event Action<CloseOutcome> BackInputCompleted;
+
+        /// <summary>
+        /// 供按钮、输入动作或平台返回回调连接的无参数入口；必须在 Unity 主线程调用。
+        /// 输入系统应仅在按下阶段派发，同一手势由局部取消或此入口之一处理。
+        /// </summary>
+        public void RequestBack() => TryRequestBack();
+
+        /// <summary>
+        /// 接纳一次返回输入。同帧重复输入、尚未完成的返回及不可用宿主返回 false。
+        /// true 仅表示已接纳，不代表页面已关闭；具体结果通过 BackInputCompleted 发布。
+        /// 同步宿主直接执行，不创建任务；异步宿主在关闭结束前拒绝追加输入，不积压请求。
+        /// </summary>
+        public bool TryRequestBack()
+        {
+            if (this == null || !isActiveAndEnabled || navigator == null || navigator.IsShutdown ||
+                shutdown != null || synchronousShuttingDown || backInputPending || lastBackInputFrame == Time.frameCount)
+            {
+                return false;
+            }
+
+            if (!BackInputConsumption.TryConsume())
+            {
+                return false;
+            }
+
+            // 先占位，阻止关闭回调和完成通知再次派发同一帧的输入。
+            lastBackInputFrame = Time.frameCount;
+            backInputPending = true;
+            if (navigator.Mode == LifetimeMode.Synchronous)
+            {
+                try
+                {
+                    PublishBackInput(navigator.Back());
+                }
+                catch (Exception error)
+                {
+                    UIErrors.Report(error);
+                }
+                finally
+                {
+                    backInputPending = false;
+                }
+            }
+            else
+            {
+                _ = DispatchBackInputAsync();
+            }
+
+            return true;
+        }
+
+        private async Task DispatchBackInputAsync()
+        {
+            try
+            {
+                var outcome = await navigator.BackAsync();
+                PublishBackInput(outcome);
+            }
+            catch (Exception error)
+            {
+                UIErrors.Report(error);
+            }
+            finally
+            {
+                backInputPending = false;
+            }
+        }
+
+        private void PublishBackInput(CloseOutcome outcome)
+        {
+            // 退出期间的迟到结果不再回调已释放的项目界面。
+            if (this == null || navigator.IsShutdown || shutdown != null || synchronousShuttingDown)
+            {
+                return;
+            }
+
+            var handlers = BackInputCompleted;
+            if (handlers == null)
+            {
+                return;
+            }
+
+            foreach (Action<CloseOutcome> handler in handlers.GetInvocationList())
+            {
+                // 前一个订阅者可能已经关闭宿主。
+                if (this == null || navigator.IsShutdown || shutdown != null || synchronousShuttingDown)
+                {
+                    break;
+                }
+
+                try
+                {
+                    handler(outcome);
+                }
+                catch (Exception error)
+                {
+                    UIErrors.Report(error);
+                }
+            }
+        }
+    }
+}

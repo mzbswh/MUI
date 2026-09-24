@@ -1,0 +1,7 @@
+{
+  "name": "MUI.Samples.Settings.Editor",
+  "rootNamespace": "MUI.Samples.Settings.Editor",
+  "references": ["MUI.Samples.Settings"],
+  "includePlatforms": ["Editor"],
+  "autoReferenced": true
+}

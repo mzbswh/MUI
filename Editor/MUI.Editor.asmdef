@@ -1,0 +1,7 @@
+{
+  "name": "MUI.Editor",
+  "rootNamespace": "MUI.Editor",
+  "references": ["MUI.Core", "MUI.Resources", "MUI.UGUI", "MUI.Navigation", "Unity.ugui"],
+  "includePlatforms": ["Editor"],
+  "autoReferenced": true
+}

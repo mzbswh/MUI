@@ -1,0 +1,11 @@
+{
+  "name": "MUI.UGUI.Loading",
+  "rootNamespace": "MUI.UGUI",
+  "references": [
+    "MUI.Core",
+    "MUI.UGUI",
+    "MUI.Loading",
+    "Unity.ugui"
+  ],
+  "autoReferenced": true
+}

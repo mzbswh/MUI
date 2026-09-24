@@ -1,0 +1,9 @@
+{
+  "name": "MUI.Themes",
+  "rootNamespace": "MUI.Themes",
+  "references": [
+    "MUI.Core"
+  ],
+  "autoReferenced": true,
+  "noEngineReferences": true
+}

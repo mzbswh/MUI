@@ -1,0 +1,13 @@
+{
+  "name": "MUI.Samples.Dialogs",
+  "rootNamespace": "MUI.Samples.Dialogs",
+  "references": [
+    "MUI.Core",
+    "MUI.Resources",
+    "MUI.Navigation",
+    "MUI.Dialogs",
+    "MUI.UGUI",
+    "MUI.UGUI.Dialogs"
+  ],
+  "autoReferenced": true
+}

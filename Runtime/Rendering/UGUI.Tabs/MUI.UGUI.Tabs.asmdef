@@ -1,0 +1,13 @@
+{
+  "name": "MUI.UGUI.Tabs",
+  "rootNamespace": "MUI.UGUI",
+  "references": [
+    "MUI.Core",
+    "MUI.UGUI",
+    "MUI.Tabs",
+    "Unity.ugui",
+    "MUI.Resources",
+    "MUI.ChildViews"
+  ],
+  "autoReferenced": true
+}

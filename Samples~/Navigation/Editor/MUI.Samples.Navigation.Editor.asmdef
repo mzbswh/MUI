@@ -1,0 +1,7 @@
+{
+  "name": "MUI.Samples.Navigation.Editor",
+  "rootNamespace": "MUI.Samples.Navigation.Editor",
+  "references": ["MUI.Samples.Navigation", "MUI.Navigation", "MUI.Navigation.Editor"],
+  "includePlatforms": ["Editor"],
+  "autoReferenced": true
+}

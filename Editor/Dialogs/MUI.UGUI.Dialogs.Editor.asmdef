@@ -1,0 +1,16 @@
+{
+  "name": "MUI.UGUI.Dialogs.Editor",
+  "rootNamespace": "MUI.UGUI.Dialogs.Editor",
+  "references": [
+    "MUI.Core",
+    "MUI.UGUI",
+    "MUI.Editor",
+    "MUI.UGUI.Dialogs",
+    "Unity.ugui",
+    "MUI.Dialogs"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "autoReferenced": true
+}

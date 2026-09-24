@@ -6,6 +6,10 @@
 
 更新：2026-09-24。
 
+2026-09-24 异步 Tab 缓存故障收尾：`InvalidateCacheAsync` 在逐项淘汰以外发生异常时，现在保留清理诊断、完成显式 `ClearCacheAsync` 等待者的失败结果，并继续释放维护占位，使最终销毁仍可逐项尝试缓存清理。MUI.Tabs Release 编译零警告、零错误，594 个 C# 文件格式检查通过。仅在 `mui-unity-validation@8bc64b8a` 的编辑模式执行不落盘的反射故障探针：注入缓存目录读取异常后，清理等待任务立即完成且为 Faulted，最终生命周期清理报告保留的 AggregateException；未创建脚本、测试或场景资产。原 `ResourceBinding 1` 场景未变脏，MUI 与 fun-slg 编辑器均仍运行。此探针验证异常完成信号，不覆盖真实缓存实例释放、取消交错或原生 UI 交互。
+
+2026-09-24 提交后纯同步现有示例复验：仅控制 `mui-unity-validation@8bc64b8a`（`/private/tmp/mui-unity-validation`，Unity 2022.3.62f3）。SynchronousNavigation 场景中，打开 Ready、参数更新 Applied、注入的参数提交失败为 CommitFailed 且清理 Complete/恢复失败 False；替换候选准备失败时旧页仍 Open，随后替换 Committed、换绑 Applied、关闭 Closed、缓存重开 Succeeded、预加载占用 1 后清除为 0、批量关闭全部完成。SynchronousTabs 场景中，背包与任务切换复用缓存；注入任务页准备失败后显示仍为 inventory，恢复任务页后 Ready，移除任务定义后回到 inventory。SynchronousVirtualList 场景中，1000 项初始物化 8 个，切为三列物化 24 个，定位第 500 项返回 Ready，移除首项后物化 27 个，仍受视口约束。三条链路均为已有场景与运行时入口，没有新增测试、脚本或场景资产；故意注入的异常在 Console 中作为预期诊断。退出 Play Mode 后恢复未修改的 `ResourceBinding 1` 场景，复查 MUI 与 fun-slg 两个编辑器均运行。此证据不覆盖纯同步所有故障组合、原生输入、帧分配、目标平台或长期内存；完整目标仍未完成。
+
 2026-09-24 拖放线程边界编辑器内存复验：只定位并刷新 `mui-unity-validation@8bc64b8a`（`/private/tmp/mui-unity-validation`，Unity 2022.3.62f3），未创建脚本、测试或场景资产。CodeDom 内存探针中，后台取消后由 UI 线程 Pump 收尾得到 `Cancelled`、视觉回调 1 次、所属 Lifetime 清理完成；业务提交在后台完成并配置非 UI 线程同步上下文后，UI 线程 Pump 得到 `Committed`、视觉回调 1 次、源和目标 Lifetime 清理完成。探针没有单独记录派发回调的线程 ID。原 `ResourceBinding 1` 场景文件未改。探针后 MCP 实例索引间歇短暂缺少 MUI，随后列出 MUI 与 fun-slg，但针对 MUI 的项目信息路由仍报实例缺失，因此停止控制；不能据此宣称最终编辑器状态或原生拖拽输入已验收。未操作 fun-slg，未新增测试文件、未提交。
 
 2026-09-24 拖放线程边界复核：异步拖放会话的后台取消即使 UI 上下文投递失败或回调落在错误线程，也会留下待处理标记；uGUI 帧驱动的 Pump 和所属线程显式 Cancel 可结束尚未提交的会话。异步提交在其他线程完成时先暂存结果，再请求 UI 线程发布；派发故障交由 Pump 收尾，会话销毁先等待提交函数退出再排空结果。实际业务提交仍由项目目标委托负责，框架只协调会话、输入捕获和收尾。DragDrop、UGUI.DragDrop、示例 3 个离线工程零警告、零错误，594 个 C# 文件格式检查通过。未新增测试、未操作 Unity Editor、未提交；自定义上下文派发故障及禁用后的原生拖放竞态仍待运行验收。

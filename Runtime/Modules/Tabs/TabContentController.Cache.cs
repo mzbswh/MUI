@@ -388,6 +388,18 @@ namespace MUI.Tabs
                     }
                 }
             }
+            catch (Exception error)
+            {
+                cacheCleanupErrors.Add(error);
+                RecordCacheClearFailure(error);
+                if (cacheClearCompletion != null && !cacheClearCompletion.Task.IsCompleted)
+                {
+                    cacheClearRequested = false;
+                    CompleteCacheClear();
+                }
+
+                throw;
+            }
             finally
             {
                 completion.TrySetResult(true);

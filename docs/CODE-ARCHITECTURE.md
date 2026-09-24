@@ -908,9 +908,9 @@ ChildViewHandle.ContentVersion 独立负责记录提供方/绑定代际、受回
 
 框架不实现共享资源预算或加载合并。项目资源系统负责这些策略，UI 仅归还所持凭证。页面实例缓存的数量/估算容量仅限制 UI 自身的停用实例，不代表全项目资源预算。
 
-### 低内存调度
+### 非活动 UI 清理
 
-Navigation/Navigator.Memory 协调预加载取消和非活动缓存释放，复用已有清理所有权而不另写销毁协议。预加载在途清理目录使回收可以等待此前版本失效已移出的批次；清理操作先登记到 Lifetime，再执行取消回调，避免宿主退出重入遗漏责任。UGUI/Hosting/UIHost.Memory 仅负责平台事件订阅、线程安全请求标记、主线程驱动和异常观察，Unity API 不进入 Navigation。
+`Navigator.ClearInactiveContent` 和 `ClearInactiveContentAsync` 清理当前导航器的预加载占位与停用实例缓存，`UIHost` 转发这两个入口。清理沿用导航器既有持有与释放协议，不订阅平台低内存事件；何时调用以及项目对象池和资源后端的回收顺序由项目决定。
 
 
 ### 有界回收参与者
@@ -1140,11 +1140,11 @@ ReplaceOutcome.SourceClose 与 OpenOutcome.ReplacedClose 为同步结果快照�
 
 Resources/Views 提供 ISynchronousPreloadViewProvider、ISynchronousPreloadLease 和 SynchronousPreloadLease。提供方只实现同步创建、预加载与释放，无需异步接口。独立 IViewContentVersion 承载内容代际，原 IVersionedViewProvider 继承该契约以保持兼容；导航和 ContentViewProvider 从独立契约读取代际。
 
-Navigator.Preloading.Synchronous 保存同步驻留凭证，沿用 PreloadOutcome、PreloadReservationCount、容量配置和退出错误目录。同资源重复请求复用当前驻留记录；先占容量再调用提供方，返回后核对资源身份与代际；拒绝候选立即释放。正常释放归还容量，释放失败不重试且不归还容量，退出报告历史错误。清除先移出目录再逐项释放，一项失败不阻止其余项。版本维护使用宿主 Tick，低内存通过同步协调器先清预加载再清缓存，退出直接清理剩余凭证。
+Navigator.Preloading.Synchronous 保存同步驻留凭证，沿用 PreloadOutcome、PreloadReservationCount、容量配置和退出错误目录。同资源重复请求复用当前驻留记录；先占容量再调用提供方，返回后核对资源身份与代际；拒绝候选立即释放。正常释放归还容量，释放失败不重试且不归还容量，退出报告历史错误。清除先移出目录再逐项释放，一项失败不阻止其余项。版本维护使用宿主 Tick；项目收到低内存信号后可显式调用 ClearInactiveContent，先清本导航器的预加载再清停用实例缓存，退出直接清理剩余凭证。
 
 CreateSynchronous/UIHost.InitializeSynchronous 新增末尾可选 preloadCapacity 参数，默认 32。纯同步提供方回调内禁止导航重入，不引入异步预加载任务。PrefabViewProvider 的同步预加载只独立保持已经常驻的 Prefab 引用，不额外读取资源，不销毁活动实例，也不保证原生资源卸载。真正同步按需加载的项目提供方仍需遵守独立驻留与失败回滚契约。
 
-SynchronousNavigationDemo 增加预加载和清除菜单，可重复预加载检查占用维持 1；低内存和退出调用同一释放流程。当前只完成离线编译，代际变化、失败释放、容量占用及 Unity 运行效果尚未验收。
+SynchronousNavigationDemo 增加预加载和清除菜单，可重复预加载检查占用维持 1；项目触发的非活动内容清理与退出沿用同一释放协议。当前示例已验证正常预加载与清除；代际变化及失败释放仍待专项运行验收。
 
 
 ## 同步资源释放状态与 Lifetime 兼容入口

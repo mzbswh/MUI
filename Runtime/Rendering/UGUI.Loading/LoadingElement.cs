@@ -21,6 +21,7 @@ namespace MUI.UGUI
         private ILoadingSource source;
         private Action<LoadingSnapshot> subscription;
         private long renderVersion;
+        private long sourceAssignmentVersion;
 
         public ILoadingSource Source
         {
@@ -38,25 +39,114 @@ namespace MUI.UGUI
                     return;
                 }
 
+                var assignment = ++sourceAssignmentVersion;
                 // 变更所有权前先读取，确保来源线程错误时保留原绑定。
                 var snapshot = value == null ? default : value.Snapshot;
-                Detach();
+                if (!IsAlive || assignment != sourceAssignmentVersion)
+                {
+                    return;
+                }
+
+                try
+                {
+                    Detach();
+                }
+                catch (Exception failure)
+                {
+                    if (IsAlive && assignment == sourceAssignmentVersion && source == null)
+                    {
+                        try
+                        {
+                            Apply(default);
+                        }
+                        catch (Exception renderFailure)
+                        {
+                            throw new AggregateException("加载来源退订与显示清理均失败。", failure, renderFailure);
+                        }
+                    }
+
+                    throw;
+                }
+
+                if (!IsAlive || assignment != sourceAssignmentVersion)
+                {
+                    return;
+                }
+
                 source = value;
+                var versionBeforeSubscription = renderVersion;
                 if (value != null)
                 {
                     var expectedSource = value;
-                    subscription = state =>
+                    Action<LoadingSnapshot> nextSubscription = null;
+                    nextSubscription = state =>
                     {
-                        if (ReferenceEquals(source, expectedSource))
+                        if (ReferenceEquals(source, expectedSource) &&
+                            ReferenceEquals(subscription, nextSubscription))
                         {
                             Apply(state);
                         }
                     };
-                    source.Changed += subscription;
+                    subscription = nextSubscription;
+                    try
+                    {
+                        value.Changed += nextSubscription;
+                    }
+                    catch (Exception error)
+                    {
+                        var cleared = assignment == sourceAssignmentVersion &&
+                            ReferenceEquals(source, value) && ReferenceEquals(subscription, nextSubscription);
+                        if (cleared)
+                        {
+                            source = null;
+                            subscription = null;
+                        }
+
+                        var failures = new List<Exception> { error };
+                        try
+                        {
+                            value.Changed -= nextSubscription;
+                        }
+                        catch (Exception cleanupError)
+                        {
+                            failures.Add(cleanupError);
+                        }
+
+                        if (cleared && IsAlive && assignment == sourceAssignmentVersion &&
+                            source == null && subscription == null)
+                        {
+                            try
+                            {
+                                Apply(default);
+                            }
+                            catch (Exception renderFailure)
+                            {
+                                failures.Add(renderFailure);
+                            }
+                        }
+
+                        if (failures.Count > 1)
+                        {
+                            throw new AggregateException("加载来源订阅与回滚失败。", failures);
+                        }
+
+                        throw;
+                    }
+
+                    if (!IsAlive || assignment != sourceAssignmentVersion ||
+                        !ReferenceEquals(source, value) || !ReferenceEquals(subscription, nextSubscription))
+                    {
+                        value.Changed -= nextSubscription;
+                        return;
+                    }
                 }
 
-                Apply(snapshot);
-                if (IsAlive)
+                if (renderVersion == versionBeforeSubscription)
+                {
+                    Apply(snapshot);
+                }
+
+                if (IsAlive && assignment == sourceAssignmentVersion && ReferenceEquals(source, value))
                 {
                     NotifyChanged();
                 }

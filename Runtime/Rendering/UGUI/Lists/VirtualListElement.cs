@@ -475,16 +475,28 @@ namespace MUI.UGUI
 
             // 错误线程通知不能进入失败处理后再触碰状态节点。
             RequireListAlive();
+            var context = CaptureChangeContext();
             try
             {
-                if (!TryUpdateItem(change) && !TryAppend(change))
+                if (TryUpdateItem(change, ref context) || !IsCurrentChange(context))
                 {
-                    ApplyChangedSnapshot(change);
+                    return;
                 }
+
+                if (TryAppend(change, ref context) || !IsCurrentChange(context))
+                {
+                    return;
+                }
+
+                ApplyChangedSnapshot(change, ref context);
             }
             catch (Exception failure)
             {
-                SetStatus(VirtualListStatus.Error, failure);
+                if (IsCurrentChangeFailure(context))
+                {
+                    SetStatus(VirtualListStatus.Error, failure);
+                }
+
                 throw;
             }
         }
@@ -532,8 +544,10 @@ namespace MUI.UGUI
             return nextOffsets;
         }
 
-        private void ApplyPreparedSnapshot(List<VirtualListItem> next, VirtualRowIndex nextOffsets)
+        private void ApplyPreparedSnapshot(List<VirtualListItem> next, VirtualRowIndex nextOffsets,
+            long? preparedVersion = null)
         {
+            var nextVersion = preparedVersion ?? (items == null ? -1 : items.Version);
             var oldIndex = initialized ? FirstVisibleIndex : -1;
             var anchor = oldIndex < 0 ? null : snapshot[oldIndex].Key;
             var offset = oldIndex < 0 ? 0 : scrollRect.content.anchoredPosition.y - Layout.OffsetForIndex(oldIndex);
@@ -545,7 +559,7 @@ namespace MUI.UGUI
             snapshot.Clear();
             snapshot.AddRange(next);
             rowIndex = nextOffsets;
-            snapshotVersion = items == null ? -1 : items.Version;
+            snapshotVersion = nextVersion;
             keyIndices.Clear();
             for (var i = 0; i < snapshot.Count; i++)
             {

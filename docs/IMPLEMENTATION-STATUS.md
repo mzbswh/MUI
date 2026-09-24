@@ -6,6 +6,8 @@
 
 更新：2026-09-24。
 
+2026-09-24 借用来源与列表回调边界复核：Loading/Notifications 两个 uGUI 适配器在来源退订抛错时仍分别尝试解除引用、移除通知按钮监听及隐藏提示，清理错误继续向 Element 释放结果传播。普通回收列表与虚拟列表在集合通知期间核对来源、订阅、激活及版本代际，防止读取项目集合时换源或嵌套通知后提交旧快照、覆盖新来源的错误状态；虚拟列表提交后的本次布局错误仍归当前操作。相关三个 uGUI 离线模块 Release 编译零警告、零错误，594 个 C# 文件格式检查和补丁空白检查通过。仅在 `mui-unity-validation@8bc64b8a` 的既有 SynchronousVirtualList 场景运行正常来源路径：1000 项初始物化 8 个，切三列物化 24 个，定位第 500 项保持 Ready，移除首项后 999 项、物化 27 个且 Error 为空。退出 Play Mode 后恢复未变脏的 `ResourceBinding 1` 场景，MUI 与 fun-slg 编辑器均仍运行。自定义来源 getter/枚举器重入、退订抛错及原生渲染异常分支仍缺针对性运行验收；未新增测试文件。
+
 2026-09-24 异步 Tab 缓存故障收尾：`InvalidateCacheAsync` 在逐项淘汰以外发生异常时，现在保留清理诊断、完成显式 `ClearCacheAsync` 等待者的失败结果，并继续释放维护占位，使最终销毁仍可逐项尝试缓存清理。MUI.Tabs Release 编译零警告、零错误，594 个 C# 文件格式检查通过。仅在 `mui-unity-validation@8bc64b8a` 的编辑模式执行不落盘的反射故障探针：注入缓存目录读取异常后，清理等待任务立即完成且为 Faulted，最终生命周期清理报告保留的 AggregateException；未创建脚本、测试或场景资产。原 `ResourceBinding 1` 场景未变脏，MUI 与 fun-slg 编辑器均仍运行。此探针验证异常完成信号，不覆盖真实缓存实例释放、取消交错或原生 UI 交互。
 
 2026-09-24 提交后纯同步现有示例复验：仅控制 `mui-unity-validation@8bc64b8a`（`/private/tmp/mui-unity-validation`，Unity 2022.3.62f3）。SynchronousNavigation 场景中，打开 Ready、参数更新 Applied、注入的参数提交失败为 CommitFailed 且清理 Complete/恢复失败 False；替换候选准备失败时旧页仍 Open，随后替换 Committed、换绑 Applied、关闭 Closed、缓存重开 Succeeded、预加载占用 1 后清除为 0、批量关闭全部完成。SynchronousTabs 场景中，背包与任务切换复用缓存；注入任务页准备失败后显示仍为 inventory，恢复任务页后 Ready，移除任务定义后回到 inventory。SynchronousVirtualList 场景中，1000 项初始物化 8 个，切为三列物化 24 个，定位第 500 项返回 Ready，移除首项后物化 27 个，仍受视口约束。三条链路均为已有场景与运行时入口，没有新增测试、脚本或场景资产；故意注入的异常在 Console 中作为预期诊断。退出 Play Mode 后恢复未修改的 `ResourceBinding 1` 场景，复查 MUI 与 fun-slg 两个编辑器均运行。此证据不覆盖纯同步所有故障组合、原生输入、帧分配、目标平台或长期内存；完整目标仍未完成。

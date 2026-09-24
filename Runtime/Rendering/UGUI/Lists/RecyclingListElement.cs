@@ -334,7 +334,15 @@ namespace MUI.UGUI
         public void Refresh()
         {
             RequireListAlive();
-            AcceptSnapshot(ReadSnapshot(items));
+            var source = items;
+            var subscription = sourceSubscription;
+            var assignment = itemsAssignmentVersion;
+            var activation = lifetime;
+            var currentRevision = revision;
+            if (TryReadCurrentSnapshot(source, subscription, assignment, activation, currentRevision, out var next))
+            {
+                AcceptSnapshot(next);
+            }
         }
 
         private void RequireListAlive()
@@ -400,17 +408,72 @@ namespace MUI.UGUI
             }
 
             RequireListAlive();
+            var source = items;
+            var subscription = sourceSubscription;
+            var assignment = itemsAssignmentVersion;
+            var activation = lifetime;
+            var currentRevision = revision;
+            var accepting = false;
             try
             {
-                AcceptSnapshot(ReadSnapshot(items));
+                if (TryReadCurrentSnapshot(source, subscription, assignment, activation, currentRevision, out var next))
+                {
+                    accepting = true;
+                    AcceptSnapshot(next);
+                }
             }
             catch (Exception failure)
             {
-                Error = failure;
-                ++revision;
+                if (IsCurrentSource(source, subscription, assignment, activation, currentRevision) ||
+                    (accepting && IsCurrentSourceIdentity(source, subscription, assignment, activation) &&
+                    revision == currentRevision + 1))
+                {
+                    Error = failure;
+                    ++revision;
+                }
+
                 throw;
             }
         }
+
+        private bool TryReadCurrentSnapshot(IReadOnlyObservableList<ViewModel> source, object subscription,
+            long assignment, Lifetime activation, long currentRevision, out List<ViewModel> next)
+        {
+            next = null;
+            var before = source == null ? -1 : source.Version;
+            if (!IsCurrentSource(source, subscription, assignment, activation, currentRevision))
+            {
+                return false;
+            }
+
+            next = ReadSnapshot(source);
+            if (!IsCurrentSource(source, subscription, assignment, activation, currentRevision))
+            {
+                return false;
+            }
+
+            var after = source == null ? -1 : source.Version;
+            if (!IsCurrentSource(source, subscription, assignment, activation, currentRevision))
+            {
+                return false;
+            }
+
+            if (before != after)
+            {
+                throw new InvalidOperationException("回收列表来源在读取快照期间发生静默变更，请重新发布集合通知。");
+            }
+
+            return true;
+        }
+
+        private bool IsCurrentSource(IReadOnlyObservableList<ViewModel> source, object subscription,
+            long assignment, Lifetime activation, long currentRevision) =>
+            IsCurrentSourceIdentity(source, subscription, assignment, activation) && revision == currentRevision;
+
+        private bool IsCurrentSourceIdentity(IReadOnlyObservableList<ViewModel> source, object subscription,
+            long assignment, Lifetime activation) =>
+            IsCurrentItemsAssignment(assignment, activation) && ReferenceEquals(items, source) &&
+            ReferenceEquals(sourceSubscription, subscription);
 
         private void AcceptSnapshot(List<ViewModel> next)
         {

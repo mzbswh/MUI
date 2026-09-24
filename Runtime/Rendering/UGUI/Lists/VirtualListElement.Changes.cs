@@ -5,22 +5,69 @@ namespace MUI.UGUI
 {
     public sealed partial class VirtualListElement
     {
-        private bool CanApplyIncrementally(ListChangeSet<VirtualListItem> change) => items != null && change != null && Error == null && change.PreviousVersion == snapshotVersion && change.Version == items.Version && change.PreviousCount == snapshot.Count && change.Count == items.Count;
+        private bool CanApplyIncrementally(ListChangeSet<VirtualListItem> change, ChangeContext context)
+        {
+            if (!IsCurrentChange(context) || change == null || Error != null)
+            {
+                return false;
+            }
+
+            var version = context.Source.Version;
+            var count = context.Source.Count;
+            var currentVersion = context.Source.Version;
+            return IsCurrentChange(context) && change.PreviousVersion == snapshotVersion &&
+                version == currentVersion && change.Version == currentVersion &&
+                change.PreviousCount == snapshot.Count && change.Count == count;
+        }
 
         /// <summary>完整变更路径按稳定键淘汰候选测量，校验成功后再提交缓存与布局。</summary>
-        private void ApplyChangedSnapshot(ListChangeSet<VirtualListItem> change)
+        private void ApplyChangedSnapshot(ListChangeSet<VirtualListItem> change, ref ChangeContext context)
         {
-            var next = ReadSnapshot(items);
+            var version = context.Source.Version;
+            if (!IsCurrentChange(context))
+            {
+                return;
+            }
+
+            var next = ReadSnapshot(context.Source);
+            if (!IsCurrentChange(context))
+            {
+                return;
+            }
+
+            var currentVersion = context.Source.Version;
+            if (!IsCurrentChange(context))
+            {
+                return;
+            }
+
+            if (version != currentVersion)
+            {
+                throw new InvalidOperationException("虚拟列表来源在读取快照期间发生静默变更，请重新发布集合通知。");
+            }
+
             if (!measureItemHeights)
             {
-                ApplySnapshot(next);
+                var offsets = PrepareSnapshot(next);
+                if (IsCurrentChange(context))
+                {
+                    context.PreparedVersion = version;
+                    context.HasPreparedVersion = true;
+                    ApplyPreparedSnapshot(next, offsets, version);
+                }
+
                 return;
             }
 
             // 缺失通知、版本断档或错误恢复时无法确定哪些模型已变化，统一重新测量。
-            var nextMeasurements = CanApplyIncrementally(change)
+            var nextMeasurements = CanApplyIncrementally(change, context)
                 ? new Dictionary<object, MeasuredItem>(measuredItems)
                 : new Dictionary<object, MeasuredItem>();
+            if (!IsCurrentChange(context))
+            {
+                return;
+            }
+
             if (nextMeasurements.Count != 0)
             {
                 foreach (var entry in change.Changes)
@@ -49,18 +96,36 @@ namespace MUI.UGUI
             }
 
             var nextOffsets = PrepareSnapshot(next, nextMeasurements);
+            if (!IsCurrentChange(context))
+            {
+                return;
+            }
+
+            var preparedVersion = context.Source.Version;
+            if (!IsCurrentChange(context))
+            {
+                return;
+            }
+
+            if (preparedVersion != version)
+            {
+                throw new InvalidOperationException("虚拟列表来源在准备测量期间发生静默变更，请重新发布集合通知。");
+            }
+
             measuredItems.Clear();
             foreach (var measurement in nextMeasurements)
             {
                 measuredItems.Add(measurement.Key, measurement.Value);
             }
 
-            ApplyPreparedSnapshot(next, nextOffsets);
+            context.PreparedVersion = version;
+            context.HasPreparedVersion = true;
+            ApplyPreparedSnapshot(next, nextOffsets, version);
         }
 
-        private bool TryUpdateItem(ListChangeSet<VirtualListItem> change)
+        private bool TryUpdateItem(ListChangeSet<VirtualListItem> change, ref ChangeContext context)
         {
-            if (!CanApplyIncrementally(change) || change.Count != snapshot.Count || change.Changes.Count != 1)
+            if (!CanApplyIncrementally(change, context) || change.Count != snapshot.Count || change.Changes.Count != 1)
             {
                 return false;
             }
@@ -73,7 +138,13 @@ namespace MUI.UGUI
 
             var previous = snapshot[entry.Index];
             var current = entry.CurrentItems[0];
-            if (current == null || !ReferenceEquals(previous, entry.PreviousItems[0]) || !ReferenceEquals(current, items[entry.Index]) || !Equals(previous.Key, current.Key) || previous.Height != current.Height)
+            if (current == null || !ReferenceEquals(previous, entry.PreviousItems[0]) || !ReferenceEquals(current, context.Source[entry.Index]) || !Equals(previous.Key, current.Key) || previous.Height != current.Height)
+            {
+                return false;
+            }
+
+            var currentVersion = context.Source.Version;
+            if (!IsCurrentChange(context) || currentVersion != change.Version)
             {
                 return false;
             }
@@ -88,7 +159,14 @@ namespace MUI.UGUI
                 return false;
             }
 
+            if (!IsCurrentChange(context))
+            {
+                return false;
+            }
+
             // 保留选择和滚动锚点，仅此键借用的 ViewModel 可能变化。
+            context.PreparedVersion = change.Version;
+            context.HasPreparedVersion = true;
             snapshot[entry.Index] = current;
             snapshotVersion = change.Version;
             ++sourceRevision;
@@ -102,9 +180,9 @@ namespace MUI.UGUI
             return true;
         }
 
-        private bool TryAppend(ListChangeSet<VirtualListItem> change)
+        private bool TryAppend(ListChangeSet<VirtualListItem> change, ref ChangeContext context)
         {
-            if (!CanApplyIncrementally(change))
+            if (!CanApplyIncrementally(change, context))
             {
                 return false;
             }
@@ -147,10 +225,16 @@ namespace MUI.UGUI
 
             for (var i = 0; i < added.Count; ++i)
             {
-                if (!ReferenceEquals(items[snapshot.Count + i], added[i]))
+                if (!ReferenceEquals(context.Source[snapshot.Count + i], added[i]))
                 {
                     return false;
                 }
+            }
+
+            var currentVersion = context.Source.Version;
+            if (!IsCurrentChange(context) || currentVersion != change.Version)
+            {
+                return false;
             }
 
             if (initialized)
@@ -164,8 +248,15 @@ namespace MUI.UGUI
                 return false;
             }
 
+            if (!IsCurrentChange(context))
+            {
+                return false;
+            }
+
             Layout.ContentHeight(change.Count);
             // 追加时已有索引、选择和首个可见键保持不变。
+            context.PreparedVersion = change.Version;
+            context.HasPreparedVersion = true;
             var start = snapshot.Count;
             snapshot.AddRange(added);
             for (var i = 0; i < added.Count; ++i)
@@ -181,6 +272,45 @@ namespace MUI.UGUI
             // 进行中的刷新会观察到脏标记，并在发布前重新计算范围。
             RequestRefresh(recover: true);
             return true;
+        }
+
+        private ChangeContext CaptureChangeContext() => new ChangeContext(items, itemsSubscription,
+            itemsAssignmentVersion, lifetime, sourceRevision);
+
+        private bool IsCurrentSourceIdentity(ChangeContext context) => IsAlive && context.Source != null &&
+            ReferenceEquals(items, context.Source) && ReferenceEquals(itemsSubscription, context.Subscription) &&
+            itemsAssignmentVersion == context.Assignment && ReferenceEquals(lifetime, context.Activation) &&
+            context.Activation != null && !context.Activation.IsEnded && scope != null && scope.IsActive;
+
+        private bool IsCurrentChange(ChangeContext context) => IsCurrentSourceIdentity(context) &&
+            sourceRevision == context.Revision;
+
+        // 提交后代际前进一次；只有版本仍是本次候选时，后续布局故障才归本次通知。
+        private bool IsCurrentChangeFailure(ChangeContext context) => IsCurrentChange(context) ||
+            (IsCurrentSourceIdentity(context) && context.HasPreparedVersion &&
+            sourceRevision == context.Revision + 1 && snapshotVersion == context.PreparedVersion);
+
+        private struct ChangeContext
+        {
+            public readonly IReadOnlyObservableList<VirtualListItem> Source;
+            public readonly object Subscription;
+            public readonly long Assignment;
+            public readonly Lifetime Activation;
+            public readonly long Revision;
+            public long PreparedVersion;
+            public bool HasPreparedVersion;
+
+            public ChangeContext(IReadOnlyObservableList<VirtualListItem> source, object subscription,
+                long assignment, Lifetime activation, long revision)
+            {
+                Source = source;
+                Subscription = subscription;
+                Assignment = assignment;
+                Activation = activation;
+                Revision = revision;
+                PreparedVersion = 0;
+                HasPreparedVersion = false;
+            }
         }
     }
 }

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using MUI.Notifications;
 using UnityEngine;
 using UnityEngine.UI;
@@ -80,17 +81,55 @@ namespace MUI.UGUI
             OnDispose(() =>
             {
                 ++renderVersion;
-                Detach();
+                List<Exception> errors = null;
+                try
+                {
+                    Detach();
+                }
+                catch (Exception error)
+                {
+                    errors = new List<Exception> { error };
+                }
+
                 source = null;
                 displayedId = 0;
                 if (dismissButton != null)
                 {
-                    dismissButton.onClick.RemoveListener(Dismiss);
+                    try
+                    {
+                        dismissButton.onClick.RemoveListener(Dismiss);
+                    }
+                    catch (Exception error)
+                    {
+                        if (errors == null)
+                        {
+                            errors = new List<Exception>();
+                        }
+
+                        errors.Add(error);
+                    }
                 }
 
                 if (indicator != null)
                 {
-                    indicator.SetActive(false);
+                    try
+                    {
+                        indicator.SetActive(false);
+                    }
+                    catch (Exception error)
+                    {
+                        if (errors == null)
+                        {
+                            errors = new List<Exception>();
+                        }
+
+                        errors.Add(error);
+                    }
+                }
+
+                if (errors != null)
+                {
+                    throw new AggregateException("通知控件清理失败。", errors);
                 }
             });
             if (dismissButton != null)
@@ -136,12 +175,14 @@ namespace MUI.UGUI
 
         private void Detach()
         {
-            if (source != null && subscription != null)
-            {
-                source.Changed -= subscription;
-            }
-
+            var previousSource = source;
+            var previousSubscription = subscription;
+            source = null;
             subscription = null;
+            if (previousSource != null && previousSubscription != null)
+            {
+                previousSource.Changed -= previousSubscription;
+            }
         }
     }
 }

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using MUI.Loading;
 using UnityEngine;
 using UnityEngine.UI;
@@ -90,11 +91,37 @@ namespace MUI.UGUI
             OnDispose(() =>
             {
                 ++renderVersion;
-                Detach();
+                List<Exception> errors = null;
+                try
+                {
+                    Detach();
+                }
+                catch (Exception error)
+                {
+                    errors = new List<Exception> { error };
+                }
+
                 source = null;
                 if (indicator != null)
                 {
-                    indicator.SetActive(false);
+                    try
+                    {
+                        indicator.SetActive(false);
+                    }
+                    catch (Exception error)
+                    {
+                        if (errors == null)
+                        {
+                            errors = new List<Exception>();
+                        }
+
+                        errors.Add(error);
+                    }
+                }
+
+                if (errors != null)
+                {
+                    throw new AggregateException("加载提示控件清理失败。", errors);
                 }
             });
             indicator.SetActive(false);
@@ -159,12 +186,14 @@ namespace MUI.UGUI
 
         private void Detach()
         {
-            if (source != null && subscription != null)
-            {
-                source.Changed -= subscription;
-            }
-
+            var previousSource = source;
+            var previousSubscription = subscription;
+            source = null;
             subscription = null;
+            if (previousSource != null && previousSubscription != null)
+            {
+                previousSource.Changed -= previousSubscription;
+            }
         }
     }
 }

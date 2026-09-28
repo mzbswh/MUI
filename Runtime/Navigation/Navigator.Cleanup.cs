@@ -43,7 +43,7 @@ namespace MUI.Navigation
                     : new ValueTask<CloseOutcome>(WaitForCloseAsync(instance.CleanupCompletion, cancellationToken));
             }
 
-            if (terminal.TryGetValue(handle, out var result))
+            if (TryGetTerminal(handle, out var result))
             {
                 return new ValueTask<CloseOutcome>(result);
             }

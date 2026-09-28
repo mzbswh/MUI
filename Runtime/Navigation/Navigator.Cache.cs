@@ -105,7 +105,7 @@ namespace MUI.Navigation
         }
 
         /// <summary>无帧驱动的宿主可显式清理过期项；不等待物理释放，不关闭活动页面。</summary>
-        public void RefreshCache()
+        private void RefreshCacheUntraced()
         {
             AssertThread();
             if (IsShutdown || IsReentrant || IsSourceCommandRunning || HasCloseEvaluation)
@@ -149,7 +149,8 @@ namespace MUI.Navigation
                 lastCacheSweep = now;
                 try
                 {
-                    RefreshCache();
+                    PruneTerminals(now);
+                    RefreshCacheUntraced();
                     if (Mode == LifetimeMode.AsyncAllowed)
                     {
                         RefreshPreloadProviderVersion();
@@ -211,7 +212,7 @@ namespace MUI.Navigation
         }
 
         /// <summary>移出缓存并等待在途淘汰及最终销毁；不关闭活动页面，重复调用共享清理。</summary>
-        public ValueTask ClearCacheAsync()
+        private ValueTask ClearCacheAsyncUntraced()
         {
             AssertThread();
             RequireAsyncNavigation();

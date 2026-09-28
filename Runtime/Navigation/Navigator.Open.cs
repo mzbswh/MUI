@@ -439,9 +439,12 @@ namespace MUI.Navigation
             posted.Enqueue(() => start.TrySetResult(true));
             // 立即预留队列位置；Pump 只在回调返回后允许排队工作开始。
             var trace = BeginOperationTrace(route.Key, "PostOpen");
-            var operation = OpenCoreAsync(route, args, default, null, source, start.Task, trace);
-            _ = ObserveOpen(trace.Id == 0 ? operation :
-                ObserveTracedOpenAsync(new ValueTask<OpenOutcome<TResult>>(operation), trace).AsTask());
+            using (EnterOperationTrace(trace))
+            {
+                var operation = OpenCoreAsync(route, args, default, null, source, start.Task, trace);
+                _ = ObserveOpen(trace.Id == 0 ? operation :
+                    ObserveTracedOpenAsync(new ValueTask<OpenOutcome<TResult>>(operation), trace).AsTask());
+            }
             return PostOpenStatus.Accepted;
         }
 

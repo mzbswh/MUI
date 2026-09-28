@@ -45,7 +45,9 @@ namespace MUI.UGUI
             int cacheCapacity = 16,
             long? maxCachedEstimatedBytes = null,
             int cleanupCapacity = 16,
-            Action<View> configureDefaultView = null)
+            Action<View> configureDefaultView = null,
+            int terminalCapacity = 256,
+            TimeSpan? terminalDuration = null)
         {
             BeginInitialization();
             try
@@ -58,6 +60,16 @@ namespace MUI.UGUI
                 if (cleanupCapacity < 1)
                 {
                     throw new ArgumentOutOfRangeException(nameof(cleanupCapacity));
+                }
+
+                if (terminalCapacity < 1)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(terminalCapacity));
+                }
+
+                if (terminalDuration.HasValue && terminalDuration.Value <= TimeSpan.Zero)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(terminalDuration));
                 }
 
                 if (maxCachedEstimatedBytes.HasValue && maxCachedEstimatedBytes.Value < 0)
@@ -99,7 +111,8 @@ namespace MUI.UGUI
                     navigator = new Navigator(provider, closeConfirmationService: closeConfirmationService,
                         userPreferences: userPreferences, cacheCapacity: cacheCapacity,
                         maxCachedEstimatedBytes: maxCachedEstimatedBytes,
-                        cleanupCapacity: cleanupCapacity);
+                        cleanupCapacity: cleanupCapacity, terminalCapacity: terminalCapacity,
+                        terminalDuration: terminalDuration);
                 }
                 catch (Exception failure)
                 {
@@ -114,7 +127,7 @@ namespace MUI.UGUI
                 // 导航器构造成功才接管提供方；失败时外部提供方仍完全属于调用者。
                 asyncOwnedProvider = asynchronousDisposable;
                 ownedProvider = disposable;
-                UIErrors.Reported += LogError;
+                UnityErrorLogging.RegisterHost();
                 logging = true;
             }
             finally
@@ -185,8 +198,6 @@ namespace MUI.UGUI
 
             return new PrefabViewProvider(viewRoot, catalog, configureView);
         }
-
-        private static void LogError(Exception error) => Debug.LogException(error);
 
         private void Update()
         {
@@ -317,7 +328,7 @@ namespace MUI.UGUI
                 ownedProvider = null;
                 if (logging)
                 {
-                    UIErrors.Reported -= LogError;
+                    UnityErrorLogging.UnregisterHost();
                     logging = false;
                 }
             }
@@ -349,7 +360,7 @@ namespace MUI.UGUI
                 }
                 catch (Exception error)
                 {
-                    Debug.LogException(error);
+                    UnityErrorLogging.Report(error);
                 }
                 return;
             }
@@ -365,7 +376,7 @@ namespace MUI.UGUI
             }
             catch (Exception error)
             {
-                Debug.LogException(error);
+                UnityErrorLogging.Report(error);
             }
         }
 

@@ -36,6 +36,7 @@ namespace MUI.UGUI
         private bool running;
         private bool dirty;
         private bool initialized;
+        private bool resettingActivation;
         private int first = -1;
         private int last = -1;
         private float viewportHeight;
@@ -433,37 +434,57 @@ namespace MUI.UGUI
             // 新激活不继承前一次刷新任务或失败结果，兼容查询按需提供完成信号。
             pending = null;
             running = false;
-            parentLifetime.OnDispose(() => ReleaseActivationReferences(parentLifetime));
+            resettingActivation = true;
+            try
+            {
+                parentLifetime.OnDispose(() => ReleaseActivationReferences(parentLifetime));
+                RequireCurrentParentActivation(parentLifetime);
+
+                parentCancellation = lifetime.Token.Register(() => ParentCancelled(parentLifetime));
+                RequireCurrentParentActivation(parentLifetime);
+                DetachItemsSource();
+                RequireCurrentParentActivation(parentLifetime);
+                BindPageSource(null);
+                RequireCurrentParentActivation(parentLifetime);
+                items = null;
+                snapshot.Clear();
+                measuredItems.Clear();
+                measurementWidth = -1;
+                rowIndex = null;
+                keyIndices.Clear();
+                intrinsicKeyIndex = true;
+                selectedKey = null;
+                selectedIndex = -1;
+                ++sourceRevision;
+                ++revealSourceRevision;
+                ++revealRevision;
+                first = last = -1;
+                foreach (var cell in cells)
+                {
+                    cell.Key = null;
+                    ((IChildViewElement)cell.Element).BeginParentActivation(scope, lifetime);
+                    cell.Root.gameObject.SetActive(false);
+                    RequireCurrentParentActivation(parentLifetime);
+                }
+
+                UpdateContentHeight();
+                RequireCurrentParentActivation(parentLifetime);
+            }
+            finally
+            {
+                resettingActivation = false;
+            }
+
             SetStatus(VirtualListStatus.Empty);
-            if (!ReferenceEquals(lifetime, parentLifetime) || parentLifetime.IsEnded)
+            RequireCurrentParentActivation(parentLifetime);
+        }
+
+        private void RequireCurrentParentActivation(Lifetime activation)
+        {
+            if (!IsAlive || !ReferenceEquals(lifetime, activation) || activation.IsEnded || scope == null || !scope.IsActive)
             {
-                throw new InvalidOperationException("虚拟列表的父激活已在状态回调中结束。");
+                throw new InvalidOperationException("虚拟列表的父激活已在回调中结束。");
             }
-
-            parentCancellation = lifetime.Token.Register(() => ParentCancelled(parentLifetime));
-            DetachItemsSource();
-
-            BindPageSource(null);
-            items = null;
-            snapshot.Clear();
-            measuredItems.Clear();
-            measurementWidth = -1;
-            rowIndex = null;
-            keyIndices.Clear();
-            selectedKey = null;
-            selectedIndex = -1;
-            ++sourceRevision;
-            ++revealSourceRevision;
-            ++revealRevision;
-            first = last = -1;
-            foreach (var cell in cells)
-            {
-                cell.Key = null;
-                ((IChildViewElement)cell.Element).BeginParentActivation(scope, lifetime);
-                cell.Root.gameObject.SetActive(false);
-            }
-
-            UpdateContentHeight();
         }
 
         private void OnItemsChanged(ListChangeSet<VirtualListItem> change)
@@ -522,12 +543,9 @@ namespace MUI.UGUI
             return next;
         }
 
-        private void ApplySnapshot(List<VirtualListItem> next) =>
-                    ApplyPreparedSnapshot(next, PrepareSnapshot(next));
-
         /// <summary>只校验候选并构建几何索引，不改变来源、订阅、选择和滚动位置。</summary>
         private VirtualRowIndex PrepareSnapshot(List<VirtualListItem> next,
-            IReadOnlyDictionary<object, MeasuredItem> candidateMeasurements = null)
+            IReadOnlyDictionary<VirtualListItem, float> candidateMeasurements = null)
         {
             if (initialized)
             {
@@ -537,7 +555,7 @@ namespace MUI.UGUI
             // 错误期间来源或模型可能已变化；恢复时重新测量，不能沿用旧快照的缓存。
             if (candidateMeasurements == null && Error != null)
             {
-                candidateMeasurements = new Dictionary<object, MeasuredItem>();
+                candidateMeasurements = new Dictionary<VirtualListItem, float>();
             }
 
             var nextOffsets = BuildRowIndex(next, columns, candidateMeasurements);
@@ -546,28 +564,54 @@ namespace MUI.UGUI
         }
 
         private void ApplyPreparedSnapshot(List<VirtualListItem> next, VirtualRowIndex nextOffsets,
-            long? preparedVersion = null)
+            long? preparedVersion = null, Dictionary<VirtualListItem, float> candidateMeasurements = null)
         {
+            var assignment = itemsAssignmentVersion;
+            var activation = lifetime;
+            var source = items;
+            var previousRevision = sourceRevision;
+            var previousError = Error;
+            var previousMeasurements = measuredItems;
+            bool IsCurrent() => IsCurrentItemsAssignment(assignment, activation) &&
+                ReferenceEquals(items, source) && sourceRevision == previousRevision &&
+                ReferenceEquals(Error, previousError) && ReferenceEquals(measuredItems, previousMeasurements);
+
             var nextVersion = preparedVersion ?? (items == null ? -1 : items.Version);
+            if (!IsCurrent())
+            {
+                return;
+            }
+
             var oldIndex = initialized ? FirstVisibleIndex : -1;
             var anchor = oldIndex < 0 ? null : snapshot[oldIndex].Key;
             var offset = oldIndex < 0 ? 0 : scrollRect.content.anchoredPosition.y - Layout.OffsetForIndex(oldIndex);
-            if (Error != null)
+            var nextIndices = new Dictionary<object, int>();
+            var intrinsicKeys = true;
+            for (var i = 0; i < next.Count; i++)
             {
-                measuredItems.Clear();
+                var key = next[i].Key;
+                intrinsicKeys &= IsIntrinsicKey(key);
+                nextIndices.Add(key, i);
+                if (!IsCurrent())
+                {
+                    return;
+                }
+            }
+
+            var nextMeasurements = PrepareMeasurements(next, candidateMeasurements ?? previousMeasurements,
+                previousError != null);
+            if (!IsCurrent())
+            {
+                return;
             }
 
             snapshot.Clear();
             snapshot.AddRange(next);
             rowIndex = nextOffsets;
             snapshotVersion = nextVersion;
-            keyIndices.Clear();
-            for (var i = 0; i < snapshot.Count; i++)
-            {
-                keyIndices.Add(snapshot[i].Key, i);
-            }
-
-            PruneMeasurements();
+            keyIndices = nextIndices;
+            intrinsicKeyIndex = intrinsicKeys;
+            measuredItems = nextMeasurements;
             var revision = ++sourceRevision;
             ++revealSourceRevision;
             // 调用外部选择或布局回调前先使状态失效；嵌套的增量
@@ -589,7 +633,22 @@ namespace MUI.UGUI
 
                 if (anchor != null)
                 {
-                    var index = snapshot.FindIndex(item => Equals(item.Key, anchor));
+                    var index = -1;
+                    for (var i = 0; i < snapshot.Count; i++)
+                    {
+                        var matches = Equals(snapshot[i].Key, anchor);
+                        if (!IsAlive || revision != sourceRevision)
+                        {
+                            return;
+                        }
+
+                        if (matches)
+                        {
+                            index = i;
+                            break;
+                        }
+                    }
+
                     if (index < 0)
                     {
                         index = Mathf.Clamp(oldIndex, 0, Math.Max(0, snapshot.Count - 1));
@@ -609,12 +668,19 @@ namespace MUI.UGUI
         private float ItemHeight(int index) => EffectiveHeight(snapshot[index]);
 
         private VirtualRowIndex BuildRowIndex(IReadOnlyList<VirtualListItem> source, int columnCount,
-                    IReadOnlyDictionary<object, MeasuredItem> candidateMeasurements = null)
+                    IReadOnlyDictionary<VirtualListItem, float> candidateMeasurements = null)
         {
             var variable = measureItemHeights && source.Count != 0;
-            foreach (var item in source)
+            if (!variable)
             {
-                variable |= item.Height.HasValue || (measureItemHeights && measuredItems.ContainsKey(item.Key));
+                foreach (var item in source)
+                {
+                    if (item.Height.HasValue)
+                    {
+                        variable = true;
+                        break;
+                    }
+                }
             }
 
             if (!variable)

@@ -33,6 +33,10 @@ namespace MUI.UGUI
             }
 
             RequireAlive();
+            if (resettingActivation)
+            {
+                throw new InvalidOperationException("虚拟列表重置父激活期间不能修改列表。");
+            }
         }
 
         private void ParentCancelled(Lifetime activation)
@@ -89,17 +93,71 @@ namespace MUI.UGUI
                 return pending ?? Task.CompletedTask;
             }
 
+            var activation = lifetime;
+            var assignment = itemsAssignmentVersion;
+            var source = items;
+            var revision = sourceRevision;
+            var previousPending = pending;
+            var applying = false;
             try
             {
-                ApplySnapshot(ReadSnapshot(items));
+                var version = source == null ? -1 : source.Version;
+                if (!IsCurrentRetry(activation, assignment, source, revision))
+                {
+                    return Task.FromCanceled(new CancellationToken(true));
+                }
+
+                var next = ReadSnapshot(source);
+                if (!IsCurrentRetry(activation, assignment, source, revision))
+                {
+                    return Task.FromCanceled(new CancellationToken(true));
+                }
+
+                var offsets = PrepareSnapshot(next);
+                if (!IsCurrentRetry(activation, assignment, source, revision))
+                {
+                    return Task.FromCanceled(new CancellationToken(true));
+                }
+
+                if (source != null && source.Version != version)
+                {
+                    throw new InvalidOperationException("虚拟列表来源在重试读取期间发生静默变更，请重新发布集合通知。");
+                }
+
+                if (!IsCurrentRetry(activation, assignment, source, revision))
+                {
+                    return Task.FromCanceled(new CancellationToken(true));
+                }
+
+                applying = true;
+                ApplyPreparedSnapshot(next, offsets, version);
+                if (!IsCurrentItemsAssignment(assignment, activation) || !ReferenceEquals(items, source))
+                {
+                    return Task.FromCanceled(new CancellationToken(true));
+                }
+
                 return pending ?? Task.CompletedTask;
             }
             catch (Exception failure)
             {
-                SetStatus(VirtualListStatus.Error, failure);
-                return Task.FromException(failure);
+                var failed = Task.FromException(failure);
+                _ = failed.Exception;
+                if (IsCurrentItemsAssignment(assignment, activation) && ReferenceEquals(items, source) &&
+                    (sourceRevision == revision || (applying && sourceRevision == revision + 1)) &&
+                    ReferenceEquals(pending, previousPending))
+                {
+                    pending = failed;
+                    SetStatus(VirtualListStatus.Error, failure);
+                }
+
+                return failed;
             }
         }
+
+        private bool IsCurrentRetry(Lifetime activation, long assignment,
+            IReadOnlyObservableList<VirtualListItem> source, long revision) =>
+            IsCurrentItemsAssignment(assignment, activation) && ReferenceEquals(items, source) &&
+            sourceRevision == revision;
 
         private void ValidateStateNodes()
         {

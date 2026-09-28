@@ -44,7 +44,12 @@ namespace MUI.Editor
                 IsTruncated = true;
                 return;
             }
-            issues.Add(message.Length > 2048 ? message.Substring(0, 2048) + "…" : message);
+            if (message.Length > 2048)
+            {
+                var length = char.IsHighSurrogate(message[2046]) ? 2046 : 2047;
+                message = message.Substring(0, length) + "…";
+            }
+            issues.Add(message);
         }
 
         public string ExportText()

@@ -508,9 +508,9 @@ namespace MUI.UGUI
                 {
                     activation.Run(token =>
                     {
-                        foreach (var cell in Reconcile(activation, token))
+                        foreach (var preparation in Reconcile(activation, token))
                         {
-                            if (!((IChildViewElement)cell).TryCompleteSynchronousPreparation())
+                            if (!((IChildViewElement)preparation.Element).TryCompleteSynchronousPreparation())
                             {
                                 throw new InvalidOperationException("同步回收列表出现未完成的子视图准备。");
                             }
@@ -519,12 +519,19 @@ namespace MUI.UGUI
                 }
                 catch (Exception failure)
                 {
-                    Error = failure;
+                    if (ReferenceEquals(lifetime, activation) && !activation.IsEnded)
+                    {
+                        Error = failure;
+                    }
+
                     throw;
                 }
                 finally
                 {
-                    running = false;
+                    if (ReferenceEquals(lifetime, activation))
+                    {
+                        running = false;
+                    }
                 }
 
                 return;
@@ -552,9 +559,9 @@ namespace MUI.UGUI
             {
                 await activation.RunAsync(async token =>
                 {
-                    foreach (var cell in Reconcile(activation, token))
+                    foreach (var preparation in Reconcile(activation, token))
                     {
-                        await ((IChildViewElement)cell).Preparation;
+                        await preparation.Completion;
                     }
 
                     return true;

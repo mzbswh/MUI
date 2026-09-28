@@ -13,8 +13,8 @@ namespace MUI.UGUI
         private bool measureItemHeights;
         [SerializeField, Min(1)]
         private int measurementsPerFrame = 4;
-        // 只保留当前来源中的条目，不保留已移除的键或旧模型。
-        private readonly Dictionary<object, MeasuredItem> measuredItems = new Dictionary<object, MeasuredItem>();
+        // 高度仅随同一条目实例复用，避免缓存查询执行项目键的比较逻辑。
+        private Dictionary<VirtualListItem, float> measuredItems = new Dictionary<VirtualListItem, float>();
         private float measurementWidth = -1;
         private bool measuring;
 
@@ -56,7 +56,7 @@ namespace MUI.UGUI
         }
 
         private float EffectiveHeight(VirtualListItem item,
-                    IReadOnlyDictionary<object, MeasuredItem> candidateMeasurements = null)
+                    IReadOnlyDictionary<VirtualListItem, float> candidateMeasurements = null)
         {
             if (item.Height.HasValue)
             {
@@ -64,23 +64,33 @@ namespace MUI.UGUI
             }
 
             var measurements = candidateMeasurements ?? measuredItems;
-            if (measureItemHeights && measurements.TryGetValue(item.Key, out var saved) && ReferenceEquals(saved.Item, item))
+            if (measureItemHeights && measurements.TryGetValue(item, out var saved))
             {
-                return saved.Height;
+                return saved;
             }
 
             return rowHeight;
         }
 
-        private void PruneMeasurements()
+        private static Dictionary<VirtualListItem, float> PrepareMeasurements(
+            List<VirtualListItem> next, Dictionary<VirtualListItem, float> previous, bool discard)
         {
-            foreach (var key in new List<object>(measuredItems.Keys))
+            var retained = new Dictionary<VirtualListItem, float>();
+            if (discard)
             {
-                if (!keyIndices.TryGetValue(key, out var index) || !ReferenceEquals(measuredItems[key].Item, snapshot[index]))
+                return retained;
+            }
+
+            var current = new HashSet<VirtualListItem>(next);
+            foreach (var entry in previous)
+            {
+                if (current.Contains(entry.Key))
                 {
-                    measuredItems.Remove(key);
+                    retained.Add(entry.Key, entry.Value);
                 }
             }
+
+            return retained;
         }
 
         private void ResetMeasuredLayout(float width)
@@ -88,7 +98,7 @@ namespace MUI.UGUI
             var anchor = FirstVisibleIndex;
             var offset = anchor < 0 ? 0 : scrollRect.content.anchoredPosition.y - Layout.OffsetForIndex(anchor);
             // 用空候选计算估算布局；总高度校验失败时保留已提交的测量与宽度。
-            var nextOffsets = BuildRowIndex(snapshot, columns, new Dictionary<object, MeasuredItem>());
+            var nextOffsets = BuildRowIndex(snapshot, columns, new Dictionary<VirtualListItem, float>());
             measuredItems.Clear();
             measurementWidth = width;
             rowIndex = nextOffsets;
@@ -116,12 +126,18 @@ namespace MUI.UGUI
             }
         }
 
-        private void ApplyMeasuredRows(HashSet<int> rows, Dictionary<object, MeasuredItem> measuredBatch)
+        private void ApplyMeasuredRows(HashSet<int> rows, Dictionary<VirtualListItem, float> measuredBatch,
+            ChildViewScope owner, long revision)
         {
             if (measuredBatch.Count == 0)
             {
                 return;
             }
+
+            var previousMeasurements = measuredItems;
+            var previousRows = rowIndex;
+            bool IsCurrent() => IsMeasurementSourceCurrent(owner, revision) &&
+                ReferenceEquals(measuredItems, previousMeasurements) && ReferenceEquals(rowIndex, previousRows);
 
             var anchor = FirstVisibleIndex;
             var offset = anchor < 0 ? 0 : scrollRect.content.anchoredPosition.y - Layout.OffsetForIndex(anchor);
@@ -135,9 +151,13 @@ namespace MUI.UGUI
                 for (var index = start; index < end; ++index)
                 {
                     var item = snapshot[index];
-                    var itemHeight = measuredBatch.TryGetValue(item.Key, out var measured)
-                        ? measured.Height
-                        : EffectiveHeight(item);
+                    var itemHeight = measuredBatch.TryGetValue(item, out var measured)
+                        ? measured : EffectiveHeight(item);
+                    if (!IsCurrent())
+                    {
+                        return;
+                    }
+
                     height = Math.Max(height, itemHeight);
                 }
 
@@ -146,7 +166,12 @@ namespace MUI.UGUI
             }
 
             VirtualRowIndex.ValidateTotal(total);
-            // 缓存与几何通过整批校验后才提交；失败批次不能被后续重试当作已测量。
+            if (!IsCurrent())
+            {
+                return;
+            }
+
+            // 缓存按条目实例索引，提交期间不会执行项目键回调。
             foreach (var measured in measuredBatch)
             {
                 measuredItems[measured.Key] = measured.Value;
@@ -201,9 +226,17 @@ namespace MUI.UGUI
 
                 // 稳定视口通常已经完成测量，不为每个空闲帧创建批次集合和单元快照。
                 var hasPendingMeasurement = false;
-                foreach (var cell in cells)
+                var revision = sourceRevision;
+                var owner = scope;
+                for (var i = 0; i < cells.Count; i++)
                 {
-                    if (TryGetUnmeasuredItem(cell, out _, out _))
+                    var pending = TryGetUnmeasuredItem(cells[i], out _, out _);
+                    if (!IsMeasurementSourceCurrent(owner, revision))
+                    {
+                        return;
+                    }
+
+                    if (pending)
                     {
                         hasPendingMeasurement = true;
                         break;
@@ -215,10 +248,8 @@ namespace MUI.UGUI
                     return;
                 }
 
-                var revision = sourceRevision;
-                var owner = scope;
                 var changedRows = new HashSet<int>();
-                var measuredBatch = new Dictionary<object, MeasuredItem>();
+                var measuredBatch = new Dictionary<VirtualListItem, float>();
                 var measuredCells = new List<(Cell Cell, VirtualListItem Item, int Index, RectTransform Root)>();
                 var remaining = measurementsPerFrame;
                 foreach (var cell in cells.ToArray())
@@ -228,7 +259,13 @@ namespace MUI.UGUI
                         break;
                     }
 
-                    if (!TryGetUnmeasuredItem(cell, out var item, out var index))
+                    var pending = TryGetUnmeasuredItem(cell, out var item, out var index);
+                    if (!IsMeasurementSourceCurrent(owner, revision))
+                    {
+                        return;
+                    }
+
+                    if (!pending)
                     {
                         continue;
                     }
@@ -264,7 +301,12 @@ namespace MUI.UGUI
                         throw new InvalidOperationException("Measured item root must expose a finite positive preferred height.");
                     }
 
-                    measuredBatch[item.Key] = new MeasuredItem { Item = item, Height = height };
+                    measuredBatch[item] = height;
+                    if (!IsCurrentMeasurement(owner, revision, width, cell, item, index, measurementRoot))
+                    {
+                        return;
+                    }
+
                     measuredCells.Add((cell, item, index, measurementRoot));
                     if (height != rowHeight)
                     {
@@ -283,7 +325,7 @@ namespace MUI.UGUI
                 }
 
                 // 总高度也通过校验后，再统一发布测量缓存与行位置。
-                ApplyMeasuredRows(changedRows, measuredBatch);
+                ApplyMeasuredRows(changedRows, measuredBatch, owner, revision);
             }
             finally
             {
@@ -295,37 +337,60 @@ namespace MUI.UGUI
         {
             item = null;
             index = -1;
-            if (cell.Key == null || cell.Root == null || cell.MeasurementRoot == null ||
-                !cell.Root.gameObject.activeInHierarchy || !cell.MeasurementRoot.gameObject.activeInHierarchy ||
-                !keyIndices.TryGetValue(cell.Key, out index))
+            var owner = scope;
+            var revision = sourceRevision;
+            var key = cell.Key;
+            if (key == null || cell.Root == null || cell.MeasurementRoot == null ||
+                !cell.Root.gameObject.activeInHierarchy || !cell.MeasurementRoot.gameObject.activeInHierarchy)
             {
                 return false;
             }
 
+            var found = keyIndices.TryGetValue(key, out index);
+            if (!IsMeasurementSourceCurrent(owner, revision) || !ReferenceEquals(cell.Key, key) ||
+                !found || index < 0 || index >= snapshot.Count)
+            {
+                index = -1;
+                return false;
+            }
+
             item = snapshot[index];
-            return !item.Height.HasValue && !measuredItems.ContainsKey(item.Key) &&
+            var unmeasured = !item.Height.HasValue && !measuredItems.ContainsKey(item);
+            if (!IsMeasurementSourceCurrent(owner, revision) || !ReferenceEquals(cell.Key, key) ||
+                index >= snapshot.Count || !ReferenceEquals(snapshot[index], item) || cell.Element == null)
+            {
+                item = null;
+                index = -1;
+                return false;
+            }
+
+            return unmeasured &&
                 ReferenceEquals(cell.Element.DisplayedViewModel, item.ViewModel);
         }
+
+        private bool IsMeasurementSourceCurrent(ChildViewScope owner, long revision) =>
+            IsAlive && ReferenceEquals(scope, owner) && owner != null && owner.IsActive &&
+            revision == sourceRevision && !dirty && Error == null;
 
         private bool IsCurrentMeasurement(ChildViewScope owner, long revision, float width, Cell cell,
                     VirtualListItem item, int index, RectTransform measurementRoot)
         {
-            return IsAlive && ReferenceEquals(scope, owner) && owner != null && owner.IsActive &&
-                revision == sourceRevision && !dirty && Error == null && !IsVisualRetentionActive &&
-                scrollRect != null && scrollRect.content != null &&
-                measurementWidth == width && scrollRect.content.rect.width / columns == width &&
-                measurementRoot != null && measurementRoot.gameObject.activeInHierarchy &&
-                cell.Root != null && cell.Root.gameObject.activeInHierarchy &&
-                cell.MeasurementRoot == measurementRoot && cell.Element != null && cell.Key != null &&
-                index < snapshot.Count && ReferenceEquals(snapshot[index], item) &&
-                keyIndices.TryGetValue(cell.Key, out var currentIndex) && currentIndex == index &&
-                ReferenceEquals(cell.Element.DisplayedViewModel, item.ViewModel);
-        }
+            if (!IsMeasurementSourceCurrent(owner, revision) || IsVisualRetentionActive ||
+                scrollRect == null || scrollRect.content == null ||
+                measurementWidth != width || scrollRect.content.rect.width / columns != width ||
+                measurementRoot == null || !measurementRoot.gameObject.activeInHierarchy ||
+                cell.Root == null || !cell.Root.gameObject.activeInHierarchy ||
+                cell.MeasurementRoot != measurementRoot || cell.Element == null || cell.Key == null ||
+                index < 0 || index >= snapshot.Count || !ReferenceEquals(snapshot[index], item))
+            {
+                return false;
+            }
 
-        private sealed class MeasuredItem
-        {
-            public VirtualListItem Item;
-            public float Height;
+            var key = cell.Key;
+            var found = keyIndices.TryGetValue(key, out var currentIndex);
+            return found && IsMeasurementSourceCurrent(owner, revision) && ReferenceEquals(cell.Key, key) &&
+                index < snapshot.Count && ReferenceEquals(snapshot[index], item) && currentIndex == index &&
+                cell.Element != null && ReferenceEquals(cell.Element.DisplayedViewModel, item.ViewModel);
         }
     }
 }

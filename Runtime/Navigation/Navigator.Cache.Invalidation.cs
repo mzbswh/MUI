@@ -37,7 +37,7 @@ namespace MUI.Navigation
         /// 使当前实例内容失去后续缓存资格，并清理已有缓存及在途淘汰。
         /// 不结束活动页面或取消打开请求；上下文切换仍须由项目协调活动业务与资源提供方。
         /// </summary>
-        public ValueTask InvalidateCacheAsync()
+        private ValueTask InvalidateCacheAsyncUntraced()
         {
             AssertThread();
             RequireAsyncNavigation();

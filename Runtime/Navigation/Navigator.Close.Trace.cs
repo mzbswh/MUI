@@ -24,9 +24,12 @@ namespace MUI.Navigation
             var trace = BeginHandleOperationTrace(handle, name);
             try
             {
-                var result = CloseSynchronousCore(handle, force, createCompletion);
-                FinishCloseTrace(trace, result);
-                return result;
+                using (EnterOperationTrace(trace))
+                {
+                    var result = CloseSynchronousCore(handle, force, createCompletion);
+                    FinishCloseTrace(trace, result);
+                    return result;
+                }
             }
             catch (Exception error)
             {
@@ -42,8 +45,11 @@ namespace MUI.Navigation
             var trace = BeginHandleOperationTrace(handle, force ? "ForceCloseAsync" : "CloseAsync");
             try
             {
-                var operation = CloseAsyncCore(handle, force, token);
-                return trace.Id == 0 ? operation : ObserveTracedCloseAsync(operation, trace);
+                using (EnterOperationTrace(trace))
+                {
+                    var operation = CloseAsyncCore(handle, force, token);
+                    return trace.Id == 0 ? operation : ObserveTracedCloseAsync(operation, trace);
+                }
             }
             catch (Exception error)
             {
@@ -61,8 +67,11 @@ namespace MUI.Navigation
             var trace = BeginHandleOperationTrace(handle.Identity, "CompleteAsync");
             try
             {
-                var operation = CompleteAsyncUntraced(handle, result, cancellationToken);
-                return trace.Id == 0 ? operation : ObserveTracedCloseAsync(operation, trace);
+                using (EnterOperationTrace(trace))
+                {
+                    var operation = CompleteAsyncUntraced(handle, result, cancellationToken);
+                    return trace.Id == 0 ? operation : ObserveTracedCloseAsync(operation, trace);
+                }
             }
             catch (Exception error)
             {

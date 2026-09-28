@@ -46,7 +46,15 @@ namespace MUI.Navigation
                 return Task.CompletedTask;
             }
 
-            var frame = new ExitFrame { Instance = instance, View = transition, Duration = duration, Errors = errors };
+            var frame = new ExitFrame
+            {
+                Instance = instance,
+                View = transition,
+                Duration = duration,
+                Errors = errors,
+                InitialErrorCount = errors.Count,
+                Trace = BeginOperationPhaseTrace(instance, NavigationOperationStage.ExitTransition, CurrentTraceOperation)
+            };
             // 在调用渲染器前登记，宿主销毁重入时也能找到并结束此转场。
             exiting.Add(instance, frame);
             instance.ExitPending = true;
@@ -137,20 +145,42 @@ namespace MUI.Navigation
             exiting.Remove(instance);
             try
             {
-                if (frame.View.IsAlive)
+                try
                 {
-                    using (EnterCallback(instance))
+                    if (frame.View.IsAlive)
                     {
-                        frame.View.FinishExit();
+                        using (EnterCallback(instance))
+                        {
+                            frame.View.FinishExit();
+                        }
                     }
+                }
+                catch (Exception error)
+                {
+                    frame.Errors.Add(error);
+                    frame.Trace?.Fail(error);
+                }
+
+                CompleteVisualExit(instance, frame.Errors, frame.View);
+                if (degradation == null && frame.Errors.Count == frame.InitialErrorCount)
+                {
+                    frame.Trace?.Complete();
+                }
+                else
+                {
+                    frame.Trace?.Fail(degradation ?? frame.Errors[frame.Errors.Count - 1]);
                 }
             }
             catch (Exception error)
             {
-                frame.Errors.Add(error);
+                frame.Trace?.Fail(error);
+                throw;
+            }
+            finally
+            {
+                frame.Trace?.Dispose();
             }
 
-            CompleteVisualExit(instance, frame.Errors, frame.View);
             frame.Completion.TrySetResult(true);
             // 诊断观察者可以再次导航，必须先撤销旧屏障并完成视觉收尾。
             if (degradation != null)
@@ -213,6 +243,8 @@ namespace MUI.Navigation
             internal float Duration;
             internal double Elapsed;
             internal List<Exception> Errors;
+            internal int InitialErrorCount;
+            internal OperationPhaseTraceScope Trace;
             internal readonly TaskCompletionSource<bool> Completion =
                             new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
         }

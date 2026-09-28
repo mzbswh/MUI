@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.ExceptionServices;
 using System.Threading;
+using System.Threading.Tasks;
 using UnityEngine;
 
 namespace MUI.UGUI
@@ -12,7 +13,7 @@ namespace MUI.UGUI
         /// 同步与异步执行器共用的协调过程。产出条目表示其本轮换绑必须完成后才能显示。
         /// 复用按位置进行，删除后的节点先隐藏再完成解绑后留池，原生布局只计算活动节点。
         /// </summary>
-        private IEnumerable<NestedViewElement> Reconcile(Lifetime activation, CancellationToken token)
+        private IEnumerable<CellPreparation> Reconcile(Lifetime activation, CancellationToken token)
         {
             var remaining = (long)capacity + 8;
             while (IsActivationCurrent(activation) && dirty)
@@ -37,7 +38,12 @@ namespace MUI.UGUI
                     }
 
                     cell.ViewModel = null;
-                    yield return cell;
+                    if (!IsCurrent(activation, currentRevision))
+                    {
+                        break;
+                    }
+
+                    yield return new CellPreparation(cell, activation.Mode);
                     if (!IsCurrent(activation, currentRevision))
                     {
                         break;
@@ -62,7 +68,12 @@ namespace MUI.UGUI
                     }
 
                     cell.ViewModel = desired[index];
-                    yield return cell;
+                    if (!IsCurrent(activation, currentRevision))
+                    {
+                        break;
+                    }
+
+                    yield return new CellPreparation(cell, activation.Mode);
                     if (!IsCurrent(activation, currentRevision))
                     {
                         break;
@@ -77,7 +88,7 @@ namespace MUI.UGUI
                     cell.gameObject.SetActive(true);
                 }
 
-                if (Error != null)
+                if (IsActivationCurrent(activation) && Error != null)
                 {
                     ExceptionDispatchInfo.Capture(Error).Throw();
                 }
@@ -202,6 +213,25 @@ namespace MUI.UGUI
                 {
                     Destroy(cell.gameObject);
                 }
+            }
+        }
+
+        private readonly struct CellPreparation
+        {
+            public CellPreparation(NestedViewElement element, LifetimeMode mode)
+            {
+                Element = element;
+                Completion = mode == LifetimeMode.Synchronous ? null : ((IChildViewElement)element).Preparation;
+            }
+
+            public NestedViewElement Element
+            {
+                get;
+            }
+
+            public Task Completion
+            {
+                get;
             }
         }
     }

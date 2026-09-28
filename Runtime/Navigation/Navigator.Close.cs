@@ -28,7 +28,7 @@ namespace MUI.Navigation
                 return new ValueTask<CloseOutcome>(WaitForCloseAsync(force ? BeginClose(instance, DismissReason.Forced) : BeginRequestedClose(instance, DismissReason.Closed), cancellationToken));
             }
 
-            if (terminal.TryGetValue(handle, out var previous))
+            if (TryGetTerminal(handle, out var previous))
             {
                 return new ValueTask<CloseOutcome>(new CloseOutcome(CloseStatus.AlreadyClosed, previous.Error, previous.Cleanup));
             }
@@ -105,6 +105,7 @@ namespace MUI.Navigation
                 return Task.FromResult(BeginCloseSynchronous(instance, reason, acceptResult, replacement));
             }
 
+            var trace = CurrentTraceOperation;
             acceptResult?.Invoke();
             var completion = new TaskCompletionSource<CloseOutcome>(TaskCreationOptions.RunContinuationsAsynchronously);
             var cleanupCompletion = new TaskCompletionSource<CloseOutcome>(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -172,7 +173,8 @@ namespace MUI.Navigation
             {
                 instance.PublishReadinessObservers();
             }
-            _ = FinishCloseAsync(instance, reason, wasCommitted, errors, completion, cleanupCompletion, visualExit);
+            _ = FinishCloseAsync(instance, reason, wasCommitted, errors, completion, cleanupCompletion,
+                visualExit, trace);
             return completion.Task;
         }
 
@@ -202,42 +204,55 @@ namespace MUI.Navigation
                     List<Exception> errors,
                     TaskCompletionSource<CloseOutcome> completion,
                     TaskCompletionSource<CloseOutcome> cleanupCompletion,
-                    Task visualExit)
+                    Task visualExit,
+                    NavigationTraceOperation trace)
         {
             await visualExit;
             CloseOutcome result;
-            using (var stopDeadline = new CancellationTokenSource())
+            using (var phase = BeginOperationPhaseTrace(instance, NavigationOperationStage.InstanceCleanup, trace))
             {
-                Task deadline = Task.CompletedTask;
-                try
+                using (var stopDeadline = new CancellationTokenSource())
                 {
-                    var started = System.Diagnostics.Stopwatch.GetTimestamp();
-                    var release = instance.ReleaseAsync(reason, wasCommitted, errors);
-                    deadline = ObserveCloseDeadlineAsync(instance, reason, release, completion, started, stopDeadline.Token);
-                    result = await release;
+                    Task deadline = Task.CompletedTask;
+                    try
+                    {
+                        var started = System.Diagnostics.Stopwatch.GetTimestamp();
+                        var release = instance.ReleaseAsync(reason, wasCommitted, errors);
+                        deadline = ObserveCloseDeadlineAsync(instance, reason, release, completion, started, stopDeadline.Token);
+                        result = await release;
+                    }
+                    catch (Exception failure)
+                    {
+                        errors.Add(failure);
+                        result = new CloseOutcome(CloseStatus.Failed, failure, CleanupStatus.Failed);
+                        instance.PublishCloseResult(reason, failure, CleanupStatus.Failed, faulted: true);
+                        instance.State = ViewState.Failed;
+                    }
+                    finally
+                    {
+                        stopDeadline.Cancel();
+                        await deadline;
+                    }
                 }
-                catch (Exception failure)
+
+                // 取消回调可内联完成清理，再抛出错误；在取消调用完全退出后重新收集。
+                if (instance.CleanupCancellationFailure != null &&
+                    !ContainsCleanupError(result.Error, instance.CleanupCancellationFailure))
                 {
-                    errors.Add(failure);
-                    result = new CloseOutcome(CloseStatus.Failed, failure, CleanupStatus.Failed);
-                    instance.PublishCloseResult(reason, failure, CleanupStatus.Failed, faulted: true);
+                    var error = result.Error == null ? instance.CleanupCancellationFailure :
+                        new AggregateException("Close cleanup and cancellation failed.", result.Error, instance.CleanupCancellationFailure);
+                    result = new CloseOutcome(CloseStatus.Failed, error, CleanupStatus.Failed);
                     instance.State = ViewState.Failed;
                 }
-                finally
-                {
-                    stopDeadline.Cancel();
-                    await deadline;
-                }
-            }
 
-            // 取消回调可内联完成清理，再抛出错误；在取消调用完全退出后重新收集。
-            if (instance.CleanupCancellationFailure != null &&
-                !ContainsCleanupError(result.Error, instance.CleanupCancellationFailure))
-            {
-                var error = result.Error == null ? instance.CleanupCancellationFailure :
-                    new AggregateException("Close cleanup and cancellation failed.", result.Error, instance.CleanupCancellationFailure);
-                result = new CloseOutcome(CloseStatus.Failed, error, CleanupStatus.Failed);
-                instance.State = ViewState.Failed;
+                if (result.Cleanup == CleanupStatus.Complete)
+                {
+                    phase?.Complete();
+                }
+                else
+                {
+                    phase?.Fail(result.Error);
+                }
             }
 
             instance.EndCleanup();
@@ -260,12 +275,7 @@ namespace MUI.Navigation
             instance.CompletedCloseOutcome = result;
             ownership.Remove(instance.Handle);
             entries.Remove(instance.Handle);
-            terminal[instance.Handle] = result;
-            terminalOrder.Enqueue(instance.Handle);
-            while (terminalOrder.Count > terminalCapacity)
-            {
-                terminal.Remove(terminalOrder.Dequeue());
-            }
+            RememberTerminal(instance.Handle, result);
 
             QueueLifecycleEvent(instance, NavigationEventKind.Closed, reason, result);
             DispatchLifecycleEvents();

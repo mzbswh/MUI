@@ -38,7 +38,7 @@ namespace MUI.Navigation
                     : BeginRequestedCloseSynchronous(instance, DismissReason.Closed, accept);
             }
 
-            if (terminal.TryGetValue(handle, out var previous))
+            if (TryGetTerminal(handle, out var previous))
             {
                 return new CloseOutcome(CloseStatus.AlreadyClosed, previous.Error, previous.Cleanup);
             }
@@ -165,6 +165,7 @@ namespace MUI.Navigation
                 return new CloseOutcome(CloseStatus.Blocked, cleanup: CleanupStatus.NotRequired);
             }
 
+            var trace = CurrentTraceOperation;
             acceptResult?.Invoke();
             instance.StartSynchronousClose();
             instance.BeginCleanup();
@@ -195,17 +196,29 @@ namespace MUI.Navigation
                 instance.PublishReadinessObservers();
             }
             CloseOutcome outcome;
-            try
+            using (var phase = BeginOperationPhaseTrace(instance, NavigationOperationStage.InstanceCleanup, trace))
             {
-                outcome = instance.Release(reason, wasCommitted, errors);
-            }
-            catch (Exception failure)
-            {
-                errors.Add(failure);
-                var aggregate = new AggregateException("Synchronous navigation cleanup failed.", errors);
-                outcome = new CloseOutcome(CloseStatus.Failed, aggregate, CleanupStatus.Failed);
-                instance.PublishCloseResult(reason, aggregate, CleanupStatus.Failed, faulted: true);
-                instance.State = ViewState.Failed;
+                try
+                {
+                    outcome = instance.Release(reason, wasCommitted, errors);
+                }
+                catch (Exception failure)
+                {
+                    errors.Add(failure);
+                    var aggregate = new AggregateException("Synchronous navigation cleanup failed.", errors);
+                    outcome = new CloseOutcome(CloseStatus.Failed, aggregate, CleanupStatus.Failed);
+                    instance.PublishCloseResult(reason, aggregate, CleanupStatus.Failed, faulted: true);
+                    instance.State = ViewState.Failed;
+                }
+
+                if (outcome.Cleanup == CleanupStatus.Complete)
+                {
+                    phase?.Complete();
+                }
+                else
+                {
+                    phase?.Fail(outcome.Error);
+                }
             }
 
             instance.EndCleanup();

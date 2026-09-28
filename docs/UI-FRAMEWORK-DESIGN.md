@@ -103,23 +103,21 @@ ViewModel 是表现模型，允许像 FUI 一样通过 `[Bind]` 引用 Element �
 
 ```text
 Runtime/
-  Core/          ObservableObject、ViewModel、Presenter、BindingContext、Lifetime
-  Navigation/    Route、RoutePolicy、Navigator、ViewInstance、ViewHandle、依赖与缓存
-  ChildViews/   ChildViewTemplate、ChildViewHandle、父子激活与所有权；不依赖导航
-  Modules/Tabs/  纯托管 Tab 选择与内容状态协调；控件适配器位于 UGUI
-  Resources/     IViewProvider、Lease、资源槽、预加载
-  Rendering/
-    UGUI/        View、Element、控件、虚拟列表、安全区
-  Diagnostics/   结构化日志、状态快照、性能标记
-Editor/          页面向导、Element 收集、资产校验、运行时检查器
-Generators~/     属性、命令、绑定、Route 与工厂生成，Analyzer
-Integrations/    可选资源系统、UniTask、DI 与热更新适配
-Samples~/        设置页、背包、列表、异步弹窗与自定义 Element
+  Core/          可观察对象、ViewModel、Presenter、绑定、Lifetime 与通用 UI 契约
+  Resources/     提供方、凭证和预加载契约；不包含具体加载后端
+  Navigation/    Route、Navigator、ViewInstance、ViewHandle、依赖与自身缓存
+  ChildViews/   固定/动态子视图、父子激活与所有权；不依赖导航
+  Modules/      Tab、主题、本地化、对话框、Loading、通知与拖放的纯托管协调
+  Rendering/    UGUI 基础控件与可选适配、TMP 适配；资源槽位于 UGUI 内部
+Editor/          页面制作、资产校验、Inspector 与各可选模块的编辑器扩展
+Generators~/     属性、命令、绑定与 Route 生成器
+Tools~/          离线构建与代码格式检查
+Samples~/        页面和控件接入示例；具体资源后端位于 ResourceIntegration
 ```
 
 职责边界先于包数量；只有独立依赖、版本或发布需求时才拆 UPM 包。Runtime 不引用 Editor，核心不依赖某个资源加载库。
 
-公共异步契约统一使用 ValueTask；UniTask 集成只做语义一致的适配，不维护另一套打开流程。
+异步操作入口以 ValueTask 为主；需要反复观察或共享同一次操作的完成状态时使用 Task，例如列表的 PendingChange。项目需要 UniTask 时只做语义一致的调用适配，不维护另一套打开流程。
 
 ## 3. Route、ViewHandle 与类型安全
 
@@ -1101,6 +1099,8 @@ FUI 现有 Setup 负责目标程序集的生成器安装，Page Wizard 创建 Vi
 
 可回答“为什么看不见”“谁阻止点击”“谁还在持有页面”“哪个迟到结果被丢弃”。日志以 OperationId/Handle 关联资源、绑定、提交、动画与释放。
 
+运行时异常通过 `UIErrors.Report` 进入进程级 `UIErrors.Sink`，由项目接入日志或遥测系统；接收器异常隔离，不影响原有 UI 失败与清理结果。`UIErrors.Reported` 保留为附加观察接口。没有项目出口时，uGUI 宿主只登记一次 Unity Console 默认输出；View/Element 在没有宿主时仍有 Unity 回退。Core 不引用 Unity 日志 API，也不持久化、上传或决定项目日志策略。当前主动输出仅为错误，普通状态通过生命周期事件和诊断快照提供；示例与 Editor 日志由其自身负责。
+
 局部输入门控另提供 `InputGate.CaptureSnapshot(maxReasons)`：复制原因而不持有令牌或其拥有者，保留真实阻挡数、是否释放和截断标记。重复原因代表不同持有者，不合并计数；门控已释放后仍能查询，不能因阻挡集合清空就错误报告输入已打开。
 
 UGUI 的 `View.CaptureInputSnapshot(maxBlockerReasons)` 在 Unity 主线程采集已有状态，不初始化 View、不创建 InputGate、不调用 ApplyGates。快照包含宿主/局部门控、层级激活、逻辑释放、画面保留、View 自身可见与输入资格，以及根 CanvasGroup 的实际启用、透明度、交互、射线和忽略父组属性。逻辑释放后仍可读取；Unity 对象已销毁则拒绝读取。快照不持有 Unity 对象，原因上限默认 128，可设为 1 至 4096。
@@ -1143,13 +1143,13 @@ Preload/PreloadAsync 记录请求边界、路由键、总耗时与原始预加�
 
 Shutdown/ShutdownAsync 与 UIHost 内部请求退出导航器的路径记录请求边界及成功/异常。同步 ShutdownAsync 兼容分支直接转到 Shutdown，仅记录一次，不增加任务；多个异步等待者仍共用原导航退出工作，各自等待请求可以有独立编号。退出完成记录仅说明导航器负责的清理，不包括外层 UIHost 随后释放其拥有的提供方，也不代替 Unity 原生延迟销毁的验证。错误只复制类型名，异常仍按原流程向调用者传播。退出后可读取已有追踪，主动停止或重启仍按会话隔离规则处理。
 
-当前 OperationId 关联已接入的打开/替换/返回/关闭/批量关闭/参数更新/换绑/预加载/导航器退出与清理等待请求及候选准备阶段；生命周期事件仍按 Handle/提交版本关联，不推断其必然属于最近一次打开。UI 缓存与闲置内容清理等操作的请求编号、绑定与 Presenter 内部分段、动画与资源释放链路关联仍属于完整操作追踪的后续工作。
+当前 OperationId 关联已接入的打开/替换/返回/关闭/批量关闭/参数更新/换绑/预加载/导航器退出与清理等待、显式 UI 缓存维护/清理/失效及闲置内容清理请求，以及候选准备阶段；生命周期事件仍按 Handle/提交版本关联，不推断其必然属于最近一次打开。内部定时缓存扫描与组合清理不重复记录独立请求。候选的 Presenter 创建回调、绑定及同步/异步打开回调有嵌套准备阶段记录；Presenter 工厂仍包含在模型创建阶段。动画与资源释放链路关联仍属于完整操作追踪的后续工作。
 
 ### 16.2 自动化
 
 提供 QueryState、FindElement、InvokeCommand、SetInput、WaitForCondition、CaptureSnapshot 与 ExportTrace。
 
-UGUI 已提供项目显式创建的本地 `UIAutomation(view, mode)` 会话：`QueryState` 读取已有输入状态，`FindElement<T>` 只查询已建立的 View 绑定索引，缺失/歧义按契约报错，不自动初始化或跨嵌套 View 边界扫描。调用限制在创建会话的 Unity 主线程；纯同步模式派发时要求 View 当前激活为同步模式，未就绪、门控阻挡和同一会话派发重入分别报告状态。索引内元素被移动到其他 View 后不能通过旧会话操作。
+可选 `MUI.UGUI.Automation` 程序集提供项目显式创建的本地 `UIAutomation(view, mode)` 会话；项目 asmdef 使用时显式引用它，类型仍位于 `MUI.UGUI` 命名空间。基础 `MUI.UGUI` 仅保留控件输入适配契约与状态枚举，不承担条件轮询、截图或 PNG 编码。`QueryState` 读取已有输入状态，`FindElement<T>` 只查询已建立的 View 绑定索引，缺失/歧义按契约报错，不自动初始化或跨嵌套 View 边界扫描。调用限制在创建会话的 Unity 主线程；纯同步模式派发时要求 View 当前激活为同步模式，未就绪、门控阻挡和同一会话派发重入分别报告状态。索引内元素被移动到其他 View 后不能通过旧会话操作。
 
 `InvokeCommand(buttonName)` 检查 Element、所属 View 与原生 Selectable 资格后调用真实 Button.onClick，继续经过现有绑定的生命周期和 CanExecute 检查；Accepted 仅表示已接受派发，不代表绑定命令存在、执行成功或异步完成。`SetInput` 按 string/bool/float/int 操作原生 InputField（含 TMP）/Toggle/Slider/Dropdown（含 TMP）：拒绝只读文本框、非有限数字及越界选项，保留原生赋值事件、互斥组和限幅。文本赋值遵循对应组件自身语义：uGUI InputField 执行原生字符校验；当前 TMP_InputField 的 text 赋值不执行逐字输入校验或字符数限制，不能作为键盘输入验收。下拉框自动化只选择真实选项，不接受 TMP 的 -1 占位值。相同值可以不触发事件；业务回调可以随后覆盖输入，因此调用后仍需读取真实状态。错误向调用者传播，不把已经发生的项目回调伪装成可回滚事务。
 

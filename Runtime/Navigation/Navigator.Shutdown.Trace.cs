@@ -13,8 +13,11 @@ namespace MUI.Navigation
             var trace = BeginOperationTrace(string.Empty, "Shutdown");
             try
             {
-                ShutdownUntraced();
-                FinishOperationTrace(trace, default, "导航器退出完成", null);
+                using (EnterOperationTrace(trace))
+                {
+                    ShutdownUntraced();
+                    FinishOperationTrace(trace, default, "导航器退出完成", null);
+                }
             }
             catch (Exception error)
             {
@@ -34,8 +37,11 @@ namespace MUI.Navigation
             var trace = BeginOperationTrace(string.Empty, "ShutdownAsync");
             try
             {
-                var operation = ShutdownAsyncUntraced();
-                return trace.Id == 0 ? operation : ObserveTracedShutdownAsync(operation, trace);
+                using (EnterOperationTrace(trace))
+                {
+                    var operation = ShutdownAsyncUntraced();
+                    return trace.Id == 0 ? operation : ObserveTracedShutdownAsync(operation, trace);
+                }
             }
             catch (Exception error)
             {
@@ -56,8 +62,11 @@ namespace MUI.Navigation
             var trace = BeginOperationTrace(string.Empty, "ShutdownForHost");
             try
             {
-                var operation = RequestShutdownForHostUntraced();
-                return trace.Id == 0 ? operation : ObserveTracedShutdownAsync(new ValueTask(operation), trace).AsTask();
+                using (EnterOperationTrace(trace))
+                {
+                    var operation = RequestShutdownForHostUntraced();
+                    return trace.Id == 0 ? operation : ObserveTracedShutdownAsync(new ValueTask(operation), trace).AsTask();
+                }
             }
             catch (Exception error)
             {

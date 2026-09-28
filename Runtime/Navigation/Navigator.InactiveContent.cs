@@ -24,7 +24,7 @@ namespace MUI.Navigation
         /// 先请求结束预加载，再释放停用页面缓存，等待全部相关回收。
         /// 活动页面、业务任务与导航历史保持有效；重复请求共用当前回收任务。
         /// </summary>
-        public ValueTask ClearInactiveContentAsync()
+        private ValueTask ClearInactiveContentAsyncUntraced()
         {
             AssertThread();
             RequireAsyncNavigation();
@@ -35,7 +35,7 @@ namespace MUI.Navigation
 
             if (IsShutdown)
             {
-                return ShutdownAsync();
+                return ShutdownAsyncUntraced();
             }
 
             if (inactiveContentClearing != null && !inactiveContentClearing.IsCompleted)

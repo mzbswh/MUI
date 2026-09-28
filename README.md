@@ -28,11 +28,26 @@
 - `MUI.ChildViews`：Template、Handle、Scope、子界面准备/提交与父子激活；独立于导航。
 - `MUI.Navigation`：Route、Handle、ViewInstance、基本打开/关闭/历史/结果协议。
 - `MUI.UGUI`：View、Element、基础控件、NestedViewElement、DynamicViewElement、UIHost 和常驻 PrefabViewProvider。
+- `MUI.UGUI.Automation`（可选）：本地控件交互、条件轮询、Game View 截图与导航追踪导出；基础 uGUI 仅保留输入适配契约。
 - 列表分级：`RecyclingListElement` 用于少量奖励/道具项，保留全部条目并复用空闲节点；`VirtualListElement` 用于长列表/Grid，仅物化视口附近条目。两者复用子 View 生命周期，支持完全同步接入。
 - `MUI.Editor`：基于生成 Manifest 的 View 绑定检查器。
 - `MUI.Generators`：Roslyn 4.3 增量生成器，作为 Analyzer 发布，不作为游戏运行时程序集。
 
 Core、Resources、Navigation、ChildViews、Tabs 不依赖 UnityEngine 或第三方资源库。包依赖 uGUI；接入基线为 Unity 2022.3.62f3 / .NET Standard 2.1。
+
+## 项目日志接入
+
+框架运行时的未处理诊断异常统一交给 `UIErrors.Report`。项目可在初始化 UI 前设置全局错误出口，直接转发给自己的日志系统：
+
+```csharp
+var previousSink = UIErrors.Sink;
+UIErrors.Sink = error => projectLogger.LogError("MUI", error);
+
+// 项目退出或卸载 UI 模块时恢复原出口。
+UIErrors.Sink = previousSink;
+```
+
+配置期间不会强制调用 `Debug.LogException`；未配置时，活动 UIHost 使用 Unity Console 作为默认出口，多个宿主只登记一次。没有 UIHost 的 View/Element 原生销毁异常也会先检查项目出口，再回退到 Unity Console。`UIErrors.Reported` 仍用于额外观察，接收器异常会被隔离，不能中断界面清理。出口是进程级配置，目前框架主动发送的是错误；普通导航状态可订阅类型化生命周期事件，示例和 Editor 工具中的 `Debug.Log` 不属于运行时框架日志。
 
 ## 设置页示例
 
@@ -183,7 +198,7 @@ public partial class ExampleViewModel : CommonViewModel
 
 ## 编译
 
-`Tools~/Build` 现有 37 个 Unity、Editor 和 Samples 离线构建项目；连同 1 个生成器项目，当前工作树共 38/38 个项目通过 Unity 2022.3.62f3 对应的 Release 编译，零警告、零错误。当前统计为 594 个 C# 文件；源码归属、37 个 asmdef 和元数据检查无差异、缺失、孤立或重复项，发布生成器与源码构建一致。详见 [实现记录](docs/IMPLEMENTATION-STATUS.md)。这是当前离线证据，不代替 Unity 条件编译、导入、运行交互及平台验收，后续修改仍需按影响范围验证。
+`Tools~/Build` 现有 38 个 Unity、Editor 和 Samples 离线构建项目；连同 1 个生成器项目，当前工作树共 39/39 个项目通过 Unity 2022.3.62f3 对应的 Release 编译，零警告、零错误。当前统计为 596 个 C# 文件、38 个 asmdef；元数据检查未发现缺失、孤立或重复 GUID。详见 [实现记录](docs/IMPLEMENTATION-STATUS.md)。这是当前离线证据，不代替 Unity 条件编译、运行交互及平台验收，后续修改仍需按影响范围验证。
 
 纯托管基础层：
 
@@ -210,4 +225,6 @@ TabBarElement 与 AsyncContentElement 位于 `MUI.UGUI.Tabs`；使用这些控�
 
 标准确认框工厂 `ConfirmationDialog` 位于 `MUI.UGUI.Dialogs`，项目需显式引用。创建确认框的菜单由 `MUI.UGUI.Dialogs.Editor` 提供。基础 UGUI 不再引用现有标准模块。
 
-包依赖：uGUI 以及内置 ScreenCapture、ImageConversion 模块（1.0.0）。后两者供现有 UI 截图/PNG 导出入口使用；框架不读写导出文件。JSONSerialize（1.0.0）也是主包依赖，供页面向导读取程序集定义使用；项目资源示例复用该模块。
+本地自动化会话 `UIAutomation` 位于 `MUI.UGUI.Automation`。项目 asmdef 使用会话、条件等待或截图时需显式引用该程序集；现有类型命名空间和实例方法签名仍为 `MUI.UGUI`。基础 `MUI.UGUI` 只提供控件输入适配与状态契约，不执行截图或 PNG 编码。
+
+包依赖：uGUI 以及内置 ScreenCapture、ImageConversion 模块（1.0.0）。后两者供可选自动化程序集编译截图/PNG 导出入口使用，不是基础 `MUI.UGUI` 的程序集引用；框架不读写导出文件。JSONSerialize（1.0.0）也是主包依赖，供页面向导读取程序集定义使用；项目资源示例复用该模块。

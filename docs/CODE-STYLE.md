@@ -31,6 +31,7 @@ python3 Tools~/format-code.py --check --braces
 - `Runtime/Core` 保存与渲染器无关的 UI 契约、绑定、通知和生命周期机制。
 - `Runtime/Navigation`、`Runtime/ChildViews` 负责各自的界面实例关系。标准 UI 功能放在 `Runtime/Modules`，不能加入项目业务或基础设施。
 - `Runtime/Rendering` 保存具体渲染适配。UGUI 的基础单控件放在 Elements；列表控件、虚拟化、模板和选择模型统一放在 Lists，避免同一功能散落在两个目录。
+- 本地自动化会话与截图放在可选 `UGUI.Automation` 程序集；基础 `UGUI/Automation` 仅放控件输入适配契约和状态类型，不反向依赖自动化会话。
 - `Editor` 只保存制作与诊断工具，不能成为 Runtime 的反向依赖；可选 TMP 适配与其编辑器扩展保持独立程序集。
 - `Samples~` 保存项目接入示例，包括资源加载、语言目录读取和业务数据请求。示例不得成为 Runtime 的依赖。
 - `Generators~` 保存生成器源码，`Analyzers` 保存发布产物，`Tools~` 保存开发工具。修改生成模板后需要重新发布生成器并验证产出。

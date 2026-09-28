@@ -469,9 +469,13 @@ namespace MUI.Navigation
                 throw new InvalidOperationException("HandleByPresenter requires a Presenter implementing IBackHandler.");
             }
 
-            lifecycle.Prepare(view, activationLifetime, Args, this, route.BindingFactory, RequirePreparationCurrent);
+            lifecycle.Prepare(view, activationLifetime, Args, this, route.BindingFactory, RequirePreparationCurrent,
+                Owner.IsPreparationTraceEnabled(this) ? BeginPreparationStepTrace : (Func<ViewPreparationStep, IViewPreparationTraceScope>)null);
             activationPrepared = true;
         }
+
+        private IViewPreparationTraceScope BeginPreparationStepTrace(ViewPreparationStep step) =>
+            Owner.BeginPreparationStepTrace(this, step);
 
         public override async ValueTask PrepareAsync(CancellationToken token)
         {
@@ -482,7 +486,8 @@ namespace MUI.Navigation
 
             using (new UIThreadCancellation(token, CancelActivation))
             {
-                await lifecycle.PrepareAsync(view, Args, RequirePreparationCurrent, token);
+                await lifecycle.PrepareAsync(view, Args, RequirePreparationCurrent, token,
+                    Owner.IsPreparationTraceEnabled(this) ? BeginPreparationStepTrace : (Func<ViewPreparationStep, IViewPreparationTraceScope>)null);
             }
         }
 

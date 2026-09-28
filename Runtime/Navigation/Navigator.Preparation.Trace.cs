@@ -12,18 +12,32 @@ namespace MUI.Navigation
             candidate.PreparationTraceSession = operation.Session;
         }
 
+        internal bool IsPreparationTraceEnabled(ViewInstance candidate) => traceRecording &&
+            (candidate.PreparationOperationId == 0 || ReferenceEquals(candidate.PreparationTraceSession, traceSession));
+
         private PreparationTraceScope BeginPreparationTrace(ViewInstance candidate, NavigationPreparationStage stage)
         {
-            if (!traceRecording || (candidate.PreparationOperationId != 0 &&
-                !ReferenceEquals(candidate.PreparationTraceSession, traceSession)))
+            if (!IsPreparationTraceEnabled(candidate))
             {
                 return null;
             }
             return new PreparationTraceScope(this, candidate, stage);
         }
 
+        internal IViewPreparationTraceScope BeginPreparationStepTrace(ViewInstance candidate, ViewPreparationStep step)
+        {
+            return BeginPreparationTrace(candidate, step switch
+            {
+                ViewPreparationStep.PresenterCreate => NavigationPreparationStage.PresenterCreate,
+                ViewPreparationStep.Binding => NavigationPreparationStage.Binding,
+                ViewPreparationStep.PresenterOpen => NavigationPreparationStage.PresenterOpen,
+                ViewPreparationStep.PresenterOpenAsync => NavigationPreparationStage.PresenterOpenAsync,
+                _ => throw new ArgumentOutOfRangeException(nameof(step))
+            });
+        }
+
         /// <summary>仅启用追踪时分配；不创建任务、不持有候选或资源，不通过异常消息推断结果。</summary>
-        private sealed class PreparationTraceScope : IDisposable
+        private sealed class PreparationTraceScope : IViewPreparationTraceScope
         {
             private Navigator owner;
             private readonly object session;
@@ -47,7 +61,7 @@ namespace MUI.Navigation
                     stage, startedAt, false, false));
             }
 
-            internal void Complete() => completed = true;
+            public void Complete() => completed = true;
 
             public void Dispose()
             {

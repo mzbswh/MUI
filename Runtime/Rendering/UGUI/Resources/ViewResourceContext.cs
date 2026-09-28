@@ -36,7 +36,9 @@ namespace MUI.UGUI
                 return null;
             }
 
-            var displayName = label.Length > 256 ? label.Substring(0, 256) : label;
+            var displayName = label.Length > 256
+                ? label.Substring(0, char.IsHighSurrogate(label[255]) ? 255 : 256)
+                : label;
             return operation =>
             {
                 if (committed || Lifetime.IsEnded)

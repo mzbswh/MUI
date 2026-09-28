@@ -21,7 +21,7 @@ namespace MUI.Navigation
             int queueCapacity = 64, int terminalCapacity = 256,
             UIUserPreferences userPreferences = null, int cacheCapacity = 16,
             long? maxCachedEstimatedBytes = null,
-            int preloadCapacity = 32)
+            int preloadCapacity = 32, TimeSpan? terminalDuration = null)
         {
             if (provider == null)
             {
@@ -29,7 +29,7 @@ namespace MUI.Navigation
             }
 
             return new Navigator(null, provider, queueCapacity, terminalCapacity, preloadCapacity, null,
-                userPreferences, cacheCapacity, maxCachedEstimatedBytes, 1);
+                userPreferences, cacheCapacity, maxCachedEstimatedBytes, 1, terminalDuration);
         }
 
         /// <summary>回调或命令尚未退出时，交给下一次同步帧泵；不创建异步工作。</summary>
@@ -98,7 +98,7 @@ namespace MUI.Navigation
         }
 
         /// <summary>立即移出并销毁全部缓存；继续清理其余条目后统一报告错误。</summary>
-        public void ClearCache()
+        private void ClearCacheUntraced()
         {
             RequireSynchronousNavigation();
             if (IsReentrant || IsSourceCommandRunning || HasCloseEvaluation || synchronousCacheClearing)
@@ -129,7 +129,7 @@ namespace MUI.Navigation
         }
 
         /// <summary>使活动内容失去再次缓存资格，并同步销毁已有缓存。</summary>
-        public void InvalidateCache()
+        private void InvalidateCacheUntraced()
         {
             RequireSynchronousNavigation();
             if (IsReentrant || IsSourceCommandRunning || HasCloseEvaluation || synchronousCacheClearing)
@@ -193,7 +193,7 @@ namespace MUI.Navigation
         }
 
         /// <summary>立即清理本导航器的预加载与停用页面，不启动任务或等待帧。</summary>
-        public void ClearInactiveContent()
+        private void ClearInactiveContentUntraced()
         {
             RequireSynchronousNavigation();
             if (!CanAwaitShutdown)
@@ -221,7 +221,7 @@ namespace MUI.Navigation
                     }
                     try
                     {
-                        ClearCache();
+                        ClearCacheUntraced();
                     }
                     catch (Exception error)
                     {

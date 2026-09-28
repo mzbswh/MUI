@@ -1,0 +1,11 @@
+{
+  "name": "MUI.UGUI.Automation",
+  "rootNamespace": "MUI.UGUI",
+  "references": [
+    "MUI.Core",
+    "MUI.Navigation",
+    "MUI.UGUI",
+    "Unity.ugui"
+  ],
+  "autoReferenced": true
+}

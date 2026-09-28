@@ -20,7 +20,7 @@ namespace MUI.UGUI
                 change.PreviousCount == snapshot.Count && change.Count == count;
         }
 
-        /// <summary>完整变更路径按稳定键淘汰候选测量，校验成功后再提交缓存与布局。</summary>
+        /// <summary>完整变更路径按条目实例淘汰候选测量，校验成功后再提交缓存与布局。</summary>
         private void ApplyChangedSnapshot(ListChangeSet<VirtualListItem> change, ref ChangeContext context)
         {
             var version = context.Source.Version;
@@ -61,8 +61,8 @@ namespace MUI.UGUI
 
             // 缺失通知、版本断档或错误恢复时无法确定哪些模型已变化，统一重新测量。
             var nextMeasurements = CanApplyIncrementally(change, context)
-                ? new Dictionary<object, MeasuredItem>(measuredItems)
-                : new Dictionary<object, MeasuredItem>();
+                ? new Dictionary<VirtualListItem, float>(measuredItems)
+                : new Dictionary<VirtualListItem, float>();
             if (!IsCurrentChange(context))
             {
                 return;
@@ -84,12 +84,16 @@ namespace MUI.UGUI
                         continue;
                     }
 
-                    // 批次索引对应中间状态；更新后又移动的条目仍按键使旧测量失效。
+                    // 批次索引对应中间状态；更新后又移动的条目仍按实例使旧测量失效。
                     foreach (var item in entry.CurrentItems)
                     {
                         if (item != null)
                         {
-                            nextMeasurements.Remove(item.Key);
+                            nextMeasurements.Remove(item);
+                            if (!IsCurrentChange(context))
+                            {
+                                return;
+                            }
                         }
                     }
                 }
@@ -112,15 +116,9 @@ namespace MUI.UGUI
                 throw new InvalidOperationException("虚拟列表来源在准备测量期间发生静默变更，请重新发布集合通知。");
             }
 
-            measuredItems.Clear();
-            foreach (var measurement in nextMeasurements)
-            {
-                measuredItems.Add(measurement.Key, measurement.Value);
-            }
-
             context.PreparedVersion = version;
             context.HasPreparedVersion = true;
-            ApplyPreparedSnapshot(next, nextOffsets, version);
+            ApplyPreparedSnapshot(next, nextOffsets, version, nextMeasurements);
         }
 
         private bool TryUpdateItem(ListChangeSet<VirtualListItem> change, ref ChangeContext context)
@@ -187,7 +185,8 @@ namespace MUI.UGUI
                 return false;
             }
 
-            long expectedCount = snapshot.Count;
+            var start = snapshot.Count;
+            long expectedCount = start;
             foreach (var entry in change.Changes)
             {
                 if (entry.Kind != ListChangeKind.Add || entry.Index != expectedCount || entry.PreviousItems.Count != 0)
@@ -198,34 +197,97 @@ namespace MUI.UGUI
                 expectedCount += entry.CurrentItems.Count;
             }
 
-            if (expectedCount != change.Count || expectedCount == snapshot.Count)
+            if (expectedCount != change.Count || expectedCount == start)
             {
                 return false;
             }
 
-            var added = new List<VirtualListItem>();
-            var addedKeys = new HashSet<object>();
+            // 变高行必须重建行索引，避免为注定回退的追加复制整份键索引。
+            if (measureItemHeights || rowIndex != null)
+            {
+                return false;
+            }
+
             foreach (var entry in change.Changes)
             {
                 foreach (var item in entry.CurrentItems)
                 {
-                    if (item == null || keyIndices.ContainsKey(item.Key) || !addedKeys.Add(item.Key))
+                    if (item != null && item.Height.HasValue)
+                    {
+                        return false;
+                    }
+                }
+            }
+
+            var added = new List<VirtualListItem>();
+            var intrinsicKeys = intrinsicKeyIndex;
+            foreach (var entry in change.Changes)
+            {
+                foreach (var item in entry.CurrentItems)
+                {
+                    if (item == null)
                     {
                         throw new InvalidOperationException("Virtual list requires non-null items with unique stable keys.");
                     }
 
+                    intrinsicKeys &= IsIntrinsicKey(item.Key);
                     added.Add(item);
                 }
             }
 
-            if (added.Count == 0 || (long)snapshot.Count + added.Count != change.Count)
+            if (added.Count == 0 || (long)start + added.Count != change.Count)
             {
                 return false;
             }
 
+            // 内建值键不会进入项目回调，可在最终校验后直接提交；自定义键保持候选索引隔离。
+            Dictionary<object, int> nextIndices = null;
+            if (intrinsicKeys)
+            {
+                var newKeys = new HashSet<object>();
+                foreach (var item in added)
+                {
+                    if (keyIndices.ContainsKey(item.Key) || !newKeys.Add(item.Key))
+                    {
+                        throw new InvalidOperationException("Virtual list requires non-null items with unique stable keys.");
+                    }
+                }
+            }
+            else
+            {
+                try
+                {
+                    nextIndices = new Dictionary<object, int>(keyIndices);
+                }
+                catch when (!IsCurrentChange(context))
+                {
+                    return false;
+                }
+
+                if (!IsCurrentChange(context))
+                {
+                    return false;
+                }
+
+                for (var i = 0; i < added.Count; ++i)
+                {
+                    var addedToIndex = nextIndices.TryAdd(added[i].Key, start + i);
+                    if (!IsCurrentChange(context))
+                    {
+                        return false;
+                    }
+
+                    if (!addedToIndex)
+                    {
+                        throw new InvalidOperationException("Virtual list requires non-null items with unique stable keys.");
+                    }
+                }
+            }
+
             for (var i = 0; i < added.Count; ++i)
             {
-                if (!ReferenceEquals(context.Source[snapshot.Count + i], added[i]))
+                var current = context.Source[start + i];
+                if (!IsCurrentChange(context) || !ReferenceEquals(current, added[i]))
                 {
                     return false;
                 }
@@ -241,14 +303,14 @@ namespace MUI.UGUI
             {
                 ValidateItemTemplates(added);
             }
-            if (measureItemHeights || rowIndex != null || added.Exists(item => item.Height.HasValue))
+
+            if (!IsCurrentChange(context))
             {
-                // 变高行追加需重建行位置索引，由完整快照路径统一保持滚动锚点。
-                // 空列表尚无行索引，首次追加也必须为后续高度测量创建索引。
                 return false;
             }
 
-            if (!IsCurrentChange(context))
+            var finalVersion = context.Source.Version;
+            if (!IsCurrentChange(context) || finalVersion != change.Version)
             {
                 return false;
             }
@@ -257,11 +319,24 @@ namespace MUI.UGUI
             // 追加时已有索引、选择和首个可见键保持不变。
             context.PreparedVersion = change.Version;
             context.HasPreparedVersion = true;
-            var start = snapshot.Count;
-            snapshot.AddRange(added);
-            for (var i = 0; i < added.Count; ++i)
+            if (intrinsicKeys)
             {
-                keyIndices.Add(added[i].Key, start + i);
+                snapshot.Capacity = Math.Max(snapshot.Capacity, change.Count);
+                keyIndices.EnsureCapacity(change.Count);
+                for (var i = 0; i < added.Count; ++i)
+                {
+                    if (!keyIndices.TryAdd(added[i].Key, start + i))
+                    {
+                        throw new InvalidOperationException("Virtual list requires non-null items with unique stable keys.");
+                    }
+                }
+            }
+
+            snapshot.AddRange(added);
+            if (!intrinsicKeys)
+            {
+                keyIndices = nextIndices;
+                intrinsicKeyIndex = false;
             }
 
             snapshotVersion = change.Version;
@@ -273,6 +348,8 @@ namespace MUI.UGUI
             RequestRefresh(recover: true);
             return true;
         }
+
+        private static bool IsIntrinsicKey(object key) => key is string || key is int || key is long || key is Guid;
 
         private ChangeContext CaptureChangeContext() => new ChangeContext(items, itemsSubscription,
             itemsAssignmentVersion, lifetime, sourceRevision);

@@ -196,14 +196,27 @@ namespace MUI.UGUI
                     new InvalidOperationException("Cannot reenter synchronous list reveal."));
             }
 
-            if (!keyIndices.TryGetValue(key, out var index))
+            var activation = lifetime;
+            var source = revealSourceRevision;
+            var precedingRequest = revealRevision;
+            var found = keyIndices.TryGetValue(key, out var index);
+            if (!IsAlive || scope == null || !scope.IsActive || !ReferenceEquals(lifetime, activation))
+            {
+                return RevealResult(VirtualListRevealStatus.Inactive);
+            }
+
+            if (source != revealSourceRevision || precedingRequest != revealRevision)
+            {
+                return RevealResult(VirtualListRevealStatus.Superseded);
+            }
+
+            if (!found)
             {
                 return RevealResult(VirtualListRevealStatus.NotFound);
             }
 
             var request = ++revealRevision;
             var revision = revealSourceRevision;
-            var activation = lifetime;
             synchronousRevealing = true;
             try
             {
@@ -242,9 +255,23 @@ namespace MUI.UGUI
                             return new VirtualListRevealOutcome(VirtualListRevealStatus.Failed, Error);
                         }
 
-                        if (VisibleMeasurementsReady() && IsRevealAligned(index))
+                        var measurementsReady = VisibleMeasurementsReady();
+                        invalid = InvalidRevealStatus(request, revision, activation, token);
+                        if (invalid.HasValue)
                         {
-                            return CompleteReveal(key, focus, request, revision, activation);
+                            return RevealResult(invalid.Value);
+                        }
+
+                        var aligned = measurementsReady && IsRevealAligned(index);
+                        invalid = InvalidRevealStatus(request, revision, activation, token);
+                        if (invalid.HasValue)
+                        {
+                            return RevealResult(invalid.Value);
+                        }
+
+                        if (aligned)
+                        {
+                            return CompleteReveal(key, focus, request, revision, activation, token);
                         }
                     }
 
@@ -262,7 +289,7 @@ namespace MUI.UGUI
             }
         }
 
-        /// <summary>同步重新读取当前数据并重建视口；失败直接报告，未完成清理的单元不能复用。</summary>
+        /// <summary>同步重新读取当前数据并重建视口；来源被回调取代时不提交旧快照。</summary>
         public void Retry()
         {
             RequireListAlive();
@@ -276,7 +303,37 @@ namespace MUI.UGUI
                 throw new InvalidOperationException("Cannot retry during synchronous list refresh callbacks.");
             }
 
-            ApplySnapshot(ReadSnapshot(items));
+            var activation = lifetime;
+            var assignment = itemsAssignmentVersion;
+            var source = items;
+            var revision = sourceRevision;
+            var version = source == null ? -1 : source.Version;
+            if (!IsCurrentRetry(activation, assignment, source, revision))
+            {
+                return;
+            }
+
+            var next = ReadSnapshot(source);
+            if (!IsCurrentRetry(activation, assignment, source, revision))
+            {
+                return;
+            }
+
+            var offsets = PrepareSnapshot(next);
+            if (!IsCurrentRetry(activation, assignment, source, revision))
+            {
+                return;
+            }
+
+            if (source != null && source.Version != version)
+            {
+                throw new InvalidOperationException("虚拟列表来源在重试读取期间发生静默变更，请重新发布集合通知。");
+            }
+
+            if (IsCurrentRetry(activation, assignment, source, revision))
+            {
+                ApplyPreparedSnapshot(next, offsets, version);
+            }
         }
     }
 }

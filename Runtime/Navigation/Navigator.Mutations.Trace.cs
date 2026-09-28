@@ -18,9 +18,12 @@ namespace MUI.Navigation
             var trace = BeginOperationTrace(route.Key, "UpdateArgs", source);
             try
             {
-                var result = UpdateArgsUntraced(source, route, args);
-                FinishMutationTrace(trace, result);
-                return result;
+                using (EnterOperationTrace(trace))
+                {
+                    var result = UpdateArgsUntraced(source, route, args);
+                    FinishMutationTrace(trace, result);
+                    return result;
+                }
             }
             catch (Exception error)
             {
@@ -42,8 +45,11 @@ namespace MUI.Navigation
             var trace = BeginOperationTrace(route.Key, "UpdateArgsAsync", source);
             try
             {
-                var operation = UpdateArgsAsyncUntraced(source, route, args, cancellationToken);
-                return trace.Id == 0 ? operation : ObserveTracedOperationAsync(operation, trace, FinishMutationTrace);
+                using (EnterOperationTrace(trace))
+                {
+                    var operation = UpdateArgsAsyncUntraced(source, route, args, cancellationToken);
+                    return trace.Id == 0 ? operation : ObserveTracedOperationAsync(operation, trace, FinishMutationTrace);
+                }
             }
             catch (Exception error)
             {
@@ -78,9 +84,12 @@ namespace MUI.Navigation
             var trace = BeginOperationTrace(route.Key, "Rebind", source);
             try
             {
-                var result = RebindUntraced(source, route, viewModel);
-                FinishMutationTrace(trace, result);
-                return result;
+                using (EnterOperationTrace(trace))
+                {
+                    var result = RebindUntraced(source, route, viewModel);
+                    FinishMutationTrace(trace, result);
+                    return result;
+                }
             }
             catch (Exception error)
             {
@@ -106,8 +115,11 @@ namespace MUI.Navigation
             var trace = BeginOperationTrace(route.Key, "RebindAsync", source);
             try
             {
-                var operation = RebindAsyncUntraced(source, route, viewModel, cancellationToken);
-                return trace.Id == 0 ? operation : ObserveTracedOperationAsync(operation, trace, FinishMutationTrace);
+                using (EnterOperationTrace(trace))
+                {
+                    var operation = RebindAsyncUntraced(source, route, viewModel, cancellationToken);
+                    return trace.Id == 0 ? operation : ObserveTracedOperationAsync(operation, trace, FinishMutationTrace);
+                }
             }
             catch (Exception error)
             {

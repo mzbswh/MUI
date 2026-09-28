@@ -9,6 +9,8 @@ namespace MUI.Navigation
     {
         private readonly List<ViewInstance> entering = new List<ViewInstance>();
         private readonly List<ViewInstance> enterSnapshot = new List<ViewInstance>();
+        private readonly Dictionary<ViewInstance, OperationPhaseTraceScope> enteringTrace =
+            new Dictionary<ViewInstance, OperationPhaseTraceScope>();
 
         private void StartEnter(ViewInstance instance)
         {
@@ -22,6 +24,13 @@ namespace MUI.Navigation
             entering.Add(instance);
             try
             {
+                var phase = BeginOperationPhaseTrace(instance, NavigationOperationStage.EnterTransition,
+                    CurrentTraceOperation);
+                if (phase != null)
+                {
+                    enteringTrace.Add(instance, phase);
+                }
+
                 float duration;
                 using (EnterCallback(instance))
                 {
@@ -116,6 +125,8 @@ namespace MUI.Navigation
 
             instance.EnterPending = false;
             entering.Remove(instance);
+            enteringTrace.TryGetValue(instance, out var phase);
+            enteringTrace.Remove(instance);
             instance.EnterDegradation = degradation;
             presentationDeferrals++;
             try
@@ -136,14 +147,35 @@ namespace MUI.Navigation
             catch (Exception error)
             {
                 // 无法恢复稳定状态属于渲染失败，不能视为转场降级成功。
+                phase?.Fail(error);
                 instance.SetFailure(error);
                 UIErrors.Report(error);
                 CloseAfterFailure(instance, DismissReason.OpenFailed);
             }
             finally
             {
-                presentationDeferrals--;
-                RecomputePresentation();
+                try
+                {
+                    presentationDeferrals--;
+                    RecomputePresentation();
+                    if (degradation == null && instance.Failure == null)
+                    {
+                        phase?.Complete();
+                    }
+                    else
+                    {
+                        phase?.Fail(degradation ?? instance.Failure);
+                    }
+                }
+                catch (Exception error)
+                {
+                    phase?.Fail(error);
+                    throw;
+                }
+                finally
+                {
+                    phase?.Dispose();
+                }
             }
         }
 

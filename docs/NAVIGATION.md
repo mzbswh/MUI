@@ -96,7 +96,7 @@ Presenter 的 `InstanceLifetime` 管实例级资源，`Context.Lifetime` 管本�
 
 CloseAsync 的调用方取消返回 WaitCancelled，真实关闭继续；WaitForResultAsync 的取消只取消这次等待并抛 OperationCanceledException，不关闭页面。
 
-一次销毁后旧 Handle 不可操作新实例。终态记录受容量限制，淘汰后返回 UnknownOrExpired；Handle 的结果 Task 独立持有，不随账本淘汰丢失。容量默认 256，TTL 还未接入。
+一次销毁后旧 Handle 不可操作新实例。终态记录同时受容量和 TTL 限制，淘汰后返回 UnknownOrExpired；Handle 的结果 Task 独立持有，不随账本淘汰丢失。默认保留最多 256 条、10 分钟；Navigator 和 UIHost 的创建入口可配置容量与正数 TTL。查询时按单调时钟惰性淘汰，宿主帧维护每秒清理一次，不启动计时任务。
 
 ## 4. 队列、重入与关闭
 

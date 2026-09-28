@@ -107,12 +107,17 @@ namespace MUI.UGUI
             while (node != null && segments.Count < 64)
             {
                 var name = node.name;
-                segments.Add(name.Length > 128 ? name.Substring(0, 128) + "…" : name);
+                if (name.Length > 128)
+                {
+                    var length = char.IsHighSurrogate(name[126]) ? 126 : 127;
+                    name = name.Substring(0, length) + "…";
+                }
+                segments.Add(name);
                 node = node.parent;
             }
             if (node != null)
             {
-                segments.Add("…");
+                segments[segments.Count - 1] = "…";
             }
             segments.Reverse();
             return string.Join("/", segments);

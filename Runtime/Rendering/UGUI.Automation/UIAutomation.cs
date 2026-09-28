@@ -4,16 +4,6 @@ using UnityEngine;
 
 namespace MUI.UGUI
 {
-    /// <summary>派发结果只表示交互是否被接受，不代表绑定命令执行成功或异步业务已完成。</summary>
-    public enum UIAutomationStatus
-    {
-        Accepted,
-        NotReady,
-        InputBlocked,
-        RequiresAsync,
-        Reentrant
-    }
-
     /// <summary>
     /// 由项目显式创建的本地自动化会话，必须在 Unity 主线程使用。
     /// 不安装远程端口，不初始化 View，不修改导航账本；模式决定是否允许派发异步业务。

@@ -7,6 +7,25 @@ namespace MUI.Navigation
 {
     public sealed partial class Navigator
     {
+        private AsyncLocal<NavigationTraceOperation> activeTraceOperation;
+
+        private NavigationTraceOperation CurrentTraceOperation => activeTraceOperation == null
+            ? default : activeTraceOperation.Value;
+
+        private TraceOperationScope EnterOperationTrace(NavigationTraceOperation operation)
+        {
+            if (operation.Id == 0)
+            {
+                return default;
+            }
+
+            if (activeTraceOperation == null)
+            {
+                activeTraceOperation = new AsyncLocal<NavigationTraceOperation>();
+            }
+            return new TraceOperationScope(activeTraceOperation, operation);
+        }
+
         /// <summary>仅追踪启用时观察原操作一次；完成回调仅限框架元数据适配，不捕获业务参数。</summary>
         private async ValueTask<T> ObserveTracedOperationAsync<T>(ValueTask<T> operation,
             NavigationTraceOperation trace, Action<NavigationTraceOperation, T> finish)
@@ -35,7 +54,7 @@ namespace MUI.Navigation
                 return default;
             }
             var operation = new NavigationTraceOperation(traceSession, ++nextTracedOperationId,
-                name, key.Length > 256 ? key.Substring(0, 256) + "…" : key, Stopwatch.GetTimestamp(), source);
+                name, NavigationTraceEntry.Limit(key), Stopwatch.GetTimestamp(), source);
             AppendTrace(new NavigationTraceEntry(host, operation.Id, name, operation.Key,
                 operation.Timestamp, false, source, string.Empty, null));
             return operation;
@@ -93,6 +112,28 @@ namespace MUI.Navigation
             internal long Timestamp
             {
                 get;
+            }
+        }
+
+        private readonly struct TraceOperationScope : IDisposable
+        {
+            private readonly AsyncLocal<NavigationTraceOperation> context;
+            private readonly NavigationTraceOperation previous;
+
+            internal TraceOperationScope(AsyncLocal<NavigationTraceOperation> context,
+                NavigationTraceOperation operation)
+            {
+                this.context = context;
+                previous = context.Value;
+                context.Value = operation;
+            }
+
+            public void Dispose()
+            {
+                if (context != null)
+                {
+                    context.Value = previous;
+                }
             }
         }
     }

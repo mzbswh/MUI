@@ -12,12 +12,9 @@ namespace MUI.UGUI
         private static bool rebuilding;
 
         // 只从 Unity 的主线程初始化回调记录身份，不能把首次调用者当成主线程。
-        // 编辑器重载后与禁用域重载的运行会话都需要重新建立记录。
-#if UNITY_EDITOR
-        [UnityEditor.InitializeOnLoadMethod]
-#endif
+        // 编辑器重载入口位于 Editor 程序集，运行会话由 Unity 的运行时回调重建记录。
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        private static void InitializeMainThread()
+        internal static void InitializeMainThread()
         {
             rebuilding = false;
             Volatile.Write(ref mainThreadId, Thread.CurrentThread.ManagedThreadId);

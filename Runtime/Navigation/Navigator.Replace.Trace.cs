@@ -19,9 +19,12 @@ namespace MUI.Navigation
             var trace = BeginOperationTrace(route.Key, "Replace", source);
             try
             {
-                var result = ReplaceUntraced(source, route, args, assignedViewModel, trace);
-                FinishReplacementTrace(trace, result);
-                return result;
+                using (EnterOperationTrace(trace))
+                {
+                    var result = ReplaceUntraced(source, route, args, assignedViewModel, trace);
+                    FinishReplacementTrace(trace, result);
+                    return result;
+                }
             }
             catch (Exception error)
             {
@@ -44,8 +47,11 @@ namespace MUI.Navigation
             var trace = BeginOperationTrace(route.Key, "ReplaceAsync", source);
             try
             {
-                var operation = ReplaceAsyncUntraced(source, route, args, cancellationToken, assignedViewModel, trace);
-                return trace.Id == 0 ? operation : ObserveTracedReplacementAsync(operation, trace);
+                using (EnterOperationTrace(trace))
+                {
+                    var operation = ReplaceAsyncUntraced(source, route, args, cancellationToken, assignedViewModel, trace);
+                    return trace.Id == 0 ? operation : ObserveTracedReplacementAsync(operation, trace);
+                }
             }
             catch (Exception error)
             {

@@ -191,7 +191,7 @@ namespace MUI.UGUI
             }
             catch (Exception error)
             {
-                Debug.LogException(error);
+                UnityErrorLogging.Report(error);
             }
         }
     }

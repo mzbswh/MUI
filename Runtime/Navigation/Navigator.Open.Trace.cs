@@ -17,9 +17,12 @@ namespace MUI.Navigation
             var trace = BeginOperationTrace(route.Key, "Open");
             try
             {
-                var result = OpenUntraced(route, args, assignedViewModel, trace);
-                FinishOperationTrace(trace, result);
-                return result;
+                using (EnterOperationTrace(trace))
+                {
+                    var result = OpenUntraced(route, args, assignedViewModel, trace);
+                    FinishOperationTrace(trace, result);
+                    return result;
+                }
             }
             catch (Exception error)
             {
@@ -41,9 +44,12 @@ namespace MUI.Navigation
             var trace = BeginOperationTrace(route.Key, "OpenAsync");
             try
             {
-                var operation = OpenAsyncUntraced(route, args, cancellationToken, assignedViewModel, trace);
-                // 未启用追踪时直接归还原操作，不增加异步状态机或重复消费 ValueTask。
-                return trace.Id == 0 ? operation : ObserveTracedOpenAsync(operation, trace);
+                using (EnterOperationTrace(trace))
+                {
+                    var operation = OpenAsyncUntraced(route, args, cancellationToken, assignedViewModel, trace);
+                    // 未启用追踪时直接归还原操作，不增加异步状态机或重复消费 ValueTask。
+                    return trace.Id == 0 ? operation : ObserveTracedOpenAsync(operation, trace);
+                }
             }
             catch (Exception error)
             {

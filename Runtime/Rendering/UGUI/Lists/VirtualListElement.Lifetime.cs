@@ -114,6 +114,7 @@ namespace MUI.UGUI
             measurementWidth = -1;
             rowIndex = null;
             keyIndices.Clear();
+            intrinsicKeyIndex = true;
             selectedKey = null;
             selectedIndex = -1;
             first = last = -1;

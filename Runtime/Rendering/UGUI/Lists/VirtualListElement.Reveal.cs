@@ -9,7 +9,8 @@ namespace MUI.UGUI
 {
     public sealed partial class VirtualListElement
     {
-        private readonly Dictionary<object, int> keyIndices = new Dictionary<object, int>();
+        private Dictionary<object, int> keyIndices = new Dictionary<object, int>();
+        private bool intrinsicKeyIndex = true;
         private long sourceRevision;
         private long revealRevision;
         private long revealSourceRevision;
@@ -43,14 +44,27 @@ namespace MUI.UGUI
                 return RevealResult(VirtualListRevealStatus.Cancelled);
             }
 
-            if (!keyIndices.TryGetValue(key, out var index))
+            var activation = lifetime;
+            var source = revealSourceRevision;
+            var precedingRequest = revealRevision;
+            var found = keyIndices.TryGetValue(key, out var index);
+            if (!IsAlive || scope == null || !scope.IsActive || !ReferenceEquals(lifetime, activation))
+            {
+                return RevealResult(VirtualListRevealStatus.Inactive);
+            }
+
+            if (source != revealSourceRevision || precedingRequest != revealRevision)
+            {
+                return RevealResult(VirtualListRevealStatus.Superseded);
+            }
+
+            if (!found)
             {
                 return RevealResult(VirtualListRevealStatus.NotFound);
             }
 
             var request = ++revealRevision;
             var revision = revealSourceRevision;
-            var activation = lifetime;
             try
             {
                 // 数据更新会淘汰请求；同一来源的测量修正只要求重新对齐，不应冒充数据换代。
@@ -99,7 +113,21 @@ namespace MUI.UGUI
                             return new VirtualListRevealOutcome(VirtualListRevealStatus.Failed, Error);
                         }
 
-                        if (VisibleMeasurementsReady() && IsRevealAligned(index))
+                        var measurementsReady = VisibleMeasurementsReady();
+                        invalid = InvalidRevealStatus(request, revision, activation, cancellationToken);
+                        if (invalid.HasValue)
+                        {
+                            return RevealResult(invalid.Value);
+                        }
+
+                        var alignedNow = measurementsReady && IsRevealAligned(index);
+                        invalid = InvalidRevealStatus(request, revision, activation, cancellationToken);
+                        if (invalid.HasValue)
+                        {
+                            return RevealResult(invalid.Value);
+                        }
+
+                        if (alignedNow)
                         {
                             aligned = true;
                             break;
@@ -115,7 +143,7 @@ namespace MUI.UGUI
                         new TimeoutException("Virtual list layout did not stabilize within its reveal budget."));
                 }
 
-                return CompleteReveal(key, focus, request, revision, activation);
+                return CompleteReveal(key, focus, request, revision, activation, cancellationToken);
             }
             catch (OperationCanceledException)
             {
@@ -127,9 +155,33 @@ namespace MUI.UGUI
             }
         }
 
-        private VirtualListRevealOutcome CompleteReveal(object key, bool focus, long request, long revision, Lifetime activation)
+        private VirtualListRevealOutcome CompleteReveal(object key, bool focus, long request, long revision,
+            Lifetime activation, CancellationToken token)
         {
-            var cell = cells.Find(candidate => Equals(candidate.Key, key));
+            Cell cell = null;
+            for (var i = 0; i < cells.Count; i++)
+            {
+                var candidate = cells[i];
+                var candidateKey = candidate.Key;
+                var matches = Equals(candidateKey, key);
+                var invalid = InvalidRevealStatus(request, revision, activation, token);
+                if (invalid.HasValue)
+                {
+                    return RevealResult(invalid.Value);
+                }
+
+                if (i >= cells.Count || !ReferenceEquals(cells[i], candidate) || !ReferenceEquals(candidate.Key, candidateKey))
+                {
+                    return RevealResult(VirtualListRevealStatus.Superseded);
+                }
+
+                if (matches)
+                {
+                    cell = candidate;
+                    break;
+                }
+            }
+
             if (cell == null || cell.Root == null || !cell.Root.gameObject.activeSelf)
             {
                 return RevealResult(VirtualListRevealStatus.Superseded);
@@ -221,16 +273,47 @@ namespace MUI.UGUI
                 return false;
             }
 
-            foreach (var cell in cells)
+            var owner = scope;
+            var revision = sourceRevision;
+            for (var i = 0; i < cells.Count; i++)
             {
-                if (cell.Key == null || !keyIndices.TryGetValue(cell.Key, out var index))
+                var cell = cells[i];
+                var key = cell.Key;
+                if (key == null)
                 {
                     continue;
                 }
 
+                var found = keyIndices.TryGetValue(key, out var index);
+                if (!IsMeasurementSourceCurrent(owner, revision))
+                {
+                    return false;
+                }
+
+                if (!found)
+                {
+                    continue;
+                }
+
+                if (!ReferenceEquals(cell.Key, key) || index < 0 || index >= snapshot.Count)
+                {
+                    return false;
+                }
+
                 var item = snapshot[index];
-                if (!item.Height.HasValue && (!measuredItems.TryGetValue(item.Key, out var measured) ||
-                    !ReferenceEquals(measured.Item, item)))
+                if (item.Height.HasValue)
+                {
+                    continue;
+                }
+
+                var measured = measuredItems.ContainsKey(item);
+                if (!IsMeasurementSourceCurrent(owner, revision) || !ReferenceEquals(cell.Key, key) ||
+                    index >= snapshot.Count || !ReferenceEquals(snapshot[index], item))
+                {
+                    return false;
+                }
+
+                if (!measured)
                 {
                     return false;
                 }

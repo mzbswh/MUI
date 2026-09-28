@@ -19,7 +19,16 @@ namespace MUI.UGUI
             set
             {
                 RequireListAlive();
-                if (value != null && !keyIndices.ContainsKey(value))
+                var activation = lifetime;
+                var source = sourceRevision;
+                var selection = selectionRevision;
+                var exists = value == null || keyIndices.ContainsKey(value);
+                if (!IsSelectionCurrent(activation, source, selection))
+                {
+                    return;
+                }
+
+                if (!exists)
                 {
                     throw new ArgumentException("Selected key is not in the current list.", nameof(value));
                 }
@@ -32,13 +41,25 @@ namespace MUI.UGUI
 
         private void SetSelection(object key)
         {
+            var activation = lifetime;
+            var source = sourceRevision;
+            var previousSelection = selectionRevision;
             var keyChanged = !Equals(selectedKey, key);
+            if (!IsSelectionCurrent(activation, source, previousSelection))
+            {
+                return;
+            }
+
             var index = key != null && keyIndices.TryGetValue(key, out var found) ? found : -1;
+            if (!IsSelectionCurrent(activation, source, previousSelection))
+            {
+                return;
+            }
+
             var indexChanged = selectedIndex != index;
             selectedKey = key;
             selectedIndex = index;
             var revision = ++selectionRevision;
-            var source = sourceRevision;
             RefreshSelectionVisuals(revision, source);
             // PropertyChanged 读取者使用当前状态。即使视觉回调
             // 替换为同键来源，也应保留本次变更通知。
@@ -63,7 +84,22 @@ namespace MUI.UGUI
             }
         }
 
-        private void ReconcileSelection() => SetSelection(selectedKey != null && keyIndices.ContainsKey(selectedKey) ? selectedKey : null);
+        private bool IsSelectionCurrent(Lifetime activation, long source, long selection) =>
+            IsAlive && ReferenceEquals(lifetime, activation) && source == sourceRevision &&
+            selection == selectionRevision && (activation == null || (!activation.IsEnded && scope != null && scope.IsActive));
+
+        private void ReconcileSelection()
+        {
+            var activation = lifetime;
+            var source = sourceRevision;
+            var selection = selectionRevision;
+            var key = selectedKey;
+            var exists = key != null && keyIndices.ContainsKey(key);
+            if (IsSelectionCurrent(activation, source, selection))
+            {
+                SetSelection(exists ? key : null);
+            }
+        }
 
         private void RefreshSelectionVisuals(long revision, long source)
         {
@@ -77,7 +113,13 @@ namespace MUI.UGUI
 
                 if (cell.Selection != null)
                 {
-                    cell.Selection.SetSelected(cell.Key != null && Equals(cell.Key, selectedKey));
+                    var selected = cell.Key != null && Equals(cell.Key, selectedKey);
+                    if (!IsAlive || revision != selectionRevision || source != sourceRevision)
+                    {
+                        return;
+                    }
+
+                    cell.Selection.SetSelected(selected);
                 }
             }
         }
@@ -104,7 +146,17 @@ namespace MUI.UGUI
                     return;
                 }
 
-                if (!keyIndices.TryGetValue(cell.Key, out var index) || !ReferenceEquals(snapshot[index].ViewModel, cell.Element.DisplayedViewModel) ||
+                var key = cell.Key;
+                var activation = lifetime;
+                var source = sourceRevision;
+                var selection = selectionRevision;
+                var found = keyIndices.TryGetValue(key, out var index);
+                if (!IsSelectionCurrent(activation, source, selection) || !ReferenceEquals(cell.Key, key) || cell.Element == null)
+                {
+                    return;
+                }
+
+                if (!found || !ReferenceEquals(snapshot[index].ViewModel, cell.Element.DisplayedViewModel) ||
                     !string.Equals(snapshot[index].TemplateKey, cell.TemplateKey, StringComparison.Ordinal))
                 {
                     return;

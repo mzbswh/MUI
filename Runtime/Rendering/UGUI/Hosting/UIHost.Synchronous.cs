@@ -19,7 +19,9 @@ namespace MUI.UGUI
             bool ownsProvider = false, UIUserPreferences userPreferences = null,
             int cacheCapacity = 16, long? maxCachedEstimatedBytes = null,
             int preloadCapacity = 32,
-            Action<View> configureDefaultView = null)
+            Action<View> configureDefaultView = null,
+            int terminalCapacity = 256,
+            TimeSpan? terminalDuration = null)
         {
             BeginInitialization();
             try
@@ -33,6 +35,16 @@ namespace MUI.UGUI
                 if (preloadCapacity < 1)
                 {
                     throw new ArgumentOutOfRangeException(nameof(preloadCapacity));
+                }
+
+                if (terminalCapacity < 1)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(terminalCapacity));
+                }
+
+                if (terminalDuration.HasValue && terminalDuration.Value <= TimeSpan.Zero)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(terminalDuration));
                 }
 
                 if (maxCachedEstimatedBytes.HasValue && maxCachedEstimatedBytes.Value < 0)
@@ -63,7 +75,8 @@ namespace MUI.UGUI
                     RequireInitializationCurrent();
                     navigator = Navigator.CreateSynchronous(provider, userPreferences: userPreferences,
                         cacheCapacity: cacheCapacity, maxCachedEstimatedBytes: maxCachedEstimatedBytes,
-                        preloadCapacity: preloadCapacity);
+                        preloadCapacity: preloadCapacity, terminalCapacity: terminalCapacity,
+                        terminalDuration: terminalDuration);
                 }
                 catch (Exception failure)
                 {
@@ -76,7 +89,7 @@ namespace MUI.UGUI
                 }
 
                 ownedProvider = disposable;
-                UIErrors.Reported += LogError;
+                UnityErrorLogging.RegisterHost();
                 logging = true;
             }
             finally
@@ -139,7 +152,7 @@ namespace MUI.UGUI
                 ownedProvider = null;
                 if (logging)
                 {
-                    UIErrors.Reported -= LogError;
+                    UnityErrorLogging.UnregisterHost();
                     logging = false;
                 }
                 synchronousShutdownCompleted = true;

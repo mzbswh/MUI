@@ -339,7 +339,7 @@ namespace MUI.Navigation
                 return instance.State;
             }
 
-            if (terminal.TryGetValue(handle, out var outcome))
+            if (TryGetTerminal(handle, out var outcome))
             {
                 return outcome.Status == CloseStatus.Failed ? ViewState.Failed : ViewState.Destroyed;
             }

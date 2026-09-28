@@ -124,7 +124,8 @@ namespace MUI
             TArgs args,
             ICommandTarget target,
             Func<IView, TViewModel, BindingContext> bindingFactory,
-            Action requireCurrent)
+            Action requireCurrent,
+            Func<ViewPreparationStep, IViewPreparationTraceScope> trace = null)
         {
             if (destroyed || opened || Binding != null)
             {
@@ -147,31 +148,58 @@ namespace MUI
             {
                 // 创建回调失败也需要销毁回调清理其已经建立的实例资源。
                 created = true;
-                invoke(() => presenter.Create(model, instance));
-                requireCurrent();
+                using (var phase = trace?.Invoke(ViewPreparationStep.PresenterCreate))
+                {
+                    invoke(() => presenter.Create(model, instance));
+                    requireCurrent();
+                    phase?.Complete();
+                }
             }
 
             // 先接管工厂返回的绑定，再复核准备资格，取消路径仍能释放迟到的结果。
-            invoke(() => Binding = bindingFactory(view, model));
-            requireCurrent();
-            ViewPreparation.ValidateBinding(Binding, model);
-            Binding.SetLifetimeMode(activation.Mode);
-            requireCurrent();
-            Binding.SetCommandTarget(target);
-            requireCurrent();
-            invoke(Binding.Bind);
-            requireCurrent();
-            invoke(() => presenter.Open(new ActivationContext<TArgs, TResult>(args, activation, target, view as IInputView)));
-            opened = true;
-            requireCurrent();
+            using (var phase = trace?.Invoke(ViewPreparationStep.Binding))
+            {
+                invoke(() => Binding = bindingFactory(view, model));
+                requireCurrent();
+                ViewPreparation.ValidateBinding(Binding, model);
+                Binding.SetLifetimeMode(activation.Mode);
+                requireCurrent();
+                Binding.SetCommandTarget(target);
+                requireCurrent();
+                invoke(Binding.Bind);
+                requireCurrent();
+                phase?.Complete();
+            }
+            using (var phase = trace?.Invoke(ViewPreparationStep.PresenterOpen))
+            {
+                invoke(() => presenter.Open(new ActivationContext<TArgs, TResult>(args, activation, target, view as IInputView)));
+                opened = true;
+                requireCurrent();
+                phase?.Complete();
+            }
         }
 
-        internal ValueTask PrepareAsync(IView view, TArgs args, Action requireCurrent, CancellationToken token)
+        internal ValueTask PrepareAsync(IView view, TArgs args, Action requireCurrent, CancellationToken token,
+            Func<ViewPreparationStep, IViewPreparationTraceScope> trace = null)
         {
             Func<CancellationToken, ValueTask> openAsync = null;
             if (presenter is IAsyncOpenPresenter<TArgs> asynchronous)
             {
-                openAsync = cancellation => invokeAsync(() => asynchronous.OnOpenAsync(args, cancellation));
+                if (trace == null)
+                {
+                    openAsync = cancellation => invokeAsync(() => asynchronous.OnOpenAsync(args, cancellation));
+                }
+                else
+                {
+                    openAsync = async cancellation =>
+                    {
+                        using (var phase = trace(ViewPreparationStep.PresenterOpenAsync))
+                        {
+                            await invokeAsync(() => asynchronous.OnOpenAsync(args, cancellation));
+                            phase?.Complete();
+                        }
+                    };
+                }
             }
 
             return ViewPreparation.CompleteAsync(view, openAsync, requireCurrent, token);

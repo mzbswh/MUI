@@ -15,9 +15,12 @@ namespace MUI.Navigation
             {
                 var outcome = FindBackTarget(out var target);
                 trace = ResolveBackTraceTarget(trace, target);
-                var result = target == null ? outcome : BeginRequestedCloseSynchronous(target, DismissReason.Back);
-                FinishCloseTrace(trace, result);
-                return result;
+                using (EnterOperationTrace(trace))
+                {
+                    var result = target == null ? outcome : BeginRequestedCloseSynchronous(target, DismissReason.Back);
+                    FinishCloseTrace(trace, result);
+                    return result;
+                }
             }
             catch (Exception error)
             {
@@ -35,9 +38,12 @@ namespace MUI.Navigation
             {
                 var outcome = FindBackTarget(out var target);
                 trace = ResolveBackTraceTarget(trace, target);
-                var operation = target == null ? new ValueTask<CloseOutcome>(outcome)
-                    : new ValueTask<CloseOutcome>(WaitForCloseAsync(BeginRequestedClose(target, DismissReason.Back), cancellationToken));
-                return trace.Id == 0 ? operation : ObserveTracedCloseAsync(operation, trace);
+                using (EnterOperationTrace(trace))
+                {
+                    var operation = target == null ? new ValueTask<CloseOutcome>(outcome)
+                        : new ValueTask<CloseOutcome>(WaitForCloseAsync(BeginRequestedClose(target, DismissReason.Back), cancellationToken));
+                    return trace.Id == 0 ? operation : ObserveTracedCloseAsync(operation, trace);
+                }
             }
             catch (Exception error)
             {
@@ -54,7 +60,7 @@ namespace MUI.Navigation
             }
             var key = target.Route.Key;
             return new NavigationTraceOperation(trace.Session, trace.Id, trace.Name,
-                key.Length > 256 ? key.Substring(0, 256) + "…" : key, trace.Timestamp, target.Handle);
+                NavigationTraceEntry.Limit(key), trace.Timestamp, target.Handle);
         }
     }
 }

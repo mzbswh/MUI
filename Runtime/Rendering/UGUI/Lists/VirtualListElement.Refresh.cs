@@ -243,11 +243,28 @@ namespace MUI.UGUI
                 desiredTemplates.Add(item.Key, item.TemplateKey);
             }
 
+            if (!IsRefreshCurrent(revision, activation))
+            {
+                InvalidateAbandonedRefreshRange(activation);
+                yield break;
+            }
+
             var draining = new List<CellPreparation>();
             foreach (var cell in cells.ToArray())
             {
-                if (cell.Key != null && (!desiredTemplates.TryGetValue(cell.Key, out var templateKey) ||
-                    !string.Equals(templateKey, cell.TemplateKey, StringComparison.Ordinal)))
+                if (cell.Key == null)
+                {
+                    continue;
+                }
+
+                var retained = desiredTemplates.TryGetValue(cell.Key, out var templateKey) &&
+                    string.Equals(templateKey, cell.TemplateKey, StringComparison.Ordinal);
+                if (!IsRefreshCurrent(revision, activation))
+                {
+                    break;
+                }
+
+                if (!retained)
                 {
                     cell.Root.gameObject.SetActive(false);
                     if (!IsRefreshCurrent(revision, activation))
@@ -256,6 +273,12 @@ namespace MUI.UGUI
                     }
 
                     cell.Element.ViewModel = null;
+                    if (!IsRefreshCurrent(revision, activation))
+                    {
+                        InvalidateAbandonedRefreshRange(activation);
+                        yield break;
+                    }
+
                     draining.Add(new CellPreparation(cell.Element, activation.Mode));
                     cell.Key = null;
                     if (!IsRefreshCurrent(revision, activation))
@@ -272,7 +295,7 @@ namespace MUI.UGUI
 
             if (!IsRefreshCurrent(revision, activation))
             {
-                first = last = -1;
+                InvalidateAbandonedRefreshRange(activation);
                 yield break;
             }
 
@@ -280,7 +303,13 @@ namespace MUI.UGUI
             for (var i = 0; i < desired.Count; i++)
             {
                 var item = desired[i];
-                var cell = FindReusableCell(item);
+                var cell = FindReusableCell(item, revision, activation);
+                if (!IsRefreshCurrent(revision, activation))
+                {
+                    InvalidateAbandonedRefreshRange(activation);
+                    yield break;
+                }
+
                 if (cell == null)
                 {
                     // 已排空的异模板单元不能换绑成新模板；先移除空闲单元，避免按模板累积历史池。
@@ -293,14 +322,14 @@ namespace MUI.UGUI
 
                     if (!IsRefreshCurrent(revision, activation))
                     {
-                        first = last = -1;
+                        InvalidateAbandonedRefreshRange(activation);
                         yield break;
                     }
 
                     cell = CreateCell(item.TemplateKey, revision, activation);
                     if (cell == null)
                     {
-                        first = last = -1;
+                        InvalidateAbandonedRefreshRange(activation);
                         yield break;
                     }
 
@@ -316,34 +345,51 @@ namespace MUI.UGUI
                 // 原生尺寸回调可以同步换来源或关闭父级，旧快照不得继续启动业务绑定。
                 if (!IsRefreshCurrent(revision, activation))
                 {
-                    first = last = -1;
+                    InvalidateAbandonedRefreshRange(activation);
                     yield break;
                 }
 
                 cell.Element.ViewModel = item.ViewModel;
+                if (!IsRefreshCurrent(revision, activation))
+                {
+                    InvalidateAbandonedRefreshRange(activation);
+                    yield break;
+                }
+
                 preparedCell[0] = new CellPreparation(cell.Element, activation.Mode);
                 yield return preparedCell;
                 if (!IsRefreshCurrent(revision, activation))
                 {
-                    first = last = -1;
+                    InvalidateAbandonedRefreshRange(activation);
                     yield break;
                 }
 
                 if (cell.Selection != null)
                 {
-                    cell.Selection.SetSelected(Equals(cell.Key, selectedKey));
+                    var selection = selectionRevision;
+                    var selected = Equals(cell.Key, selectedKey);
+                    if (!IsRefreshCurrent(revision, activation))
+                    {
+                        InvalidateAbandonedRefreshRange(activation);
+                        yield break;
+                    }
+
+                    if (selection == selectionRevision)
+                    {
+                        cell.Selection.SetSelected(selected);
+                    }
                 }
 
                 if (!IsRefreshCurrent(revision, activation))
                 {
-                    first = last = -1;
+                    InvalidateAbandonedRefreshRange(activation);
                     yield break;
                 }
 
                 cell.Root.gameObject.SetActive(true);
                 if (!IsRefreshCurrent(revision, activation))
                 {
-                    first = last = -1;
+                    InvalidateAbandonedRefreshRange(activation);
                     yield break;
                 }
             }
@@ -358,7 +404,7 @@ namespace MUI.UGUI
                     ReleaseCell(cell);
                     if (!IsRefreshCurrent(revision, activation))
                     {
-                        first = last = -1;
+                        InvalidateAbandonedRefreshRange(activation);
                         yield break;
                     }
                 }
@@ -368,12 +414,19 @@ namespace MUI.UGUI
             last = end;
         }
 
-        private Cell FindReusableCell(VirtualListItem item)
+        private Cell FindReusableCell(VirtualListItem item, long revision, Lifetime activation)
         {
             Cell unused = null;
-            foreach (var cell in cells)
+            for (var i = 0; i < cells.Count; i++)
             {
-                if (Equals(cell.Key, item.Key))
+                var cell = cells[i];
+                var matches = Equals(cell.Key, item.Key);
+                if (!IsRefreshCurrent(revision, activation))
+                {
+                    return null;
+                }
+
+                if (matches)
                 {
                     return cell;
                 }
@@ -392,6 +445,14 @@ namespace MUI.UGUI
         private bool IsRefreshCurrent(long revision, Lifetime activation) =>
             IsAlive && scope != null && scope.IsActive && ReferenceEquals(lifetime, activation) &&
             !activation.IsEnded && revision == sourceRevision && !dirty && Error == null;
+
+        private void InvalidateAbandonedRefreshRange(Lifetime activation)
+        {
+            if (IsAlive && ReferenceEquals(lifetime, activation))
+            {
+                first = last = -1;
+            }
+        }
 
         private Cell CreateCell(string templateKey, long revision, Lifetime activation)
         {

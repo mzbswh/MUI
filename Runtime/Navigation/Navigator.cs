@@ -23,11 +23,12 @@ namespace MUI.Navigation
         private readonly List<ViewInstance> activeOrder = new List<ViewInstance>();
         private readonly List<ViewHandle> history = new List<ViewHandle>();
         private readonly Dictionary<ViewHandle, CloseOutcome> terminal = new Dictionary<ViewHandle, CloseOutcome>();
-        private readonly Queue<ViewHandle> terminalOrder = new Queue<ViewHandle>();
+        private readonly Queue<TerminalRecord> terminalOrder = new Queue<TerminalRecord>();
         private readonly Queue<Action> posted = new Queue<Action>();
         private readonly AsyncLocal<CallbackContext> callback = new AsyncLocal<CallbackContext>();
         private readonly int queueCapacity;
         private readonly int terminalCapacity;
+        private readonly TimeSpan terminalDuration;
         private long nextHandle;
         private long order;
         private int pending;
@@ -42,10 +43,11 @@ namespace MUI.Navigation
                     UIUserPreferences userPreferences = null,
                     int cacheCapacity = 16,
                     long? maxCachedEstimatedBytes = null,
-                    int cleanupCapacity = 16)
+                    int cleanupCapacity = 16,
+                    TimeSpan? terminalDuration = null)
                     : this(provider, null, queueCapacity, terminalCapacity, preloadCapacity,
                         closeConfirmationService, userPreferences, cacheCapacity, maxCachedEstimatedBytes,
-                        cleanupCapacity)
+                        cleanupCapacity, terminalDuration)
         {
         }
 
@@ -53,7 +55,7 @@ namespace MUI.Navigation
                     int queueCapacity, int terminalCapacity, int preloadCapacity,
                     ICloseConfirmationService closeConfirmationService, UIUserPreferences userPreferences,
                     int cacheCapacity, long? maxCachedEstimatedBytes,
-                    int cleanupCapacity)
+                    int cleanupCapacity, TimeSpan? terminalDuration)
         {
             if (cleanupCapacity < 1)
             {
@@ -81,6 +83,11 @@ namespace MUI.Navigation
                 throw new ArgumentOutOfRangeException(nameof(terminalCapacity));
             }
 
+            if (terminalDuration.HasValue && terminalDuration.Value <= TimeSpan.Zero)
+            {
+                throw new ArgumentOutOfRangeException(nameof(terminalDuration));
+            }
+
             if (preloadCapacity < 1)
             {
                 throw new ArgumentOutOfRangeException(nameof(preloadCapacity));
@@ -100,6 +107,7 @@ namespace MUI.Navigation
             this.cacheCapacity = cacheCapacity;
             this.queueCapacity = queueCapacity;
             this.terminalCapacity = terminalCapacity;
+            this.terminalDuration = terminalDuration ?? TimeSpan.FromMinutes(10);
             this.preloadCapacity = preloadCapacity;
 
             // 纯同步预加载使用独立账本，不创建异步批次及其 Lifetime 完成信号。

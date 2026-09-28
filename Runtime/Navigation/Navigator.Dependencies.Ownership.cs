@@ -68,7 +68,7 @@ namespace MUI.Navigation
             }
             if (!entries.TryGetValue(handle, out instance))
             {
-                return terminal.ContainsKey(handle)
+                return TryGetTerminal(handle, out _)
                     ? new ExplicitOwnershipReleaseOutcome(ExplicitOwnershipReleaseStatus.AlreadyReleased)
                     : RejectExplicitRelease(IsExpired(handle) ? CloseStatus.UnknownOrExpired : CloseStatus.NotFound);
             }

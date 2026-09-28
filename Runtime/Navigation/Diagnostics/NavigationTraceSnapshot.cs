@@ -14,17 +14,31 @@ namespace MUI.Navigation
         OperationFinished,
         PreparationStarted,
         PreparationFinished,
-        BatchCloseItem
+        BatchCloseItem,
+        OperationStageStarted,
+        OperationStageFinished
     }
 
-    /// <summary>统一候选准备的阶段；绑定与 Presenter 钩子归于同一激活准备阶段。</summary>
+    /// <summary>统一候选准备及其中的绑定、Presenter 阶段。</summary>
     public enum NavigationPreparationStage
     {
         RequiredDependencies,
         ModelCreation,
         ResourceCreation,
         ActivationPreparation,
-        AttachedDependencies
+        AttachedDependencies,
+        PresenterCreate,
+        Binding,
+        PresenterOpen,
+        PresenterOpenAsync
+    }
+
+    /// <summary>提交后的转场与实例清理阶段；与候选准备阶段分别计时。</summary>
+    public enum NavigationOperationStage
+    {
+        EnterTransition,
+        ExitTransition,
+        InstanceCleanup
     }
 
     /// <summary>事件入队时的元数据，不保留路由工厂、参数、结果对象或异常引用。</summary>
@@ -99,6 +113,24 @@ namespace MUI.Navigation
             ElapsedMilliseconds = finished ? (Timestamp - startedAt) * 1000.0 / Stopwatch.Frequency : (double?)null;
         }
 
+        internal NavigationTraceEntry(Guid host, long operationId, string operationName, ViewHandle handle,
+            string routeKey, NavigationOperationStage stage, long startedAt, bool finished, bool completed,
+            Exception error) : this()
+        {
+            Timestamp = Stopwatch.GetTimestamp();
+            TraceKind = finished ? NavigationTraceKind.OperationStageFinished : NavigationTraceKind.OperationStageStarted;
+            HostId = host;
+            OperationId = operationId;
+            OperationName = operationName;
+            OperationStage = stage;
+            Handle = handle;
+            RouteKey = Limit(routeKey);
+            Outcome = finished ? completed ? "完成" : "未完成" : string.Empty;
+            ErrorType = error == null ? string.Empty : Limit(error.GetType().FullName);
+            DependencyRouteKey = string.Empty;
+            ElapsedMilliseconds = finished ? (Timestamp - startedAt) * 1000.0 / Stopwatch.Frequency : (double?)null;
+        }
+
         /// <summary>批次返回时复制的逐项结果，不表示该项实际完成时刻。</summary>
         internal NavigationTraceEntry(Guid host, long operationId, string operationName,
             BatchCloseItem item, int index) : this()
@@ -152,6 +184,11 @@ namespace MUI.Navigation
         }
 
         public NavigationPreparationStage? PreparationStage
+        {
+            get;
+        }
+
+        public NavigationOperationStage? OperationStage
         {
             get;
         }
@@ -226,7 +263,20 @@ namespace MUI.Navigation
             get;
         }
 
-        private static string Limit(string text) => text == null ? string.Empty : text.Length <= 256 ? text : text.Substring(0, 256) + "…";
+        internal static string Limit(string text)
+        {
+            if (text == null)
+            {
+                return string.Empty;
+            }
+            if (text.Length <= 256)
+            {
+                return text;
+            }
+
+            var length = char.IsHighSurrogate(text[254]) ? 254 : 255;
+            return text.Substring(0, length) + "…";
+        }
     }
 
     /// <summary>一次手动采集的有界导航时间线；包含生命周期和已接入的请求边界，不等同于各准备阶段耗时。</summary>
@@ -305,9 +355,14 @@ namespace MUI.Navigation
                 {
                     text.Append(" | 准备阶段=").Append(entry.PreparationStage);
                 }
+                if (entry.OperationStage.HasValue)
+                {
+                    text.Append(" | 操作阶段=").Append(entry.OperationStage);
+                }
                 if (entry.ElapsedMilliseconds.HasValue)
                 {
-                    text.Append(entry.PreparationStage.HasValue ? " | 阶段耗时毫秒=" : " | 请求总耗时毫秒=")
+                    text.Append(entry.PreparationStage.HasValue || entry.OperationStage.HasValue
+                            ? " | 阶段耗时毫秒=" : " | 请求总耗时毫秒=")
                         .Append(entry.ElapsedMilliseconds.Value.ToString("F3", CultureInfo.InvariantCulture));
                 }
                 if (entry.DependencyStage.HasValue)

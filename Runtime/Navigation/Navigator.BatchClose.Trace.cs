@@ -16,9 +16,12 @@ namespace MUI.Navigation
             var trace = traceRecording ? BeginOperationTrace(string.Empty, GetBatchTraceName(layer, false)) : default;
             try
             {
-                var result = CloseBatchSynchronous(layer);
-                FinishBatchCloseTrace(trace, result);
-                return result;
+                using (EnterOperationTrace(trace))
+                {
+                    var result = CloseBatchSynchronous(layer);
+                    FinishBatchCloseTrace(trace, result);
+                    return result;
+                }
             }
             catch (Exception error)
             {
@@ -34,8 +37,11 @@ namespace MUI.Navigation
             var trace = traceRecording ? BeginOperationTrace(string.Empty, GetBatchTraceName(layer, true)) : default;
             try
             {
-                var operation = BeginCloseBatch(layer, token);
-                return trace.Id == 0 ? operation : ObserveTracedOperationAsync(operation, trace, FinishBatchCloseTrace);
+                using (EnterOperationTrace(trace))
+                {
+                    var operation = BeginCloseBatch(layer, token);
+                    return trace.Id == 0 ? operation : ObserveTracedOperationAsync(operation, trace, FinishBatchCloseTrace);
+                }
             }
             catch (Exception error)
             {

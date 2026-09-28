@@ -1,6 +1,7 @@
 using MUI.Generators;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 
 namespace MUI.CodeStyle;
@@ -10,9 +11,11 @@ internal static class Program
     private static int Main(string[] args)
     {
         var check = args.Contains("--check");
-        var root = args.FirstOrDefault(a => a != "--check") ?? throw new ArgumentException("需要仓库目录。");
+        var checkBraces = args.Contains("--braces");
+        var root = args.FirstOrDefault(a => a != "--check" && a != "--braces") ?? throw new ArgumentException("需要仓库目录。");
         var changed = 0;
         var conflicts = 0;
+        var braceViolations = 0;
         foreach (var folder in new[] { "Runtime", "Editor", "Samples~", "Generators~", "Tools~/CodeStyle" })
         {
             foreach (var file in Directory.EnumerateFiles(Path.Combine(root, folder), "*.cs", SearchOption.AllDirectories))
@@ -28,6 +31,35 @@ internal static class Program
                 {
                     Console.Error.WriteLine("语法无法解析：" + file);
                     return 2;
+                }
+
+                if (checkBraces)
+                {
+                    foreach (var statement in tree.GetRoot().DescendantNodes().OfType<StatementSyntax>())
+                    {
+                        var body = GetControlBody(statement);
+                        if (body == null || body is BlockSyntax ||
+                            (statement is UsingStatementSyntax && body is UsingStatementSyntax))
+                        {
+                            continue;
+                        }
+
+                        var line = body.GetLocation().GetLineSpan().StartLinePosition.Line + 1;
+                        Console.Error.WriteLine($"控制流缺少大括号：{Path.GetRelativePath(root, file)}:{line}");
+                        braceViolations++;
+                    }
+
+                    foreach (var clause in tree.GetRoot().DescendantNodes().OfType<ElseClauseSyntax>())
+                    {
+                        if (clause.Statement is BlockSyntax or IfStatementSyntax)
+                        {
+                            continue;
+                        }
+
+                        var line = clause.Statement.GetLocation().GetLineSpan().StartLinePosition.Line + 1;
+                        Console.Error.WriteLine($"else 缺少大括号：{Path.GetRelativePath(root, file)}:{line}");
+                        braceViolations++;
+                    }
                 }
 
                 var rewriter = new MemberLayout();
@@ -59,9 +91,23 @@ internal static class Program
             }
         }
 
-        Console.WriteLine($"成员布局：{changed} 个文件{(check ? "需要调整" : "已调整")}，{conflicts} 个需人工处理项。");
-        return conflicts > 0 || (check && changed > 0) ? 1 : 0;
+        Console.WriteLine($"成员布局：{changed} 个文件{(check ? "需要调整" : "已调整")}，{conflicts} 个需人工处理项；控制流大括号：{braceViolations} 个违规项。");
+        return conflicts > 0 || braceViolations > 0 || (check && changed > 0) ? 1 : 0;
     }
+
+    private static StatementSyntax GetControlBody(StatementSyntax statement) => statement switch
+    {
+        IfStatementSyntax node => node.Statement,
+        ForStatementSyntax node => node.Statement,
+        ForEachStatementSyntax node => node.Statement,
+        ForEachVariableStatementSyntax node => node.Statement,
+        WhileStatementSyntax node => node.Statement,
+        DoStatementSyntax node => node.Statement,
+        UsingStatementSyntax node => node.Statement,
+        LockStatementSyntax node => node.Statement,
+        FixedStatementSyntax node => node.Statement,
+        _ => null
+    };
 
     private static string CollapseBlankLines(string source)
     {

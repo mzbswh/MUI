@@ -91,14 +91,15 @@ namespace MUI.UGUI
         private void RefreshSynchronous()
         {
             BeginSynchronousRefresh();
+            var activation = lifetime;
             running = true;
             try
             {
-                lifetime.Run(token =>
+                activation.Run(token =>
                 {
                     SetStatus(VirtualListStatus.Loading);
                     var remaining = (long)maxCells + 8;
-                    while (IsAlive && scope != null && scope.IsActive)
+                    while (IsAlive && ReferenceEquals(lifetime, activation) && scope != null && scope.IsActive)
                     {
                         token.ThrowIfCancellationRequested();
                         if (Error != null)
@@ -125,31 +126,43 @@ namespace MUI.UGUI
                         }
 
                         SetStatus(snapshot.Count == 0 ? VirtualListStatus.Empty : VirtualListStatus.Ready);
+                        if (!ReferenceEquals(lifetime, activation))
+                        {
+                            break;
+                        }
+
                         if (!dirty && Error == null)
                         {
                             break;
                         }
                     }
 
-                    if (scope == null || !scope.IsActive)
+                    if (ReferenceEquals(lifetime, activation) && (scope == null || !scope.IsActive))
                     {
                         SetStatus(VirtualListStatus.Inactive);
                     }
                 });
-                if (synchronousRefreshCompletion != null)
+                if (ReferenceEquals(lifetime, activation) && synchronousRefreshCompletion != null)
                 {
                     synchronousRefreshCompletion.TrySetResult(true);
                 }
             }
             catch (Exception failure)
             {
-                FailSynchronousRefresh(failure);
-                SetStatus(VirtualListStatus.Error, failure);
+                if (ReferenceEquals(lifetime, activation))
+                {
+                    FailSynchronousRefresh(failure);
+                    SetStatus(VirtualListStatus.Error, failure);
+                }
+
                 throw;
             }
             finally
             {
-                running = false;
+                if (ReferenceEquals(lifetime, activation))
+                {
+                    running = false;
+                }
             }
         }
 

@@ -29,6 +29,8 @@ def main():
     layout = [dotnet, str(project.parent / "bin/Debug/net10.0/MUI.CodeStyle.dll"), str(root)]
     if args.check:
         layout.append("--check")
+        if args.braces:
+            layout.append("--braces")
     result = subprocess.run(layout, cwd=root).returncode
     if result != 0:
         return result
@@ -49,7 +51,7 @@ def main():
     command.extend(["--verbosity", "normal"])
     print(f"{'检查' if args.check else '格式化'} {len(sources)} 个 C# 源文件。", flush=True)
     result = subprocess.run(command, cwd=root).returncode
-    if result != 0 or not args.braces:
+    if result != 0 or not args.braces or args.check:
         return result
 
     projects = sorted((root / "Tools~/Build").glob("*.csproj"))

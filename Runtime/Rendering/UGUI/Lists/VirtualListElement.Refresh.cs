@@ -71,22 +71,29 @@ namespace MUI.UGUI
             var completion = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
             synchronousRefresh = false;
             var refreshTask = completion.Task;
+            var activation = lifetime;
             pending = refreshTask;
             running = true;
             try
             {
                 // 在状态观察者可调用 RetryAsync/PendingChange 前先发布操作。
-                var operation = lifetime.RunAsync(async token =>
+                var operation = activation.RunAsync(async token =>
                 {
                     try
                     {
                         SetStatus(VirtualListStatus.Loading);
-                        while (IsAlive && scope != null && scope.IsActive)
+                        var remaining = (long)maxCells + 8;
+                        while (IsRefreshOperationCurrent(activation, refreshTask) && scope != null && scope.IsActive)
                         {
                             token.ThrowIfCancellationRequested();
                             if (Error != null)
                             {
                                 throw Error;
+                            }
+
+                            if (--remaining < 0)
+                            {
+                                throw new InvalidOperationException("Virtual list refresh did not stabilize within its callback budget.");
                             }
 
                             if (dirty)
@@ -97,6 +104,11 @@ namespace MUI.UGUI
                             }
 
                             SetStatus(snapshot.Count == 0 ? VirtualListStatus.Empty : VirtualListStatus.Ready);
+                            if (!IsRefreshOperationCurrent(activation, refreshTask))
+                            {
+                                break;
+                            }
+
                             // Ready/Empty 观察者可能同步提交另一个来源。
                             if (!dirty && Error == null)
                             {
@@ -109,7 +121,8 @@ namespace MUI.UGUI
                             }
                         }
 
-                        if (scope == null || !scope.IsActive)
+                        token.ThrowIfCancellationRequested();
+                        if (IsRefreshOperationCurrent(activation, refreshTask) && (scope == null || !scope.IsActive))
                         {
                             SetStatus(VirtualListStatus.Inactive);
                         }
@@ -118,26 +131,40 @@ namespace MUI.UGUI
                     }
                     catch (OperationCanceledException) when (token.IsCancellationRequested)
                     {
-                        SetStatus(VirtualListStatus.Inactive);
+                        if (IsRefreshOperationCurrent(activation, refreshTask))
+                        {
+                            SetStatus(VirtualListStatus.Inactive);
+                        }
+
                         throw;
                     }
                     catch (Exception failure)
                     {
-                        SetStatus(VirtualListStatus.Error, failure);
+                        if (IsRefreshOperationCurrent(activation, refreshTask))
+                        {
+                            SetStatus(VirtualListStatus.Error, failure);
+                        }
+
                         throw;
                     }
                     finally
                     {
-                        running = false;
+                        if (IsRefreshOperationCurrent(activation, refreshTask))
+                        {
+                            running = false;
+                        }
                     }
                 }).AsTask();
                 _ = CompleteRefreshAsync(operation, completion);
             }
             catch (Exception failure)
             {
-                running = false;
                 completion.TrySetException(failure);
-                SetStatus(VirtualListStatus.Error, failure);
+                if (IsRefreshOperationCurrent(activation, refreshTask))
+                {
+                    running = false;
+                    SetStatus(VirtualListStatus.Error, failure);
+                }
             }
 
             // 刷新回调可能结束激活或启动新一轮操作，只观察本轮已发布的完成边界。
@@ -150,6 +177,9 @@ namespace MUI.UGUI
                 _ = ObserveAsync(refreshTask);
             }
         }
+
+        private bool IsRefreshOperationCurrent(Lifetime activation, Task refreshTask) =>
+            IsAlive && ReferenceEquals(lifetime, activation) && ReferenceEquals(pending, refreshTask);
 
         private static async Task CompleteRefreshAsync(Task operation, TaskCompletionSource<bool> completion)
         {

@@ -4,7 +4,13 @@
 
 目标保持为完整实现 `UI-FRAMEWORK-DESIGN.md` 的核心与标准模块。以下为当前工作树状态，不以阶段性交付替代完整目标。条件扩展仍遵循设计文档的启用条件。
 
-更新：2026-09-24。
+更新：2026-09-28。
+
+2026-09-28 虚拟列表持续重入与格式门禁复验：仅在 `mui-unity-validation@8bc64b8a` 的编辑器内存中创建空列表，`Empty` 状态观察者反复切换来源；第 6 次换源后刷新按配置预算停止，`Status=Error`、`PendingChange=Faulted`，错误为 `Virtual list refresh did not stabilize within its callback budget.`。探针在 finally 释放 Lifetime 与临时原生对象，原 `ResourceBinding 1` 场景仍未变脏；未创建脚本、测试或场景资产。格式工具的检查模式改由已有 Roslyn 语法工具直接校验控制流大括号，不再因逐工程 `dotnet format style` 的 MSBuild BuildHost 连接超时而漏检；连续 using 共用最终代码块。`python3 Tools~/format-code.py --check --braces` 已覆盖 594 个 C# 文件，成员布局、空白和大括号违规均为 0。此探针只覆盖空列表上的持续状态重入；跨激活迟到异步条目、目标平台与长期性能仍待验收。
+
+2026-09-25 虚拟列表当前代码运行复验：`mui-unity-validation@8bc64b8a`（`/private/tmp/mui-unity-validation`，Unity 2022.3.62f3）完成脚本刷新并运行既有 Navigation 场景；虚拟列表 Loading 观察者拿到当前未完成任务，Ready 回调换源后得到 `final=Empty; cells=0`，VM 绑定层 Ready 回调换源后得到 `vmCount=0; sameSource=True; status=Empty; cells=0`，演示输出 `MUI Navigation shutdown complete`。退出 Play Mode 后恢复未变脏的 `ResourceBinding 1` 场景，MUI 与 fun-slg 编辑器均仍运行。`MUI.UGUI` 离线 Release 编译零警告、零错误，594 个 C# 文件基础格式检查与补丁空白检查通过；定向 IDE0011 检查仍在 Roslyn/MSBuild BuildHost 连接处超时。此运行只覆盖正常重入，不证明持续重入达到预算上限、旧激活迟到收尾或目标平台行为；未新增测试或场景资产。
+
+2026-09-24 虚拟列表跨激活刷新收尾：异步刷新捕获所属 Lifetime 与已发布任务，状态通知、循环继续、错误及 finally 写入均核对归属；同步刷新在状态回调后复核激活，父激活结束取消已发布的同步兼容完成信号并清除运行标记。异步刷新也限制单次收敛轮数，避免状态观察者持续改写来源时占满 UI 线程。`MUI.UGUI` 使用 Unity 2022.3.62f3 对应程序集离线 Release 编译零警告、零错误，补丁空白检查通过。全仓格式工具的成员布局和空白阶段通过，逐工程 IDE0011 阶段在 Roslyn/MSBuild BuildHost 连接处超时，未得到完整大括号检查结果；本次未操作 Unity Editor，跨激活运行交错与持续重入仍待验收。
 
 2026-09-24 普通回收列表异步子视图准备修复与运行复验：真实异步演示发现 `NestedViewElement.ChangeAsync` 和失败恢复分支仍调用同步 `ChildViewScope.Prepare`，当子 View 等待异步资源时直接失败；现统一使用 `PrepareAsync`，等待返回后复核令牌、元素、请求代际和所属 Scope，再提交或清理候选。`MUI.UGUI` 使用 Unity 2022.3.62f3 程序集离线 Release 编译零警告、零错误，594 个 C# 文件格式检查通过。仅在 `mui-unity-validation@8bc64b8a` 的 Play Mode 中以既有回收列表层级和异步示例加载器创建不落盘对象，子 View 开启 `WaitForResourceSources`、加载延迟 500 毫秒且忽略取消：初始两项等待后 Ready，2 个节点/4 份在用凭证；新增第三项仍在途时移除首项，最终显示 `Async 2` 与 `Async 3`、第三节点隐藏留池、PendingChange 完成且 Error 为空，凭证创建 10、归还 6、在用 4；再新增一项期间关闭，最终创建 12、归还 12、在途与持有均为 0，关闭任务正常完成。修复前相同异步准备触发 `Required child view preparation needs the asynchronous entry point`，旧显示仍保持，关闭后 6 份凭证全部归还。退出 Play Mode 后原场景未变脏，MUI 与 fun-slg 编辑器仍运行。未新增测试或场景资产；仍需验收资源/绑定失败恢复、缓存复开、外部来源重入及长期性能。
 

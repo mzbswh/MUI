@@ -118,14 +118,18 @@ namespace MUI.UGUI
             selectedIndex = -1;
             first = last = -1;
             pending = null;
+            running = false;
             automaticPage = null;
             pageRequestError = null;
             pageSourceError = null;
-            // 原生回调中直接销毁时，同步刷新仍在栈内；保留已发布信号给原执行器收尾。
-            if (!running)
+            // 父激活结束后，已发布的同步兼容信号不能等待旧执行栈继续写入新激活。
+            var previousRefreshCompletion = synchronousRefreshCompletion;
+            synchronousRefreshCompletion = null;
+            if (previousRefreshCompletion != null)
             {
-                synchronousRefreshCompletion = null;
+                previousRefreshCompletion.TrySetCanceled();
             }
+
             synchronousRefreshFailure = null;
             dirty = false;
             Status = VirtualListStatus.Inactive;

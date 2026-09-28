@@ -432,6 +432,7 @@ namespace MUI.UGUI
             synchronousRefreshCompletion = null;
             // 新激活不继承前一次刷新任务或失败结果，兼容查询按需提供完成信号。
             pending = null;
+            running = false;
             parentLifetime.OnDispose(() => ReleaseActivationReferences(parentLifetime));
             SetStatus(VirtualListStatus.Empty);
             if (!ReferenceEquals(lifetime, parentLifetime) || parentLifetime.IsEnded)

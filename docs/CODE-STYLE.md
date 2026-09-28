@@ -17,7 +17,7 @@ python3 Tools~/format-code.py --check --braces
 
 检查覆盖 Runtime、Editor、Samples 和生成器的手写 C# 源码，排除 bin/obj。脚本使用 .NET 10 SDK 构建本地成员布局工具，先检查成员排列、分隔与多余空行，再检查空白缩进。连续空行检查使用 Roslyn 源码行和 token 范围，不改动字符串或注释内部的换行。工具直接引用 SDK 自带 Roslyn，不新增 NuGet 依赖。检查模式遇到空集合、布局冲突或格式差异会失败，但不替代编译、命名与架构审查。生成器输出共用同一套成员布局规则，保留模板原有参数和清单换行。
 
-`--braces` 额外逐项目执行 IDE0011 规则；首次使用前需恢复各构建项目依赖。涉及 Unity 的工作区应通过环境变量提供 `UnityManagedPath`、`UnityUIAssemblyPath` 和 `UnityTMPAssemblyPath`，与离线编译采用相同引用。工作区加载警告不能当作编译成功，格式修复之后仍需编译相关程序集。
+`--check --braces` 使用本地 Roslyn 语法工具检查控制流大括号，不加载各构建工程；连续的 `using (...) using (...) { ... }` 共享最终代码块。`--braces` 修复模式仍逐项目执行 IDE0011，首次使用前需恢复各构建项目依赖。涉及 Unity 的工作区应通过环境变量提供 `UnityManagedPath`、`UnityUIAssemblyPath` 和 `UnityTMPAssemblyPath`，与离线编译采用相同引用。工作区加载警告不能当作编译成功，格式修复之后仍需编译相关程序集。
 
 ## 命名与注释
 

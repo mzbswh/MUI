@@ -30,7 +30,8 @@ namespace MUI.Navigation
         CleanupCapacity,
         DependencyCycle,
         DependencyLimit,
-        DependencyOrderConflict
+        DependencyOrderConflict,
+        CloseDecisionTimedOut
     }
 
     public readonly struct OpenOutcome<TResult>

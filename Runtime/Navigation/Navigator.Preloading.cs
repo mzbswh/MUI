@@ -83,7 +83,9 @@ namespace MUI.Navigation
             ++preloadReservations;
             // 调用提供方前先登记，确保 Clear/Shutdown 等待迟到的持有凭证。
             _ = batch.Lifetime.RunAsync(token => LoadPreloadAsync(batch, preloader, route.Resource, token, cancellationToken, completion));
-            return new ValueTask<PreloadOutcome>(completion.Task);
+            return cancellationToken.CanBeCanceled
+                ? new ValueTask<PreloadOutcome>(WaitForOwnedPreloadAsync(completion.Task, cancellationToken))
+                : new ValueTask<PreloadOutcome>(completion.Task);
         }
 
         private async ValueTask<bool> LoadPreloadAsync(PreloadBatch batch,
@@ -366,6 +368,18 @@ namespace MUI.Navigation
             if (errors.Count != 0)
             {
                 throw new AggregateException("Preload cleanup failed.", errors);
+            }
+        }
+
+        private static async Task<PreloadOutcome> WaitForOwnedPreloadAsync(Task<PreloadOutcome> task, CancellationToken token)
+        {
+            try
+            {
+                return await AsyncWait.WithCancellation(task, token);
+            }
+            catch (OperationCanceledException)
+            {
+                return new PreloadOutcome(PreloadStatus.Cancelled);
             }
         }
 

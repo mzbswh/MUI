@@ -629,7 +629,13 @@ NavigationDemo 的 Show Rebind Walkthrough 默认关闭。示例包含部分钩�
 
 回滚失败的关闭通知先于候选异步释放，释放期间该实例不再拥有 Tick 和新命令资格，但实际资源归还仍等待更新排空。更新执行器在完成信号发布前将完整结果交给宿主，关闭会读取其中的恢复失败与清理失败；提前开始关闭后发生的释放错误不会遗漏。每个实例仅保留首个历史清理异常，后续成功更新不会消除它，关闭结果继续报告错误且内容不能入缓存。一般提交失败但成功恢复、成功清理，不会因为保留诊断而永久污染实例。
 
-## 关闭超时与待清理实例
+## 准备与关闭超时
+
+`RoutePolicy.PrepareTimeout` 默认为 30 秒，覆盖一次异步候选准备及其必需依赖。准备超过预算或请求取消而提供方仍未返回时，OpenAsync 返回 PreparationFailed/CancelledBeforeCommit，ReplaceAsync 保留旧页面并返回 PreparationFailed/CancelledBeforeCommit；结果的 Cleanup 为 Pending。候选立即失去提交资格，异步清理等待原准备结束后再归还其资源。框架不会强行终止不合作的项目任务，也不会提前释放它可能仍在使用的对象。同步阻塞回调无法由异步计时器打断。
+
+隔离中的准备候选计入 `PendingCleanupCount` 和 `cleanupCapacity`，真实清理完成后退出隔离；若其关闭清理继续超时，同一实例转入关闭超时计数，不重复占用容量。准备超时只释放原导航队列许可，不代表底层提供方已停止。
+
+`RoutePolicy.CloseDecisionTimeout` 默认为 2 分钟。普通关闭先用此预算等待已开始的参数更新或 VM 换绑排空，再用同一预算等待异步关闭守卫及确认服务；这两个阶段各自计时。任一阶段超时后，普通关闭返回 Failed 和 TimeoutException，页面保持活动，原任务仍被持有；原任务结束前不允许再次请求业务关闭或替换。守卫超时时会通知合作式回调取消，不会强制结束仍在运行的任务。ReplaceAsync 的关闭决策超时后也通知取消，保留旧页面、关闭隐藏候选并返回 CloseDecisionTimedOut；采用 CloseOldest 溢出策略的 OpenAsync 保留同名拒绝原因。请求取消会及时结束 ReplaceAsync 的等待。超时后尚未结束的关闭决策计入 `PendingCleanupCount` 和 `cleanupCapacity`；若页面随后强制关闭且清理继续超时，同一实例转入关闭超时计数，不重复占位。参数更新和换绑自身的公开请求尚无独立超时；同步阻塞回调不能由异步计时器打断。
 
 `RoutePolicy.CloseTimeout` 默认为 30 秒，可配置正 TimeSpan，最大为 int.MaxValue 毫秒。计时从视觉退出结束后开始，覆盖更新排空、关闭钩子、解绑及实例资源释放；退出动画继续使用独立的 ExitTimeout。超时不会中断同步阻塞代码；异步计时和取消在所属 UI SynchronizationContext 上继续执行，因此宿主必须持续调度该上下文。
 
@@ -651,7 +657,7 @@ if (closed.Status == CloseStatus.ClosedWithCleanupPending)
 
 `CloseCleanupPending` 事件使用 CloseOutcome 字段发布超时快照，随后 Closed 才表示物理清理结束。ReplaceOutcome/溢出替换中的 SourceCleanup 保持真实清理语义，不因关闭响应超时提前完成。ShutdownAsync 也等待实际清理后才允许 UIHost 释放提供方；不合作且永不结束的任务仍会阻塞宿主销毁，框架不会宣称资源已经释放。
 
-当前只接通关闭阶段的超时隔离。尚未关闭时的 Prepare、关闭守卫、参数更新及 VM 换绑仍需各自的超时策略；它们占据的导航队列不会仅因 CloseAsync 返回 Pending 自动释放。Show Close Timeout Walkthrough 演示忽略取消的关闭钩子、容量拒绝、迟到清理及清理令牌取消。仅离线编译与源码检查，Unity 运行时序仍未验收。
+Show Close Timeout Walkthrough 演示忽略取消的关闭钩子、容量拒绝、迟到清理及清理令牌取消。准备超时与取消后的不合作提供方隔离仍需 Unity 运行时序验收。
 
 
 ## 标准单按钮提示框

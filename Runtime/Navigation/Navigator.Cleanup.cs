@@ -11,17 +11,17 @@ namespace MUI.Navigation
         private readonly int cleanupCapacity;
         private bool hasUnconfirmedCleanup;
 
-        /// <summary>已经超过关闭预算但仍由宿主持有资源的实例数。</summary>
+        /// <summary>准备、关闭决策或关闭清理超时后仍由宿主持有资源的实例数。</summary>
         public int PendingCleanupCount
         {
             get
             {
                 AssertThread();
-                return pendingCleanupCount;
+                return pendingCleanupCount + quarantinedPreparations.Count + detachedCloseWaits.Count;
             }
         }
 
-        private bool HasCleanupCapacity => pendingCleanupCount < cleanupCapacity;
+        private bool HasCleanupCapacity => pendingCleanupCount + quarantinedPreparations.Count + detachedCloseWaits.Count < cleanupCapacity;
 
         private ValueTask<CloseOutcome> WaitForCleanupUntracedAsync(ViewHandle handle, CancellationToken cancellationToken = default)
         {
@@ -88,6 +88,8 @@ namespace MUI.Navigation
 
                 // 超时只移交结果，不移交资源；实例继续留在 entries，仍计入路由实例容量。
                 instance.CleanupTimedOut = true;
+                quarantinedPreparations.Remove(instance.Handle);
+                detachedCloseWaits.Remove(instance.Handle);
                 ++pendingCleanupCount;
                 var timeout = new TimeoutException("View close cleanup exceeded its time budget; resources remain owned until cleanup completes.");
                 var pending = new CloseOutcome(CloseStatus.ClosedWithCleanupPending, timeout, CleanupStatus.Pending);

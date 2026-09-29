@@ -242,7 +242,14 @@ namespace MUI.Navigation
 
                     instance = NewInstance(route, args, assigned);
                     AssignPreparationTrace(instance, trace);
-                    await PrepareCandidateAsync(instance, cancellation.Token);
+                    var preparationFailure = await PrepareCandidateWithDeadlineAsync(instance, cancellation.Token);
+                    if (preparationFailure != null)
+                    {
+                        var closing = QuarantinePreparation(instance, preparationFailure);
+                        var status = preparationFailure is TimeoutException ? OpenStatus.PreparationFailed
+                            : IsShutdown ? OpenStatus.HostClosed : OpenStatus.CancelledBeforeCommit;
+                        return new OpenOutcome<TResult>(status, error: preparationFailure, cleanup: CleanupState(closing));
+                    }
 
                     AssertThread();
                     cancellation.Token.ThrowIfCancellationRequested();

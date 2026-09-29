@@ -57,8 +57,22 @@ namespace MUI.Navigation
                     float exitTimeout = 5f,
                     ViewCacheMode cacheMode = ViewCacheMode.None,
                     TimeSpan? cacheDuration = null,
-                    TimeSpan? closeTimeout = null)
+                    TimeSpan? closeTimeout = null,
+                    TimeSpan? prepareTimeout = null,
+                    TimeSpan? closeDecisionTimeout = null)
         {
+            CloseDecisionTimeout = closeDecisionTimeout ?? TimeSpan.FromMinutes(2);
+            if (CloseDecisionTimeout <= TimeSpan.Zero || CloseDecisionTimeout.TotalMilliseconds > int.MaxValue)
+            {
+                throw new ArgumentOutOfRangeException(nameof(closeDecisionTimeout));
+            }
+
+            PrepareTimeout = prepareTimeout ?? TimeSpan.FromSeconds(30);
+            if (PrepareTimeout <= TimeSpan.Zero || PrepareTimeout.TotalMilliseconds > int.MaxValue)
+            {
+                throw new ArgumentOutOfRangeException(nameof(prepareTimeout));
+            }
+
             CloseTimeout = closeTimeout ?? TimeSpan.FromSeconds(30);
             if (CloseTimeout <= TimeSpan.Zero || CloseTimeout.TotalMilliseconds > int.MaxValue)
             {
@@ -155,6 +169,18 @@ namespace MUI.Navigation
 
         /// <summary>视觉退出后的清理预算；超时只完成逻辑结果，未收敛资源继续隔离持有。</summary>
         public TimeSpan CloseTimeout
+        {
+            get;
+        }
+
+        /// <summary>异步候选及其依赖的总准备预算；超时后候选隔离持有，等待实际准备与清理结束。</summary>
+        public TimeSpan PrepareTimeout
+        {
+            get;
+        }
+
+        /// <summary>关闭前事务排空和关闭决策各阶段的等待预算；超时不释放仍被项目回调持有的页面。</summary>
+        public TimeSpan CloseDecisionTimeout
         {
             get;
         }

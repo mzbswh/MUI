@@ -68,6 +68,9 @@ namespace MUI.Navigation
                 case ReplaceRejection.ConfirmationUnavailable:
                     rejection = OpenRejection.ConfirmationUnavailable;
                     break;
+                case ReplaceRejection.CloseDecisionTimedOut:
+                    rejection = OpenRejection.CloseDecisionTimedOut;
+                    break;
                 case ReplaceRejection.ConflictingData:
                     rejection = OpenRejection.ConflictingData;
                     break;

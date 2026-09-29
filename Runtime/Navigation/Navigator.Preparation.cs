@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using MUI.Resources;
@@ -7,6 +8,86 @@ namespace MUI.Navigation
 {
     public sealed partial class Navigator
     {
+        private readonly HashSet<ViewHandle> quarantinedPreparations = new HashSet<ViewHandle>();
+
+        private async Task<Exception> PrepareCandidateWithDeadlineAsync(ViewInstance candidate, CancellationToken token)
+        {
+            var preparation = PrepareCandidateAsync(candidate, token).AsTask();
+            if (preparation.IsCompleted)
+            {
+                await preparation;
+                return null;
+            }
+
+            using (var deadline = CancellationTokenSource.CreateLinkedTokenSource(token))
+            {
+                var elapsed = Task.Delay(candidate.Route.Policy.PrepareTimeout, deadline.Token);
+                if (await Task.WhenAny(preparation, elapsed) == preparation || preparation.IsCompleted)
+                {
+                    deadline.Cancel();
+                    await preparation;
+                    return null;
+                }
+            }
+
+            _ = ObserveAbandonedPreparationAsync(preparation);
+            if (token.IsCancellationRequested)
+            {
+                return new OperationCanceledException("View preparation was cancelled before its provider returned.", token);
+            }
+
+            return new TimeoutException("View preparation exceeded its time budget; resources remain owned until preparation and cleanup complete.");
+        }
+
+        private static async Task ObserveAbandonedPreparationAsync(Task preparation)
+        {
+            try
+            {
+                await preparation;
+            }
+            catch (OperationCanceledException)
+            {
+            }
+            catch (Exception error)
+            {
+                UIErrors.Report(error);
+            }
+        }
+
+        private Task<CloseOutcome> QuarantinePreparation(ViewInstance candidate, Exception failure)
+        {
+            if (failure is TimeoutException)
+            {
+                candidate.SetFailure(failure);
+            }
+
+            if (!candidate.CleanupTimedOut)
+            {
+                quarantinedPreparations.Add(candidate.Handle);
+            }
+            try
+            {
+                var closing = BeginClose(candidate, failure is TimeoutException
+                    ? DismissReason.OpenFailed : DismissReason.OpenCancelled);
+                Observe(closing);
+                if (failure is TimeoutException)
+                {
+                    UIErrors.Report(failure);
+                }
+
+                return closing;
+            }
+            catch
+            {
+                if (!candidate.HasCloseStarted)
+                {
+                    quarantinedPreparations.Remove(candidate.Handle);
+                }
+
+                throw;
+            }
+        }
+
         /// <summary>
         /// 在调用方已经持有的导航事务内准备隐藏候选，不申请队列许可、不提交显示。
         /// false 表示需要异步能力；候选的失败清理由创建它的事务负责。

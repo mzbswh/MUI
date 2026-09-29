@@ -28,6 +28,11 @@ namespace MUI.Navigation
                 return ReplacementRejected<TResult>(ReplaceRejection.Reentrant);
             }
 
+            if (detachedCloseWaits.Contains(source))
+            {
+                return ReplacementRejected<TResult>(ReplaceRejection.Busy);
+            }
+
             if (IsShutdown || !entries.TryGetValue(source, out var current) || !CanReplace(current))
             {
                 return ReplacementRejected<TResult>(ReplaceRejection.SourceUnavailable);
@@ -45,16 +50,12 @@ namespace MUI.Navigation
         private static ValueTask<ReplaceOutcome<TResult>> ReplacementRejected<TResult>(ReplaceRejection reason) => new ValueTask<ReplaceOutcome<TResult>>(new ReplaceOutcome<TResult>(ReplaceStatus.Rejected, rejection: reason));
 
         private bool CanReplace(ViewInstance source) => source.IsActive && !source.HasCloseStarted && !ownership.HasOwners(source.Handle) &&
-                    !retiringDependencies.Contains(source.Handle) && source.CloseRequest == null && !source.ActivationToken.IsCancellationRequested;
+                    !retiringDependencies.Contains(source.Handle) && source.CloseRequest == null &&
+                    !detachedCloseWaits.Contains(source.Handle) && !source.ActivationToken.IsCancellationRequested;
 
         // 候选可借用源界面的实例名额；其他活动、准备中和关闭中的实例仍计入容量。
         private bool HasReplacementCapacity(Route route, ViewInstance source, ViewInstance candidate)
         {
-            if (!HasCleanupCapacity)
-            {
-                return false;
-            }
-
             var count = 0;
             foreach (var entry in entries.Values)
             {
@@ -110,7 +111,17 @@ namespace MUI.Navigation
 
                     candidate = NewInstance(route, args, assigned);
                     AssignPreparationTrace(candidate, trace);
-                    await PrepareCandidateAsync(candidate, cancellation.Token);
+                    var preparationFailure = await PrepareCandidateWithDeadlineAsync(candidate, cancellation.Token);
+                    if (preparationFailure != null)
+                    {
+                        var closing = QuarantinePreparation(candidate, preparationFailure);
+                        var cancelled = preparationFailure is OperationCanceledException;
+                        var destination = new OpenOutcome<TResult>(cancelled
+                            ? IsShutdown ? OpenStatus.HostClosed : OpenStatus.CancelledBeforeCommit
+                            : OpenStatus.PreparationFailed, error: preparationFailure, cleanup: CleanupState(closing));
+                        return new ReplaceOutcome<TResult>(cancelled
+                            ? ReplaceStatus.CancelledBeforeCommit : ReplaceStatus.PreparationFailed, destination);
+                    }
 
                     cancellation.Token.ThrowIfCancellationRequested();
                     long approvedVersion = 0;
@@ -119,7 +130,27 @@ namespace MUI.Navigation
                         // 确认框需要使用导航队列；候选保持隐藏，并继续由当前操作持有。
                         requests.Release();
                         acquired = false;
-                        var decision = await source.EvaluateCloseAsync(activationToken => EvaluateReplacementCloseAsync(source, cancellation.Token, activationToken, version => approvedVersion = version));
+                        var evaluation = await AwaitCloseEvaluationAsync(source,
+                            activationToken => EvaluateReplacementCloseAsync(source, cancellation.Token,
+                                activationToken, version => approvedVersion = version), cancellation.Token);
+                        if (evaluation.Error != null)
+                        {
+                            var cleanup = BeginClose(candidate, DismissReason.OpenCancelled);
+                            Observe(cleanup);
+                            var cancelled = evaluation.Error is OperationCanceledException;
+                            if (!cancelled)
+                            {
+                                UIErrors.Report(evaluation.Error);
+                            }
+
+                            var destination = new OpenOutcome<TResult>(OpenStatus.CancelledBeforeCommit,
+                                error: evaluation.Error, cleanup: CleanupState(cleanup));
+                            return new ReplaceOutcome<TResult>(cancelled
+                                ? ReplaceStatus.CancelledBeforeCommit : ReplaceStatus.Rejected, destination,
+                                cancelled ? ReplaceRejection.None : ReplaceRejection.CloseDecisionTimedOut);
+                        }
+
+                        var decision = evaluation.Status;
                         cancellation.Token.ThrowIfCancellationRequested();
                         if (decision != CloseStatus.Closed)
                         {
@@ -146,10 +177,26 @@ namespace MUI.Navigation
                     // 版本属性访问器属于外部代码，返回后必须再次校验。
                     candidate.RequirePreparationCurrent();
                     cancellation.Token.ThrowIfCancellationRequested();
-                    if (!sourceValid || !CanReplace(source) || !HasReplacementCapacity(route, source, candidate))
+                    if (!sourceValid || !CanReplace(source))
                     {
                         await BeginClose(candidate, DismissReason.OpenCancelled);
                         return new ReplaceOutcome<TResult>(ReplaceStatus.Rejected, new OpenOutcome<TResult>(OpenStatus.CancelledBeforeCommit, cleanup: CleanupState(candidate.Closing)), ReplaceRejection.Superseded);
+                    }
+
+                    if (!HasCleanupCapacity)
+                    {
+                        await BeginClose(candidate, DismissReason.OpenCancelled);
+                        return new ReplaceOutcome<TResult>(ReplaceStatus.Rejected,
+                            new OpenOutcome<TResult>(OpenStatus.Rejected, rejection: OpenRejection.CleanupCapacity,
+                                cleanup: CleanupState(candidate.Closing)), ReplaceRejection.CleanupCapacity);
+                    }
+
+                    if (!HasReplacementCapacity(route, source, candidate))
+                    {
+                        await BeginClose(candidate, DismissReason.OpenCancelled);
+                        return new ReplaceOutcome<TResult>(ReplaceStatus.Rejected,
+                            new OpenOutcome<TResult>(OpenStatus.Rejected, rejection: OpenRejection.InstanceLimit,
+                                cleanup: CleanupState(candidate.Closing)), ReplaceRejection.InstanceLimit);
                     }
 
                     // 移除源实例与插入候选之间不能等待异步操作或调用外部回调。

@@ -66,18 +66,19 @@ namespace MUI.UGUI
 
         private async Task DispatchBackInputAsync()
         {
-            Task inputSettled = null;
+            var releaseStarted = false;
             try
             {
-                var operation = navigator.BackAsync(out inputSettled);
+                var operation = navigator.BackAsync(out var inputSettled);
                 _ = ReleaseBackInputAsync(inputSettled);
+                releaseStarted = true;
                 var outcome = await operation;
                 PublishBackInput(outcome);
             }
             catch (Exception error)
             {
                 UIErrors.Report(error);
-                if (inputSettled == null)
+                if (!releaseStarted)
                 {
                     backInputPending = false;
                 }
@@ -86,8 +87,18 @@ namespace MUI.UGUI
 
         private async Task ReleaseBackInputAsync(Task inputSettled)
         {
-            await inputSettled;
-            backInputPending = false;
+            try
+            {
+                await inputSettled;
+            }
+            catch (Exception error)
+            {
+                UIErrors.Report(error);
+            }
+            finally
+            {
+                backInputPending = false;
+            }
         }
 
         private void PublishBackInput(CloseOutcome outcome)

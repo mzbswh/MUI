@@ -73,6 +73,11 @@ namespace MUI.Navigation
                 }
 
                 Register(route);
+                if (!HasCleanupCapacity)
+                {
+                    return Reject(ReplaceRejection.CleanupCapacity);
+                }
+
                 if (!HasReplacementCapacity(route, source, null))
                 {
                     return Reject(ReplaceRejection.InstanceLimit);
@@ -122,10 +127,19 @@ namespace MUI.Navigation
                 }
                 // 最后一次守卫属性访问也可能使候选失效，不能只复核源实例。
                 candidate.RequirePreparationCurrent();
-                if (!guardCurrent || !CanReplace(source) || !source.CanReleaseSynchronously ||
-                    !HasReplacementCapacity(route, source, candidate))
+                if (!guardCurrent || !CanReplace(source) || !source.CanReleaseSynchronously)
                 {
                     return Reject(ReplaceRejection.Superseded);
+                }
+
+                if (!HasCleanupCapacity)
+                {
+                    return Reject(ReplaceRejection.CleanupCapacity);
+                }
+
+                if (!HasReplacementCapacity(route, source, candidate))
+                {
+                    return Reject(ReplaceRejection.InstanceLimit);
                 }
 
                 RequireDependenciesCurrent(candidate);

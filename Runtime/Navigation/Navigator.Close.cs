@@ -280,6 +280,8 @@ namespace MUI.Navigation
             }
             ownership.Remove(instance.Handle);
             entries.Remove(instance.Handle);
+            quarantinedPreparations.Remove(instance.Handle);
+            detachedCloseWaits.Remove(instance.Handle);
             RememberTerminal(instance.Handle, result);
 
             QueueLifecycleEvent(instance, NavigationEventKind.Closed, reason, result);

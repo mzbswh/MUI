@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -8,6 +9,7 @@ namespace MUI.Navigation
     {
         private readonly ICloseConfirmationService closeConfirmationService;
         private readonly AsyncLocal<CloseEvaluation> closeEvaluation = new AsyncLocal<CloseEvaluation>();
+        private readonly HashSet<ViewHandle> detachedCloseWaits = new HashSet<ViewHandle>();
 
         private bool HasCloseEvaluation
         {
@@ -66,6 +68,11 @@ namespace MUI.Navigation
                 return instance.CloseRequest;
             }
 
+            if (detachedCloseWaits.Contains(instance.Handle))
+            {
+                return Task.FromResult(new CloseOutcome(CloseStatus.Blocked, cleanup: CleanupStatus.NotRequired));
+            }
+
             if (instance.Mode == LifetimeMode.Synchronous)
             {
                 return Task.FromResult(BeginRequestedCloseSynchronous(instance, reason, acceptResult));
@@ -100,23 +107,31 @@ namespace MUI.Navigation
                     TaskCompletionSource<CloseOutcome> completion)
         {
             CloseOutcome outcome;
+            var retainCloseRequest = false;
             try
             {
                 // 参数更新的候选必须先收尾，业务关闭守卫不能与其并发观察或修改模型。
-                if (instance.ArgsUpdating != null)
+                var prerequisiteError = await AwaitClosePrerequisitesAsync(instance, completion.Task);
+                if (prerequisiteError != null)
                 {
-                    await instance.ArgsUpdating;
-                }
-
-                if (instance.Rebinding != null)
-                {
-                    await instance.Rebinding;
+                    retainCloseRequest = true;
+                    throw prerequisiteError;
                 }
 
                 // 只有守卫求值归激活周期管理；若在此操作内等待实际关闭，
                 // 会导致生命周期清理等待自身。
                 long approvedVersion = 0;
-                var status = await instance.EvaluateCloseAsync(token => EvaluateDecisionAsync(instance, new CloseContext(instance.Handle, reason, acceptResult != null), token, version => approvedVersion = version));
+                var decision = await AwaitCloseEvaluationAsync(instance,
+                    token => EvaluateDecisionAsync(instance,
+                        new CloseContext(instance.Handle, reason, acceptResult != null), token,
+                        version => approvedVersion = version), CancellationToken.None, completion.Task);
+                if (decision.Error != null)
+                {
+                    retainCloseRequest = true;
+                    throw decision.Error;
+                }
+
+                var status = decision.Status;
                 AssertThread();
                 if (instance.HasCloseStarted)
                 {
@@ -159,7 +174,12 @@ namespace MUI.Navigation
             }
             catch (Exception failure)
             {
-                if (instance.HasCloseStarted)
+                if (retainCloseRequest)
+                {
+                    UIErrors.Report(failure);
+                    outcome = new CloseOutcome(CloseStatus.Failed, failure, CleanupStatus.NotRequired);
+                }
+                else if (instance.HasCloseStarted)
                 {
                     outcome = await instance.Closing;
                 }
@@ -174,12 +194,127 @@ namespace MUI.Navigation
                 }
             }
 
-            if (ReferenceEquals(instance.CloseRequest, completion.Task))
+            if (!retainCloseRequest && ReferenceEquals(instance.CloseRequest, completion.Task))
             {
                 instance.CloseRequest = null;
             }
 
             completion.TrySetResult(outcome);
+        }
+
+        private async Task<Exception> AwaitClosePrerequisitesAsync(ViewInstance instance,
+            Task<CloseOutcome> closeRequest)
+        {
+            var argsUpdate = instance.ArgsUpdating;
+            var rebind = instance.Rebinding;
+            Task pending = argsUpdate == null ? rebind : rebind == null ? argsUpdate : Task.WhenAll(argsUpdate, rebind);
+            if (pending == null)
+            {
+                return null;
+            }
+
+            if (pending.IsCompleted)
+            {
+                await pending;
+                return null;
+            }
+
+            using (var deadline = new CancellationTokenSource())
+            {
+                var elapsed = Task.Delay(instance.Route.Policy.CloseDecisionTimeout, deadline.Token);
+                if (await Task.WhenAny(pending, elapsed) == pending || pending.IsCompleted)
+                {
+                    deadline.Cancel();
+                    await pending;
+                    return null;
+                }
+            }
+
+            detachedCloseWaits.Add(instance.Handle);
+            _ = ObserveDetachedCloseWaitAsync(instance, pending, closeRequest);
+            return new TimeoutException(
+                "Pending view mutation exceeded the close decision budget; the view remains owned until it finishes.");
+        }
+
+        private async Task<CloseEvaluationWait> AwaitCloseEvaluationAsync(ViewInstance instance,
+            Func<CancellationToken, ValueTask<CloseStatus>> evaluate, CancellationToken waitToken,
+            Task<CloseOutcome> closeRequest = null)
+        {
+            var decisionCancellation = CancellationTokenSource.CreateLinkedTokenSource(instance.ActivationToken, waitToken);
+            var decisionToken = decisionCancellation.Token;
+            var detached = false;
+            try
+            {
+                var evaluation = instance.EvaluateCloseAsync(_ => evaluate(decisionToken)).AsTask();
+                if (evaluation.IsCompleted)
+                {
+                    return new CloseEvaluationWait(await evaluation);
+                }
+
+                using (var deadline = CancellationTokenSource.CreateLinkedTokenSource(waitToken))
+                {
+                    var elapsed = Task.Delay(instance.Route.Policy.CloseDecisionTimeout, deadline.Token);
+                    if (await Task.WhenAny(evaluation, elapsed) == evaluation || evaluation.IsCompleted)
+                    {
+                        deadline.Cancel();
+                        return new CloseEvaluationWait(await evaluation);
+                    }
+                }
+
+                detachedCloseWaits.Add(instance.Handle);
+                detached = true;
+                try
+                {
+                    decisionCancellation.Cancel();
+                }
+                catch (Exception error)
+                {
+                    UIErrors.Report(error);
+                }
+
+                _ = ObserveDetachedCloseWaitAsync(instance, evaluation, closeRequest, decisionCancellation);
+                if (waitToken.IsCancellationRequested)
+                {
+                    return new CloseEvaluationWait(new OperationCanceledException(
+                        "Close decision wait was cancelled before its callback returned.", waitToken));
+                }
+
+                return new CloseEvaluationWait(new TimeoutException(
+                    "Close decision exceeded its time budget; the callback remains owned until it finishes."));
+            }
+            finally
+            {
+                if (!detached)
+                {
+                    decisionCancellation.Dispose();
+                }
+            }
+        }
+
+        private async Task ObserveDetachedCloseWaitAsync(ViewInstance instance,
+            Task pending, Task<CloseOutcome> closeRequest,
+            CancellationTokenSource decisionCancellation = null)
+        {
+            try
+            {
+                await pending;
+            }
+            catch (OperationCanceledException)
+            {
+            }
+            catch (Exception error)
+            {
+                UIErrors.Report(error);
+            }
+            finally
+            {
+                decisionCancellation?.Dispose();
+                detachedCloseWaits.Remove(instance.Handle);
+                if (closeRequest != null && ReferenceEquals(instance.CloseRequest, closeRequest))
+                {
+                    instance.CloseRequest = null;
+                }
+            }
         }
 
         private async ValueTask<CloseStatus> EvaluateDecisionAsync(ViewInstance instance,
@@ -275,6 +410,31 @@ namespace MUI.Navigation
             {
                 frame.Active = false;
                 closeEvaluation.Value = frame.Parent;
+            }
+        }
+
+        private readonly struct CloseEvaluationWait
+        {
+            internal CloseEvaluationWait(CloseStatus status)
+            {
+                Status = status;
+                Error = null;
+            }
+
+            internal CloseEvaluationWait(Exception error)
+            {
+                Status = default;
+                Error = error;
+            }
+
+            internal CloseStatus Status
+            {
+                get;
+            }
+
+            internal Exception Error
+            {
+                get;
             }
         }
 

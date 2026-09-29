@@ -43,7 +43,7 @@ await navigator.ClearPreloadsAsync();
 await navigator.ShutdownAsync();
 ```
 
-Navigator 按完整 ViewResource（key/version）共享预加载工作和驻留 Lease，不创建 VM/Presenter，不进入页面历史。原始请求的 token 可以取消该工作；重复调用只有独立等待权，取消返回 WaitCancelled。不同 Route 使用同一资源可共享预加载，但 Route 自身的不可变定义注册规则保持不变。
+Navigator 按完整 ViewResource（key/version）共享预加载工作和驻留 Lease，不创建 VM/Presenter，不进入页面历史。原始请求的 token 可以取消该工作，并及时返回 Cancelled；后端忽略取消时，其工作和容量仍由 Navigator 持有，直到迟到凭证实际回收。重复调用只有独立等待权，取消返回 WaitCancelled。不同 Route 使用同一资源可共享预加载，但 Route 自身的不可变定义注册规则保持不变。
 
 PreloadOutcome 包括 Ready、Unsupported、CapacityExceeded、Cancelled、Superseded、WaitCancelled、HostClosed、Reentrant、Failed。只有实现 IPreloadViewProvider 的 Provider 支持此入口。Ready 表示持有资源，不代表该 Route 能同步打开。
 

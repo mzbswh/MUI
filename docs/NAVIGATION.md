@@ -156,7 +156,7 @@ var decorationPolicy = new RoutePolicy(takesFocus: false);
 
 `ButtonElement` 的 Pointer 点击与 `OverlayDismissArea` 的背景按下会自动登记关闭输入。项目自定义的 Pointer 回调若会关闭模态页，应先调用所属 `View.CaptureModalPointer(eventData)`，再请求关闭。此屏障只覆盖模态页所属的宿主区域；其他 Canvas、直接读取的原始输入以及项目输入动作仍由项目适配。
 
-使用 Input System 的项目会启用可选 `MUI.UGUI.InputSystem` 程序集，由它读取 `InputSystemUIInputModule` 对应 Click Action 的按下状态；基础 `MUI.UGUI` 不引用 Input System。`StandaloneInputModule` 读取自身 `BaseInput` 的鼠标或触摸状态，兼容项目设置的 `inputOverride`。其他输入模块可通过 `ModalPointerBarrier.RegisterPressStateProvider` 登记按键状态读取器，不支持的模块返回 null 并沿用 uGUI Pointer 状态。项目应持有返回的 IDisposable，并在输入适配器停用时释放。
+使用 Input System 的项目会启用可选 `MUI.UGUI.InputSystem` 程序集，由它按关闭指针读取触摸接触状态，或读取对应设备在 Click Action 中的按键状态；另一根手指或另一设备仍按下不会延长本次屏障。基础 `MUI.UGUI` 不引用 Input System。`StandaloneInputModule` 读取自身 `BaseInput` 的鼠标或触摸状态，兼容项目设置的 `inputOverride`。其他输入模块可通过 `ModalPointerBarrier.RegisterPointerPressStateProvider` 登记包含 `PointerEventData` 的按键状态读取器；原 `RegisterPressStateProvider` 保留给不区分指针的适配器。不支持的模块返回 null 并沿用 uGUI Pointer 状态。项目应持有返回的 IDisposable，并在输入适配器停用时释放。
 
 新建或重新启用模态屏障时，uGUI 若尚未为其分配 Graphic 深度，View 会同步刷新 Canvas；若刷新后仍无有效深度、被裁剪或已关闭射线目标，页面表现提交失败并走导航失败清理。该检查不代替实际命中位置、其他 Canvas 排序或设备输入验收；刷新也会触发项目 Canvas 回调。
 
@@ -781,7 +781,7 @@ foreach (var issue in validation.Issues)
 }
 ```
 
-校验覆盖从根可达的路由键冲突、共享目标单实例约束、重复位置声明、所有权环、同层显示环及最长路径超过 64 层。问题默认最多记录 64 项，超出时 IsTruncated 为 true；IsValid 为 false 时不能把部分诊断误当作完整问题列表。RouteCount 表示本次发现的不同路由定义数量。
+校验覆盖从根可达的路由键冲突、共享目标单实例约束、同一父路由重复依赖声明及其位置/必需性冲突、所有权环、同层显示环及最长路径超过 64 层。问题默认最多记录 64 项，超出时 IsTruncated 为 true；IsValid 为 false 时不能把部分诊断误当作完整问题列表。RouteCount 表示本次发现的不同路由定义数量。
 
 Route.DependencyDescriptors 提供不含参数工厂的只读目标/位置信息。校验不会创建 VM、Presenter、绑定或 Prefab，也不会执行参数工厂；因此无法判断 `default` 与 `other` 这样的运行时参数冲突，或发现两个分别合法的根路由同时打开后才产生的共享显示冲突。运行时所有权检查仍保留。
 

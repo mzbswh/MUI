@@ -124,9 +124,12 @@ namespace MUI
                 invoke(() => presenter.ChangeViewModel(next));
                 RequireCurrent();
                 Binding = null;
-                invoke(() => Binding = bindingFactory(view, next));
-                RequireCurrent();
-                invoke(() => ViewPreparation.ValidateBinding(Binding, next));
+                invoke(() =>
+                {
+                    var candidate = bindingFactory(view, next);
+                    ViewPreparation.ValidateBinding(candidate, view, next);
+                    Binding = candidate;
+                });
                 RequireCurrent();
                 invoke(() => Binding.SetLifetimeMode(LifetimeMode.Synchronous));
                 RequireCurrent();
@@ -184,7 +187,7 @@ namespace MUI
                             try
                             {
                                 RequireCurrent(true);
-                                invoke(() => ViewPreparation.ValidateBinding(previousBinding, previous));
+                                invoke(() => ViewPreparation.ValidateBinding(previousBinding, view, previous));
                                 CompleteBinding(previousBinding, true);
                             }
                             catch (Exception failure)

@@ -214,7 +214,7 @@ public partial class ExampleViewModel : CommonViewModel
 
 ## 编译
 
-`Tools~/Build` 现有 40 个 Unity、Editor 和 Samples 离线构建项目。2026-09-28 的 38 个既有项目与生成器曾全部通过 Release 编译；此后新增 Basic Example 与可选 Input System 项目，不能沿用旧的全量通过数量。当前改动的 `MUI.UGUI` 已用 Unity 2022.3.62f3 对应程序集离线编译，零警告、零错误；610 个 C# 文件的成员布局、空白及控制流大括号检查通过。Navigation、Settings、Tabs 的既有 Play Mode 批处理演示发生在此前代码版本。详见 [实现记录](docs/IMPLEMENTATION-STATUS.md)。这些证据不代替当前版本的真实输入、渲染、平台及完整故障验收。
+`Tools~/Build` 现有 41 个 Unity、Editor 和 Samples 离线构建项目，包括独立的 Basic Example Editor 菜单项目。当前工作树使用 Unity 2022.3.62f3 对应程序集完成 41/41 个 Release 构建，611 个 C# 文件通过成员布局、空白及控制流大括号检查。上一源码快照曾核对当时 609 个 C# 源文件的实际编译覆盖；本次尚未重做逐文件覆盖核对。Navigation、Settings、Tabs 的既有 Play Mode 演示发生在此前代码版本。详见 [实现记录](docs/IMPLEMENTATION-STATUS.md)。离线检查不代替当前版本的真实输入、渲染、平台及完整故障验收。
 
 纯托管基础层：
 

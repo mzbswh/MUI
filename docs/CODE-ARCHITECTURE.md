@@ -21,6 +21,8 @@ flowchart TB
     UGUI --> Navigation
     UGUI --> Resources
     UGUI --> ChildViews
+    UGUIInputSystem["MUI.UGUI.InputSystem（可选）\n关闭手势的设备状态适配"] --> UGUI
+    UGUIInputSystem --> InputSystemPackage["Unity Input System"]
     Automation["MUI.UGUI.Automation（可选）\n本地交互、条件轮询、截图与追踪"] --> UGUI
     Automation --> Core
     Automation --> Navigation
@@ -132,6 +134,7 @@ MUI/                                  UPM 包根目录
 │   ├── Navigation/                   [已建立] Route、Navigator、结果与内部实例协调
 │   ├── ChildViews/                   [已建立] Template、Handle、Scope、Slot；独立于导航
 │   ├── Rendering/UGUI/               [已建立] View、Element、基础控件、UIHost、Prefab Provider
+│   ├── Rendering/UGUI.InputSystem/   [可选适配] InputSystemUIInputModule 指针状态；基础 UGUI 不依赖 Input System
 │   ├── Rendering/UGUI.Automation/    [可选工具] 本地交互、条件轮询、截图与追踪导出
 │   ├── Rendering/UGUI.Loading/       [可选适配] LoadingElement
 │   ├── Rendering/UGUI.Notifications/ [可选适配] NotificationElement
@@ -588,7 +591,7 @@ LayoutSizeElement 适配 UnityEngine.UI.LayoutElement 的 IgnoreLayout、最小/
 
 需要当帧读取尺寸时，可在主线程完成一组属性更新后显式调用 View.FlushLayout()。它只同步重建该 View 根节点的原生布局子树，不初始化绑定、不刷新祖先或全 Canvas、不物化屏外列表项，也不等待字体/图片加载；调用方必须先准备好会影响尺寸的数据及资源。根节点须为活动 RectTransform，CanvasGroup 隐藏不影响此条件。
 
-即时布局的线程身份由 Unity 运行时 SubsystemRegistration 与编辑器 InitializeOnLoadMethod 回调记录，不采用首次调用线程或 MonoBehaviour 字段初始化线程。FlushLayout 在存活检查和 transform 访问前检查线程，共用 Rebuild 入口也独立检查；后台调用或初始化回调尚未执行时直接拒绝，不派发任务。编辑器重载与关闭域重载后的新运行会话均重新记录线程身份；具体回调时序仍需 Unity 运行验收。
+UGUI 主线程身份由 Unity 运行时 SubsystemRegistration 与编辑器 InitializeOnLoadMethod 回调记录，并通过 `UnityMainThread.Require()` 提供给项目的界面适配器；不采用首次调用线程或 MonoBehaviour 字段初始化线程。View、Element、宿主、Prefab 提供方与即时布局在访问原生对象前检查线程；后台调用或初始化回调尚未执行时直接拒绝，不派发任务。编辑器重载与关闭域重载后的新运行会话均重新记录线程身份；具体回调时序仍需 Unity 运行验收。
 
 公共 Flush 与虚拟列表可见单元测量共用 ImmediateLayout 重入保护，拒绝 Unity 布局/图形重建期间以及框架即时刷新回调中的再次刷新；finally 解除保护，原生根被回调销毁或停用时拒绝使用本次结果。虚拟列表的测量根也必须活动。该入口无任务或等待，不形成多轮自动收敛器；祖先尺寸变化、多驱动冲突以及原生回调内部自行吞掉的异常仍需项目处理。
 
@@ -974,6 +977,8 @@ ViewInstance.Cleanup 持有独立清理令牌、CleanupCompletion 和超时标�
 ## 同步视图资源能力
 
 Resources/Views 新增独立 ISynchronousViewProvider / ISynchronousViewLease，以及复用 SynchronousResourceLease 的 SynchronousViewLease；不让同步项目必须实现异步方法。PrefabViewProvider 和 BorrowedViewProvider 同时适配旧 IViewProvider；PrefabViewFactory 返回同步持有权，旧异步资源管线仍可消费同一对象。ContentViewProvider 以底层同步释放能力为准入条件，共用挂载方法并分别使用同步/异步失败清理。
+
+ResourceLease 与 SynchronousResourceLease 接受可选的释放线程 ID；不指定时保持纯托管资源的原有行为。uGUI Prefab 工厂、内容挂载、借用子视图和资源接入示例交付的页面凭证指定所属 UI 线程，示例异步预加载凭证也指定所属线程；同步预加载凭证已有独立检查。错误线程调用在进入一次性释放状态之前被拒绝，调用者可在正确线程重试。异步清理仍依赖项目加载器在 Unity 调度上下文继续执行，不能把线程约束当成自动调度器。
 
 LoadedPrefabViewProvider 不因此获得同步释放能力：其原生销毁等待及资源引用归还顺序保持必要约束。完整同步宿主已经接入独立同步 Provider；只实现同步接口的项目应使用 `CreateSynchronous` 或 `InitializeSynchronous`。Unity 生命周期、资源后端和设备验收仍需单独完成，不能用离线编译替代运行证据。
 

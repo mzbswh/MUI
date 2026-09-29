@@ -55,7 +55,7 @@ namespace MUI.Resources
             try
             {
                 view.SetHostState(false, false);
-                return new SynchronousViewLease(view, Release);
+                return new SynchronousViewLease(view, Release, threadId);
             }
             catch
             {

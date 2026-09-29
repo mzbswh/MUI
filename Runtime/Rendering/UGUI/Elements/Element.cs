@@ -16,7 +16,14 @@ namespace MUI.UGUI
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        public bool IsAlive => this != null && !disposed;
+        public bool IsAlive
+        {
+            get
+            {
+                UnityMainThread.Require();
+                return this != null && !disposed;
+            }
+        }
 
         public string Name
         {
@@ -151,11 +158,13 @@ namespace MUI.UGUI
 
         protected void NotifyChanged([CallerMemberName] string property = null)
         {
+            UnityMainThread.Require();
             PropertyChanged?.Invoke(this, PropertyChangedEventArgsCache.Get(property));
         }
 
         public void Dispose()
         {
+            UnityMainThread.Require();
             if (disposed)
             {
                 return;

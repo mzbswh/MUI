@@ -143,7 +143,7 @@ namespace MUI
                 throw new InvalidOperationException("A synchronous view lifecycle cannot use asynchronous presenter hooks.");
             }
 
-            ViewPreparation.Begin(view, activation, requireCurrent);
+            ViewPreparation.Begin(view, activation, invoke, requireCurrent);
             if (!created)
             {
                 // 创建回调失败也需要销毁回调清理其已经建立的实例资源。
@@ -156,15 +156,19 @@ namespace MUI
                 }
             }
 
-            // 先接管工厂返回的绑定，再复核准备资格，取消路径仍能释放迟到的结果。
+            // 验证工厂结果后才接管；无效的共享上下文不能被本次失败清理解绑。
             using (var phase = trace?.Invoke(ViewPreparationStep.Binding))
             {
-                invoke(() => Binding = bindingFactory(view, model));
+                invoke(() =>
+                {
+                    var candidate = bindingFactory(view, model);
+                    ViewPreparation.ValidateBinding(candidate, view, model);
+                    Binding = candidate;
+                });
                 requireCurrent();
-                ViewPreparation.ValidateBinding(Binding, model);
-                Binding.SetLifetimeMode(activation.Mode);
+                invoke(() => Binding.SetLifetimeMode(activation.Mode));
                 requireCurrent();
-                Binding.SetCommandTarget(target);
+                invoke(() => Binding.SetCommandTarget(target));
                 requireCurrent();
                 invoke(Binding.Bind);
                 requireCurrent();

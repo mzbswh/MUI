@@ -26,6 +26,7 @@ namespace MUI.UGUI
         /// </summary>
         public bool TryRequestBack()
         {
+            UnityMainThread.Require();
             if (this == null || !isActiveAndEnabled || navigator == null || navigator.IsShutdown ||
                 shutdown != null || synchronousShuttingDown || backInputPending || lastBackInputFrame == Time.frameCount)
             {

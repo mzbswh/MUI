@@ -7,9 +7,9 @@ namespace MUI.Resources
     {
         private readonly ResourceLease<IView> lease;
 
-        public ViewLease(IView view, Func<IView, ValueTask> release)
+        public ViewLease(IView view, Func<IView, ValueTask> release, int? releaseThreadId = null)
         {
-            lease = new ResourceLease<IView>(view, release);
+            lease = new ResourceLease<IView>(view, release, releaseThreadId);
         }
 
         public IView View => lease.Asset;

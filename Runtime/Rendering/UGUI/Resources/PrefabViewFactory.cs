@@ -12,6 +12,7 @@ namespace MUI.UGUI
     {
         public static async ValueTask WaitForFailedInstanceAsync(Exception failure)
         {
+            UnityMainThread.Require();
             while (failure is SynchronousResourceLoadException rollback)
             {
                 failure = rollback.LoadError;
@@ -28,12 +29,14 @@ namespace MUI.UGUI
                 while (creation.Instance != null)
                 {
                     await Task.Yield();
+                    UnityMainThread.Require();
                 }
             }
         }
 
         public static async ValueTask WaitForReleasedInstanceAsync(GameObject instance, Exception failure)
         {
+            UnityMainThread.Require();
             if (instance != null && failure != null &&
                 (!(failure is ReleaseFailure release) || !release.DestructionRequested))
             {
@@ -44,12 +47,14 @@ namespace MUI.UGUI
             while (instance != null)
             {
                 await Task.Yield();
+                UnityMainThread.Require();
             }
         }
 
         public static SynchronousViewLease Create(GameObject prefab, Transform parent, Transform staging,
                     Action requireCurrent = null, Action<View> configureView = null)
         {
+            UnityMainThread.Require();
             GameObject instance = null;
             View view = null;
             try
@@ -96,7 +101,8 @@ namespace MUI.UGUI
                     throw new InvalidOperationException("原生激活回调改变了界面实例的有效性或挂载状态。");
                 }
                 // 独立保留原生根对象；View 组件提前销毁后仍要负责释放整个预制体实例。
-                return new SynchronousViewLease(view, released => Release(released, instance));
+                return new SynchronousViewLease(view, released => Release(released, instance),
+                    System.Threading.Thread.CurrentThread.ManagedThreadId);
             }
             catch (Exception failure)
             {

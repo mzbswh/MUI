@@ -152,6 +152,7 @@ namespace MUI.UGUI
         /// <summary>默认目录会修改原生层级，初始化期间必须拒绝回调再次进入任一初始化入口。</summary>
         private void BeginInitialization()
         {
+            UnityMainThread.Require();
             RequireInitializationCurrent();
             if (initializing)
             {
@@ -223,6 +224,7 @@ namespace MUI.UGUI
         /// <summary>启用的宿主可手动驱动请求派发和界面 Tick；自动模式下拒绝调用。</summary>
         public void AdvanceFrame(float unscaledDeltaTime)
         {
+            UnityMainThread.Require();
             if (this == null || destroyed)
             {
                 throw new ObjectDisposedException(nameof(UIHost));
@@ -277,6 +279,7 @@ namespace MUI.UGUI
 
         public ValueTask ShutdownAsync()
         {
+            UnityMainThread.Require();
             if (navigator != null && navigator.Mode == LifetimeMode.Synchronous)
             {
                 Shutdown();

@@ -314,7 +314,25 @@ namespace MUI.Navigation
                 return false;
             }
 
-            if (!entries.TryGetValue(handle, out var entry) || entry.State != ViewState.Open)
+            if (!entries.TryGetValue(handle, out var entry) || !CanBringToFront(entry))
+            {
+                return false;
+            }
+
+            entry.Order = ++order;
+            if (entry.Route.Policy.EnterHistory)
+            {
+                history.Remove(handle);
+                history.Add(handle);
+            }
+
+            RecomputePresentation();
+            return entry.State == ViewState.Open;
+        }
+
+        private bool CanBringToFront(ViewInstance entry)
+        {
+            if (entry.State != ViewState.Open)
             {
                 return false;
             }
@@ -335,15 +353,7 @@ namespace MUI.Navigation
                 }
             }
 
-            entry.Order = ++order;
-            if (entry.Route.Policy.EnterHistory)
-            {
-                history.Remove(handle);
-                history.Add(handle);
-            }
-
-            RecomputePresentation();
-            return entry.State == ViewState.Open;
+            return true;
         }
 
         public bool TryGetViewModel<TViewModel>(ViewHandle handle, out TViewModel model)

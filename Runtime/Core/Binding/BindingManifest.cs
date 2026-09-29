@@ -21,18 +21,78 @@ namespace MUI
         public BindingEntry(string source, string elementName, Type elementType, string targetProperty, BindingMode mode,
             BindingEntryKind kind, string interactableProperty, string sourcePath, int sourceLine)
         {
+            if (source == null)
+            {
+                throw new ArgumentNullException(nameof(source));
+            }
+
+            if (string.IsNullOrWhiteSpace(source))
+            {
+                throw new ArgumentException("Source property is required.", nameof(source));
+            }
+
+            if (elementName == null)
+            {
+                throw new ArgumentNullException(nameof(elementName));
+            }
+
+            if (string.IsNullOrWhiteSpace(elementName))
+            {
+                throw new ArgumentException("Element name is required.", nameof(elementName));
+            }
+
+            if (elementType == null)
+            {
+                throw new ArgumentNullException(nameof(elementType));
+            }
+
+            if (!typeof(IElement).IsAssignableFrom(elementType))
+            {
+                throw new ArgumentException("Element type must implement IElement.", nameof(elementType));
+            }
+
+            if (targetProperty == null)
+            {
+                throw new ArgumentNullException(nameof(targetProperty));
+            }
+
+            if (string.IsNullOrWhiteSpace(targetProperty))
+            {
+                throw new ArgumentException("Target property is required.", nameof(targetProperty));
+            }
+
+            if (!Enum.IsDefined(typeof(BindingMode), mode))
+            {
+                throw new ArgumentOutOfRangeException(nameof(mode));
+            }
+
+            if (!Enum.IsDefined(typeof(BindingEntryKind), kind))
+            {
+                throw new ArgumentOutOfRangeException(nameof(kind));
+            }
+
+            if (interactableProperty == null)
+            {
+                throw new ArgumentNullException(nameof(interactableProperty));
+            }
+
+            if (string.IsNullOrWhiteSpace(interactableProperty))
+            {
+                throw new ArgumentException("Command input property is required.", nameof(interactableProperty));
+            }
+
             if (sourceLine < 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(sourceLine));
             }
 
-            Source = source ?? throw new ArgumentNullException(nameof(source));
-            ElementName = elementName ?? throw new ArgumentNullException(nameof(elementName));
-            ElementType = elementType ?? throw new ArgumentNullException(nameof(elementType));
-            TargetProperty = targetProperty ?? throw new ArgumentNullException(nameof(targetProperty));
+            Source = source;
+            ElementName = elementName;
+            ElementType = elementType;
+            TargetProperty = targetProperty;
             Mode = mode;
             Kind = kind;
-            InteractableProperty = interactableProperty ?? throw new ArgumentNullException(nameof(interactableProperty));
+            InteractableProperty = interactableProperty;
             SourcePath = sourcePath;
             SourceLine = sourceLine;
         }
@@ -90,7 +150,17 @@ namespace MUI
     {
         public BindingManifest(Type viewModelType, IEnumerable<BindingEntry> entries)
         {
-            ViewModelType = viewModelType ?? throw new ArgumentNullException(nameof(viewModelType));
+            if (viewModelType == null)
+            {
+                throw new ArgumentNullException(nameof(viewModelType));
+            }
+
+            if (!typeof(ViewModel).IsAssignableFrom(viewModelType))
+            {
+                throw new ArgumentException("Manifest type must inherit ViewModel.", nameof(viewModelType));
+            }
+
+            ViewModelType = viewModelType;
             if (entries == null)
             {
                 throw new ArgumentNullException(nameof(entries));

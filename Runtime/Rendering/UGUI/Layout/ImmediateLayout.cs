@@ -1,5 +1,4 @@
 using System;
-using System.Threading;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -8,35 +7,17 @@ namespace MUI.UGUI
     /// <summary>主线程即时布局共用入口，阻止 View 与虚拟列表之间的嵌套重建。</summary>
     internal static class ImmediateLayout
     {
-        private static int mainThreadId;
         private static bool rebuilding;
 
-        // 只从 Unity 的主线程初始化回调记录身份，不能把首次调用者当成主线程。
-        // 编辑器重载入口位于 Editor 程序集，运行会话由 Unity 的运行时回调重建记录。
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        internal static void InitializeMainThread()
+        internal static void Reset()
         {
             rebuilding = false;
-            Volatile.Write(ref mainThreadId, Thread.CurrentThread.ManagedThreadId);
-        }
-
-        internal static void RequireMainThread()
-        {
-            var expectedThreadId = Volatile.Read(ref mainThreadId);
-            if (expectedThreadId == 0)
-            {
-                throw new InvalidOperationException("即时布局尚未完成 Unity 主线程初始化。");
-            }
-
-            if (Thread.CurrentThread.ManagedThreadId != expectedThreadId)
-            {
-                throw new InvalidOperationException("即时布局只能在 Unity 主线程调用。");
-            }
         }
 
         internal static void Rebuild(RectTransform root)
         {
-            RequireMainThread();
+            UnityMainThread.Require();
             if (root == null)
             {
                 throw new ArgumentNullException(nameof(root));

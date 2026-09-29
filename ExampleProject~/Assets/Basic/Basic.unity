@@ -408,6 +408,7 @@ MonoBehaviour:
   host: {fileID: 1614527429}
   pagePrefab: {fileID: 5585269923075176462, guid: e2bfbc679d5ad4db984d56f676928255, type: 3}
   reopenButton: {fileID: 1726000005}
+  reopenLabel: {fileID: 1726000009}
 --- !u!4 &609657566
 Transform:
   m_ObjectHideFlags: 0

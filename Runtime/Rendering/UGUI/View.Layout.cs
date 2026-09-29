@@ -13,7 +13,7 @@ namespace MUI.UGUI
         public void FlushLayout()
         {
             // 在存活检查和 transform 访问之前拒绝后台调用，避免触碰原生对象。
-            ImmediateLayout.RequireMainThread();
+            UnityMainThread.Require();
             RequireAlive();
             var root = transform as RectTransform;
             if (root == null)

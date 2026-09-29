@@ -3,6 +3,7 @@ using MUI.UGUI;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.Controls;
 using UnityEngine.InputSystem.UI;
 
 namespace MUI.UGUI.InputSystem
@@ -10,12 +11,13 @@ namespace MUI.UGUI.InputSystem
     internal static class InputSystemModalPointerAdapter
     {
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
-        private static void Register() => ModalPointerBarrier.RegisterPressStateProvider(Capture);
+        private static void Register() => ModalPointerBarrier.RegisterPointerPressStateProvider(Capture);
 
-        private static Func<bool> Capture(BaseInputModule module, PointerEventData.InputButton button)
+        private static Func<bool> Capture(BaseInputModule module, PointerEventData pointer, PointerEventData.InputButton button)
         {
             var input = module as InputSystemUIInputModule;
-            if (input == null)
+            var extended = pointer as ExtendedPointerEventData;
+            if (input == null || extended == null || extended.device == null)
             {
                 return null;
             }
@@ -40,7 +42,46 @@ namespace MUI.UGUI.InputSystem
             }
 
             var action = reference.action;
-            return action.IsPressed;
+            var device = extended.device;
+            if (extended.touchId != 0 && device is Touchscreen touchscreen)
+            {
+                var touchId = extended.touchId;
+                return () =>
+                {
+                    if (!touchscreen.added)
+                    {
+                        return false;
+                    }
+
+                    foreach (var touch in touchscreen.touches)
+                    {
+                        if (touch.touchId.ReadValue() == touchId)
+                        {
+                            return touch.press.isPressed;
+                        }
+                    }
+
+                    return false;
+                };
+            }
+
+            return () =>
+            {
+                if (!action.enabled || !device.added)
+                {
+                    return false;
+                }
+
+                foreach (var control in action.controls)
+                {
+                    if (ReferenceEquals(control.device, device) && control is ButtonControl press && press.isPressed)
+                    {
+                        return true;
+                    }
+                }
+
+                return false;
+            };
         }
     }
 }

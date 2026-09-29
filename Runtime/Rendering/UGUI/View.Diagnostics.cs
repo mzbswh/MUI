@@ -8,6 +8,7 @@ namespace MUI.UGUI
         /// <summary>在 Unity 主线程读取首帧资源准备账本，不启动加载、初始化或等待任务。</summary>
         public ViewResourcePreparationSnapshot CaptureResourcePreparationSnapshot(int maxEntries = 128)
         {
+            UnityMainThread.Require();
             if (maxEntries < 1 || maxEntries > 4096)
             {
                 throw new ArgumentOutOfRangeException(nameof(maxEntries));
@@ -33,6 +34,7 @@ namespace MUI.UGUI
         /// </summary>
         public ViewInputSnapshot CaptureInputSnapshot(int maxBlockerReasons = 128)
         {
+            UnityMainThread.Require();
             if (maxBlockerReasons < 1 || maxBlockerReasons > 4096)
             {
                 throw new ArgumentOutOfRangeException(nameof(maxBlockerReasons), "输入原因采集上限必须在 1 至 4096 之间。");

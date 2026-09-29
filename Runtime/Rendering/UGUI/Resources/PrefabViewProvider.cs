@@ -23,6 +23,7 @@ namespace MUI.UGUI
         public PrefabViewProvider(Transform parent, IEnumerable<KeyValuePair<ViewResource, GameObject>> prefabs,
             Action<View> configureView = null)
         {
+            UnityMainThread.Require();
             if (parent == null)
             {
                 throw new ArgumentNullException(nameof(parent));
@@ -45,9 +46,39 @@ namespace MUI.UGUI
                 this.prefabs.Add(entry.Key, entry.Value);
             }
 
-            staging = new GameObject("MUI Staging", typeof(RectTransform));
-            staging.SetActive(false);
-            staging.transform.SetParent(parent, false);
+            var createdStaging = new GameObject("MUI Staging", typeof(RectTransform));
+            try
+            {
+                createdStaging.SetActive(false);
+                if (parent == null)
+                {
+                    throw new InvalidOperationException("Prefab mounting root was destroyed while reading the catalog.");
+                }
+
+                createdStaging.transform.SetParent(parent, false);
+                if (createdStaging == null || parent == null || createdStaging.transform.parent != parent)
+                {
+                    throw new InvalidOperationException("Prefab staging root changed during provider setup.");
+                }
+
+                staging = createdStaging;
+            }
+            catch (Exception failure)
+            {
+                try
+                {
+                    if (createdStaging != null)
+                    {
+                        UnityEngine.Object.Destroy(createdStaging);
+                    }
+                }
+                catch (Exception cleanupFailure)
+                {
+                    throw new AggregateException("Prefab provider setup and staging cleanup failed.", failure, cleanupFailure);
+                }
+
+                throw;
+            }
         }
 
         public SyncCreateAvailability GetSyncAvailability(ViewResource resource)
@@ -106,6 +137,7 @@ namespace MUI.UGUI
 
         private void RequireAlive()
         {
+            UnityMainThread.Require();
             if (disposed || parent == null || staging == null)
             {
                 throw new ObjectDisposedException(nameof(PrefabViewProvider));
@@ -114,6 +146,7 @@ namespace MUI.UGUI
 
         public void Dispose()
         {
+            UnityMainThread.Require();
             if (disposed)
             {
                 return;

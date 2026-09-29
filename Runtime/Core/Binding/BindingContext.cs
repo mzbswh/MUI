@@ -27,6 +27,9 @@ namespace MUI
             get;
         }
 
+        /// <summary>本会话绑定的 View；直接继承此基类的上下文必须覆写。</summary>
+        public virtual IView BoundView => null;
+
         /// <summary>当前清理任务，可用于等待命令和订阅收尾。</summary>
         public abstract Task CleanupCompletion
         {
@@ -105,6 +108,8 @@ namespace MUI
         {
             get;
         }
+
+        public override IView BoundView => View;
 
         public TViewModel ViewModel
         {

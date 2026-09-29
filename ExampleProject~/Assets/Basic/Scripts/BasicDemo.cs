@@ -12,21 +12,24 @@ namespace MUI.BasicExample
         [SerializeField] private UIHost host = null;
         [SerializeField] private GameObject pagePrefab = null;
         [SerializeField] private UnityEngine.UI.Button reopenButton = null;
+        [SerializeField] private UnityEngine.UI.Text reopenLabel = null;
         private readonly Lifetime resultLifetime = new Lifetime(LifetimeMode.Synchronous);
         private Route<BasicPageViewModel, string, int> route;
         private bool initialized;
 
         private void Start()
         {
-            if (host == null || pagePrefab == null || reopenButton == null)
+            if (host == null || pagePrefab == null || reopenButton == null || reopenLabel == null)
             {
-                Debug.LogError("Basic Demo needs a UIHost, BasicView prefab, and reopen button.", this);
+                Debug.LogError("Basic Demo needs a UIHost, BasicView prefab, reopen button, and label.", this);
                 return;
             }
 
             reopenButton.gameObject.SetActive(false);
+            route = BasicPageViewModelRoute.Create(
+                () => new BasicPageViewModel(), _ => new BasicPagePresenter());
             var provider = new PrefabViewProvider(host.transform,
-                new[] { new KeyValuePair<ViewResource, GameObject>(new ViewResource("BasicView"), pagePrefab) });
+                new[] { new KeyValuePair<ViewResource, GameObject>(route.Resource, pagePrefab) });
             try
             {
                 host.InitializeSynchronous(provider, ownsProvider: true);
@@ -46,23 +49,40 @@ namespace MUI.BasicExample
             }
 
             initialized = true;
-            reopenButton.onClick.AddListener(OpenPage);
             try
             {
-                route = BasicPageViewModelRoute.Create(
-                    () => new BasicPageViewModel(), _ => new BasicPagePresenter());
+                reopenButton.onClick.AddListener(OpenPage);
                 OpenPage();
             }
             catch (Exception failure)
             {
+                initialized = false;
+                var cleanupErrors = new List<Exception>();
                 try
                 {
-                    host.Shutdown();
-                    initialized = false;
+                    if (reopenButton != null)
+                    {
+                        reopenButton.onClick.RemoveListener(OpenPage);
+                    }
                 }
                 catch (Exception cleanupFailure)
                 {
-                    throw new AggregateException("Basic Demo startup and cleanup failed.", failure, cleanupFailure);
+                    cleanupErrors.Add(cleanupFailure);
+                }
+
+                try
+                {
+                    host.Shutdown();
+                }
+                catch (Exception cleanupFailure)
+                {
+                    cleanupErrors.Add(cleanupFailure);
+                }
+
+                if (cleanupErrors.Count != 0)
+                {
+                    cleanupErrors.Insert(0, failure);
+                    throw new AggregateException("Basic Demo startup and cleanup failed.", cleanupErrors);
                 }
 
                 throw;
@@ -81,6 +101,7 @@ namespace MUI.BasicExample
             if (!outcome.IsSuccess)
             {
                 Debug.LogError($"Open failed: {outcome.Status} ({outcome.Rejection})", this);
+                reopenLabel.text = "Reopen";
                 reopenButton.gameObject.SetActive(true);
                 return;
             }
@@ -89,8 +110,9 @@ namespace MUI.BasicExample
             outcome.Handle.ObserveResult(resultLifetime, result =>
             {
                 Debug.Log($"Page result: {result.Status}, value={result.Value}, cleanup={result.Cleanup}", this);
-                if (initialized && host != null && !host.Navigator.IsShutdown && reopenButton != null)
+                if (initialized && host != null && !host.Navigator.IsShutdown && reopenButton != null && reopenLabel != null)
                 {
+                    reopenLabel.text = result.IsCompleted ? $"{result.Value}: Reopen" : "Reopen";
                     reopenButton.gameObject.SetActive(true);
                     var eventSystem = UnityEngine.EventSystems.EventSystem.current;
                     if (eventSystem != null && !eventSystem.alreadySelecting)
@@ -103,26 +125,45 @@ namespace MUI.BasicExample
 
         private void OnDestroy()
         {
+            var wasInitialized = initialized;
+            initialized = false;
+            var errors = new List<Exception>();
             try
             {
-                if (initialized && host != null)
+                if (wasInitialized && host != null)
                 {
                     host.Shutdown();
                 }
             }
-            finally
+            catch (Exception error)
             {
-                try
+                errors.Add(error);
+            }
+
+            try
+            {
+                if (reopenButton != null)
                 {
-                    if (reopenButton != null)
-                    {
-                        reopenButton.onClick.RemoveListener(OpenPage);
-                    }
+                    reopenButton.onClick.RemoveListener(OpenPage);
                 }
-                finally
-                {
-                    resultLifetime.Dispose();
-                }
+            }
+            catch (Exception error)
+            {
+                errors.Add(error);
+            }
+
+            try
+            {
+                resultLifetime.Dispose();
+            }
+            catch (Exception error)
+            {
+                errors.Add(error);
+            }
+
+            if (errors.Count != 0)
+            {
+                throw new AggregateException("Basic Demo cleanup failed.", errors);
             }
         }
     }

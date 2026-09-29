@@ -163,9 +163,12 @@ namespace MUI
                 invoke(() => presenter.ChangeViewModel(next));
                 RequireCurrent();
                 Binding = null;
-                invoke(() => Binding = bindingFactory(view, next));
-                RequireCurrent();
-                invoke(() => ViewPreparation.ValidateBinding(Binding, next));
+                invoke(() =>
+                {
+                    var candidate = bindingFactory(view, next);
+                    ViewPreparation.ValidateBinding(candidate, view, next);
+                    Binding = candidate;
+                });
                 RequireCurrent();
                 invoke(() => Binding.SetCommandTarget(target));
                 RequireCurrent();
@@ -237,7 +240,7 @@ namespace MUI
                             {
                                 // 调用者取消仍需恢复活动界面；已关闭/停用则只恢复引用，不再激活 UI。
                                 RequireActiveView();
-                                invoke(() => ViewPreparation.ValidateBinding(previousBinding, previous));
+                                invoke(() => ViewPreparation.ValidateBinding(previousBinding, view, previous));
                                 RequireActiveView();
                                 invoke(previousBinding.Bind);
                                 RequireActiveView();

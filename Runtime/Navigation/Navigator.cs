@@ -273,7 +273,24 @@ namespace MUI.Navigation
                 }
 
                 var instance = (ViewInstance<TViewModel, TArgs, TResult>)entry;
-                if (!route.ArgsEqual(instance.Args, args) || (assigned != null && !ReferenceEquals(instance.TypedModel, assigned)))
+                bool argsMatch;
+                using (EnterCallback(entry))
+                {
+                    argsMatch = route.ArgsEqual(instance.Args, args);
+                }
+
+                if (IsShutdown)
+                {
+                    return new OpenOutcome<TResult>(OpenStatus.HostClosed);
+                }
+
+                if (!entries.TryGetValue(entry.Handle, out var current) || !ReferenceEquals(current, entry) ||
+                    entry.State != ViewState.Open || entry.HasCloseStarted || entry.CloseRequest != null)
+                {
+                    return Reject<TResult>(OpenRejection.Busy);
+                }
+
+                if (!argsMatch || (assigned != null && !ReferenceEquals(instance.TypedModel, assigned)))
                 {
                     return Reject<TResult>(OpenRejection.ConflictingData);
                 }
@@ -282,6 +299,12 @@ namespace MUI.Navigation
                 {
                     return Reject<TResult>(OpenRejection.Busy);
                 }
+
+                if (!CanBringToFront(entry))
+                {
+                    return Reject<TResult>(OpenRejection.Busy);
+                }
+
                 ownership.AcquireExplicit(entry.Handle);
                 entry.ExplicitFocusReleased = false;
                 if (route.Policy.EnterHistory && !history.Contains(entry.Handle))

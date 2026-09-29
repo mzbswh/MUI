@@ -69,15 +69,25 @@ namespace MUI.Navigation
                         Issue(OpenRejection.ConflictingData, route, "依赖元数据缺少目标或使用无效位置。");
                         continue;
                     }
-                    if (placements.TryGetValue(target, out var placement) && placement != descriptor.Placement)
+                    if (placements.TryGetValue(target, out var placement))
                     {
-                        Issue(OpenRejection.DependencyOrderConflict, route,
-                            $"同一父路由对依赖 {target.Key} 声明了不同位置。");
-                    }
-                    if (requirements.TryGetValue(target, out var required) && required != descriptor.IsRequired)
-                    {
-                        Issue(OpenRejection.ConflictingData, route,
-                            $"同一父路由对依赖 {target.Key} 同时声明必需与可选，降级语义不明确。");
+                        if (placement != descriptor.Placement)
+                        {
+                            Issue(OpenRejection.DependencyOrderConflict, route,
+                                $"同一父路由对依赖 {target.Key} 声明了不同位置。");
+                        }
+                        if (requirements[target] != descriptor.IsRequired)
+                        {
+                            Issue(OpenRejection.ConflictingData, route,
+                                $"同一父路由对依赖 {target.Key} 同时声明必需与可选，降级语义不明确。");
+                        }
+                        if (placement == descriptor.Placement && requirements[target] == descriptor.IsRequired)
+                        {
+                            Issue(OpenRejection.ConflictingData, route,
+                                $"同一父路由重复声明了依赖 {target.Key}。");
+                        }
+
+                        continue;
                     }
                     requirements[target] = descriptor.IsRequired;
                     placements[target] = descriptor.Placement;

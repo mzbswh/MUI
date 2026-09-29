@@ -195,11 +195,12 @@ namespace MUI.Navigation
             {
                 ownership.ValidateAcquisition(parent.Handle, found.Handle, request.Placement, request.IsRequired);
                 // 比较器属于项目代码，不在字典迭代中执行，返回后再次核对实例身份。
-                if (!request.Matches(found))
+                bool matches;
+                using (EnterCallback(parent))
                 {
-                    throw new NavigationPreparationRejectedException(OpenRejection.ConflictingData,
-                        $"共享依赖 {request.Route.Key} 的参数与现有实例冲突。");
+                    matches = request.Matches(found);
                 }
+
                 parent.RequirePreparationCurrent();
                 if (!entries.TryGetValue(found.Handle, out var current) || !ReferenceEquals(current, found) ||
                     found.HasCloseStarted || found.CloseRequest != null || found.IsUpdatingArgs || found.IsRebinding ||
@@ -209,6 +210,11 @@ namespace MUI.Navigation
                 {
                     throw new NavigationPreparationRejectedException(OpenRejection.Busy,
                         $"共享依赖 {request.Route.Key} 尚未准备完成或已经退出。");
+                }
+                if (!matches)
+                {
+                    throw new NavigationPreparationRejectedException(OpenRejection.ConflictingData,
+                        $"共享依赖 {request.Route.Key} 的参数与现有实例冲突。");
                 }
                 acquired = ownership.Acquire(parent.Handle, found.Handle, request.Placement, request.IsRequired);
                 created = false;

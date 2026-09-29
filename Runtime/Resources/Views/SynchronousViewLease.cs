@@ -8,9 +8,9 @@ namespace MUI.Resources
     {
         private readonly SynchronousResourceLease<IView> lease;
 
-        public SynchronousViewLease(IView view, Action<IView> release)
+        public SynchronousViewLease(IView view, Action<IView> release, int? releaseThreadId = null)
         {
-            lease = new SynchronousResourceLease<IView>(view, release);
+            lease = new SynchronousResourceLease<IView>(view, release, releaseThreadId);
         }
 
         public IView View => lease.Asset;

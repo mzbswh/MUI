@@ -21,8 +21,20 @@ namespace MUI.UGUI
         private bool releasing;
         private bool standaloneInputFailed;
 
-        /// <summary>可选输入模块登记按键状态读取器；不支持该模块时返回 null。返回凭证用于撤销登记。</summary>
+        /// <summary>兼容不区分指针的输入适配器；多指针模块应使用包含 PointerEventData 的重载。</summary>
         public static IDisposable RegisterPressStateProvider(Func<BaseInputModule, PointerEventData.InputButton, Func<bool>> provider)
+        {
+            if (provider == null)
+            {
+                throw new ArgumentNullException(nameof(provider));
+            }
+
+            return RegisterPointerPressStateProvider((inputModule, eventData, button) => provider(inputModule, button));
+        }
+
+        /// <summary>按关闭手势的指针登记状态读取器；不支持该模块时返回 null，凭证用于撤销登记。</summary>
+        public static IDisposable RegisterPointerPressStateProvider(
+            Func<BaseInputModule, PointerEventData, PointerEventData.InputButton, Func<bool>> provider)
         {
             if (provider == null)
             {
@@ -104,7 +116,7 @@ namespace MUI.UGUI
 
                 try
                 {
-                    isPressed = provider(module, button);
+                    isPressed = provider(module, pointer, button);
                     if (isPressed != null)
                     {
                         return;
@@ -218,14 +230,14 @@ namespace MUI.UGUI
 
         private sealed class PressStateRegistration : IDisposable
         {
-            private Func<BaseInputModule, PointerEventData.InputButton, Func<bool>> provider;
+            private Func<BaseInputModule, PointerEventData, PointerEventData.InputButton, Func<bool>> provider;
 
-            public PressStateRegistration(Func<BaseInputModule, PointerEventData.InputButton, Func<bool>> provider)
+            public PressStateRegistration(Func<BaseInputModule, PointerEventData, PointerEventData.InputButton, Func<bool>> provider)
             {
                 this.provider = provider;
             }
 
-            public Func<BaseInputModule, PointerEventData.InputButton, Func<bool>> Provider => provider;
+            public Func<BaseInputModule, PointerEventData, PointerEventData.InputButton, Func<bool>> Provider => provider;
 
             public void Dispose()
             {

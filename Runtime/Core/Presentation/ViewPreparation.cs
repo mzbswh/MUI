@@ -8,20 +8,20 @@ namespace MUI
     internal static class ViewPreparation
     {
         /// <summary>先隐藏本视图，再建立本次激活的子视图所有权；外部回调后重新确认准备资格。</summary>
-        internal static void Begin(IView view, Lifetime activation, Action requireCurrent)
+        internal static void Begin(IView view, Lifetime activation, Action<Action> invoke, Action requireCurrent)
         {
             requireCurrent();
-            view.SetHostState(false, false);
+            invoke(() => view.SetHostState(false, false));
             requireCurrent();
             if (view is IChildViewHost childHost)
             {
-                childHost.BeginChildActivation(activation);
+                invoke(() => childHost.BeginChildActivation(activation));
                 requireCurrent();
             }
         }
 
-        /// <summary>绑定必须属于本实例的模型，避免显示模型与业务 Presenter 使用不同数据。</summary>
-        internal static void ValidateBinding(BindingContext binding, ViewModel model)
+        /// <summary>绑定必须属于本实例的模型和 View，且尚未开始绑定。</summary>
+        internal static void ValidateBinding(BindingContext binding, IView view, ViewModel model)
         {
             if (binding == null)
             {
@@ -31,6 +31,16 @@ namespace MUI
             if (!ReferenceEquals(binding.Model, model))
             {
                 throw new InvalidOperationException("View binding factory returned a different model.");
+            }
+
+            if (!ReferenceEquals(binding.BoundView, view))
+            {
+                throw new InvalidOperationException("View binding factory must return a context for the current view.");
+            }
+
+            if (binding.State != BindingState.Unbound)
+            {
+                throw new InvalidOperationException("View binding factory must return an unbound context.");
             }
         }
 

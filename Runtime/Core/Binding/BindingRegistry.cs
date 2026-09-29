@@ -22,6 +22,7 @@ namespace MUI
             }
         }
 
+        /// <summary>相同工厂与绑定契约可重复登记并刷新诊断位置；契约改变须先重建注册表。</summary>
         public static void Register<TViewModel>(Func<IView, TViewModel, BindingContext<TViewModel>> factory, BindingManifest manifest)
                     where TViewModel : ViewModel
         {
@@ -44,8 +45,9 @@ namespace MUI
             {
                 if (Entries.TryGetValue(typeof(TViewModel), out var existing))
                 {
-                    if (existing.Identity.Equals(factory))
+                    if (existing.Identity.Equals(factory) && SameContract(existing.Manifest, manifest))
                     {
+                        existing.Manifest = manifest;
                         return;
                     }
 
@@ -147,7 +149,30 @@ namespace MUI
             throw new InvalidOperationException($"类型 {viewModelType.FullName} 及其基类均未注册绑定工厂。");
         }
 
-        /// <summary>禁用域重载时，由宿主启动流程在进入运行模式时调用。</summary>
+        private static bool SameContract(BindingManifest left, BindingManifest right)
+        {
+            if (left.ViewModelType != right.ViewModelType || left.Entries.Count != right.Entries.Count)
+            {
+                return false;
+            }
+
+            for (var i = 0; i < left.Entries.Count; ++i)
+            {
+                var previous = left.Entries[i];
+                var current = right.Entries[i];
+                if (previous.Source != current.Source || previous.ElementName != current.ElementName ||
+                    previous.ElementType != current.ElementType || previous.TargetProperty != current.TargetProperty ||
+                    previous.Mode != current.Mode || previous.Kind != current.Kind ||
+                    previous.InteractableProperty != current.InteractableProperty)
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        /// <summary>项目重建模块注册前显式调用；清除进程级注册并使旧绑定缓存失效。</summary>
         public static void Reset()
         {
             lock (Gate)

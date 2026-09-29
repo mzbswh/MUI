@@ -37,6 +37,7 @@ namespace MUI.Samples.ResourceIntegration
             ISynchronousInstantiableResourceLoader loader, Func<ViewResource, string> resolveKey,
             int residentCapacity = 32, Action<View> configureView = null)
         {
+            UnityMainThread.Require();
             if (parent == null)
             {
                 throw new ArgumentNullException(nameof(parent));
@@ -136,7 +137,7 @@ namespace MUI.Samples.ResourceIntegration
                 entry = Acquire(resource);
                 var instance = PrefabViewFactory.Create(entry.Prefab, parent, staging.transform,
                     () => RequireCurrent(entry.Version), configureView);
-                return new SynchronousViewLease(instance.View, _ => ReleaseView(instance, entry));
+                return new SynchronousViewLease(instance.View, _ => ReleaseView(instance, entry), thread);
             }
             catch (Exception failure)
             {
@@ -338,6 +339,7 @@ namespace MUI.Samples.ResourceIntegration
 
         private void RequireThread()
         {
+            UnityMainThread.Require();
             if (Thread.CurrentThread.ManagedThreadId != thread)
             {
                 throw new InvalidOperationException("Synchronous prefab provider requires its owning Unity thread.");

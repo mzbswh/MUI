@@ -34,6 +34,7 @@ namespace MUI.Samples.ResourceIntegration
         public LoadedPrefabViewProvider(Transform parent, IResourceLoader loader, Func<ViewResource, string> resolveKey,
             int loadCapacity = 16, Action<View> configureView = null)
         {
+            UnityMainThread.Require();
             if (parent == null)
             {
                 throw new ArgumentNullException(nameof(parent));
@@ -138,7 +139,7 @@ namespace MUI.Samples.ResourceIntegration
             {
                 RequireCurrent(entry.Version);
                 ++entry.References;
-                return new ValueTask<IPreloadLease>(new PreloadLease(resource, () => ReleaseAsync(entry)));
+                return new ValueTask<IPreloadLease>(new PreloadLease(resource, () => ReleaseAsync(entry), thread));
             }
 
             RequireCapacity();
@@ -154,7 +155,7 @@ namespace MUI.Samples.ResourceIntegration
                 caller.ThrowIfCancellationRequested();
                 RequireAlive(resource);
                 RequireCurrent(entry.Version);
-                return new PreloadLease(resource, () => ReleaseAsync(entry));
+                return new PreloadLease(resource, () => ReleaseAsync(entry), thread);
             }
             catch (Exception failure)
             {
@@ -314,7 +315,7 @@ namespace MUI.Samples.ResourceIntegration
                 {
                     throw failure;
                 }
-            });
+            }, thread);
         }
 
         private async ValueTask ReleaseFailedCreationAsync(Entry entry, Exception failure)
@@ -404,6 +405,7 @@ namespace MUI.Samples.ResourceIntegration
 
         private void RequireThread()
         {
+            UnityMainThread.Require();
             if (Thread.CurrentThread.ManagedThreadId != thread)
             {
                 throw new InvalidOperationException("Prefab provider requires its owning Unity thread.");

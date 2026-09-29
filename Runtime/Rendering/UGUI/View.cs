@@ -20,7 +20,6 @@ namespace MUI.UGUI
         private bool hostInteractable;
         private bool localVisible = true;
         private bool localInteractable = true;
-        private int owningThreadId;
         private ChildViewScope childViews;
         private CancellationToken childActivationToken;
         private bool configuringCreation;
@@ -40,7 +39,14 @@ namespace MUI.UGUI
 
         public bool IsInputEnabled => !retainingVisuals && IsVisible && hostInteractable && localInteractable && (inputGate == null || inputGate.IsOpen);
 
-        public bool IsAlive => this != null && !disposed && (index == null || group != null);
+        public bool IsAlive
+        {
+            get
+            {
+                UnityMainThread.Require();
+                return this != null && !disposed && (index == null || group != null);
+            }
+        }
 
         /// <summary>子项共享此 View 的激活周期和有效渲染门控。</summary>
         public ChildViewScope ChildViews
@@ -155,19 +161,13 @@ namespace MUI.UGUI
 
         public void Initialize()
         {
-            var currentThreadId = Thread.CurrentThread.ManagedThreadId;
-            if (owningThreadId != 0 && owningThreadId != currentThreadId)
-            {
-                throw new InvalidOperationException("View must be initialized on its owning UI thread.");
-            }
-
+            UnityMainThread.Require();
             RequireAlive();
             if (index != null)
             {
                 return;
             }
 
-            owningThreadId = currentThreadId;
             if (inputGate == null)
             {
                 inputGate = new InputGate();
@@ -317,14 +317,10 @@ namespace MUI.UGUI
 
         public void Dispose()
         {
+            UnityMainThread.Require();
             if (disposed)
             {
                 return;
-            }
-
-            if (owningThreadId != 0 && owningThreadId != Thread.CurrentThread.ManagedThreadId)
-            {
-                throw new InvalidOperationException("View must be disposed on its owning UI thread.");
             }
 
             disposed = true;

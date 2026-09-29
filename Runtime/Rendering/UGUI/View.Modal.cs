@@ -41,7 +41,53 @@ namespace MUI.UGUI
                 {
                     if (barrier != null)
                     {
-                        if (HoldModalBarrier(barrier, modalClosingPointer, modalClosingModule, modalClosingButton))
+                        bool transferred;
+                        try
+                        {
+                            transferred = HoldModalBarrier(barrier, modalClosingPointer, modalClosingModule, modalClosingButton);
+                        }
+                        catch (Exception failure)
+                        {
+                            if (ReferenceEquals(modalBarrier, barrier))
+                            {
+                                modalBarrier = null;
+                            }
+
+                            Exception cleanupFailure = null;
+                            try
+                            {
+                                if (barrier != null)
+                                {
+                                    barrier.SetActive(false);
+                                }
+                            }
+                            catch (Exception error)
+                            {
+                                cleanupFailure = error;
+                            }
+
+                            try
+                            {
+                                if (barrier != null)
+                                {
+                                    Destroy(barrier);
+                                }
+                            }
+                            catch (Exception error)
+                            {
+                                cleanupFailure = cleanupFailure == null ? error :
+                                    new AggregateException(cleanupFailure, error);
+                            }
+
+                            if (cleanupFailure != null)
+                            {
+                                throw new AggregateException("Modal barrier handoff and cleanup failed.", failure, cleanupFailure);
+                            }
+
+                            throw;
+                        }
+
+                        if (transferred)
                         {
                             if (ReferenceEquals(modalBarrier, barrier))
                             {

@@ -1,0 +1,7 @@
+{
+  "name": "MUI.BasicExample.Editor",
+  "rootNamespace": "MUI.BasicExample.Editor",
+  "references": ["MUI.BasicExample"],
+  "includePlatforms": ["Editor"],
+  "autoReferenced": true
+}

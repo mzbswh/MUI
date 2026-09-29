@@ -235,6 +235,7 @@ BindingContext 必须保证：
 5. 解绑取消绑定级异步命令，清理事件及输入监听。
 6. 双向绑定有来源/等值保护，避免 Slider/InputField 反馈循环。
 7. VM 变更在主线程提交；后台结果通过调度器应用。
+8. 绑定工厂返回与本次模型及 View 同一对象关联、尚未绑定的上下文；直接继承 BindingContext 的自定义实现须报告其 BoundView。校验通过后才转交页面所有权。无效结果仍由工厂负责，页面故障清理不能解绑其他页面的上下文。
 
 生成绑定只登记真正需要读回的外部值源。参照 FUI 由 View 汇总外部 Transform 等非事件型属性，在渲染前按需同步；不能让每个 Element 注册一套全局回调。隐藏、解绑、缓存后停止轮询；Visible/KeepVisible 页面是否暂停读回由覆盖更新策略明确决定。
 
@@ -756,7 +757,7 @@ Owners 表示哪些页面需要该实例，Dependencies 表示当前页面持有
 
 RequiredBefore/AttachedAfter 是生命周期与视觉顺序信息。对于必须随父页面成功的依赖，MUI 在父提交前完成全部可失败准备，提交时再按声明顺序安排显示，避免“父已显示但必要依赖加载失败”的半成功。
 
-可选依赖声明降级策略。静态环在生成/资产校验阶段发现，动态环在打开路径检测。失败按实际取得的所有权逆序释放，不关闭原先已由别人持有的页面。
+可选依赖声明降级策略。静态环在生成/资产校验阶段发现，动态环在打开路径检测。失败按实际取得的所有权逆序释放，不关闭原先已由别人持有的页面。同一父路由对每个依赖目标只声明一次，重复声明在路由图校验时拒绝。
 
 可选声明使用 `RouteDependency<TParentArgs>.Optional(...)`，明确选择“依赖不可用时继续显示父页面”；`Required(...)` 选择“与父页面共同成功”。两者沿用强类型参数工厂、单实例及 Unit 结果约束。同一父页面不能将同一目标同时声明为必需和可选，静态校验直接报告冲突。
 
@@ -1028,7 +1029,7 @@ FUI ObservableList 提供 Add/Remove/Replace/Update 通知；MUI 沿用基本模
 
 `[ViewRoute(typeof(Args), typeof(Result))]` 为具有 ViewContract 的具体模型生成 `模型名Route.Create`。Presenter 选择优先显式 `PresenterType`，其次当前编译源码中唯一可访问的兼容 Presenter，没有候选时使用 EmptyPresenter；多个候选产生诊断。外部程序集 Presenter 需显式指定。模型工厂由项目传入；Presenter 有依赖构造参数时必须传入工厂，生成器不构建业务服务。Create 可显式覆盖 key、resource、policy、preparation 和估算保留大小以创建变体。尚未提供自动路由注册或自动命名变体。
 
-顶层 Route 使用显式工厂，省略时按路由声明的 TViewModel 精确查找注册工厂，不将基类或派生类的泛型 BindingContext 强转为路由类型。子视图默认按模型实际类型解析工厂，未注册时沿类继承链回退最近注册的基类；GetManifest 与 Create 使用相同规则。新增契约和 Reset 都更新注册代际，使旧绑定缓存失效；同一工厂的重复登记不改变代际。需要同一 VM 配多个子视图 Presenter 时使用显式 ChildViewTemplate/工厂，而不是向全局注册表覆盖一个默认项。
+顶层 Route 使用显式工厂，省略时按路由声明的 TViewModel 精确查找注册工厂，不将基类或派生类的泛型 BindingContext 强转为路由类型。子视图默认按模型实际类型解析工厂，未注册时沿类继承链回退最近注册的基类；GetManifest 与 Create 使用相同规则。新增契约和 Reset 都更新注册代际，使旧绑定缓存失效；同一工厂且绑定契约相同的重复登记不改变代际，契约冲突须先 Reset 再注册。需要同一 VM 配多个子视图 Presenter 时使用显式 ChildViewTemplate/工厂，而不是向全局注册表覆盖一个默认项。
 
 生成器必须处理跨程序集、继承、泛型/嵌套类型、null 契约和重载歧义；不支持的结构明确诊断。为 Args/Result 生成简洁入口，这是 MUI 增强，当前 FUI 仍以 object param 打开。
 

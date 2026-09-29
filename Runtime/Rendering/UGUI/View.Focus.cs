@@ -31,10 +31,12 @@ namespace MUI.UGUI
                 return;
             }
 
-            ConstrainFocus();
+            ConstrainFocusCore(true);
         }
 
-        public void ConstrainFocus()
+        public void ConstrainFocus() => ConstrainFocusCore(false);
+
+        private void ConstrainFocusCore(bool acquiringFocus)
         {
             RequireAlive();
             var system = EventSystem.current;
@@ -49,10 +51,6 @@ namespace MUI.UGUI
                 if (BelongsToView(selected))
                 {
                     previousSelection = selected;
-                }
-
-                if (selected != null)
-                {
                     system.SetSelectedGameObject(null);
                 }
 
@@ -63,6 +61,15 @@ namespace MUI.UGUI
             {
                 previousSelection = selected;
                 return;
+            }
+
+            if (!acquiringFocus && selected != null)
+            {
+                var host = GetComponentInParent<UIHost>();
+                if (host != null && !selected.transform.IsChildOf(host.transform))
+                {
+                    return;
+                }
             }
 
             GameObject candidate = CanSelect(previousSelection) ? previousSelection : null;

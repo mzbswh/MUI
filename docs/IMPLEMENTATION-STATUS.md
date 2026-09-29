@@ -6,7 +6,21 @@
 
 更新：2026-09-29。
 
-2026-09-29 基础示例工程结构：包内 `ExampleProject~` 改为模板，通过 `Tools~/create-basic-example.py` 在包目录外生成独立 Unity 2022.3.62f3 工程，避免同一场景在本地包与项目 Assets 下出现路径别名。工具只复制 Assets、Packages、ProjectSettings，使用 JSON 解析器同步改写 manifest 与锁文件中的本地包引用；已在 `/private/tmp/MUI-BasicExample-20260929-01` 生成，资源与工程设置逐目录比较一致，引用解析回当前 MUI 根目录；已有输出及包内输出均被拒绝。未启动 Unity，导入、画面与真实点击仍未验收。
+2026-09-29 uGUI 线程与释放所有权：View/Element 的存活查询、初始化、通知和释放统一先校验 Unity 回调记录的主线程，诊断快照、Prefab 工厂及提供方也在原生访问前检查。`UnityMainThread.Require()` 对项目适配器开放。同步和异步资源凭证新增可选释放线程约束，错误线程请求在所有权转移前拒绝，正确线程仍可重试；内置和示例 uGUI 页面、借用子视图及示例异步预加载凭证启用该约束。使用 Unity 2022.3.62f3 对应 uGUI、TMP、Input System 程序集顺序完成 41/41 个离线 Release 构建，零警告、零错误；611 个 C# 文件格式与大括号检查及 `git diff --check` 通过。本次未重做逐文件编译覆盖核对或启动 Unity，异步续体、回调重入和实际原生释放仍待运行验收。
+
+2026-09-29 模态退出故障清理：`View.SetModalBarrier(false)` 的关闭手势移交若抛错，立即断开半移交屏障的页面引用，并分别尝试停用与销毁；清理也失败时保留全部错误，避免同帧重试复用异常屏障。`MUI.BasicExample.Editor` 及依赖使用 Unity 2022.3.62f3 程序集离线 Release 编译零警告、零错误，611 个 C# 文件格式与大括号检查及 `git diff --check` 通过。本轮未启动 Unity，原生回调抛错和真实指针输入仍待运行验收。
+
+2026-09-29 UGUI 主线程职责：将线程身份记录与校验从即时布局工具移到 `UnityMainThread`；Unity 运行时与 Editor 初始化回调各自接线，布局类只维护重建状态。UIHost 初始化、手动帧驱动及返回输入在读取 Unity 对象或帧状态前检查线程。`MUI.Editor` 与 `MUI.BasicExample.Editor` 使用 Unity 2022.3.62f3 对应程序集离线 Release 编译，均零警告、零错误；611 个 C# 文件的格式与大括号检查、`git diff --check` 通过。未重跑全量 41 项或启动 Unity，编辑器回调顺序、真实输入和运行时故障组合仍待验收。
+
+2026-09-29 上一源码快照完整离线编译覆盖：基础示例 Editor 菜单新增独立 asmdef 与构建项目。使用匹配 Unity 2022.3.62f3 的 uGUI、TMP、Input System 程序集，顺序完成 Tools~/Build 的 41/41 个 Release 构建；将 MSBuild 实际 Compile 项与 Runtime、Editor、Samples、Basic Example、生成器目录中的 609 个 C# 源文件逐一对照，未发现漏编、重复或额外项目文件。610 个 C# 文件格式与大括号检查通过；未启动 Unity，本次离线结果不证明新的 Editor asmdef 在 Unity 中导入、基础示例物理点击或完整设计验收。
+
+2026-09-29 绑定工厂所有权校验：页面初次准备及同步/异步换绑均先确认工厂返回的上下文非空、关联当前模型与 View 且处于 Unbound，再交给本次激活清理；直接继承 BindingContext 的项目实现须覆写 BoundView，否则准备阶段拒绝接管。错误返回的其他页面上下文不会被误解绑。初次准备的 View/子视图激活与可覆写绑定配置入口统一进入宿主回调保护。绑定清单构造时拒绝空白字段、无效枚举、非 Element 类型及非 ViewModel 清单类型。Core、BasicExample、ChildViews、Navigation/Settings 示例离线编译零警告、零错误，610 个 C# 文件格式与大括号检查通过；未新增测试或启动 Unity，故障工厂回调的运行行为仍待验收。
+
+2026-09-29 基础示例独立工程导入：在正常用户授权环境中明确指定 Unity 2022.3.62f3，对 `/private/tmp/MUI-BasicExample-20260929-01` 执行一次限时批量导入，退出码 0；日志 `/private/tmp/mui-basic-import-once-20260929.log` 显示 AssetDatabase 完成初次刷新并正常退出，`MUI.BasicExample.dll`、`MUI.Navigation.dll` 和 `MUI.UGUI.dll` 均已生成，未见 C# 编译错误。复用页面和共享依赖的参数比较器现处于导航回调保护内，比较后复核实例资格；基础示例及依赖离线编译零警告、零错误，610 个 C# 文件格式检查通过。导入不证明 Play 画面、真实指针点击、结果回收或完整设计第 19/24 章验收。
+
+2026-09-29 基础示例图形启动复核：对同一独立工程明确指定 Unity 2022.3.62f3 执行一次 `unity projects open`，命令退出码为 0；等待后 `unity editors running` 仍未列出该工程，Unity Hub 项目表也没有该工程，因此没有取得 Play 会话。此返回码只证明启动请求已交给 Hub，不证明编辑器实际打开；本轮停止图形启动尝试，基础示例的 Done 点击和结果回收仍未运行验收。
+
+2026-09-29 基础示例工程结构：包内 `ExampleProject~` 改为模板，通过 `Tools~/create-basic-example.py` 在包目录外生成独立 Unity 2022.3.62f3 工程，避免同一场景在本地包与项目 Assets 下出现路径别名。工具只复制 Assets、Packages、ProjectSettings，使用 JSON 解析器同步改写 manifest 与锁文件中的本地包引用；已在 `/private/tmp/MUI-BasicExample-20260929-01` 生成，资源与工程设置逐目录比较一致，引用解析回当前 MUI 根目录；已有输出及包内输出均被拒绝。该阶段尚未启动 Unity；后续导入结果见上，画面与真实点击仍未验收。
 
 2026-09-29 宿主容量与退出所有权：UIHost 的同步/异步初始化均暴露 queueCapacity，异步初始化补充 preloadCapacity，参数先于默认目录创建校验。导航快照增加持久的 HasUnconfirmedCleanup；页面或缓存释放失败后，即使实例已移出账本且历史诊断已清空，宿主也不会据“零实例”提前释放提供方。MUI.BasicExample 及依赖用 Unity 2022.3.62f3 程序集离线编译零警告、零错误，610 个 C# 文件格式与大括号检查通过；未启动 Unity，故障路径仍待运行验收。
 

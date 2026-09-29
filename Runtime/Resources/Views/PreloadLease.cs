@@ -7,7 +7,7 @@ namespace MUI.Resources
     {
         private readonly ResourceLease<ViewResource> lease;
 
-        public PreloadLease(ViewResource resource, Func<ValueTask> release)
+        public PreloadLease(ViewResource resource, Func<ValueTask> release, int? releaseThreadId = null)
         {
             Resource = resource ?? throw new ArgumentNullException(nameof(resource));
             if (release == null)
@@ -15,7 +15,7 @@ namespace MUI.Resources
                 throw new ArgumentNullException(nameof(release));
             }
 
-            lease = new ResourceLease<ViewResource>(resource, _ => release());
+            lease = new ResourceLease<ViewResource>(resource, _ => release(), releaseThreadId);
         }
 
         public ViewResource Resource

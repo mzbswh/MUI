@@ -107,6 +107,7 @@ namespace MUI.UGUI
         /// <summary>直接停止导航、释放拥有的同步提供方并撤销平台监听。</summary>
         public void Shutdown()
         {
+            UnityMainThread.Require();
             if (navigator == null || navigator.Mode != LifetimeMode.Synchronous)
             {
                 throw new InvalidOperationException("UIHost synchronous shutdown requires synchronous initialization.");

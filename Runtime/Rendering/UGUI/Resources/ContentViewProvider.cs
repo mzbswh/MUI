@@ -21,6 +21,7 @@ namespace MUI.UGUI
 
         private ContentViewProvider(object provider, Transform parent, bool visible, bool constrainSorting)
         {
+            UnityMainThread.Require();
             this.provider = provider ?? throw new ArgumentNullException(nameof(provider));
             if (parent == null)
             {
@@ -37,6 +38,7 @@ namespace MUI.UGUI
         {
             get
             {
+                UnityMainThread.Require();
                 var version = provider is IViewContentVersion versioned ? versioned.ContentVersion : provider;
                 if (version == null || version.GetType().IsValueType)
                 {
@@ -56,6 +58,7 @@ namespace MUI.UGUI
 
         public SyncCreateAvailability GetSyncAvailability(ViewResource resource)
         {
+            UnityMainThread.Require();
             if (parent == null || !(provider is ISynchronousViewProvider synchronous))
             {
                 return SyncCreateAvailability.Unsupported;
@@ -70,6 +73,7 @@ namespace MUI.UGUI
 
         private SynchronousViewLease CreateSynchronous(ViewResource resource)
         {
+            UnityMainThread.Require();
             if (!(provider is ISynchronousViewProvider synchronous))
             {
                 throw new NotSupportedException("Content requires a provider with synchronous creation and release.");
@@ -95,7 +99,8 @@ namespace MUI.UGUI
             try
             {
                 Mount(lease.View, version, CancellationToken.None);
-                return new SynchronousViewLease(lease.View, _ => lease.Dispose());
+                return new SynchronousViewLease(lease.View, _ => lease.Dispose(),
+                    Thread.CurrentThread.ManagedThreadId);
             }
             catch (Exception failure)
             {
@@ -114,6 +119,7 @@ namespace MUI.UGUI
 
         public async ValueTask<IViewLease> CreateAsync(ViewResource resource, CancellationToken token)
         {
+            UnityMainThread.Require();
             token.ThrowIfCancellationRequested();
             if (parent == null)
             {
@@ -161,6 +167,7 @@ namespace MUI.UGUI
         /// <summary>共享挂载校验与代际复核；此方法不加载资源、不启动异步工作。</summary>
         private void Mount(IView instance, object version, CancellationToken token)
         {
+            UnityMainThread.Require();
             token.ThrowIfCancellationRequested();
             if (parent == null)
             {

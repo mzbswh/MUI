@@ -12,6 +12,7 @@
     <ProjectReference Include="MUI.Navigation.csproj" />
     <ProjectReference Include="MUI.ChildViews.csproj" />
     <Reference Include="UnityEngine.CoreModule"><HintPath>$(UnityManagedPath)/UnityEngine.CoreModule.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="UnityEngine.InputLegacyModule"><HintPath>$(UnityManagedPath)/UnityEngine.InputLegacyModule.dll</HintPath><Private>false</Private></Reference>
     <Reference Include="UnityEngine.UIModule"><HintPath>$(UnityManagedPath)/UnityEngine.UIModule.dll</HintPath><Private>false</Private></Reference>
     <Reference Include="UnityEngine.TextRenderingModule"><HintPath>$(UnityManagedPath)/UnityEngine.TextRenderingModule.dll</HintPath><Private>false</Private></Reference>
     <Reference Include="UnityEngine.UI"><HintPath>$(UnityUIAssemblyPath)</HintPath><Private>false</Private></Reference>

@@ -113,9 +113,27 @@ namespace MUI.UGUI
             {
                 snapshot = localBackHandlers.ToArray();
             }
+            List<Exception> errors = null;
             foreach (var registration in snapshot)
             {
-                registration.Dispose();
+                try
+                {
+                    registration.Dispose();
+                }
+                catch (Exception error)
+                {
+                    if (errors == null)
+                    {
+                        errors = new List<Exception>();
+                    }
+
+                    errors.Add(error);
+                }
+            }
+
+            if (errors != null)
+            {
+                throw new AggregateException("View local back cleanup failed.", errors);
             }
         }
 

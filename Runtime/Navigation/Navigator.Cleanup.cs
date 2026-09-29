@@ -9,6 +9,7 @@ namespace MUI.Navigation
     {
         private int pendingCleanupCount;
         private readonly int cleanupCapacity;
+        private bool hasUnconfirmedCleanup;
 
         /// <summary>已经超过关闭预算但仍由宿主持有资源的实例数。</summary>
         public int PendingCleanupCount

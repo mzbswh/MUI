@@ -94,7 +94,6 @@ namespace MUI.Samples.ResourceIntegration
                 throw new InvalidOperationException("Resource must be preloaded before synchronous creation.");
             }
 
-            RequireCapacity();
             return loading.Run(_ => CreateResidentView(entry));
         }
 
@@ -165,7 +164,7 @@ namespace MUI.Samples.ResourceIntegration
                 }
                 catch (Exception cleanup)
                 {
-                    throw new AggregateException(failure, cleanup);
+                    throw new ResourceLoadException(failure, Task.FromException(cleanup));
                 }
 
                 throw;
@@ -190,7 +189,7 @@ namespace MUI.Samples.ResourceIntegration
                 }
                 catch (Exception cleanup)
                 {
-                    throw new AggregateException(failure, cleanup);
+                    throw new ResourceLoadException(failure, Task.FromException(cleanup));
                 }
 
                 throw;
@@ -267,7 +266,7 @@ namespace MUI.Samples.ResourceIntegration
                         catch (Exception cleanup)
                         {
                             RecordCleanupFailure(cleanup);
-                            throw new AggregateException(failure, cleanup);
+                            throw new ResourceLoadException(failure, Task.FromException(cleanup));
                         }
                     }
 

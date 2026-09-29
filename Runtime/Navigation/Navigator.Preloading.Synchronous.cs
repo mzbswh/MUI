@@ -79,7 +79,7 @@ namespace MUI.Navigation
                 {
                     // 提供方未交出凭证且明确报告回滚失败；没有可再释放的对象，也不能归还占用。
                     reserved = false;
-                    preloadCleanupErrors.Add(failure);
+                    RecordPreloadCleanupFailure(failure);
                 }
                 try
                 {
@@ -117,7 +117,7 @@ namespace MUI.Navigation
             catch (Exception error)
             {
                 // 释放失败不重试、不返还额度；退出仍能报告原始失败。
-                preloadCleanupErrors.Add(error);
+                RecordPreloadCleanupFailure(error);
                 throw;
             }
         }

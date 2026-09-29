@@ -180,6 +180,7 @@ namespace MUI.Navigation
                 return null;
             }
 
+            hasUnconfirmedCleanup = true;
             var failure = new AggregateException("Synchronous navigation cache cleanup failed.", errors);
             if (cacheReleaseErrors.Count < terminalCapacity)
             {
@@ -296,11 +297,19 @@ namespace MUI.Navigation
                     {
                         errors.Add(result.Error);
                     }
-                    else if (result.Status == CloseStatus.Blocked)
+                    else if ((result.Status != CloseStatus.Closed && result.Status != CloseStatus.AlreadyClosed) ||
+                        result.Cleanup != CleanupStatus.Complete)
                     {
-                        errors.Add(new InvalidOperationException("View cleanup was blocked during synchronous shutdown."));
+                        errors.Add(new InvalidOperationException(
+                            $"View cleanup did not complete during synchronous shutdown: {result.Status}/{result.Cleanup}."));
                     }
                 });
+            }
+
+            if (entries.Count != 0)
+            {
+                errors.Add(new InvalidOperationException(
+                    $"Synchronous navigator shutdown retained {entries.Count} view instance(s)."));
             }
 
             try
@@ -319,12 +328,20 @@ namespace MUI.Navigation
             {
                 ClearSynchronousPreloadsCore();
             }
-            catch (Exception)
+            catch (Exception error)
             {
-                // 已记录的逐项失败在下方统一报告，避免重复计入。
+                if (!IsRecordedInactiveCleanup(error))
+                {
+                    errors.Add(error);
+                }
             }
             errors.AddRange(preloadCleanupErrors);
             preloadCleanupErrors.Clear();
+            if (omittedPreloadCleanupErrors != 0)
+            {
+                errors.Add(new InvalidOperationException($"Additional preload cleanup failures omitted: {omittedPreloadCleanupErrors}."));
+                omittedPreloadCleanupErrors = 0;
+            }
             errors.AddRange(cacheReleaseErrors);
             cacheReleaseErrors.Clear();
             if (omittedCacheReleaseErrors != 0)

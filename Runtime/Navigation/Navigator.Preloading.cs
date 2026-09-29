@@ -13,6 +13,7 @@ namespace MUI.Navigation
         private int preloadReservations;
         private readonly Lifetime preloadCleanup;
         private readonly List<Exception> preloadCleanupErrors = new List<Exception>();
+        private long omittedPreloadCleanupErrors;
         private readonly HashSet<Task> preloadClearings = new HashSet<Task>();
 
         /// <summary>容量包含准备中、驻留和待释放的持有权；清空不会提前归还容量。</summary>
@@ -128,8 +129,8 @@ namespace MUI.Navigation
                         throw new OperationCanceledException("Preload provider content changed.");
                     }
 
-                    batch.Lifetime.Own(lease);
-                    ++batch.OwnedCount;
+                    var retainedLease = lease;
+                    batch.Lifetime.OnDisposeAsync(() => ReleasePreloadLeaseAsync(retainedLease));
                     adopted = true;
                     lease = null;
                     completion.TrySetResult(new PreloadOutcome(PreloadStatus.Ready));
@@ -148,9 +149,27 @@ namespace MUI.Navigation
                         catch (Exception cleanup)
                         {
                             cleanupFailed = true;
-                            preloadCleanupErrors.Add(cleanup);
+                            RecordPreloadCleanupFailure(cleanup);
                             failure = new AggregateException("Preload and late cleanup failed.", failure, cleanup);
                         }
+                    }
+                    else if (failure is ResourceLoadException pending)
+                    {
+                        try
+                        {
+                            await pending.CleanupCompletion;
+                        }
+                        catch (Exception cleanup)
+                        {
+                            cleanupFailed = true;
+                            RecordPreloadCleanupFailure(cleanup);
+                            failure = new AggregateException("Preload and resource rollback failed.", failure, cleanup);
+                        }
+                    }
+                    else if (failure is SynchronousResourceLoadException residual)
+                    {
+                        cleanupFailed = true;
+                        RecordPreloadCleanupFailure(residual.CleanupError);
                     }
 
                     var status = cleanupFailed ? PreloadStatus.Failed : IsShutdown ? PreloadStatus.HostClosed : batch.Lifetime.IsEnded || versionChanged ? PreloadStatus.Superseded : failure is OperationCanceledException ? PreloadStatus.Cancelled : PreloadStatus.Failed;
@@ -229,7 +248,17 @@ namespace MUI.Navigation
             var previous = preloadBatch;
             preloadBatch = new PreloadBatch();
             // 在取消回调执行前登记清理，回调导致宿主退出时也不能遗漏旧批次。
-            var task = preloadCleanup.RunAsync(_ => ClearPreloadBatchAsync(previous)).AsTask();
+            Task task;
+            try
+            {
+                task = preloadCleanup.RunAsync(_ => ClearPreloadBatchAsync(previous)).AsTask();
+            }
+            catch
+            {
+                preloadBatch = previous;
+                throw;
+            }
+
             preloadClearings.Add(task);
             _ = UntrackPreloadClearAsync(task);
             return task;
@@ -260,33 +289,83 @@ namespace MUI.Navigation
                     await batch.Lifetime.DisposeAsync();
                 }
 
-                preloadReservations -= batch.OwnedCount;
-                batch.Entries.Clear();
                 return true;
             }
             catch (Exception error)
             {
                 // 释放失败的资源仍占用容量，错误在关闭时报告。
-                preloadCleanupErrors.Add(error);
+                RecordPreloadCleanupFailure(error);
                 throw;
+            }
+            finally
+            {
+                batch.Entries.Clear();
+            }
+        }
+
+        private async ValueTask ReleasePreloadLeaseAsync(IPreloadLease lease)
+        {
+            await lease.DisposeAsync();
+            --preloadReservations;
+        }
+
+        private void RecordPreloadCleanupFailure(Exception error)
+        {
+            if (preloadCleanupErrors.Count < terminalCapacity)
+            {
+                preloadCleanupErrors.Add(error);
+            }
+            else if (omittedPreloadCleanupErrors < long.MaxValue)
+            {
+                ++omittedPreloadCleanupErrors;
             }
         }
 
         private async Task FinishPreloadShutdownAsync(Task latestClear)
         {
+            var errors = new List<Exception>();
             try
             {
                 await latestClear;
             }
-            catch (Exception)
-            { /* 已计入清理错误记录。 */
+            catch (Exception error)
+            {
+                if (!IsRecordedInactiveCleanup(error))
+                {
+                    errors.Add(error);
+                }
             }
 
-            await preloadCleanup.DisposeAsync();
-            await preloadBatch.Lifetime.DisposeAsync();
-            if (preloadCleanupErrors.Count != 0)
+            try
             {
-                throw new AggregateException("Preload cleanup failed.", preloadCleanupErrors);
+                await preloadCleanup.DisposeAsync();
+            }
+            catch (Exception error)
+            {
+                errors.Add(error);
+            }
+
+            try
+            {
+                await preloadBatch.Lifetime.DisposeAsync();
+            }
+            catch (Exception error)
+            {
+                errors.Add(error);
+            }
+
+            errors.AddRange(preloadCleanupErrors);
+            preloadCleanupErrors.Clear();
+            if (omittedPreloadCleanupErrors != 0)
+            {
+                errors.Add(new InvalidOperationException(
+                    $"Additional preload cleanup failures omitted: {omittedPreloadCleanupErrors}."));
+                omittedPreloadCleanupErrors = 0;
+            }
+
+            if (errors.Count != 0)
+            {
+                throw new AggregateException("Preload cleanup failed.", errors);
             }
         }
 
@@ -309,7 +388,6 @@ namespace MUI.Navigation
         {
             public readonly Lifetime Lifetime = new Lifetime();
             public readonly Dictionary<ViewResource, TaskCompletionSource<PreloadOutcome>> Entries = new Dictionary<ViewResource, TaskCompletionSource<PreloadOutcome>>();
-            public int OwnedCount;
             public object ProviderVersion;
         }
     }

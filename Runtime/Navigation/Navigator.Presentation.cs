@@ -319,6 +319,22 @@ namespace MUI.Navigation
                 return false;
             }
 
+            var currentIndex = activeOrder.IndexOf(entry);
+            if (currentIndex < 0)
+            {
+                return false;
+            }
+
+            for (var i = currentIndex + 1; i < activeOrder.Count; ++i)
+            {
+                var above = activeOrder[i];
+                if (above.Route.Policy.Layer == entry.Route.Policy.Layer && above.Route.Policy.Modal &&
+                    (above.State == ViewState.Open || above.ExitPending))
+                {
+                    return false;
+                }
+            }
+
             entry.Order = ++order;
             if (entry.Route.Policy.EnterHistory)
             {

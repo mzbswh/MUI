@@ -22,6 +22,8 @@ await provider.DisposeAsync();
 
 projectLoader 实现 IResourceLoader，负责资源库实际下载/读取和引用释放。必须显式提供 ViewResource → 资源库键的映射，包含项目所需的版本语义，不把版本静默丢弃。Unity 2022.3 主线程/同步上下文是本适配器的运行条件。
 
+提供方在交出 Lease 前若回滚失败，使用 ResourceLoadException 携带实际清理结果（允许已完成且失败的 Task）；调用方等待 CleanupCompletion，失败时保留未归还的资源占用。普通 AggregateException 无法表达这一所有权状态。
+
 LoadedPrefabViewProvider 会复用当前已驻留资源项，在预加载和每个实例之间独立计数；最后一份持有释放时调用底层资源 Lease。没有驻留项时同步入口返回 RequiresPreload，不阻塞异步加载。异步入口加载后实例化；每个 await 后检查取消，迟到 Lease 由接收者回收。
 
 预加载期间不创建 View，只校验加载的 Prefab 含根 View。实例化使用与常驻 PrefabViewProvider 共用的 PrefabViewFactory，先隐藏初始化再挂载。释放实例先执行 View 清理和 Unity Destroy，等待 Unity 对象实际消失后再释放 Prefab 资源，避免在延迟销毁期间卸载依赖。构造失败时同样保留资源直到失败实例被销毁。
@@ -81,4 +83,4 @@ using (ISynchronousViewLease lease = synchronous.Create(resource))
 
 常驻 Prefab 的同步释放清理 View 并请求 Unity Destroy，不等待原生对象物理消失，也不卸载共享 Prefab。LoadedPrefabViewProvider 仍可能需要等待实例实际销毁后释放底层资源，所以不实现完整同步视图契约；预加载后的同步 Create 不改变这一点。
 
-这是资源层契约，不是已接通完整 UI 同步模式：Navigator 和 ChildViewScope 的完整同步关闭、绑定及 Tab 生命周期还需继续实现。ViewLease 不能代替宿主排空业务工作。纯同步宿主后续必须在激活前拒绝异步组件，而非在 Dispose 时补救。
+纯同步导航、ChildViewScope、绑定及 Tab 生命周期已有独立实现；其完整运行验收仍以实现状态文档为准。ViewLease 不能代替宿主排空业务工作。纯同步宿主在激活前拒绝异步组件，不能等到 Dispose 时再补救。

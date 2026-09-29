@@ -62,7 +62,8 @@ namespace MUI.Navigation
             return new NavigationSnapshot(Mode, IsShutdown, commitVersion,
                 !recomputingPresentation && !presentationDirty && presentationDeferrals == 0 && !IsReentrant,
                 focused, entries.Count, snapshots, history.Count, recentHistory, pending, posted.Count,
-                cachedContents.Count, retiringCachedViews, preloadReservations, pendingCleanupCount, DroppedLifecycleEventCount);
+                cachedContents.Count, retiringCachedViews, preloadReservations, pendingCleanupCount,
+                hasUnconfirmedCleanup, DroppedLifecycleEventCount);
         }
 
         /// <summary>取得仍在账本中的实例，包括准备中和等待清理的实例；终态历史不伪造活动快照。</summary>

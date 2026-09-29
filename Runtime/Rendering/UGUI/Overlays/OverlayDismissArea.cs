@@ -80,6 +80,11 @@ namespace MUI.UGUI
 
             // 背景持有本次按下事件；原生 EventSystem 会保持按下目标直至释放。
             // 不能将本次按下重新派发给正在关闭菜单下方的页面控件。
+            if (view != null)
+            {
+                view.CaptureModalPointer(eventData);
+            }
+
             eventData.Use();
             overlay.HandleOutsidePointer(eventData.position, eventData.pressEventCamera);
         }

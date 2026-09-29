@@ -20,6 +20,7 @@ namespace MUI.UGUI
         private bool hostInteractable;
         private bool localVisible = true;
         private bool localInteractable = true;
+        private int owningThreadId;
         private ChildViewScope childViews;
         private CancellationToken childActivationToken;
         private bool configuringCreation;
@@ -154,12 +155,19 @@ namespace MUI.UGUI
 
         public void Initialize()
         {
+            var currentThreadId = Thread.CurrentThread.ManagedThreadId;
+            if (owningThreadId != 0 && owningThreadId != currentThreadId)
+            {
+                throw new InvalidOperationException("View must be initialized on its owning UI thread.");
+            }
+
             RequireAlive();
             if (index != null)
             {
                 return;
             }
 
+            owningThreadId = currentThreadId;
             if (inputGate == null)
             {
                 inputGate = new InputGate();
@@ -247,6 +255,7 @@ namespace MUI.UGUI
         {
             RequireAlive();
             transform.SetAsLastSibling();
+            ModalPointerBarrier.RaiseHeldBarriers(transform.parent);
         }
 
         public void SetHostState(bool visible, bool interactable)
@@ -313,12 +322,25 @@ namespace MUI.UGUI
                 return;
             }
 
+            if (owningThreadId != 0 && owningThreadId != Thread.CurrentThread.ManagedThreadId)
+            {
+                throw new InvalidOperationException("View must be disposed on its owning UI thread.");
+            }
+
             disposed = true;
             synchronousResourceLoader = null;
             activeResourceContext = null;
             resourceLoader = null;
-            ClearLocalBackHandlers();
             var errors = new List<Exception>();
+            try
+            {
+                ClearLocalBackHandlers();
+            }
+            catch (Exception error)
+            {
+                errors.Add(error);
+            }
+
             try
             {
                 EndVisualRetention();
@@ -330,19 +352,51 @@ namespace MUI.UGUI
 
             if (inputGate != null)
             {
-                inputGate.Changed -= ApplyGates;
-                inputGate.Dispose();
+                try
+                {
+                    inputGate.Changed -= ApplyGates;
+                    inputGate.Dispose();
+                }
+                catch (Exception error)
+                {
+                    errors.Add(error);
+                }
             }
 
-            ReleaseModalBarrier();
+            try
+            {
+                ReleaseModalBarrier();
+            }
+            catch (Exception error)
+            {
+                errors.Add(error);
+            }
             if (childViews != null)
             {
-                childViews.Cancel();
-                childViews.TickActivityChanged -= NotifyChildTicks;
+                try
+                {
+                    childViews.Cancel();
+                }
+                catch (Exception error)
+                {
+                    errors.Add(error);
+                }
+                finally
+                {
+                    childViews.TickActivityChanged -= NotifyChildTicks;
+                }
             }
 
             ChildTickActivityChanged = null;
-            ApplyGates();
+            try
+            {
+                ApplyGates();
+            }
+            catch (Exception error)
+            {
+                errors.Add(error);
+            }
+
             for (var i = elements.Count - 1; i >= 0; --i)
             {
                 var element = elements[i];

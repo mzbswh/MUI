@@ -1,14 +1,16 @@
 using System;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.Events;
 using UnityEngine.UI;
 
 namespace MUI.UGUI
 {
     [DisallowMultipleComponent, RequireComponent(typeof(Button))]
-    public sealed class ButtonElement : Element
+    public sealed class ButtonElement : Element, IPointerDownHandler
     {
         private Button target;
+        private PointerEventData pressedPointer;
 
         public event Action Clicked;
 
@@ -43,6 +45,14 @@ namespace MUI.UGUI
 
         protected override AccessibilityRole DefaultAccessibilityRole => AccessibilityRole.Button;
 
+        public void OnPointerDown(PointerEventData eventData)
+        {
+            if (eventData != null && eventData.button == PointerEventData.InputButton.Left && CanReceiveInput(target))
+            {
+                pressedPointer = eventData;
+            }
+        }
+
         protected override void OnInitialize()
         {
             target = RequireComponent<Button>();
@@ -50,6 +60,15 @@ namespace MUI.UGUI
             {
                 if (CanReceiveInput(target))
                 {
+                    if (pressedPointer != null && pressedPointer.eligibleForClick && pressedPointer.pointerPress == gameObject)
+                    {
+                        var owner = GetComponentInParent<View>(true);
+                        if (owner != null)
+                        {
+                            owner.CaptureModalPointer(pressedPointer);
+                        }
+                    }
+
                     Clicked?.Invoke();
                 }
             };
@@ -61,6 +80,7 @@ namespace MUI.UGUI
                 }
 
                 Clicked = null;
+                pressedPointer = null;
             });
             target.onClick.AddListener(handler);
         }

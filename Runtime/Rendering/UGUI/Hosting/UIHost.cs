@@ -47,7 +47,9 @@ namespace MUI.UGUI
             int cleanupCapacity = 16,
             Action<View> configureDefaultView = null,
             int terminalCapacity = 256,
-            TimeSpan? terminalDuration = null)
+            TimeSpan? terminalDuration = null,
+            int queueCapacity = 64,
+            int preloadCapacity = 32)
         {
             BeginInitialization();
             try
@@ -60,6 +62,16 @@ namespace MUI.UGUI
                 if (cleanupCapacity < 1)
                 {
                     throw new ArgumentOutOfRangeException(nameof(cleanupCapacity));
+                }
+
+                if (queueCapacity < 1)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(queueCapacity));
+                }
+
+                if (preloadCapacity < 1)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(preloadCapacity));
                 }
 
                 if (terminalCapacity < 1)
@@ -112,7 +124,8 @@ namespace MUI.UGUI
                         userPreferences: userPreferences, cacheCapacity: cacheCapacity,
                         maxCachedEstimatedBytes: maxCachedEstimatedBytes,
                         cleanupCapacity: cleanupCapacity, terminalCapacity: terminalCapacity,
-                        terminalDuration: terminalDuration);
+                        terminalDuration: terminalDuration, queueCapacity: queueCapacity,
+                        preloadCapacity: preloadCapacity);
                 }
                 catch (Exception failure)
                 {
@@ -280,7 +293,6 @@ namespace MUI.UGUI
 
         private Task BeginShutdown()
         {
-            BackInputCompleted = null;
             if (shutdown != null)
             {
                 return shutdown;
@@ -292,28 +304,78 @@ namespace MUI.UGUI
             return completion.Task;
         }
 
+        private bool HasOutstandingProviderUse()
+        {
+            var snapshot = navigator.CaptureSnapshot(maxInstances: 1);
+            return snapshot.TotalInstances != 0 || snapshot.PendingRequestCount != 0 ||
+                snapshot.CachedViewCount != 0 || snapshot.RetiringCachedViewCount != 0 ||
+                snapshot.PreloadReservationCount != 0 || snapshot.PendingCleanupCount != 0 ||
+                snapshot.HasUnconfirmedCleanup;
+        }
+
         private async Task ShutdownCoreAsync(TaskCompletionSource<bool> completion)
         {
+            Task navigatorShutdown;
+            try
+            {
+                navigatorShutdown = navigator == null ? Task.CompletedTask : navigator.RequestShutdownForHost();
+            }
+            catch (Exception error)
+            {
+                if (navigator == null || !navigator.IsShutdown)
+                {
+                    shutdown = null;
+                }
+
+                completion.TrySetException(error);
+                return;
+            }
+
+            if (navigator == null || navigator.IsShutdown)
+            {
+                BackInputCompleted = null;
+            }
             var errors = new List<Exception>();
             try
             {
-                if (navigator != null)
+                await navigatorShutdown;
+            }
+            catch (Exception error)
+            {
+                if (navigator == null || !navigator.IsShutdown)
                 {
-                    await navigator.RequestShutdownForHost();
+                    shutdown = null;
+                    completion.TrySetException(error);
+                    return;
                 }
+
+                errors.Add(error);
+            }
+
+            BackInputCompleted = null;
+            var providerInUse = false;
+            try
+            {
+                providerInUse = navigator != null && HasOutstandingProviderUse();
             }
             catch (Exception error)
             {
                 errors.Add(error);
+                providerInUse = true;
+            }
+
+            if (providerInUse)
+            {
+                errors.Add(new InvalidOperationException("UIHost retained its provider because navigation still owns UI resources."));
             }
 
             try
             {
-                if (asyncOwnedProvider != null)
+                if (!providerInUse && asyncOwnedProvider != null)
                 {
                     await asyncOwnedProvider.DisposeAsync();
                 }
-                else if (ownedProvider != null)
+                else if (!providerInUse && ownedProvider != null)
                 {
                     ownedProvider.Dispose();
                 }
@@ -324,8 +386,12 @@ namespace MUI.UGUI
             }
             finally
             {
-                asyncOwnedProvider = null;
-                ownedProvider = null;
+                if (!providerInUse)
+                {
+                    asyncOwnedProvider = null;
+                    ownedProvider = null;
+                }
+
                 if (logging)
                 {
                     UnityErrorLogging.UnregisterHost();

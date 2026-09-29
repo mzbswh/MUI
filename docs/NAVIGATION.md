@@ -17,9 +17,9 @@ var registration = navigationView.RegisterLocalBack(activation, closeLocalState)
 
 子控件应向所属导航 View 显式登记，而不是向任意嵌套 View 登记后期待自动冒泡；框架不按 Transform 或子实例创建顺序猜测局部焦点优先级。组合层负责按临时内容的打开顺序登记，并传入子内容的激活 Lifetime。输入法和控件原生编辑态仍由项目输入适配优先处理。
 
-将返回按钮的 onClick 或项目输入动作的按下回调连接到 `UIHost.RequestBack()`。需要知道输入是否接纳时，在主线程调用 `TryRequestBack()`：返回 false 表示宿主不可用、同帧已接纳一次返回或上次返回尚未完成；返回 true 不代表关闭成功。通过 `BackInputCompleted` 读取 `CloseOutcome`，例如仅在 `NotFound` 时执行项目大厅或退出逻辑，`Blocked`、`Denied`、`Handled` 不应继续返回下层。
+将返回按钮的 onClick 或项目输入动作的按下回调连接到 `UIHost.RequestBack()`。需要知道输入是否接纳时，在主线程调用 `TryRequestBack()`：返回 false 表示宿主不可用、同帧已接纳一次返回或上次输入尚未结束；返回 true 不代表关闭成功。通过 `BackInputCompleted` 读取 `CloseOutcome`，例如仅在 `NotFound` 时执行项目大厅或退出逻辑，`Blocked`、`Denied`、`Handled` 不应继续返回下层。
 
-纯同步宿主直接执行 `Navigator.Back()`，完成通知也在当前调用栈发布；异步宿主执行 `BackAsync()` 并观察异常。完成通知期间仍保持输入占位，订阅者不能递归返回；退出宿主时清除订阅，不再发布迟到结果。输入去重只作用于该宿主入口，不改变直接调用 Navigator 的语义。
+纯同步宿主直接执行 `Navigator.Back()`，完成通知也在当前调用栈发布；异步宿主执行 `BackAsync()` 并观察异常。异步返回的输入占位在目标视觉退出或请求拒绝后解除，`BackInputCompleted` 仍等待完整关闭清理；同帧去重和导航重入保护继续生效。退出宿主时清除订阅，不再发布迟到结果。输入去重只作用于该宿主入口，不改变直接调用 Navigator 的语义。
 
 框架不自动轮询 Escape，也不依赖特定 Input System 包。项目先处理输入法组合、控件编辑态、子界面临时态，再把未消费的返回交给宿主。`UIHost.RequestBack`、`DialogCancelInput`、`ContextMenuItemInput` 通过 `BackInputConsumption` 共用同一 EventSystem 的帧消费标记，同帧只接纳一次。项目自定义取消适配也可在确认能够处理之后、执行回调之前调用 `TryConsume(system)`；失败则停止派发。此策略合并同帧输入，不识别跨帧按键重复，也不使任意第三方控件自动参与；输入动作仍应只在按下阶段触发。平台输入法与手柄行为尚需目标平台运行验收。
 
@@ -80,7 +80,7 @@ public sealed class InventoryPresenter :
 → OnDestroy → 实例资源清理 → ViewLease 释放
 ```
 
-当前没有进入/退出动画，所以视觉退出立即完成；不能将此误认为已实现设计中的完整转场协议。
+支持可选的帧驱动进入/退出转场。退出画面和模态屏障在动画结束或超时降级后释放，随后继续 OnCloseAsync 和资源清理；完整设备输入与转场故障组合仍待运行验收。
 
 打开准备失败且 OnOpen 已成功时执行同步 OnClose，然后清理；不执行正常关闭的异步结束钩子。OnCreate/OnOpen 自身失败依靠已登记的 Lifetime 资源与 OnDestroy 清理，避免假设未完成的初始化成功。
 
@@ -123,8 +123,8 @@ ViewLease 释放会解绑/释放控件并隐藏 GameObject，然后调用 Unity 
 ## 6. 下一阶段必须补齐
 
 - Dialog 运行验收与扩展类型、守卫超时隔离、Replace 运行验收与转场、缓存版本兼容、预算与运行验收、共享依赖与多实例溢出运行验收。
-- 完整模态输入连续性、转场、readiness、超时隔离与释放预算。
-- 具体远程资源适配、资源预算、Tab 缓存与虚拟列表；基础预加载、资源槽和子视图已实现。
+- 模态关闭手势、转场与首帧 readiness 的完整设备输入验收，以及复杂故障组合。
+- Tab 与虚拟列表的完整运行和性能验收；具体远程资源适配与资源预算由项目提供。
 - Route/Presenter 工厂生成、重绑定导航入口、完整诊断快照。显式参数更新见文末。
 - 目标平台构建、并发/失败/内存长稳验收。
 
@@ -144,17 +144,23 @@ Navigator.PreloadAsync(Route) 托管资源预加载，ClearPreloadsAsync 清理�
 
 `TakesFocus=false` 可用于不抢焦点的装饰层。焦点选择最上层、允许输入且要求焦点的页面；关闭覆盖层后重新计算门控并发送 OnRevealed。多个覆盖层按累计效果计算，移除其中一层不提前恢复仍被覆盖的页面。框架先提交内部状态，再处理门控和通知；通知内请求关闭会触发重新计算。
 
+`BringToFront(handle)` 不允许把页面移到同层、仍在渲染序列中的模态页之上，即使该模态页暂时被更高层遮住；受阻时返回 false，页面顺序和历史均保持不变。高层模态页下方的低层页面仍可在自身层级内重排；需要更高层级的界面应使用明确的 Route 层级与打开策略。
+
 ```csharp
 var dialogPolicy = new RoutePolicy(layer: 100, modal: true);
 var fullScreenPolicy = new RoutePolicy(coverage: CoveragePolicy.Hide);
 var decorationPolicy = new RoutePolicy(takesFocus: false);
 ```
 
-`Modal=true` 默认将 None 提升为 BlockInput，要求 View 实现 Core 的 `IModalView`。uGUI View 创建与页面同父级、紧邻其下的全宿主区域 Image 屏障；页面关闭或销毁时停用并释放。宿主须为 RectTransform，并具有正常 Canvas/GraphicRaycaster/EventSystem 配置；页面内部不允许 overrideSorting Canvas 绕过同级顺序。
+`Modal=true` 默认将 None 提升为 BlockInput，要求 View 实现 Core 的 `IModalView`。uGUI View 创建与页面同父级、紧邻其下的全宿主区域 Image 屏障；视觉退出后正常释放。若关闭 Pointer 尚未结束，屏障会透明保留到该次输入释放，并始终高于同宿主内的活动页面。宿主须为 RectTransform，并具有正常 Canvas/GraphicRaycaster/EventSystem 配置；页面内部不允许 overrideSorting Canvas 绕过同级顺序。
 
-Unity 示例中，新建屏障同帧立即 RaycastAll 未命中，下一帧 Canvas 更新后命中；当前同步 Open 不保证新 Graphic 已进入射线查询，完整首帧 readiness 协议仍待补齐。
+`ButtonElement` 的 Pointer 点击与 `OverlayDismissArea` 的背景按下会自动登记关闭输入。项目自定义的 Pointer 回调若会关闭模态页，应先调用所属 `View.CaptureModalPointer(eventData)`，再请求关闭。此屏障只覆盖模态页所属的宿主区域；其他 Canvas、直接读取的原始输入以及项目输入动作仍由项目适配。
 
-这是宿主区域内的 uGUI 射线屏障，不拦截项目直接读取的原始输入或其他 Canvas 的更高排序对象。尚未实现关闭手势跨帧消费、输入事件级焦点陷阱、转场期间屏障保持；局部隐藏 View 不等于关闭模态导航实例。
+使用 Input System 的项目会启用可选 `MUI.UGUI.InputSystem` 程序集，由它读取 `InputSystemUIInputModule` 对应 Click Action 的按下状态；基础 `MUI.UGUI` 不引用 Input System。`StandaloneInputModule` 读取自身 `BaseInput` 的鼠标或触摸状态，兼容项目设置的 `inputOverride`。其他输入模块可通过 `ModalPointerBarrier.RegisterPressStateProvider` 登记按键状态读取器，不支持的模块返回 null 并沿用 uGUI Pointer 状态。项目应持有返回的 IDisposable，并在输入适配器停用时释放。
+
+新建或重新启用模态屏障时，uGUI 若尚未为其分配 Graphic 深度，View 会同步刷新 Canvas；若刷新后仍无有效深度、被裁剪或已关闭射线目标，页面表现提交失败并走导航失败清理。该检查不代替实际命中位置、其他 Canvas 排序或设备输入验收；刷新也会触发项目 Canvas 回调。
+
+输入事件级焦点陷阱和物理指针、拖放、追踪设备及 IL2CPP 运行验收仍待完成；局部隐藏 View 不等于关闭模态导航实例。
 
 ## 返回行为
 
@@ -488,7 +494,7 @@ Core 的 `IVisualRetentionView` 提供 `BeginVisualRetention` / `EndVisualRetent
 
 采样异常、无法取得显示保留或超出帧预算通过 UIErrors 报告并跳过剩余动画；隐藏、结束保留和释放屏障仍分别尝试，收尾错误进入最终清理结果。必须由宿主持续驱动 Navigator.Tick；未调用 Shutdown 又停止驱动时，不承诺帧驱动动画自行结束。
 
-Navigation 原有可选 Show Enter Transition Preview 现在同时演示 0.8 秒淡入、模态覆盖和 0.4 秒淡出，取消演示时强制清理。源码及离线编译验证不等于实际视觉、焦点或输入验收。触发关闭的同一次 Pointer 手势持续消费仍未实现；非合作任务超时隔离、Tab KeepPrevious/RestorePrevious 和缓存复开也不由本次转场提供。
+Navigation 原有可选 Show Enter Transition Preview 现在同时演示 0.8 秒淡入、模态覆盖和 0.4 秒淡出，取消演示时强制清理。源码及离线编译验证不等于实际视觉、焦点或输入验收。模态关闭手势的透明屏障已接入，但真实指针验收仍待完成；非合作任务超时隔离、Tab KeepPrevious/RestorePrevious 和缓存复开也不由本次转场提供。
 
 
 ## 顶层页面关闭缓存
@@ -500,6 +506,8 @@ RoutePolicy(cacheMode: ViewCacheMode.KeepAlive) 与 Presenter 实现 IReusableVi
 Open/OpenAsync/ReplaceAsync 都可使用缓存，命中后不重复向 Provider 创建 ViewLease。同步打开仍检查 Route/Presenter 和必需子界面的同步准备能力。缓存内容的宿主回调与输入/Tick 监听重新连接到新导航实例；旧激活的绑定已释放。
 
 Navigator/UIHost.Initialize 的 cacheCapacity 默认 16，0 禁用。满时按最近使用后归还的顺序淘汰最旧停用实例：命中移出，关闭后重新放到末尾。上一批淘汰尚未结束时不再开启新批次；若目录已满，新关闭内容直接销毁。可复用目录和自动淘汰批次各不超过 cacheCapacity，清缓存会移出整个目录并与在途淘汰一起排空，因此缓存所属内容最多占用两倍数量上限；这不包含活动页面或普通关闭中的实例，也不是物理内存预算。
+
+UIHost.Initialize 与 InitializeSynchronous 均可配置 queueCapacity（默认 64）；异步入口还可配置 preloadCapacity（默认 32），同步入口保留同名参数。容量必须为正，校验发生在默认 Prefab 目录创建之前。导航快照的 HasUnconfirmedCleanup 在页面或缓存释放失败后保持为 true；宿主退出时会保留仍可能被这些内容使用的提供方，不把零活动实例误判为已完成资源归还。
 
 CachedViewCount 统计目录条目（可能包含尚未扫描移出的过期项），RetiringCachedViewCount 统计已移出但尚未释放完成的数量。ClearCacheAsync 移出整个目录，等待目录最终释放及已开始的淘汰，重复调用共享在途清理；清理期间不接收新缓存。活动页面保持活动；ShutdownAsync 等待缓存释放。清理回调不可等待自身清缓存或宿主关闭。历史清理失败最多保留 terminalCapacity 条聚合诊断，超出只累计次数；每次清理等待者仍收到本次完整异常。
 

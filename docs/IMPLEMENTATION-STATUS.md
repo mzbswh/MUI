@@ -6,6 +6,18 @@
 
 更新：2026-09-29。
 
+2026-09-29 基础示例工程结构：包内 `ExampleProject~` 改为模板，通过 `Tools~/create-basic-example.py` 在包目录外生成独立 Unity 2022.3.62f3 工程，避免同一场景在本地包与项目 Assets 下出现路径别名。工具只复制 Assets、Packages、ProjectSettings，使用 JSON 解析器同步改写 manifest 与锁文件中的本地包引用；已在 `/private/tmp/MUI-BasicExample-20260929-01` 生成，资源与工程设置逐目录比较一致，引用解析回当前 MUI 根目录；已有输出及包内输出均被拒绝。未启动 Unity，导入、画面与真实点击仍未验收。
+
+2026-09-29 宿主容量与退出所有权：UIHost 的同步/异步初始化均暴露 queueCapacity，异步初始化补充 preloadCapacity，参数先于默认目录创建校验。导航快照增加持久的 HasUnconfirmedCleanup；页面或缓存释放失败后，即使实例已移出账本且历史诊断已清空，宿主也不会据“零实例”提前释放提供方。MUI.BasicExample 及依赖用 Unity 2022.3.62f3 程序集离线编译零警告、零错误，610 个 C# 文件格式与大括号检查通过；未启动 Unity，故障路径仍待运行验收。
+
+2026-09-29 示例提供方契约复核：LoadedPrefabViewProvider 在交付 Lease 前清理失败时，改用 ResourceLoadException 携带已失败的回滚结果，供导航保留预加载容量或等待创建回滚；已驻留 Prefab 的同步创建不再被异步加载额度拒绝。资源接入示例及依赖使用 Unity 2022.3.62f3 程序集离线编译零警告、零错误，610 个 C# 文件格式与大括号检查通过；未启动 Unity，故障注入与真实资源库行为仍未运行验收。
+
+2026-09-29 预加载所有权复核：异步批次逐份 Lease 成功释放后才归还容量；未取得 Lease 但提供方报告后台回滚时，导航等待回滚完成，回滚失败或同步残留均保留容量并报告。同步/异步预加载的历史清理错误按终态容量保留并统计省略数；宿主退出即使一段预加载清理失败仍尝试其余批次。`MUI.BasicExample` 及依赖离线编译零警告、零错误，610 个 C# 文件格式检查与 `git diff --check` 通过；未启动 Unity，故障组合与真实场景退出仍待运行验收。
+
+2026-09-29 模态首帧射线准备：对照当前 Unity 2022.3.62f3 随附 uGUI 源码，GraphicRaycaster 会跳过深度为 -1 或被裁剪的 Graphic。新建或重新启用模态屏障后，View 在尚无深度且非 Canvas 重建期间调用 ForceUpdateCanvases；刷新后仍无有效深度、被裁剪或失去射线目标则报告表现失败。直接销毁 View 时也会移交已登记的关闭手势；可选输入状态提供方返回可释放的登记凭证，避免场景级适配长期持有项目对象。MUI.BasicExample、MUI.UGUI.InputSystem 及依赖离线编译零警告、零错误，610 个 C# 文件格式、大括号和 diff 检查通过；未启动 Unity，首帧真实射线、设备手势和 Canvas 回调重入仍需运行验收。
+
+2026-09-29 宿主失败清理复核：基础示例在宿主初始化成功后，若路由创建或首次打开抛错，立即关闭已接管提供方的宿主；若关闭也失败，聚合保留两项错误。异步 UIHost 只有在导航退出请求成功启动后才清除返回订阅并继续释放提供方；启动前被拒绝时保留提供方，导航仍运行时允许在 UI 线程重试。使用 Unity 2022.3.62f3 程序集离线编译 MUI.BasicExample 及依赖，零警告、零错误；610 个 C# 文件格式和大括号检查、`git diff --check` 通过。本轮没有启动 Unity；这些检查不证明真实输入和运行时故障组合。
+
 2026-09-29 基础示例工程交互编辑器复验：从 `ExampleProject~` 作为工作目录直接启动指定的 Unity 2022.3.62f3 后，内置 Shader 编译错误和整窗洋红消失。通过系统文件对话框选择场景时，Unity 将同一物理文件映射为 `Packages/com.mzbswh.mui/ExampleProject~/Assets/Basic/Basic.unity`，实际载入空场景；示例工程新增 `MUI > Basic Example > Open Scene` 菜单，以 `Assets/Basic/Basic.unity` 打开后，Hierarchy 出现 Main Camera、UI Host、Basic Demo 与 EventSystem，Play 中显示绑定后的标题和 Done 按钮，Console 为 0 错误、0 警告。桌面工具的坐标点击未触发 Done，故页面结果、清理与真实指针输入仍未验收。此轮没有新增测试、没有提交。
 
 2026-09-29 基础示例可见性修复：静态复核 `ExampleProject~/Assets/Basic/Basic.unity` 时发现根 Canvas/UI Host 的 RectTransform.localScale 为 `(0,0,0)`，会把所有子界面缩成零；已恢复为 `(1,1,1)`，场景和 Prefab 中不再有零缩放节点。`MUI.BasicExample` 连同生成器及依赖按 Unity 2022.3.62f3 匹配程序集完成 Release 离线编译，零警告、零错误，`git diff --check` 通过。打开工程时 Unity 弹出新版软件条款窗口，尚未由用户本人处理，因此本次仍未进入 Play、确认画面或物理点击；此前的导入与 GUID 核对不能当作视觉验收。
@@ -816,6 +828,12 @@
 | 设置页示例 | 程序化 UI、滑条双向绑定、异步 Save、同步 Reset、编辑器启动入口和自动演示 | Unity Play mode：50% → 80% → Saved 80% → Reset 50%；这是自动演示，未进行人工鼠标/键盘验收 |
 
 ## 待收尾与待验收
+
+2026-09-29 模态输入静态复核：`BringToFront` 现在仅阻止越过同层模态页，高层模态下方的低层页面可在本层重排。透明关闭屏障在读取按键状态前，先核对输入模块、指针 ID 和按钮，避免复用事件对象后误把下一次输入当成原关闭手势；`StandaloneInputModule` 读取其实际 `BaseInput` 鼠标/触摸状态，包括项目 `inputOverride`，其他不支持的输入保留 Pointer 状态回退。可选 Input System 适配器在场景加载前登记。当前 `MUI.UGUI`、`MUI.UGUI.InputSystem` 和 `MUI.BasicExample` 使用 Unity 2022.3.62f3 与现有 Input System 1.14.2 程序集完成 Release 离线编译，均零警告、零错误；610 个 C# 文件格式检查及 `git diff --check` 通过。没有启动 Unity，真实指针行为与可选程序集导入仍未运行验收。
+
+2026-09-29 模态置前约束：`Navigator.BringToFront` 在修改 Order 或历史前检查当前渲染序列，拒绝越过同层 Open/退出中的模态页，包括暂被更高层隐藏的模态页，避免同层下层页重新获得输入。基础示例及依赖的离线编译通过；模态叠加与关闭交错下的原生焦点仍待 Unity 运行验收。
+
+2026-09-29 模态关闭手势：uGUI 模态屏障在视觉退出后对正在结束的关闭 Pointer 转为透明，保持在同一宿主区域的活动页面之上；旧输入模块按原生 Pointer 状态、可选 `MUI.UGUI.InputSystem` 适配程序集按 Click Action 的按下状态，在手势结束、模块切换或失焦后释放。基础 UGUI 不引用 Input System；ButtonElement 点击和 OverlayDismissArea 按下自动登记，项目自定义 Pointer 回调在请求关闭前调用 `View.CaptureModalPointer(eventData)`。基础示例与可选适配器分别离线编译、全仓格式门禁通过；真实鼠标、触摸、拖放、追踪设备和 IL2CPP 的逐模块运行行为仍待验收，不能将源码检查记为完整输入协议通过。
 
 2026-09-29 返回输入收尾修复：异步 UIHost 的返回输入锁现在随目标视觉退出解除；守卫拒绝或无目标时随请求完成解除，完整关闭结果仍在清理结束后通过 BackInputCompleted 发布。Unity 2022.3 对应程序集离线编译、全仓格式门禁与 `git diff --check` 通过；没有启动编辑器，慢速 OnCloseAsync 下的连续物理返回输入仍待运行验收。模态 Pointer 关闭手势持续消费是独立缺口，本次未据此宣称完成。
 

@@ -21,7 +21,8 @@ namespace MUI.UGUI
             int preloadCapacity = 32,
             Action<View> configureDefaultView = null,
             int terminalCapacity = 256,
-            TimeSpan? terminalDuration = null)
+            TimeSpan? terminalDuration = null,
+            int queueCapacity = 64)
         {
             BeginInitialization();
             try
@@ -35,6 +36,11 @@ namespace MUI.UGUI
                 if (preloadCapacity < 1)
                 {
                     throw new ArgumentOutOfRangeException(nameof(preloadCapacity));
+                }
+
+                if (queueCapacity < 1)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(queueCapacity));
                 }
 
                 if (terminalCapacity < 1)
@@ -76,7 +82,7 @@ namespace MUI.UGUI
                     navigator = Navigator.CreateSynchronous(provider, userPreferences: userPreferences,
                         cacheCapacity: cacheCapacity, maxCachedEstimatedBytes: maxCachedEstimatedBytes,
                         preloadCapacity: preloadCapacity, terminalCapacity: terminalCapacity,
-                        terminalDuration: terminalDuration);
+                        terminalDuration: terminalDuration, queueCapacity: queueCapacity);
                 }
                 catch (Exception failure)
                 {
@@ -136,9 +142,25 @@ namespace MUI.UGUI
             }
 
             BackInputCompleted = null;
+            var providerInUse = false;
             try
             {
-                if (ownedProvider != null)
+                providerInUse = HasOutstandingProviderUse();
+            }
+            catch (Exception error)
+            {
+                errors.Add(error);
+                providerInUse = true;
+            }
+
+            if (providerInUse)
+            {
+                errors.Add(new InvalidOperationException("UIHost retained its provider because navigation still owns UI resources."));
+            }
+
+            try
+            {
+                if (!providerInUse && ownedProvider != null)
                 {
                     ownedProvider.Dispose();
                 }
@@ -149,7 +171,11 @@ namespace MUI.UGUI
             }
             finally
             {
-                ownedProvider = null;
+                if (!providerInUse)
+                {
+                    ownedProvider = null;
+                }
+
                 if (logging)
                 {
                     UnityErrorLogging.UnregisterHost();

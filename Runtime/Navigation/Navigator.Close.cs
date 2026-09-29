@@ -274,6 +274,10 @@ namespace MUI.Navigation
             }
 
             instance.CompletedCloseOutcome = result;
+            if (result.Cleanup == CleanupStatus.Failed || result.Cleanup == CleanupStatus.Pending)
+            {
+                hasUnconfirmedCleanup = true;
+            }
             ownership.Remove(instance.Handle);
             entries.Remove(instance.Handle);
             RememberTerminal(instance.Handle, result);
@@ -351,49 +355,114 @@ namespace MUI.Navigation
 
             var completion = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
             shutdownTask = completion.Task;
+            _ = ObserveShutdownCoreAsync(completion);
+            return completion.Task;
+        }
+
+        private async Task ObserveShutdownCoreAsync(TaskCompletionSource<bool> completion)
+        {
+            try
+            {
+                await ShutdownCoreAsync(completion);
+            }
+            catch (Exception failure)
+            {
+                if (!IsShutdown)
+                {
+                    shutdownTask = null;
+                }
+
+                completion.TrySetException(failure);
+            }
+        }
+
+        private void BeginShutdownClosures(Dictionary<ViewHandle, Task<CloseOutcome>> closing,
+            List<Exception> errors, bool activeOnly)
+        {
+            foreach (var entry in entries.Values.ToArray())
+            {
+                if ((activeOnly && entry.State != ViewState.Open && entry.State != ViewState.Closing) ||
+                    closing.ContainsKey(entry.Handle))
+                {
+                    continue;
+                }
+
+                try
+                {
+                    closing.Add(entry.Handle, BeginCloseForCleanup(entry, DismissReason.HostShutdown));
+                }
+                catch (Exception failure)
+                {
+                    errors.Add(failure);
+                }
+            }
+        }
+
+        private async Task ShutdownCoreAsync(TaskCompletionSource<bool> completion)
+        {
+            var errors = new List<Exception>();
             try
             {
                 shutdown.Cancel(throwOnFirstException: false);
             }
             catch (Exception failure)
             {
+                errors.Add(failure);
                 UIErrors.Report(failure);
             }
 
             posted.Clear();
-            var preloadClearing = StartPreloadClear();
-            // 立即使活动 UI 失效，即使准备中的提供方尚未返回。
-            var activeCleanup = entries.Values.Where(entry => entry.State == ViewState.Open || entry.State == ViewState.Closing).ToArray().Select(entry => BeginCloseForCleanup(entry, DismissReason.HostShutdown)).ToArray();
-            _ = ShutdownCoreAsync(completion, activeCleanup, preloadClearing);
-            return completion.Task;
-        }
+            var preloadClearing = Task.CompletedTask;
+            try
+            {
+                preloadClearing = StartPreloadClear();
+            }
+            catch (Exception failure)
+            {
+                errors.Add(failure);
+            }
 
-        private async Task ShutdownCoreAsync(TaskCompletionSource<bool> completion, Task<CloseOutcome>[] activeCleanup, Task preloadClearing)
-        {
-            var errors = new List<Exception>();
+            // 先使活动 UI 失效，等待在途请求后再收拢剩余候选。
+            var closing = new Dictionary<ViewHandle, Task<CloseOutcome>>();
+            BeginShutdownClosures(closing, errors, activeOnly: true);
             try
             {
                 // 请求等待确认期间可以释放队列许可，因此队列可用
                 // 不代表候选准备或其回滚已经结束。
                 await WaitForNavigationRequestsAsync();
-                var closing = new HashSet<Task<CloseOutcome>>(activeCleanup);
-                foreach (var entry in entries.Values.ToArray())
-                {
-                    closing.Add(BeginCloseForCleanup(entry, DismissReason.HostShutdown));
-                }
+            }
+            catch (Exception failure)
+            {
+                errors.Add(failure);
+            }
 
-                foreach (var operation in closing)
+            BeginShutdownClosures(closing, errors, activeOnly: false);
+            foreach (var operation in closing.Values)
+            {
+                try
                 {
                     var result = await operation;
                     if (result.Error != null)
                     {
                         errors.Add(result.Error);
                     }
+                    else if ((result.Status != CloseStatus.Closed && result.Status != CloseStatus.AlreadyClosed) ||
+                        result.Cleanup != CleanupStatus.Complete)
+                    {
+                        errors.Add(new InvalidOperationException(
+                            $"View cleanup did not complete during navigator shutdown: {result.Status}/{result.Cleanup}."));
+                    }
+                }
+                catch (Exception failure)
+                {
+                    errors.Add(failure);
                 }
             }
-            catch (Exception failure)
+
+            if (entries.Count != 0)
             {
-                errors.Add(failure);
+                errors.Add(new InvalidOperationException(
+                    $"Navigator shutdown retained {entries.Count} view instance(s)."));
             }
 
             try

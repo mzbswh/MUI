@@ -9,7 +9,8 @@ namespace MUI.Navigation
         internal NavigationSnapshot(LifetimeMode mode, bool shutdown, long version, bool presentationSettled,
                     ViewHandle focused, int totalInstances, ViewInstanceSnapshot[] instances, int historyCount,
                     ViewHandle[] history, int pendingRequests, int postedRequests, int cachedViews,
-                    int retiringCachedViews, int preloadReservations, int pendingCleanup, long droppedEvents)
+                    int retiringCachedViews, int preloadReservations, int pendingCleanup,
+                    bool hasUnconfirmedCleanup, long droppedEvents)
         {
             Mode = mode;
             IsShutdown = shutdown;
@@ -26,6 +27,7 @@ namespace MUI.Navigation
             RetiringCachedViewCount = retiringCachedViews;
             PreloadReservationCount = preloadReservations;
             PendingCleanupCount = pendingCleanup;
+            HasUnconfirmedCleanup = hasUnconfirmedCleanup;
             DroppedLifecycleEventCount = droppedEvents;
         }
 
@@ -108,6 +110,12 @@ namespace MUI.Navigation
 
         /// <summary>已超出关闭预算但尚未完成物理清理的实例数，不包含所有正常关闭中的实例。</summary>
         public int PendingCleanupCount
+        {
+            get;
+        }
+
+        /// <summary>页面或缓存清理曾失败，不能据此确认其所有资源均已归还。</summary>
+        public bool HasUnconfirmedCleanup
         {
             get;
         }

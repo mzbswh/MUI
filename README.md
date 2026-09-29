@@ -37,7 +37,7 @@ Core、Resources、Navigation、ChildViews、Tabs 不依赖 UnityEngine 或第�
 
 ## 接入与验收工程
 
-仓库内的 [Basic Example](ExampleProject~/README.md) 是可直接打开的 Unity 2022.3.62f3 工程，包含真实 uGUI Prefab、场景、生成绑定与纯同步类型化导航。包通过相对路径接入，不依赖临时验收目录；按工程 README 在 Play Mode 中点击 Confirm 可看到结果和清理状态。
+仓库内的 [Basic Example](ExampleProject~/README.md) 是 Unity 2022.3.62f3 工程模板，包含真实 uGUI Prefab、场景、生成绑定与纯同步类型化导航。运行 `python3 Tools~/create-basic-example.py /private/tmp/MUI-BasicExample`，再打开生成的独立工程；工具按输出位置更新本地包引用。按工程 README 在 Play Mode 中点击 Done 可看到结果和清理状态，关闭后可通过场景按钮再次打开。
 
 本仓库是 UPM 包，完整 Unity 工程由接入项目提供。独立验收时使用 Unity Hub 创建的 Unity 2022.3.62f3 工程，通过 Package Manager 添加本地 `package.json`，并从包的 Samples 区域完整导入所需示例。标准导入目录为 `Assets/Samples/MUI/0.1.0`，不要只复制入口脚本或引用另一个项目的 `Library/PackageCache`；uGUI 使用正常的 `com.unity.ugui: 1.0.0` 包依赖。
 
@@ -214,7 +214,7 @@ public partial class ExampleViewModel : CommonViewModel
 
 ## 编译
 
-`Tools~/Build` 现有 38 个 Unity、Editor 和 Samples 离线构建项目；连同 1 个生成器项目，2026-09-28 当前工作树共 39/39 个项目通过 Unity 2022.3.62f3 对应的 Release 编译，零警告、零错误。604 个 C# 文件的成员布局、空白及控制流大括号检查通过；全包 746 份元数据的 GUID 格式、唯一性及资产对应关系检查通过，Runtime/Editor/Samples 的 C# 和 asmdef 均有元数据，38 个 asmdef 内部引用及无环检查通过。独立 Unity 2022.3.62f3 项目的 Navigation、Settings、Tabs 既有 Play Mode 批处理演示通过。详见 [实现记录](docs/IMPLEMENTATION-STATUS.md)。这些证据不代替真实输入、渲染、平台及完整故障验收，后续修改仍需按影响范围验证。
+`Tools~/Build` 现有 40 个 Unity、Editor 和 Samples 离线构建项目。2026-09-28 的 38 个既有项目与生成器曾全部通过 Release 编译；此后新增 Basic Example 与可选 Input System 项目，不能沿用旧的全量通过数量。当前改动的 `MUI.UGUI` 已用 Unity 2022.3.62f3 对应程序集离线编译，零警告、零错误；610 个 C# 文件的成员布局、空白及控制流大括号检查通过。Navigation、Settings、Tabs 的既有 Play Mode 批处理演示发生在此前代码版本。详见 [实现记录](docs/IMPLEMENTATION-STATUS.md)。这些证据不代替当前版本的真实输入、渲染、平台及完整故障验收。
 
 纯托管基础层：
 
@@ -232,6 +232,8 @@ Generator 工程需要 Roslyn 4.3 的 NuGet 包；基础层不依赖第三方 Nu
 
 
 Loading 与 Notifications 的显示控件分别位于 `MUI.UGUI.Loading` / `MUI.UGUI.Notifications`，项目 asmdef 使用时请显式引用；基础 UGUI 不依赖这两个可选模块。对应 Editor 校验通过独立扩展程序集注册。源码仍包含在同一 UPM 包内。
+
+`MUI.UGUI.InputSystem` 使用 asmdef 版本约束，在安装 Unity Input System 的项目中提供模态关闭手势的类型化按键状态适配；未安装时该可选程序集不参与编译，基础 UGUI 仍可使用 `StandaloneInputModule`。实际 Unity 导入与物理输入行为仍待验收。
 
 主题绑定工具独立为 `MUI.UGUI.Themes` / `MUI.TMP.Themes`；调用 ThemeBindings、PreferenceBindings 或 TMPPreferenceBindings 时请补充对应 asmdef 引用。基础 UGUI/TMP 控件不依赖主题服务。详见 [主题接入](docs/THEMES.md)。
 

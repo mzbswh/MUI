@@ -36,6 +36,7 @@ namespace MUI.UGUI
         public static IDisposable RegisterPointerPressStateProvider(
             Func<BaseInputModule, PointerEventData, PointerEventData.InputButton, Func<bool>> provider)
         {
+            UnityMainThread.Require();
             if (provider == null)
             {
                 throw new ArgumentNullException(nameof(provider));
@@ -241,6 +242,7 @@ namespace MUI.UGUI
 
             public void Dispose()
             {
+                UnityMainThread.Require();
                 if (provider == null)
                 {
                     return;

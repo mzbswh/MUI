@@ -16,6 +16,7 @@ namespace MUI.UGUI
         /// <summary>在确认本入口能够处理后、执行外部回调前消费；false 表示本帧已经有入口接纳。</summary>
         public static bool TryConsume(EventSystem system = null)
         {
+            UnityMainThread.Require();
             if (system == null)
             {
                 system = EventSystem.current;

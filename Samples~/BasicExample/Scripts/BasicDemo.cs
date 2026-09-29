@@ -26,6 +26,7 @@ namespace MUI.BasicExample
             }
 
             reopenButton.gameObject.SetActive(false);
+            Generated.BasicBindings.Initialize();
             route = BasicPageViewModelRoute.Create(
                 () => new BasicPageViewModel(), _ => new BasicPagePresenter());
             var provider = new PrefabViewProvider(host.transform,

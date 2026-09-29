@@ -10,7 +10,7 @@ import tempfile
 
 
 PACKAGE_NAME = "com.mzbswh.mui"
-PROJECT_DIRECTORIES = ("Assets", "Packages", "ProjectSettings")
+PROJECT_DIRECTORIES = ("Packages", "ProjectSettings")
 
 
 def write_json(path, document):
@@ -24,6 +24,7 @@ def main():
 
     package_root = Path(__file__).resolve().parent.parent
     template = package_root / "ExampleProject~"
+    sample = package_root / "Samples~/BasicExample"
     output = args.output.expanduser().resolve()
     if output == package_root or package_root in output.parents or output in package_root.parents:
         parser.error("The output must be outside the MUI package directory.")
@@ -38,6 +39,10 @@ def main():
     try:
         for name in PROJECT_DIRECTORIES:
             shutil.copytree(template / name, staging / name)
+        assets = staging / "Assets"
+        assets.mkdir()
+        shutil.copytree(sample, assets / "Basic")
+        shutil.copy2(sample.with_suffix(".meta"), assets / "Basic.meta")
 
         manifest_path = staging / "Packages/manifest.json"
         manifest = json.loads(manifest_path.read_text(encoding="utf-8"))

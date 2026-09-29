@@ -37,8 +37,7 @@ def main():
 
     sources = sorted(
         path.relative_to(root).as_posix()
-        for folder in ("Runtime", "Editor", "Samples~", "ExampleProject~/Assets/Basic/Scripts",
-                       "ExampleProject~/Assets/Basic/Editor",
+        for folder in ("Runtime", "Editor", "Samples~",
                        "Generators~", "Tools~/CodeStyle")
         for path in (root / folder).rglob("*.cs")
         if not {"bin", "obj"}.intersection(path.relative_to(root).parts)

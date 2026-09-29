@@ -1,7 +1,13 @@
 {
   "name": "MUI.BasicExample.Editor",
   "rootNamespace": "MUI.BasicExample.Editor",
-  "references": ["MUI.BasicExample"],
+  "references": [
+    "MUI.BasicExample",
+    "MUI.Core",
+    "MUI.Navigation",
+    "MUI.Resources",
+    "MUI.Editor"
+  ],
   "includePlatforms": ["Editor"],
   "autoReferenced": true
 }

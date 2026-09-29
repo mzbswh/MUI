@@ -16,7 +16,7 @@ internal static class Program
         var changed = 0;
         var conflicts = 0;
         var braceViolations = 0;
-        foreach (var folder in new[] { "Runtime", "Editor", "Samples~", "ExampleProject~/Assets/Basic/Scripts", "ExampleProject~/Assets/Basic/Editor", "Generators~", "Tools~/CodeStyle" })
+        foreach (var folder in new[] { "Runtime", "Editor", "Samples~", "Generators~", "Tools~/CodeStyle" })
         {
             foreach (var file in Directory.EnumerateFiles(Path.Combine(root, folder), "*.cs", SearchOption.AllDirectories))
             {

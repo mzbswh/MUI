@@ -280,13 +280,18 @@ namespace MUI.UGUI
         public ValueTask ShutdownAsync()
         {
             UnityMainThread.Require();
-            if (navigator != null && navigator.Mode == LifetimeMode.Synchronous)
+            if (navigator == null)
+            {
+                throw new InvalidOperationException("UIHost shutdown requires initialization.");
+            }
+
+            if (navigator.Mode == LifetimeMode.Synchronous)
             {
                 Shutdown();
                 return default;
             }
 
-            if (navigator != null && !navigator.CanAwaitShutdown)
+            if (!navigator.CanAwaitShutdown)
             {
                 return new ValueTask(Task.FromException(new InvalidOperationException("A lifecycle hook or command cannot await its own UIHost shutdown.")));
             }

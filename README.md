@@ -37,7 +37,7 @@ Core、Resources、Navigation、ChildViews、Tabs 不依赖 UnityEngine 或第�
 
 ## 接入与验收工程
 
-仓库内的 [Basic Example](ExampleProject~/README.md) 是 Unity 2022.3.62f3 工程模板，包含真实 uGUI Prefab、场景、生成绑定与纯同步类型化导航。运行 `python3 Tools~/create-basic-example.py /private/tmp/MUI-BasicExample`，再打开生成的独立工程；工具按输出位置更新本地包引用。按工程 README 在 Play Mode 中点击 Done 可看到结果和清理状态，关闭后可通过场景按钮再次打开。
+基础验收使用 [Basic Example](Samples~/BasicExample/README.md)：在桌面创建空 Unity 2022.3.62f3 工程，通过 Package Manager 从本仓库的 `package.json` 添加本地包，再在该包的 Samples 区域导入 **Basic Example**。打开导入的 `Basic.unity`，进入 Play Mode，点击 Done 验证结果 `42` 和重新打开。`ExampleProject~` 仍提供从同一份 Sample 生成独立工程的备用工具，但不作为基础验收入口。
 
 本仓库是 UPM 包，完整 Unity 工程由接入项目提供。独立验收时使用 Unity Hub 创建的 Unity 2022.3.62f3 工程，通过 Package Manager 添加本地 `package.json`，并从包的 Samples 区域完整导入所需示例。标准导入目录为 `Assets/Samples/MUI/0.1.0`，不要只复制入口脚本或引用另一个项目的 `Library/PackageCache`；uGUI 使用正常的 `com.unity.ugui: 1.0.0` 包依赖。
 
@@ -214,7 +214,7 @@ public partial class ExampleViewModel : CommonViewModel
 
 ## 编译
 
-`Tools~/Build` 现有 41 个 Unity、Editor 和 Samples 离线构建项目，包括独立的 Basic Example Editor 菜单项目。当前工作树使用 Unity 2022.3.62f3 对应程序集完成 41/41 个 Release 构建，611 个 C# 文件通过成员布局、空白及控制流大括号检查。上一源码快照曾核对当时 609 个 C# 源文件的实际编译覆盖；本次尚未重做逐文件覆盖核对。Navigation、Settings、Tabs 的既有 Play Mode 演示发生在此前代码版本。详见 [实现记录](docs/IMPLEMENTATION-STATUS.md)。离线检查不代替当前版本的真实输入、渲染、平台及完整故障验收。
+`Tools~/Build` 现有 41 个 Unity、Editor 和 Samples 离线构建项目，包括独立的 Basic Example Editor 构建项目。上一源码快照使用 Unity 2022.3.62f3 对应程序集完成 41/41 个 Release 构建，均零警告、零错误；Basic Example 迁入包 Sample 后，其 Editor 及依赖重新编译通过，613 个 C# 文件通过成员布局、空白及控制流大括号检查。较早快照曾核对当时 609 个 C# 源文件的实际编译覆盖；当前尚未重做逐文件覆盖核对。桌面空工程的本地包安装、Basic Example 导入、构建目录校验及 Button 事件触发的结果/重新打开已在 Unity 2022.3.62f3 实际运行。详见 [实现记录](docs/IMPLEMENTATION-STATUS.md)。这些检查不代替真实鼠标、渲染、平台及完整故障验收。
 
 纯托管基础层：
 

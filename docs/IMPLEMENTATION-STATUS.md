@@ -6,6 +6,10 @@
 
 更新：2026-09-29。
 
+2026-09-29 桌面空工程的 UPM 示例验收：基础示例迁入 `Samples~/BasicExample` 并列入 `package.json`，场景菜单与构建目录按资产 GUID 定位导入后的路径；备用独立工程生成工具也复用此目录。在 `/Users/mzbswh/Desktop/MUI-Package-Validation` 使用 Unity 2022.3.62f3 的空 2D 工程，以 Package Manager Client.Add 安装本地 MUI，随后以 Sample.Import 导入 Basic Example。导入文件与包内示例逐文件一致；编辑器编译无 C# 错误，实际打开导入的 `Basic.unity` 后构建校验为目录 1、页面 1、路由 1，零问题。批处理 Play Mode 通过原生 Button.onClick 触发 Done，结果为 Completed(42)、cleanup=Complete，重新打开产生新页面；退出 Play 时该页 Dismissed 且 cleanup=Complete。日志为 `/private/tmp/mui-desktop-package-install.log`、`/private/tmp/mui-desktop-sample-import.log`、`/private/tmp/mui-desktop-sample-verify.log` 与 `/private/tmp/mui-desktop-basic-play.log`。一次性 Editor 验证脚本已从桌面工程移至 `/private/tmp/MUI-Package-Validation-bootstrap-Editor-20260929`。这不证明实际鼠标/键盘、图形渲染、其他平台或完整第 19/24 章故障组合。迁移后的基础示例及 Editor 依赖离线 Release 编译零警告、零错误，613 个 C# 文件格式与大括号检查、`git diff --check` 通过。
+
+2026-09-29 基础示例与输入入口复核：基础 Prefab 显式将 Confirm Button 设为默认焦点；`UIHost.ShutdownAsync()` 在未初始化时直接拒绝，避免创建永久阻断后续初始化的关闭任务。返回输入消费与模态指针状态提供方注册/撤销在修改主线程共享状态前校验线程。使用 Unity 2022.3.62f3 对应程序集完成当前代码 41/41 个离线 Release 构建，均零警告、零错误；611 个 C# 文件格式与大括号检查、`git diff --check` 通过。观察到的 Unity 软件条款窗口属于 6000.5.5f1；示例和独立验收工程均指定 2022.3.62f3。本轮未接受条款、启动编辑器或进行 Play 验收，逐文件编译覆盖核对也尚未重做。
+
 2026-09-29 uGUI 线程与释放所有权：View/Element 的存活查询、初始化、通知和释放统一先校验 Unity 回调记录的主线程，诊断快照、Prefab 工厂及提供方也在原生访问前检查。`UnityMainThread.Require()` 对项目适配器开放。同步和异步资源凭证新增可选释放线程约束，错误线程请求在所有权转移前拒绝，正确线程仍可重试；内置和示例 uGUI 页面、借用子视图及示例异步预加载凭证启用该约束。使用 Unity 2022.3.62f3 对应 uGUI、TMP、Input System 程序集顺序完成 41/41 个离线 Release 构建，零警告、零错误；611 个 C# 文件格式与大括号检查及 `git diff --check` 通过。本次未重做逐文件编译覆盖核对或启动 Unity，异步续体、回调重入和实际原生释放仍待运行验收。
 
 2026-09-29 模态退出故障清理：`View.SetModalBarrier(false)` 的关闭手势移交若抛错，立即断开半移交屏障的页面引用，并分别尝试停用与销毁；清理也失败时保留全部错误，避免同帧重试复用异常屏障。`MUI.BasicExample.Editor` 及依赖使用 Unity 2022.3.62f3 程序集离线 Release 编译零警告、零错误，611 个 C# 文件格式与大括号检查及 `git diff --check` 通过。本轮未启动 Unity，原生回调抛错和真实指针输入仍待运行验收。
@@ -842,6 +846,8 @@
 | 设置页示例 | 程序化 UI、滑条双向绑定、异步 Save、同步 Reset、编辑器启动入口和自动演示 | Unity Play mode：50% → 80% → Saved 80% → Reset 50%；这是自动演示，未进行人工鼠标/键盘验收 |
 
 ## 待收尾与待验收
+
+2026-09-29 基础示例接线与构建校验：示例程序集声明 `ViewModule` 并在 UIHost 初始化前显式调用生成的 `BasicBindings.Initialize()`；示例 Editor 程序集登记实际使用的单页 Route、Prefab 和生成 Manifest，供菜单和 Player 构建前处理器共用。新增的 Editor 直接程序集引用同时写入 asmdef 与离线构建项目。使用 Unity 2022.3.62f3 对应程序集重编译 `MUI.BasicExample.Editor` 及其依赖，零警告、零错误；生成注册入口名称得到编译确认。613 个 C# 文件的格式与大括号检查及 `git diff --check` 通过。没有启动 Unity；菜单实际校验、Prefab 导入、Done 指针点击和结果回收仍待当前源码版本的运行验收。本次未新增测试或提交。
 
 2026-09-29 模态输入静态复核：`BringToFront` 现在仅阻止越过同层模态页，高层模态下方的低层页面可在本层重排。透明关闭屏障在读取按键状态前，先核对输入模块、指针 ID 和按钮，避免复用事件对象后误把下一次输入当成原关闭手势；`StandaloneInputModule` 读取其实际 `BaseInput` 鼠标/触摸状态，包括项目 `inputOverride`，其他不支持的输入保留 Pointer 状态回退。可选 Input System 适配器在场景加载前登记。当前 `MUI.UGUI`、`MUI.UGUI.InputSystem` 和 `MUI.BasicExample` 使用 Unity 2022.3.62f3 与现有 Input System 1.14.2 程序集完成 Release 离线编译，均零警告、零错误；610 个 C# 文件格式检查及 `git diff --check` 通过。没有启动 Unity，真实指针行为与可选程序集导入仍未运行验收。
 

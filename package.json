@@ -16,6 +16,11 @@
   },
   "samples": [
     {
+      "displayName": "Basic Example",
+      "description": "Prefab、生成绑定和纯同步类型化导航的最小可运行场景。",
+      "path": "Samples~/BasicExample"
+    },
+    {
       "displayName": "Resource Integration",
       "description": "项目资源后端接入示例；运行 Navigation 示例前导入。不是框架资源管理实现。",
       "path": "Samples~/ResourceIntegration"

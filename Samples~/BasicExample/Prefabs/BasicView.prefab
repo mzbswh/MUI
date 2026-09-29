@@ -287,7 +287,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   enterFadeDuration: 0
   exitFadeDuration: 0
-  defaultSelection: {fileID: 0}
+  defaultSelection: {fileID: 7029357596051137938}
   modalBarrierColor: {r: 0, g: 0, b: 0, a: 0.45}
   inheritParentResources: 1
   waitForResourceSources: 0

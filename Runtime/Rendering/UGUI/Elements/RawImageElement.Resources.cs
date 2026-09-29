@@ -152,7 +152,17 @@ namespace MUI.UGUI
                 return;
             }
 
-            textureResources.AssignNative(() => target.texture = texture);
+            textureResources.AssignNative(() => target.texture = texture,
+                () =>
+                {
+                    if (!clearing || target == null || !ReferenceEquals(target.texture, null))
+                    {
+                        return false;
+                    }
+
+                    target.canvasRenderer.Clear();
+                    return true;
+                });
             textureResources.CommitSource(clearing);
             if (IsAlive)
             {

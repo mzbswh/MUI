@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "com.mzbswh.mui": "file:../../"
+  }
+}

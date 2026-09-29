@@ -68,6 +68,11 @@ namespace MUI.UGUI
                 return;
             }
 
+            StartAsynchronousRefresh();
+        }
+
+        private void StartAsynchronousRefresh()
+        {
             var completion = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
             synchronousRefresh = false;
             var refreshTask = completion.Task;
@@ -236,34 +241,29 @@ namespace MUI.UGUI
                 throw new InvalidOperationException("Viewport exceeds the configured virtual list cell capacity.");
             }
 
-            var desired = snapshot.GetRange(start, end - start);
-            var desiredTemplates = new Dictionary<object, string>();
-            foreach (var item in desired)
-            {
-                desiredTemplates.Add(item.Key, item.TemplateKey);
-            }
-
             if (!IsRefreshCurrent(revision, activation))
             {
                 InvalidateAbandonedRefreshRange(activation);
                 yield break;
             }
 
-            var draining = new List<CellPreparation>();
-            foreach (var cell in cells.ToArray())
+            var draining = activation.Mode == LifetimeMode.Synchronous ? null : new List<CellPreparation>();
+            for (var cellIndex = 0; cellIndex < cells.Count; ++cellIndex)
             {
+                var cell = cells[cellIndex];
                 if (cell.Key == null)
                 {
                     continue;
                 }
 
-                var retained = desiredTemplates.TryGetValue(cell.Key, out var templateKey) &&
-                    string.Equals(templateKey, cell.TemplateKey, StringComparison.Ordinal);
+                var found = keyIndices.TryGetValue(cell.Key, out var itemIndex);
                 if (!IsRefreshCurrent(revision, activation))
                 {
                     break;
                 }
 
+                var retained = found && itemIndex >= start && itemIndex < end &&
+                    string.Equals(snapshot[itemIndex].TemplateKey, cell.TemplateKey, StringComparison.Ordinal);
                 if (!retained)
                 {
                     cell.Root.gameObject.SetActive(false);
@@ -279,7 +279,11 @@ namespace MUI.UGUI
                         yield break;
                     }
 
-                    draining.Add(new CellPreparation(cell.Element, activation.Mode));
+                    if (draining != null)
+                    {
+                        draining.Add(new CellPreparation(cell.Element, activation.Mode));
+                    }
+
                     cell.Key = null;
                     if (!IsRefreshCurrent(revision, activation))
                     {
@@ -288,7 +292,7 @@ namespace MUI.UGUI
                 }
             }
 
-            if (draining.Count != 0)
+            if (draining != null && draining.Count != 0)
             {
                 yield return draining.ToArray();
             }
@@ -299,10 +303,10 @@ namespace MUI.UGUI
                 yield break;
             }
 
-            var preparedCell = new CellPreparation[1];
-            for (var i = 0; i < desired.Count; i++)
+            var preparedCell = activation.Mode == LifetimeMode.Synchronous ? null : new CellPreparation[1];
+            for (var i = start; i < end; i++)
             {
-                var item = desired[i];
+                var item = snapshot[i];
                 var cell = FindReusableCell(item, revision, activation);
                 if (!IsRefreshCurrent(revision, activation))
                 {
@@ -337,10 +341,10 @@ namespace MUI.UGUI
                 }
 
                 cell.Key = item.Key;
-                var column = (start + i) % columns;
+                var column = i % columns;
                 cell.Root.anchorMin = new Vector2(column / (float)columns, 1);
                 cell.Root.anchorMax = new Vector2((column + 1) / (float)columns, 1);
-                cell.Root.anchoredPosition = new Vector2(0, -Layout.OffsetForIndex(start + i));
+                cell.Root.anchoredPosition = new Vector2(0, -Layout.OffsetForIndex(i));
                 cell.Root.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, EffectiveHeight(item));
                 // 原生尺寸回调可以同步换来源或关闭父级，旧快照不得继续启动业务绑定。
                 if (!IsRefreshCurrent(revision, activation))
@@ -356,8 +360,12 @@ namespace MUI.UGUI
                     yield break;
                 }
 
-                preparedCell[0] = new CellPreparation(cell.Element, activation.Mode);
-                yield return preparedCell;
+                if (preparedCell != null)
+                {
+                    preparedCell[0] = new CellPreparation(cell.Element, activation.Mode);
+                    yield return preparedCell;
+                }
+
                 if (!IsRefreshCurrent(revision, activation))
                 {
                     InvalidateAbandonedRefreshRange(activation);

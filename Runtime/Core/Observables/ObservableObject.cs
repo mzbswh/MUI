@@ -36,7 +36,7 @@ namespace MUI
                 return;
             }
 
-            var args = new PropertyChangedEventArgs(propertyName);
+            var args = PropertyChangedEventArgsCache.Get(propertyName);
             foreach (PropertyChangedEventHandler handler in handlers.GetInvocationList())
             {
                 try
@@ -58,7 +58,7 @@ namespace MUI
                 return;
             }
 
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            PropertyChanged?.Invoke(this, PropertyChangedEventArgsCache.Get(propertyName));
         }
     }
 }

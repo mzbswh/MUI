@@ -27,7 +27,8 @@ namespace MUI.Navigation
 
         /// <summary>直接结束激活并归还内容；同步缓存接管由调用方显式提供，不进入异步缓存队列。</summary>
         internal override CloseOutcome Release(DismissReason reason, bool wasCommitted,
-            IReadOnlyList<Exception> initialErrors, Func<ViewContent, bool> retainContent = null)
+            IReadOnlyList<Exception> initialErrors, Func<ViewContent, bool> retainContent = null,
+            Func<IViewResourceReleaseTraceScope> beginResourceRelease = null)
         {
             if (System.Threading.Thread.CurrentThread.ManagedThreadId != threadId)
             {
@@ -96,7 +97,7 @@ namespace MUI.Navigation
 
                     if (!retained)
                     {
-                        content.Release(errors);
+                        content.Release(errors, beginResourceRelease);
                     }
 
                     content = null;

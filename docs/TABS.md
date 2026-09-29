@@ -52,7 +52,7 @@ Snapshot 原子包含 SelectedTab、DisplayedTab、Phase、Error、RequestVersio
 
 相同 Loading Tab 共用工作，重复调用者的取消只返回 WaitCancelled。相同 Ready Tab 直接返回 Ready；Error 状态需 RetryAsync 或 forceReload=true。未知或禁用 Tab 返回 Rejected，不改变当前选择或取消有效请求。可用性在选择时重新验证，也可调用 RefreshAvailability 刷新按钮；当前刷新不会自动移除已显示内容。
 
-新选择淘汰旧请求，旧结果 Superseded。父关闭返回 ParentInactive 并发布 Inactive；调用者取消当前操作返回 Cancelled，内容为空且保留最后选择键。加载失败发布 Error，Retry 使用新版本重试。同一控制器的准备回调、状态通知、当前子命令中同步重入选择被明确拒绝，避免状态提交和自身回收等待冲突；TabBar 的独立按钮请求不受此限制。
+新选择淘汰旧请求，旧结果 Superseded。父关闭返回 ParentInactive 并发布 Inactive；调用者在提交前取消已受理的选择时返回 Cancelled。仍有稳定旧内容时重新建立其激活，并将 SelectedTab/DisplayedTab 一起恢复为旧键；否则清空两个键并进入 Empty。恢复失败时发布 Error，结果附恢复错误，且不递归恢复。取消不触发 SelectionFailed；恢复后 Cancelled 也不代表内容为空。恢复令牌独立于已取消目标的令牌，但仍归父激活所有，并由后续选择撤销；恢复期间的加载提示使用有效恢复令牌，迟到计时器不修改新状态。加载失败发布 Error，Retry 使用新版本重试。同一控制器的准备回调、状态通知、当前子命令中同步重入选择被明确拒绝，避免状态提交和自身回收等待冲突；TabBar 的独立按钮请求不受此限制。
 
 容量沿用 ChildViewSlot 的一个在途准备/回收加一个最新待启动请求。不合作 I/O 可以拖延新内容准备和物理清理，但不会无限创建更多候选。选择结果与物理清理完成不同；最终 Dispose 会等待清理并汇总错误。
 
@@ -95,6 +95,8 @@ new TabContentDefinition("edit", "Edit", prepare,
 当前默认允许确认期间原内容继续运行；项目确认窗口决定是否屏蔽输入。没有强制终止不合作的守卫：其取消结果及时返回，但物理清理仍等待回调收敛。DialogService 的串行确认服务已经提供，Tab 与确认服务的组合仍需完整运行验收。
 
 ## 验证范围
+
+2026-09-28：Unity 2022.3.62f3 附带 Mono 的不落盘内存探针验证了取消后原凭证恢复、无旧页清空选择、恢复失败、恢复中选择 C、父关闭、重复等待取消、恢复延迟提示及失败恢复中取消。取消恢复没有重新申请旧页凭证，最终父清理恰好归还一次；恢复失败保留父清理错误。受影响工程 Release 编译和全仓格式检查通过，独立 Unity 项目的既有 Tabs Play Mode 批处理演示退出码 0。这些证据覆盖托管协议与现有默认演示，不代替取消恢复的原生输入、冻结画面或布局验收。
 
 导入 Tabs 示例，通过 Tools → MUI → Samples → Open Tabs Scene 启动。Inventory 正常加载，Quests 第一次模拟失败，再点击 Retry 成功；Locked 不可选。开启 BlankWhileLoading 可体验加载留空。
 

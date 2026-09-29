@@ -46,6 +46,8 @@ activation.Token.ThrowIfCancellationRequested();
 - 停止显示前保持当前持有权，解除原生引用后归还。
 - 原生赋值结果不确定时保留可能仍被使用的凭证并报告失败，避免提前卸载。
 
+Sprite、Texture 和 uGUI Font 清空时，若原生脏标记回调在引用更新后抛错，适配器会确认该控件已不再引用资源，并清空 CanvasRenderer，随后报告回调错误并归还凭证。无法确认显示引用已解除时继续保留凭证和清理失败诊断。Material 的原生 getter 可能回退到默认材质，因此不能用返回值为 null 判断清空成功；该路径仍保守保留凭证。
+
 业务不需要了解槽、请求代际或冻结状态。特殊控件通过 Source 配置接口接入，或自行将资源持有权交给 Lifetime。
 
 ## 字体与材质

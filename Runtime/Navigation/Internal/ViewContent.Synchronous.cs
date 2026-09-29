@@ -29,10 +29,12 @@ namespace MUI.Navigation
             }
         }
 
-        internal override void ReleaseCached(List<Exception> errors) => Release(errors);
+        internal override void ReleaseCached(List<Exception> errors,
+            Func<IViewResourceReleaseTraceScope> beginResourceRelease = null) => Release(errors, beginResourceRelease);
 
         /// <summary>调用前结束激活；同步执行销毁、实例释放、宿主退订和视图归还。</summary>
-        internal void Release(List<Exception> errors, params Action[] detachHost)
+        internal void Release(List<Exception> errors,
+            Func<IViewResourceReleaseTraceScope> beginResourceRelease = null, params Action[] detachHost)
         {
             if (errors == null)
             {
@@ -49,7 +51,16 @@ namespace MUI.Navigation
                 Lifecycle.Destroy(errors);
             }
 
-            ViewInstanceCleanup.Run(instance, synchronousLease, errors, detachHost);
+            ViewInstanceCleanup.Run(instance, null, errors, detachHost);
+            if (synchronousLease != null)
+            {
+                using (var phase = beginResourceRelease == null ? null : beginResourceRelease())
+                {
+                    var before = errors.Count;
+                    ViewInstanceCleanup.ReleaseViewResource(synchronousLease, errors);
+                    FinishResourceReleaseTrace(phase, errors, before);
+                }
+            }
             synchronousLease = null;
             View = null;
             Lifecycle = null;

@@ -9,6 +9,8 @@ namespace MUI.Navigation
         private readonly Dictionary<ViewInstance, ExitFrame> exiting = new Dictionary<ViewInstance, ExitFrame>();
         private readonly List<ExitFrame> exitSnapshot = new List<ExitFrame>();
 
+        private event Action<ViewHandle> visualExitCompleted;
+
         private Task StartExit(ViewInstance instance, bool eligible, List<Exception> errors)
         {
             if (!eligible || IsShutdown || !(instance.View is IExitTransitionView transition) ||
@@ -234,6 +236,7 @@ namespace MUI.Navigation
                 }
             });
             Attempt(RecomputePresentation);
+            visualExitCompleted?.Invoke(instance.Handle);
         }
 
         private sealed class ExitFrame

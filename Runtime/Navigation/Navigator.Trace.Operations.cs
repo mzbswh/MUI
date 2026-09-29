@@ -9,8 +9,16 @@ namespace MUI.Navigation
     {
         private AsyncLocal<NavigationTraceOperation> activeTraceOperation;
 
-        private NavigationTraceOperation CurrentTraceOperation => activeTraceOperation == null
-            ? default : activeTraceOperation.Value;
+        private NavigationTraceOperation CurrentTraceOperation
+        {
+            get
+            {
+                var operation = activeTraceOperation == null ? default : activeTraceOperation.Value;
+                return traceRecording && operation.Id != 0 &&
+                    ReferenceEquals(operation.Session, traceSession) && !operation.IsFinished
+                    ? operation : default;
+            }
+        }
 
         private TraceOperationScope EnterOperationTrace(NavigationTraceOperation operation)
         {
@@ -43,6 +51,10 @@ namespace MUI.Navigation
                 {
                     FinishOperationTrace(trace, trace.Source, "抛出异常", error);
                 }
+                else
+                {
+                    trace.MarkFinished();
+                }
                 throw;
             }
         }
@@ -63,7 +75,12 @@ namespace MUI.Navigation
         private void FinishOperationTrace(NavigationTraceOperation operation, ViewHandle handle, string outcome, Exception error, ViewHandle related = default)
         {
             // 停止或重新开始后，旧在途请求的完成不能污染新一轮时间线。
-            if (operation.Id == 0 || !traceRecording || !ReferenceEquals(operation.Session, traceSession))
+            if (operation.Id == 0 || operation.IsFinished)
+            {
+                return;
+            }
+            operation.MarkFinished();
+            if (!traceRecording || !ReferenceEquals(operation.Session, traceSession))
             {
                 return;
             }
@@ -74,7 +91,15 @@ namespace MUI.Navigation
         /// <summary>只保存本次追踪的标识和字符串，不持有路由、参数或项目对象。</summary>
         private readonly struct NavigationTraceOperation
         {
+            private readonly TraceOperationCompletion completion;
+
             internal NavigationTraceOperation(object session, long id, string name, string key, long timestamp, ViewHandle source)
+                : this(session, id, name, key, timestamp, source, new TraceOperationCompletion())
+            {
+            }
+
+            private NavigationTraceOperation(object session, long id, string name, string key, long timestamp,
+                ViewHandle source, TraceOperationCompletion completion)
             {
                 Session = session;
                 Id = id;
@@ -82,7 +107,10 @@ namespace MUI.Navigation
                 Key = key;
                 Timestamp = timestamp;
                 Source = source;
+                this.completion = completion;
             }
+
+            internal bool IsFinished => completion == null || completion.Finished;
 
             internal ViewHandle Source
             {
@@ -113,6 +141,16 @@ namespace MUI.Navigation
             {
                 get;
             }
+
+            internal void MarkFinished() => completion.Finished = true;
+
+            internal NavigationTraceOperation WithTarget(string key, ViewHandle source) =>
+                new NavigationTraceOperation(Session, Id, Name, key, Timestamp, source, completion);
+        }
+
+        private sealed class TraceOperationCompletion
+        {
+            internal volatile bool Finished;
         }
 
         private readonly struct TraceOperationScope : IDisposable

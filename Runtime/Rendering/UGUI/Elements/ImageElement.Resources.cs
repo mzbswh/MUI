@@ -158,7 +158,18 @@ namespace MUI.UGUI
                 return;
             }
 
-            spriteResources.AssignNative(() => target.sprite = sprite);
+            spriteResources.AssignNative(() => target.sprite = sprite,
+                () =>
+                {
+                    if (!clearing || target == null || !ReferenceEquals(target.sprite, null) ||
+                        !ReferenceEquals(target.overrideSprite, null))
+                    {
+                        return false;
+                    }
+
+                    target.canvasRenderer.Clear();
+                    return true;
+                });
             spriteResources.CommitSource(clearing);
             if (IsAlive)
             {

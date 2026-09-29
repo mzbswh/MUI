@@ -8,11 +8,15 @@ namespace MUI.Navigation
     {
         private bool recomputingPresentation;
         private bool presentationDirty;
+        private bool presentationOrderDirty;
         private int presentationDeferrals;
 
-        private void RecomputePresentation()
+        private void RecomputePresentation() => RecomputePresentation(updateOrder: true);
+
+        private void RecomputePresentation(bool updateOrder)
         {
             presentationDirty = true;
+            presentationOrderDirty |= updateOrder;
             if (recomputingPresentation || presentationDeferrals != 0)
             {
                 return;
@@ -24,8 +28,10 @@ namespace MUI.Navigation
             {
                 while (presentationDirty)
                 {
+                    var reorder = presentationOrderDirty;
                     presentationDirty = false;
-                    RecomputePresentationCore();
+                    presentationOrderDirty = false;
+                    RecomputePresentationCore(reorder);
                 }
 
                 // 渲染门控、覆盖关系与焦点回调均已收敛。替换流程的
@@ -48,7 +54,7 @@ namespace MUI.Navigation
             }
         }
 
-        private void RecomputePresentationCore()
+        private void RecomputePresentationCore(bool updateOrder)
         {
             activeOrder.Sort((left, right) =>
             {
@@ -108,12 +114,12 @@ namespace MUI.Navigation
                         throw new InvalidOperationException("An active View was externally destroyed.");
                     }
 
-                    if (entry.View is IOrderedView ordered)
+                    if (updateOrder && entry.View is IOrderedView ordered)
                     {
                         ordered.MoveToFront();
                     }
 
-                    if (entry.View is IModalView modal)
+                    if (updateOrder && entry.View is IModalView modal)
                     {
                         modal.SetModalBarrier(entry.Route.Policy.Modal && entry.HostVisible);
                     }
@@ -268,7 +274,8 @@ namespace MUI.Navigation
             AssertThread();
             if (instance.State == ViewState.Open)
             {
-                RecomputePresentation();
+                // 原生激活回调中的输入变化只更新门控与焦点，不能重排正在改变状态的层级。
+                RecomputePresentation(updateOrder: false);
             }
         }
 

@@ -313,11 +313,13 @@ LabelFont 演示 TextElement.Font 的直接对象绑定，绑定前应赋予实�
 
 播放模式中选择 UIHost，在“导航生命周期追踪”中点击开始，再执行示例打开/关闭/参数更新等操作。点击采集后可复制报告；停止保留已有记录，停止并清除会释放缓冲区。默认最近 512 条，旧条目覆盖数量与通知队列丢弃数量分别显示；关闭检查器不自动停止记录。
 
-代码入口是 `host.Navigator.StartLifecycleTrace()`、`CaptureLifecycleTrace().ExportText()` 和 `StopLifecycleTrace()`，同步模式不创建任务。报告记录事件顺序和相对时间，Open/OpenAsync 另有请求编号、结束结果及总耗时（包括失败、取消、提前拒绝），不等于各准备阶段耗时；未启用前的历史不会补记。受理的异步 PostOpen 包含排队时间，同步 PostOpen 从实际执行 Open 开始计时。停止或重启后不将旧在途请求的结束写入新一轮记录。Unity 内的操作与显示仍待实际验收。
+代码入口是 `host.Navigator.StartLifecycleTrace()`、`CaptureLifecycleTrace().ExportText()` 和 `StopLifecycleTrace()`，同步模式不创建任务。报告记录事件顺序和相对时间，Open/OpenAsync 另有请求编号、结束结果及总耗时（包括失败、取消、提前拒绝），不等于各准备阶段耗时；未启用前的历史不会补记。受理的异步 PostOpen 包含排队时间，同步 PostOpen 从实际执行 Open 开始计时。停止或重启后不将旧在途请求的结束写入新一轮记录。
 
-追踪报告另有候选准备阶段：前置依赖、模型创建、资源创建、激活准备、后置依赖。每个阶段显示候选句柄和可关联的打开请求编号，缓存命中不产生资源创建阶段。父依赖阶段包含子候选时间，不能把所有阶段简单求和；阶段“未完成”可能是异常、取消或同步能力不足，请结合请求结束结果。绑定和 Presenter 钩子暂合并为激活准备。
+菜单 `Tools/MUI/Samples/Open Navigation Lifecycle Trace Scene` 创建启用追踪、转场和缓存演示的导航场景。`RecordLifecycleTrace` 使用 2048 条有界记录；自动演示在导航退出后输出完整报告。批处理入口为 `MUI.Samples.Navigation.Editor.NavigationSampleMenu.RunLifecycleTracePreviewBatch`，它等待演示清理完成后自行退出，启动 Unity 时不要附加 `-quit`。该入口已在 Unity 2022.3.62f3 采集到真实阶段报告；Inspector 按钮和复制交互仍需单独操作验收。
 
-独立 `Replace/ReplaceAsync` 同样记录请求编号和总耗时，准备阶段沿用该编号；开始行定位源页面，结束行定位目标页面并保留关联源句柄。打开触发的超限替换复用打开请求编号，不重复生成替换请求。同步源清理直接展示 `SourceClose`，异步源清理标记为未采集，复制报告不会触发兼容任务或额外等待。
+追踪报告另有候选准备阶段：前置依赖、模型创建、资源创建、激活准备、后置依赖；激活准备内部还分 Presenter 创建、绑定与同步/异步打开回调。每个阶段显示候选句柄和可关联的打开请求编号，缓存命中不产生资源创建阶段。进入转场、实际播放的退出转场和实例清理另有操作阶段；实例清理包含生命周期钩子及内容释放。`ViewResourceRelease` 单独计时 View Lease 的 Dispose/DisposeAsync，正常返回才标记完成，异常仍按原清理协议报告；不存在凭证或关闭进入缓存时不伪造归还阶段。缓存淘汰使用路由键和无效句柄，关联发起清理的请求，不能冒充旧激活。父依赖与实例清理包含子阶段时间，不能把所有阶段简单求和。
+
+独立 `Replace/ReplaceAsync` 同样记录请求编号和总耗时，准备阶段沿用该编号；开始行定位源页面，结束行定位目标页面并保留关联源句柄。打开触发的超限替换复用打开请求编号，不重复生成替换请求。实际发生的源页面退出转场和实例清理记录各自的阶段时间，复制报告不会触发兼容任务或额外等待。
 
 关闭追踪包括普通/强制关闭、Complete 结果完成以及显式 `WaitForCleanupAsync`。报告保留原始关闭和清理状态：`WaitCancelled/Pending` 是等待取消，`ClosedWithCleanupPending/Pending` 是逻辑关闭后仍有清理，均不能当作资源全部归还。诊断不会自动调用清理等待，也不会记录业务结果内容。Back 与按层/全部批量关闭也已接入请求边界。
 
@@ -371,7 +373,7 @@ using (var snapshot = automation.CaptureSnapshot())
 string trace = automation.ExportTrace(navigator);
 ```
 
-截图为整个 Game View，不裁剪到当前 View，可能含其他界面和可见文本。项目负责导出内容与存储策略；默认及最大像素预算为 16777216，PNG 编码另有内存成本。截图、编码和 Dispose 均同步完成其托管逻辑，不启动 Task；原生纹理 Destroy 仍由 Unity 在帧末执行。方法不会自动等待合适的渲染时机，详见 [Unity 截图时机要求](https://docs.unity3d.com/2022.3/Documentation/ScriptReference/ScreenCapture.CaptureScreenshotAsTexture.html)。此入口的实际图像与释放时序尚未在 Unity 中验收。
+截图为整个 Game View，不裁剪到当前 View，可能含其他界面和可见文本。项目负责导出内容与存储策略；默认及最大像素预算为 16777216，PNG 编码另有内存成本。截图、编码和 Dispose 均同步完成其托管逻辑，不启动 Task；原生纹理 Destroy 仍由 Unity 在帧末执行。方法不会自动等待合适的渲染时机，详见 [Unity 截图时机要求](https://docs.unity3d.com/2022.3/Documentation/ScriptReference/ScreenCapture.CaptureScreenshotAsTexture.html)。此入口已在 Unity 2022.3.62f3 的真实 Prefab Play Mode 中，等待渲染结束后验证正常 PNG、重复释放、释放后访问保护和后续帧原生纹理销毁；像素预算异常、其他时机和平台仍待验收。
 
 ## 构建前校验登记
 

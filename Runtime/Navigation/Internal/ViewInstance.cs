@@ -247,7 +247,8 @@ namespace MUI.Navigation
         internal abstract void AdoptSynchronousLease(ISynchronousViewLease lease);
 
         internal abstract CloseOutcome Release(DismissReason reason, bool wasCommitted,
-                    IReadOnlyList<Exception> initialErrors, Func<ViewContent, bool> retainContent = null);
+                    IReadOnlyList<Exception> initialErrors, Func<ViewContent, bool> retainContent = null,
+                    Func<IViewResourceReleaseTraceScope> beginResourceRelease = null);
 
         internal void CancelArgsUpdate() => CancelArgsUpdateCallback?.Invoke();
 
@@ -294,7 +295,8 @@ namespace MUI.Navigation
 
         public abstract void SetFailure(Exception failure);
 
-        public abstract Task<CloseOutcome> ReleaseAsync(DismissReason reason, bool wasCommitted, IReadOnlyList<Exception> initialErrors);
+        public abstract Task<CloseOutcome> ReleaseAsync(DismissReason reason, bool wasCommitted,
+            IReadOnlyList<Exception> initialErrors, Func<IViewResourceReleaseTraceScope> beginResourceRelease = null);
 
         public void RequestClose()
         {
@@ -637,17 +639,19 @@ namespace MUI.Navigation
             }
         }
 
-        public override Task<CloseOutcome> ReleaseAsync(DismissReason reason, bool wasCommitted, IReadOnlyList<Exception> initialErrors)
+        public override Task<CloseOutcome> ReleaseAsync(DismissReason reason, bool wasCommitted,
+            IReadOnlyList<Exception> initialErrors, Func<IViewResourceReleaseTraceScope> beginResourceRelease = null)
         {
             if (Mode == LifetimeMode.Synchronous)
             {
-                return Task.FromResult(Release(reason, wasCommitted, initialErrors));
+                return Task.FromResult(Release(reason, wasCommitted, initialErrors, beginResourceRelease: beginResourceRelease));
             }
 
-            return ReleaseCoreAsync(reason, wasCommitted, initialErrors);
+            return ReleaseCoreAsync(reason, wasCommitted, initialErrors, beginResourceRelease);
         }
 
-        private async Task<CloseOutcome> ReleaseCoreAsync(DismissReason reason, bool wasCommitted, IReadOnlyList<Exception> initialErrors)
+        private async Task<CloseOutcome> ReleaseCoreAsync(DismissReason reason, bool wasCommitted,
+            IReadOnlyList<Exception> initialErrors, Func<IViewResourceReleaseTraceScope> beginResourceRelease)
         {
             var errors = new List<Exception>(initialErrors);
             Exception lifecycleFailure = failure;
@@ -725,7 +729,7 @@ namespace MUI.Navigation
 
                 if (!retained)
                 {
-                    await content.ReleaseAsync(errors);
+                    await content.ReleaseAsync(errors, beginResourceRelease);
                 }
 
                 content = null;

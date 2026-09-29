@@ -35,6 +35,22 @@
 
 Core、Resources、Navigation、ChildViews、Tabs 不依赖 UnityEngine 或第三方资源库。包依赖 uGUI；接入基线为 Unity 2022.3.62f3 / .NET Standard 2.1。
 
+## 接入与验收工程
+
+仓库内的 [Basic Example](ExampleProject~/README.md) 是可直接打开的 Unity 2022.3.62f3 工程，包含真实 uGUI Prefab、场景、生成绑定与纯同步类型化导航。包通过相对路径接入，不依赖临时验收目录；按工程 README 在 Play Mode 中点击 Confirm 可看到结果和清理状态。
+
+本仓库是 UPM 包，完整 Unity 工程由接入项目提供。独立验收时使用 Unity Hub 创建的 Unity 2022.3.62f3 工程，通过 Package Manager 添加本地 `package.json`，并从包的 Samples 区域完整导入所需示例。标准导入目录为 `Assets/Samples/MUI/0.1.0`，不要只复制入口脚本或引用另一个项目的 `Library/PackageCache`；uGUI 使用正常的 `com.unity.ugui: 1.0.0` 包依赖。
+
+Samples 导入后是工程中的独立副本；修改本地包的 `Samples~` 不会自动更新已导入文件。验收当前包源码前需重新导入对应示例，并核对其脚本、程序集声明与资源引用。
+
+使用 TMP 适配时还需安装 TextMeshPro，并执行 **Window → TextMeshPro → Import TMP Essential Resources**。安装包与导入默认字体、TMP Settings 是两个步骤。部分示例只在编辑模式保留 Demo 组件，Canvas、控件和页面由 Play Mode 的初始化代码创建；自动演示也可能在完成后清理页面。
+
+首次图形验收前确认所需 Samples 已完整导入、TMP Settings 与默认字体可读取、场景无 Missing Script、Console 无编译错误，并实际运行示例检查画面。不要把批处理能编译当作工程资源和图形环境已经完整。本次独立验收工程已通过上述完整性检查。
+
+图形验收使用正常的编辑器启动入口，例如 macOS 的 Unity Hub 或 `open -n -a <Unity.app> --args -projectPath <工程目录>`。若整个编辑器出现洋红，先检查启动日志中的内置 Shader 错误及安装目录的 `CGIncludes`，并保留异常 Shader 缓存后再重建。当前验收工程曾出现实际存在的 `HLSLSupport.cginc` 无法解析；正常启动并重建缓存后已恢复。仅切换工作目录并不能保证解决此问题。
+
+使用 `-batchmode -nographics` 完成导入或演示，只能作为编译和逻辑证据。编辑器验收可直接使用项目配置的 Unity 版本；设备性能与 IL2CPP 验收另按实际构建配置执行。
+
 ## 项目日志接入
 
 框架运行时的未处理诊断异常统一交给 `UIErrors.Report`。项目可在初始化 UI 前设置全局错误出口，直接转发给自己的日志系统：
@@ -53,7 +69,7 @@ UIErrors.Sink = previousSink;
 
 通过 Package Manager 导入 **Settings**，在空场景中给一个 GameObject 添加 `SettingsDemo`。示例自动创建滑条、文字与 Save/Reset 按钮，展示 VM → 生成绑定 → uGUI 的数据流和异步命令。
 
-Settings 示例独立展示绑定与命令；导航行为由 Navigation 示例演示。具体接入说明见 [Settings README](Samples~/Settings/README.md)。当前代码已通过 Unity 2022.3.62f3 的 Settings 批处理 Play Mode 演示，结束时绑定为 Unbound，且没有执行中的保存命令。人工输入、完整故障场景和 IL2CPP 验证尚未完成。
+Settings 示例独立展示绑定与命令；导航行为由 Navigation 示例演示。具体接入说明见 [Settings README](Samples~/Settings/README.md)。当前代码已通过 Unity 2022.3.62f3 的 Settings 批处理 Play Mode 演示，结束时绑定为 Unbound，且没有执行中的保存命令；macOS IL2CPP 构建及独立 Player 启动、画面与退出清理已验证。物理鼠标键盘输入、完整故障场景及其他平台仍待验收。
 
 ## 导航示例
 
@@ -104,7 +120,7 @@ host.Shutdown();
 
 同步表示框架操作直接执行，不表示所有行为必须在当前调用栈完成：命令内部请求关闭可能由下一次 `Pump()` 同步派发，以避免销毁正在执行的绑定；`UIHost` 默认自动驱动该帧泵。回放或自定义时钟可设置 `host.AutomaticFramePump = false`，再每帧调用 `host.AdvanceFrame(delta)`，同时推进请求派发和界面 Tick。Unity 的 `Object.Destroy` 仍遵循引擎延迟销毁规则，同步资源后端必须保证归还源资源时不会破坏尚存活的克隆依赖。现有程序集仍同时包含异步 API，纯同步模式不是移除 Task 类型的独立发行包。
 
-完整接入示例见 [SynchronousNavigationDemo](Samples~/Navigation/SynchronousNavigationDemo.cs)、[同步子界面](Samples~/Navigation/SynchronousChildDemo.cs)、[同步虚拟列表](Samples~/Navigation/SynchronousVirtualListDemo.cs) 和 [同步 Tab](Samples~/Tabs/SynchronousTabsDemo.cs)。当前同步实现通过离线编译；Unity 运行、设备及 IL2CPP 验收仍未完成。
+完整接入示例见 [SynchronousNavigationDemo](Samples~/Navigation/SynchronousNavigationDemo.cs)、[同步子界面](Samples~/Navigation/SynchronousChildDemo.cs)、[同步虚拟列表](Samples~/Navigation/SynchronousVirtualListDemo.cs) 和 [同步 Tab](Samples~/Tabs/SynchronousTabsDemo.cs)。当前同步实现已有 Unity 运行证据；真实 Prefab 导航的 macOS IL2CPP 首场景画面、键盘结果关闭，以及编辑器 500 次缓存/100 次非缓存循环已复验。完整故障组合、物理鼠标/手柄、长时设备性能与其他平台仍待验收。
 
 标准确认框与提示框也可完全同步接入，见 [Dialogs 示例](Samples~/Dialogs/README.md)：直接 Open，通过 ObserveResult 接收用户稍后提交的结果，再由帧驱动打开后续界面，无需异步 DialogService。
 
@@ -198,7 +214,7 @@ public partial class ExampleViewModel : CommonViewModel
 
 ## 编译
 
-`Tools~/Build` 现有 38 个 Unity、Editor 和 Samples 离线构建项目；连同 1 个生成器项目，当前工作树共 39/39 个项目通过 Unity 2022.3.62f3 对应的 Release 编译，零警告、零错误。当前统计为 596 个 C# 文件、38 个 asmdef；元数据检查未发现缺失、孤立或重复 GUID。详见 [实现记录](docs/IMPLEMENTATION-STATUS.md)。这是当前离线证据，不代替 Unity 条件编译、运行交互及平台验收，后续修改仍需按影响范围验证。
+`Tools~/Build` 现有 38 个 Unity、Editor 和 Samples 离线构建项目；连同 1 个生成器项目，2026-09-28 当前工作树共 39/39 个项目通过 Unity 2022.3.62f3 对应的 Release 编译，零警告、零错误。604 个 C# 文件的成员布局、空白及控制流大括号检查通过；全包 746 份元数据的 GUID 格式、唯一性及资产对应关系检查通过，Runtime/Editor/Samples 的 C# 和 asmdef 均有元数据，38 个 asmdef 内部引用及无环检查通过。独立 Unity 2022.3.62f3 项目的 Navigation、Settings、Tabs 既有 Play Mode 批处理演示通过。详见 [实现记录](docs/IMPLEMENTATION-STATUS.md)。这些证据不代替真实输入、渲染、平台及完整故障验收，后续修改仍需按影响范围验证。
 
 纯托管基础层：
 

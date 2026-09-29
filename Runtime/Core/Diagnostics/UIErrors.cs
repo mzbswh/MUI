@@ -8,6 +8,7 @@ namespace MUI
     {
         private static Action<Exception> sink;
         private static Action<Exception> fallbackSink;
+        [ThreadStatic] private static bool reporting;
 
         public static event Action<Exception> Reported;
 
@@ -24,15 +25,29 @@ namespace MUI
             set => Interlocked.Exchange(ref fallbackSink, value);
         }
 
+        /// <summary>隔离出口和观察者异常；同一线程的报告回调中再次报告会被忽略，避免递归。</summary>
         public static void Report(Exception error) => Report(error, null);
 
         internal static void Report(Exception error, Action<Exception> localFallback)
         {
-            if (error == null)
+            if (error == null || reporting)
             {
                 return;
             }
 
+            reporting = true;
+            try
+            {
+                Dispatch(error, localFallback);
+            }
+            finally
+            {
+                reporting = false;
+            }
+        }
+
+        private static void Dispatch(Exception error, Action<Exception> localFallback)
+        {
             var configured = Sink;
             var fallback = FallbackSink ?? localFallback;
             var target = configured ?? fallback;

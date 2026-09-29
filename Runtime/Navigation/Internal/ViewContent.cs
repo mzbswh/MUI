@@ -43,9 +43,9 @@ namespace MUI.Navigation
             get;
         }
 
-        internal abstract void ReleaseCached(List<Exception> errors);
+        internal abstract void ReleaseCached(List<Exception> errors, Func<IViewResourceReleaseTraceScope> beginResourceRelease = null);
 
-        internal abstract ValueTask ReleaseCachedAsync(List<Exception> errors);
+        internal abstract ValueTask ReleaseCachedAsync(List<Exception> errors, Func<IViewResourceReleaseTraceScope> beginResourceRelease = null);
     }
 
     internal sealed partial class ViewContent<TViewModel, TArgs, TResult> : ViewContent where TViewModel : ViewModel
@@ -139,31 +139,60 @@ namespace MUI.Navigation
             }
         }
 
-        internal override ValueTask ReleaseCachedAsync(List<Exception> errors) => ReleaseAsync(errors);
+        internal override ValueTask ReleaseCachedAsync(List<Exception> errors,
+            Func<IViewResourceReleaseTraceScope> beginResourceRelease = null) => ReleaseAsync(errors, beginResourceRelease);
 
         /// <summary>调用方先结束激活；最终销毁继续执行全部资源收尾，错误写入同一集合。</summary>
-        internal ValueTask ReleaseAsync(List<Exception> errors, params Action[] detachHost)
+        internal ValueTask ReleaseAsync(List<Exception> errors,
+            Func<IViewResourceReleaseTraceScope> beginResourceRelease = null, params Action[] detachHost)
         {
             if (Mode == LifetimeMode.Synchronous)
             {
-                Release(errors, detachHost);
+                Release(errors, beginResourceRelease, detachHost);
                 return default;
             }
 
-            return ReleaseCoreAsync(errors, detachHost);
+            return ReleaseCoreAsync(errors, beginResourceRelease, detachHost);
         }
 
-        private async ValueTask ReleaseCoreAsync(List<Exception> errors, Action[] detachHost)
+        private async ValueTask ReleaseCoreAsync(List<Exception> errors,
+            Func<IViewResourceReleaseTraceScope> beginResourceRelease, Action[] detachHost)
         {
             if (Lifecycle != null)
             {
                 Lifecycle.Destroy(errors);
             }
 
-            await ViewInstanceCleanup.RunAsync(instance, lease, errors, detachHost);
+            await ViewInstanceCleanup.RunAsync(instance, null, errors, detachHost);
+            if (lease != null)
+            {
+                using (var phase = beginResourceRelease == null ? null : beginResourceRelease())
+                {
+                    var before = errors.Count;
+                    await ViewInstanceCleanup.ReleaseViewResourceAsync(lease, errors);
+                    FinishResourceReleaseTrace(phase, errors, before);
+                }
+            }
             lease = null;
             View = null;
             Lifecycle = null;
+        }
+
+        private static void FinishResourceReleaseTrace(IViewResourceReleaseTraceScope phase, List<Exception> errors, int before)
+        {
+            if (phase == null)
+            {
+                return;
+            }
+
+            if (errors.Count == before)
+            {
+                phase.Complete();
+            }
+            else
+            {
+                phase.Fail(errors[before]);
+            }
         }
     }
 }

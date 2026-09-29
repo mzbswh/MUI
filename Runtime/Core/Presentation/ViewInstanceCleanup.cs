@@ -38,6 +38,12 @@ namespace MUI
                 }
             }
 
+            await ReleaseViewResourceAsync(viewResource, errors);
+        }
+
+        /// <summary>归还已结束生命周期的视图凭证；失败加入现有清理结果。</summary>
+        internal static async ValueTask ReleaseViewResourceAsync(IAsyncDisposable viewResource, List<Exception> errors)
+        {
             if (viewResource != null)
             {
                 try

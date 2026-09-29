@@ -144,6 +144,7 @@ namespace MUI.Navigation
         private Exception ReleaseCachedContentsSynchronous(CachedContent[] saved)
         {
             var errors = new List<Exception>();
+            var trace = CurrentTraceOperation;
             retiringCachedViews += saved.Length;
             foreach (var entry in saved)
             {
@@ -152,7 +153,7 @@ namespace MUI.Navigation
                 {
                     using (EnterCallback(null))
                     {
-                        entry.Content.ReleaseCached(errors);
+                        entry.Content.ReleaseCached(errors, CreateResourceReleaseTrace(default, entry.Route.Key, trace));
                     }
                 }
                 catch (Exception error)

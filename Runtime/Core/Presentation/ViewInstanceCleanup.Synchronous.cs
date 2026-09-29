@@ -43,6 +43,12 @@ namespace MUI
                 }
             }
 
+            ReleaseViewResource(viewResource, errors);
+        }
+
+        /// <summary>同步归还已结束生命周期的视图凭证；失败加入现有清理结果。</summary>
+        internal static void ReleaseViewResource(IDisposable viewResource, List<Exception> errors)
+        {
             if (viewResource != null)
             {
                 try

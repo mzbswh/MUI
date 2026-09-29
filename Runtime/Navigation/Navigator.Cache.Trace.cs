@@ -18,8 +18,11 @@ namespace MUI.Navigation
             var trace = BeginOperationTrace(string.Empty, "RefreshCache");
             try
             {
-                RefreshCacheUntraced();
-                FinishOperationTrace(trace, default, "完成", null);
+                using (EnterOperationTrace(trace))
+                {
+                    RefreshCacheUntraced();
+                    FinishOperationTrace(trace, default, "完成", null);
+                }
             }
             catch (Exception error)
             {
@@ -34,8 +37,11 @@ namespace MUI.Navigation
             var trace = BeginOperationTrace(string.Empty, "ClearCache");
             try
             {
-                ClearCacheUntraced();
-                FinishOperationTrace(trace, default, "缓存清理完成", null);
+                using (EnterOperationTrace(trace))
+                {
+                    ClearCacheUntraced();
+                    FinishOperationTrace(trace, default, "缓存清理完成", null);
+                }
             }
             catch (Exception error)
             {
@@ -51,8 +57,11 @@ namespace MUI.Navigation
             var trace = BeginOperationTrace(string.Empty, "ClearCacheAsync");
             try
             {
-                var operation = ClearCacheAsyncUntraced();
-                return trace.Id == 0 ? operation : ObserveTracedCacheOperationAsync(operation, trace, "缓存清理完成");
+                using (EnterOperationTrace(trace))
+                {
+                    var operation = ClearCacheAsyncUntraced();
+                    return trace.Id == 0 ? operation : ObserveTracedCacheOperationAsync(operation, trace, "缓存清理完成");
+                }
             }
             catch (Exception error)
             {
@@ -67,8 +76,11 @@ namespace MUI.Navigation
             var trace = BeginOperationTrace(string.Empty, "InvalidateCache");
             try
             {
-                InvalidateCacheUntraced();
-                FinishOperationTrace(trace, default, "缓存代际失效并清理完成", null);
+                using (EnterOperationTrace(trace))
+                {
+                    InvalidateCacheUntraced();
+                    FinishOperationTrace(trace, default, "缓存代际失效并清理完成", null);
+                }
             }
             catch (Exception error)
             {
@@ -84,8 +96,11 @@ namespace MUI.Navigation
             var trace = BeginOperationTrace(string.Empty, "InvalidateCacheAsync");
             try
             {
-                var operation = InvalidateCacheAsyncUntraced();
-                return trace.Id == 0 ? operation : ObserveTracedCacheOperationAsync(operation, trace, "缓存代际失效并清理完成");
+                using (EnterOperationTrace(trace))
+                {
+                    var operation = InvalidateCacheAsyncUntraced();
+                    return trace.Id == 0 ? operation : ObserveTracedCacheOperationAsync(operation, trace, "缓存代际失效并清理完成");
+                }
             }
             catch (Exception error)
             {
@@ -100,8 +115,11 @@ namespace MUI.Navigation
             var trace = BeginOperationTrace(string.Empty, "ClearInactiveContent");
             try
             {
-                ClearInactiveContentUntraced();
-                FinishOperationTrace(trace, default, "闲置内容清理完成", null);
+                using (EnterOperationTrace(trace))
+                {
+                    ClearInactiveContentUntraced();
+                    FinishOperationTrace(trace, default, "闲置内容清理完成", null);
+                }
             }
             catch (Exception error)
             {
@@ -117,8 +135,11 @@ namespace MUI.Navigation
             var trace = BeginOperationTrace(string.Empty, "ClearInactiveContentAsync");
             try
             {
-                var operation = ClearInactiveContentAsyncUntraced();
-                return trace.Id == 0 ? operation : ObserveTracedCacheOperationAsync(operation, trace, "闲置内容清理完成");
+                using (EnterOperationTrace(trace))
+                {
+                    var operation = ClearInactiveContentAsyncUntraced();
+                    return trace.Id == 0 ? operation : ObserveTracedCacheOperationAsync(operation, trace, "闲置内容清理完成");
+                }
             }
             catch (Exception error)
             {
@@ -141,6 +162,10 @@ namespace MUI.Navigation
                 if (Thread.CurrentThread.ManagedThreadId == thread)
                 {
                     FinishOperationTrace(trace, default, "清理异常", error);
+                }
+                else
+                {
+                    trace.MarkFinished();
                 }
                 throw;
             }

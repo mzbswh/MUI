@@ -22,7 +22,7 @@ namespace MUI.UGUI
         /// <summary>
         /// 接纳一次返回输入。同帧重复输入、尚未完成的返回及不可用宿主返回 false。
         /// true 仅表示已接纳，不代表页面已关闭；具体结果通过 BackInputCompleted 发布。
-        /// 同步宿主直接执行，不创建任务；异步宿主在关闭结束前拒绝追加输入，不积压请求。
+        /// 同步宿主直接执行，不创建任务；异步宿主在视觉退出或请求拒绝前拒绝追加输入，不积压请求。
         /// </summary>
         public bool TryRequestBack()
         {
@@ -65,19 +65,28 @@ namespace MUI.UGUI
 
         private async Task DispatchBackInputAsync()
         {
+            Task inputSettled = null;
             try
             {
-                var outcome = await navigator.BackAsync();
+                var operation = navigator.BackAsync(out inputSettled);
+                _ = ReleaseBackInputAsync(inputSettled);
+                var outcome = await operation;
                 PublishBackInput(outcome);
             }
             catch (Exception error)
             {
                 UIErrors.Report(error);
+                if (inputSettled == null)
+                {
+                    backInputPending = false;
+                }
             }
-            finally
-            {
-                backInputPending = false;
-            }
+        }
+
+        private async Task ReleaseBackInputAsync(Task inputSettled)
+        {
+            await inputSettled;
+            backInputPending = false;
         }
 
         private void PublishBackInput(CloseOutcome outcome)

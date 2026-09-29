@@ -106,7 +106,7 @@ namespace MUI.UGUI
         }
 
         /// <summary>原生 setter 也会调用外部监听，必须在整个调用期间阻止资源键重入。</summary>
-        internal void AssignNative(Action assignment)
+        internal void AssignNative(Action assignment, Func<bool> completedAfterFailure = null)
         {
             var previous = notifying;
             notifying = true;
@@ -116,6 +116,23 @@ namespace MUI.UGUI
             }
             catch (Exception error)
             {
+                if (completedAfterFailure != null)
+                {
+                    try
+                    {
+                        if (completedAfterFailure())
+                        {
+                            // 适配器确认原生引用和渲染器均已解除，保留错误诊断。
+                            UIErrors.Report(error);
+                            return;
+                        }
+                    }
+                    catch (Exception verificationError)
+                    {
+                        UIErrors.Report(verificationError);
+                    }
+                }
+
                 // 不猜测异常发生在原生引用修改之前还是之后，交给槽保留可能仍被借用的资源。
                 throw new ResourceAssignmentException(error);
             }

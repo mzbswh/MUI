@@ -13,29 +13,53 @@ namespace MUI.Tabs
         /// </summary>
         public event Action<TabSelectionFailure> SelectionFailed;
 
-        private async ValueTask<TabSelectionResult> ResolveFailureAsync(Operation target, Exception failure)
+        private async ValueTask<TabSelectionResult> ResolveUncommittedSelectionAsync(
+            Operation target, Exception failure, bool cancelled)
         {
             var saved = retained;
             var restored = false;
-            if (failureDisplay == TabFailureDisplay.RestorePrevious && saved != null &&
-                saved.Handle.State == ChildViewState.Retained && !target.Cancellation.IsCancellationRequested)
+            Exception recoveryFailure = null;
+            cancelled |= target.Cancellation.IsCancellationRequested;
+            if ((cancelled || failureDisplay == TabFailureDisplay.RestorePrevious) && saved != null &&
+                saved.Handle.State == ChildViewState.Retained)
             {
+                // 被取消的目标不再拥有恢复令牌；父关闭与新选择仍可撤销旧页恢复。
+                var cancellation = CancellationTokenSource.CreateLinkedTokenSource(scope.Token);
+                target.RecoveryCancellation = cancellation;
+                var indicator = ShowIndicatorAsync(target, cancellation.Token);
                 try
                 {
                     // 复用 Slot 的有界调度，先完成失败候选清理，再准备旧实例的新激活。
                     var recovery = await slot.ReplaceAsync(
                         (owner, token) => PrepareRecoveryAsync(target, saved, owner, token),
-                        target.Cancellation.Token,
+                        cancellation.Token,
                         _ => CommitRecovery(target, saved), () => RequireRecoveryCurrent(target, saved));
                     restored = recovery.Status == ChildViewChangeStatus.Ready;
                     if (recovery.Error != null)
                     {
+                        recoveryFailure = recovery.Error;
                         failure = CombineRecoveryFailure(failure, recovery.Error);
                     }
                 }
                 catch (Exception recovery)
                 {
+                    recoveryFailure = recovery;
                     failure = CombineRecoveryFailure(failure, recovery);
+                }
+                finally
+                {
+                    target.RecoveryCancellation = null;
+                    try
+                    {
+                        cancellation.Cancel();
+                    }
+                    catch (Exception error)
+                    {
+                        UIErrors.Report(error);
+                    }
+
+                    await indicator;
+                    cancellation.Dispose();
                 }
             }
 
@@ -46,11 +70,13 @@ namespace MUI.Tabs
                     ? TabSelectionStatus.ParentInactive : TabSelectionStatus.Superseded);
             }
 
+            cancelled |= target.Cancellation.IsCancellationRequested;
             if (!restored)
             {
                 var clearingFailure = ClearFailedContent(null);
                 if (clearingFailure != null)
                 {
+                    recoveryFailure = CombineRecoveryFailure(recoveryFailure, clearingFailure);
                     failure = CombineRecoveryFailure(failure, clearingFailure);
                 }
                 if (!IsCurrent(target))
@@ -59,23 +85,26 @@ namespace MUI.Tabs
                         ? TabSelectionStatus.ParentInactive : TabSelectionStatus.Superseded);
                 }
 
-                if (target.Cancellation.IsCancellationRequested)
+                if (cancelled)
                 {
-                    Publish(new TabSnapshot(target.Key, null, clearingFailure == null ? TabPhase.Empty : TabPhase.Error, clearingFailure, target.Version));
-                    return new TabSelectionResult(TabSelectionStatus.Cancelled, error: clearingFailure);
+                    Publish(new TabSnapshot(null, null, recoveryFailure == null ? TabPhase.Empty : TabPhase.Error,
+                        recoveryFailure, target.Version));
                 }
-
-                Publish(new TabSnapshot(target.Key, null, TabPhase.Error, failure, target.Version));
+                else
+                {
+                    Publish(new TabSnapshot(target.Key, null, TabPhase.Error, failure, target.Version));
+                }
             }
 
-            if (IsCurrent(target))
+            if (!cancelled && IsCurrent(target))
             {
                 NotifySelectionFailure(new TabSelectionFailure(target.Key,
                     restored ? saved.Definition.Key : null, target.Version, failure));
             }
 
-            // 恢复成功只修复显示，原目标的失败结果仍保留给调用者。
-            return new TabSelectionResult(TabSelectionStatus.Failed, error: failure);
+            // 恢复成功只修复显示，原目标的取消或失败结果仍保留给调用者。
+            return new TabSelectionResult(cancelled ? TabSelectionStatus.Cancelled : TabSelectionStatus.Failed,
+                error: cancelled ? recoveryFailure : failure);
         }
 
         private async ValueTask<ChildViewHandle> PrepareRecoveryAsync(

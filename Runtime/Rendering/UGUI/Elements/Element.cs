@@ -151,7 +151,7 @@ namespace MUI.UGUI
 
         protected void NotifyChanged([CallerMemberName] string property = null)
         {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(property));
+            PropertyChanged?.Invoke(this, PropertyChangedEventArgsCache.Get(property));
         }
 
         public void Dispose()

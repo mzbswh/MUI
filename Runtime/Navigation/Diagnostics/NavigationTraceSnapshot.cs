@@ -38,7 +38,8 @@ namespace MUI.Navigation
     {
         EnterTransition,
         ExitTransition,
-        InstanceCleanup
+        InstanceCleanup,
+        ViewResourceRelease
     }
 
     /// <summary>事件入队时的元数据，不保留路由工厂、参数、结果对象或异常引用。</summary>

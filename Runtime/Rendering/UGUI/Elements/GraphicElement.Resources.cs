@@ -205,12 +205,33 @@ namespace MUI.UGUI
                 return;
             }
 
-            materialResources.AssignNative(() => WriteMaterial(graphic, material));
+            materialResources.AssignNative(() => WriteMaterial(graphic, material),
+                () =>
+                {
+                    if (!clearing || graphic == null || !IsBuiltInGraphicMaterialTarget(graphic))
+                    {
+                        return false;
+                    }
+
+                    // 内置 Graphic 先清空 m_Material 再通知；再次清空成功后解除渲染器引用。
+                    graphic.material = null;
+                    graphic.canvasRenderer.Clear();
+                    return true;
+                });
             materialResources.CommitSource(clearing);
             if (IsAlive)
             {
                 materialResources.Notify(() => NotifyChanged(nameof(Material)));
             }
+        }
+
+        private bool IsBuiltInGraphicMaterialTarget(UnityEngine.UI.MaskableGraphic target)
+        {
+            var elementType = GetType();
+            var graphicType = target.GetType();
+            return (elementType == typeof(ImageElement) && graphicType == typeof(UnityEngine.UI.Image)) ||
+                (elementType == typeof(RawImageElement) && graphicType == typeof(UnityEngine.UI.RawImage)) ||
+                (elementType == typeof(TextElement) && graphicType == typeof(UnityEngine.UI.Text));
         }
 
         private void ReleaseMaterialOwner(ElementResourceOwner<Material> owner)

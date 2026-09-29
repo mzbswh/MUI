@@ -200,7 +200,8 @@ namespace MUI.Navigation
             {
                 try
                 {
-                    outcome = instance.Release(reason, wasCommitted, errors);
+                    outcome = instance.Release(reason, wasCommitted, errors,
+                        beginResourceRelease: CreateResourceReleaseTrace(instance.Handle, instance.Route.Key, trace));
                 }
                 catch (Exception failure)
                 {

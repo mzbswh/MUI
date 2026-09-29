@@ -7,6 +7,7 @@ namespace MUI.Tabs
     {
         Ready,
         Superseded,
+        /// <summary>目标选择被取消；已保留旧页可恢复，不能据此推断内容为空。</summary>
         Cancelled,
         Failed,
         ParentInactive,

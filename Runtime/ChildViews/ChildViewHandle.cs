@@ -187,7 +187,8 @@ namespace MUI.ChildViews
 
     public sealed partial class ChildViewHandle<TViewModel, TArgs> : ChildViewHandle, IArgsUpdateHost<TArgs> where TViewModel : ViewModel
     {
-        private readonly AsyncLocal<CallbackFrame> callback = new AsyncLocal<CallbackFrame>();
+        // 共用上下文槽，以归属链区分嵌套回调，避免槽数量随句柄实例增长。
+        private static readonly AsyncLocal<CallbackFrame> CurrentCallback = new AsyncLocal<CallbackFrame>();
         private readonly ChildViewTemplate<TViewModel, TArgs> template;
         private TArgs args;
         private readonly Lifetime instance;
@@ -239,7 +240,21 @@ namespace MUI.ChildViews
 
         internal override bool LocalInteractable => localInteractable;
 
-        internal override bool IsLifecycleExecuting => callback.Value != null && callback.Value.Active;
+        internal override bool IsLifecycleExecuting
+        {
+            get
+            {
+                for (var frame = CurrentCallback.Value; frame != null; frame = frame.Parent)
+                {
+                    if (frame.Active && ReferenceEquals(frame.Owner, this))
+                    {
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+        }
 
         internal override bool IsExecuting
         {
@@ -721,9 +736,9 @@ namespace MUI.ChildViews
 
         private void Invoke(Action action)
         {
-            var previous = callback.Value;
-            var frame = new CallbackFrame();
-            callback.Value = frame;
+            var previous = CurrentCallback.Value;
+            var frame = new CallbackFrame { Owner = this, Parent = previous };
+            CurrentCallback.Value = frame;
             try
             {
                 action();
@@ -731,15 +746,16 @@ namespace MUI.ChildViews
             finally
             {
                 frame.Active = false;
-                callback.Value = previous;
+                frame.Owner = null;
+                CurrentCallback.Value = previous;
             }
         }
 
         private async ValueTask InvokeAsync(Func<ValueTask> action)
         {
-            var previous = callback.Value;
-            var frame = new CallbackFrame();
-            callback.Value = frame;
+            var previous = CurrentCallback.Value;
+            var frame = new CallbackFrame { Owner = this, Parent = previous };
+            CurrentCallback.Value = frame;
             try
             {
                 await action();
@@ -747,12 +763,15 @@ namespace MUI.ChildViews
             finally
             {
                 frame.Active = false;
-                callback.Value = previous;
+                frame.Owner = null;
+                CurrentCallback.Value = previous;
             }
         }
 
         private sealed class CallbackFrame
         {
+            public ChildViewHandle Owner;
+            public CallbackFrame Parent;
             public bool Active = true;
         }
     }

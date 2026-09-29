@@ -78,7 +78,7 @@ namespace MUI
                             continue;
                         }
 
-                        var args = new PropertyChangedEventArgs(name);
+                        var args = PropertyChangedEventArgsCache.Get(name);
                         foreach (PropertyChangedEventHandler handler in handlers.GetInvocationList())
                         {
                             try

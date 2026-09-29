@@ -17,9 +17,12 @@ namespace MUI.Navigation
             var trace = BeginOperationTrace(route.Key, "Preload");
             try
             {
-                var result = PreloadUntraced(route);
-                FinishPreloadTrace(trace, result);
-                return result;
+                using (EnterOperationTrace(trace))
+                {
+                    var result = PreloadUntraced(route);
+                    FinishPreloadTrace(trace, result);
+                    return result;
+                }
             }
             catch (Exception error)
             {
@@ -39,8 +42,11 @@ namespace MUI.Navigation
             var trace = BeginOperationTrace(route.Key, "PreloadAsync");
             try
             {
-                var operation = PreloadAsyncUntraced(route, cancellationToken);
-                return trace.Id == 0 ? operation : ObserveTracedOperationAsync(operation, trace, FinishPreloadTrace);
+                using (EnterOperationTrace(trace))
+                {
+                    var operation = PreloadAsyncUntraced(route, cancellationToken);
+                    return trace.Id == 0 ? operation : ObserveTracedOperationAsync(operation, trace, FinishPreloadTrace);
+                }
             }
             catch (Exception error)
             {

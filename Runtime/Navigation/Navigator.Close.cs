@@ -217,7 +217,8 @@ namespace MUI.Navigation
                     try
                     {
                         var started = System.Diagnostics.Stopwatch.GetTimestamp();
-                        var release = instance.ReleaseAsync(reason, wasCommitted, errors);
+                        var release = instance.ReleaseAsync(reason, wasCommitted, errors,
+                            CreateResourceReleaseTrace(instance.Handle, instance.Route.Key, trace));
                         deadline = ObserveCloseDeadlineAsync(instance, reason, release, completion, started, stopDeadline.Token);
                         result = await release;
                     }

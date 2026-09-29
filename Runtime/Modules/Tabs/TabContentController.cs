@@ -117,6 +117,8 @@ namespace MUI.Tabs
         /// <summary>
         /// 请求选择指定 Tab。新的选择会取代旧请求；重复等待同一个加载请求时，
         /// 后加入调用者的取消只结束自身等待。forceReload 强制重新准备当前项。
+        /// 提交前取消已受理的选择时，尝试重新激活仍保留的旧页，否则清空选择；
+        /// 恢复成功仍返回 Cancelled，恢复失败的诊断由结果 Error 和快照提供。
         /// </summary>
         public ValueTask<TabSelectionResult> SelectAsync(string key, CancellationToken cancellationToken = default, bool forceReload = false)
             => SelectCore(key, cancellationToken, forceReload, false);
@@ -308,7 +310,7 @@ namespace MUI.Tabs
 
         private async ValueTask<bool> FinishAsync(Operation target, ValueTask<ChildViewChangeResult> change)
         {
-            var indicator = ShowIndicatorAsync(target);
+            var indicator = ShowIndicatorAsync(target, target.Cancellation.Token);
             try
             {
                 var result = await change;
@@ -316,19 +318,12 @@ namespace MUI.Tabs
                 var failure = result.Error;
                 if (IsCurrent(target))
                 {
-                    if (status == TabSelectionStatus.Failed)
+                    if (status == TabSelectionStatus.Failed || status == TabSelectionStatus.Cancelled)
                     {
-                        var resolution = await ResolveFailureAsync(target, failure);
+                        var resolution = await ResolveUncommittedSelectionAsync(target, failure,
+                            status == TabSelectionStatus.Cancelled);
                         status = resolution.Status;
                         failure = resolution.Error;
-                    }
-                    else if (status == TabSelectionStatus.Cancelled)
-                    {
-                        failure = ClearFailedContent(null);
-                        if (IsCurrent(target))
-                        {
-                            Publish(new TabSnapshot(target.Key, null, failure == null ? TabPhase.Empty : TabPhase.Error, failure, target.Version));
-                        }
                     }
                 }
 
@@ -357,14 +352,13 @@ namespace MUI.Tabs
             return true;
         }
 
-        private async Task ShowIndicatorAsync(Operation target)
+        private async Task ShowIndicatorAsync(Operation target, CancellationToken token)
         {
             if (pendingDisplay != TabPendingDisplay.LoadingPlaceholder || indicatorDelay == TimeSpan.Zero)
             {
                 return;
             }
 
-            var token = target.Cancellation.Token;
             try
             {
                 await Task.Delay(indicatorDelay, token).ConfigureAwait(false);
@@ -373,7 +367,8 @@ namespace MUI.Tabs
                     try
                     {
                         scope.RequireThread();
-                        if (!token.IsCancellationRequested && IsCurrent(target) && ViewModel.Snapshot.Phase == TabPhase.Loading)
+                        if (!token.IsCancellationRequested && IsCurrent(target) &&
+                            ViewModel.Snapshot.Phase == TabPhase.Loading && !ViewModel.Snapshot.LoadingIndicatorVisible)
                         {
                             Publish(new TabSnapshot(target.Key, null, TabPhase.Loading, null, target.Version, true));
                         }
@@ -557,6 +552,18 @@ namespace MUI.Tabs
             {
                 UIErrors.Report(error);
             }
+
+            if (target.RecoveryCancellation != null)
+            {
+                try
+                {
+                    target.RecoveryCancellation.Cancel();
+                }
+                catch (Exception error)
+                {
+                    UIErrors.Report(error);
+                }
+            }
         }
 
         // 共享请求的额外等待者没有请求所有权，取消等待不能取消原始加载。
@@ -621,6 +628,7 @@ namespace MUI.Tabs
             public string Key;
             public long Version;
             public CancellationTokenSource Cancellation;
+            public CancellationTokenSource RecoveryCancellation;
             public readonly TaskCompletionSource<TabSelectionResult> Completion =
                             new TaskCompletionSource<TabSelectionResult>(TaskCreationOptions.RunContinuationsAsynchronously);
         }

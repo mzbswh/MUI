@@ -89,6 +89,10 @@ namespace MUI.Navigation
                 {
                     FinishOperationTrace(trace, default, "退出异常", error);
                 }
+                else
+                {
+                    trace.MarkFinished();
+                }
                 throw;
             }
         }

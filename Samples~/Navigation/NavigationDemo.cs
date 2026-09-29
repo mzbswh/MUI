@@ -23,6 +23,7 @@ namespace MUI.Samples.Navigation
         [SerializeField] private bool showRebindWalkthrough = false;
         [SerializeField] private bool showCloseTimeoutWalkthrough = false;
         [SerializeField] private bool showSynchronousGuardWalkthrough = false;
+        [SerializeField] private bool recordLifecycleTrace;
         private readonly CancellationTokenSource cancellation = new CancellationTokenSource();
         private GameObject canvasObject;
         private GameObject eventSystemObject;
@@ -36,6 +37,16 @@ namespace MUI.Samples.Navigation
         public bool AutomaticWalkthrough
         {
             get => automaticWalkthrough; set => automaticWalkthrough = value;
+        }
+
+        public bool ShowCacheWalkthrough
+        {
+            get => showCacheWalkthrough; set => showCacheWalkthrough = value;
+        }
+
+        public bool RecordLifecycleTrace
+        {
+            get => recordLifecycleTrace; set => recordLifecycleTrace = value;
         }
 
         private void Start()
@@ -144,6 +155,10 @@ namespace MUI.Samples.Navigation
                     maxCachedEstimatedBytes: showCacheWalkthrough ? (long?)(2 * 1024 * 1024) : null,
                     cleanupCapacity: showCloseTimeoutWalkthrough ? 1 : 16);
                 var navigator = host.Navigator;
+                if (recordLifecycleTrace)
+                {
+                    navigator.StartLifecycleTrace(2048);
+                }
                 navigator.LifecycleChanged += LogLifecycle;
                 if (showSynchronousGuardWalkthrough)
                 {
@@ -320,6 +335,11 @@ namespace MUI.Samples.Navigation
                 var stillClosed = await closingPage.Handle.WaitForResultAsync(cancellation.Token);
                 Debug.Log($"MUI Navigation close continued: {stillClosed.Status}; cleanup={stillClosed.Cleanup}");
                 await host.ShutdownAsync();
+                if (recordLifecycleTrace)
+                {
+                    Debug.Log("MUI Navigation lifecycle trace:\n" + navigator.CaptureLifecycleTrace().ExportText());
+                    navigator.StopLifecycleTrace();
+                }
                 Debug.Log("MUI Navigation shutdown complete");
             }
             catch (OperationCanceledException)

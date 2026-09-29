@@ -158,7 +158,17 @@ namespace MUI.UGUI
                 return;
             }
 
-            fontResources.AssignNative(() => target.font = font);
+            fontResources.AssignNative(() => target.font = font,
+                () =>
+                {
+                    if (!clearing || target == null || !ReferenceEquals(target.font, null))
+                    {
+                        return false;
+                    }
+
+                    target.canvasRenderer.Clear();
+                    return true;
+                });
             fontResources.CommitSource(clearing);
             if (IsAlive)
             {

@@ -269,6 +269,7 @@ namespace MUI.Navigation
         private async Task ReleaseCachedContentsAsync(CachedContent[] saved, TaskCompletionSource<Exception> completion)
         {
             var errors = new List<Exception>();
+            var trace = CurrentTraceOperation;
             foreach (var entry in saved)
             {
                 var errorsBeforeRelease = errors.Count;
@@ -277,7 +278,8 @@ namespace MUI.Navigation
                     // 实例资源和凭证释放也会执行外部代码，不能在回调中等待自身清理。
                     using (EnterCallback(null))
                     {
-                        await entry.Content.ReleaseCachedAsync(errors);
+                        await entry.Content.ReleaseCachedAsync(errors,
+                            CreateResourceReleaseTrace(default, entry.Route.Key, trace));
                     }
                 }
                 catch (Exception error)

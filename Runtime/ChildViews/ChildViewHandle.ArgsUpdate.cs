@@ -26,7 +26,7 @@ namespace MUI.ChildViews
 
         IInputView IArgsUpdateHost<TArgs>.ArgsInput => view as IInputView;
 
-        CancellationToken IArgsUpdateHost<TArgs>.ArgsLifetimeToken => activation.Token;
+        LifetimeScope IArgsUpdateHost<TArgs>.ArgsLifetime => activation;
 
         bool IArgsUpdateHost<TArgs>.CanUpdateArgs => CanUpdateArgs;
 
@@ -36,6 +36,7 @@ namespace MUI.ChildViews
         /// </summary>
         public ValueTask<ArgsUpdateOutcome> UpdateArgsAsync(TArgs nextArgs, CancellationToken cancellationToken = default)
         {
+            using var diagnostic = Owner.BeginDiagnostic("ChildView.UpdateArgsAsync", "ArgsPreparation");
             Owner.RequireThread();
             if (IsLifecycleExecuting)
             {

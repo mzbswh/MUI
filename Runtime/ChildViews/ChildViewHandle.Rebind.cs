@@ -27,6 +27,7 @@ namespace MUI.ChildViews
         /// </summary>
         public ValueTask<RebindOutcome> RebindAsync(TViewModel next, CancellationToken cancellationToken = default)
         {
+            using var diagnostic = Owner.BeginDiagnostic("ChildView.RebindAsync", "RebindPreparation");
             Owner.RequireThread();
             if (next == null)
             {
@@ -56,6 +57,7 @@ namespace MUI.ChildViews
         internal ValueTask<PreparedViewRebind> PrepareStagedRebindAsync(TViewModel next,
             CancellationToken cancellationToken)
         {
+            using var diagnostic = Owner.BeginDiagnostic("ChildView.RebindAsync", "RebindPreparation");
             Owner.RequireThread();
             if (next == null)
             {

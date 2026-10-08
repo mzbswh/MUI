@@ -15,7 +15,7 @@ namespace MUI.Navigation
 
         IInputView IArgsUpdateHost<TArgs>.ArgsInput => view as IInputView;
 
-        CancellationToken IArgsUpdateHost<TArgs>.ArgsLifetimeToken => ActivationToken;
+        LifetimeScope IArgsUpdateHost<TArgs>.ArgsLifetime => activationLifetime;
 
         bool IArgsUpdateHost<TArgs>.CanUpdateArgs => IsActive && ActivationCommitted &&
                     !EnterPending && !HasCloseStarted && CloseRequest == null && !IsRebinding;

@@ -684,12 +684,18 @@ namespace MUI.ChildViews
 
         private void Invoke(Action action)
         {
+            using var diagnostic = Owner.BeginCallbackDiagnostic();
             var previous = CurrentCallback.Value;
             var frame = new CallbackFrame { Owner = this, Parent = previous };
             CurrentCallback.Value = frame;
             try
             {
                 action();
+            }
+            catch (Exception error)
+            {
+                UIErrors.AttachContext(error, UIErrors.CurrentContext);
+                throw;
             }
             finally
             {
@@ -701,12 +707,18 @@ namespace MUI.ChildViews
 
         private async ValueTask InvokeAsync(Func<ValueTask> action)
         {
+            using var diagnostic = Owner.BeginCallbackDiagnostic();
             var previous = CurrentCallback.Value;
             var frame = new CallbackFrame { Owner = this, Parent = previous };
             CurrentCallback.Value = frame;
             try
             {
                 await action();
+            }
+            catch (Exception error)
+            {
+                UIErrors.AttachContext(error, UIErrors.CurrentContext);
+                throw;
             }
             finally
             {

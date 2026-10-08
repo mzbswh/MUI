@@ -38,6 +38,11 @@ namespace MUI
         /// <summary>只读取框架会话状态；外部上下文由驱动器按其实际解绑任务确认，不调用项目查询属性。</summary>
         internal virtual bool IsCleanupConfirmed => false;
 
+        /// <summary>框架换绑预览将回滚责任登记到本次激活；自定义上下文由驱动器托管返回的准备对象。</summary>
+        internal virtual void SetRebindCleanupOwner(LifetimeScope owner)
+        {
+        }
+
         /// <summary>绑定前设置本次激活的命令目标，避免共享模型持有特定界面。</summary>
         public abstract void SetCommandTarget(ICommandTarget target);
 
@@ -118,6 +123,7 @@ namespace MUI
         private TaskCompletionSource<bool> cleanupCompletion;
         private bool cleanupPending;
         private Exception cleanupFailure;
+        private LifetimeScope rebindCleanupOwner;
 
         protected BindingContext(IView view, TViewModel viewModel)
         {
@@ -172,6 +178,8 @@ namespace MUI
         internal override bool IsExecutingCommand => session != null && session.IsExecutingCommand;
 
         internal override int ExecutingCommandCount => session == null ? 0 : session.ExecutingCommandCount;
+
+        internal override void SetRebindCleanupOwner(LifetimeScope owner) => rebindCleanupOwner = owner;
 
         protected abstract void BuildBindings(BindingBuilder<TViewModel> builder);
 
@@ -381,7 +389,7 @@ namespace MUI
             }
 
             var validation = new BindingSession();
-            var preview = new BindingPreview();
+            var preview = new BindingPreview(rebindCleanupOwner);
             try
             {
                 cancellationToken.ThrowIfCancellationRequested();

@@ -280,7 +280,11 @@ namespace MUI
                     throw new InvalidOperationException("Candidate binding does not support isolated rebind preparation.");
                 }
 
-                invoke(() => preparedBinding.SetCommandTarget(target));
+                invoke(() =>
+                {
+                    preparedBinding.SetCommandTarget(target);
+                    preparedBinding.SetRebindCleanupOwner(activation);
+                });
                 await invokeAsync(async () =>
                 {
                     preparedBindingCommit = await bindingPreparation.PrepareRebindAsync(cancellation.Token);
@@ -464,7 +468,9 @@ namespace MUI
                 {
                     try
                     {
-                        await invokeAsync(preparedBindingCommit.DisposeAsync);
+                        // 框架预览在内部准备失败时也登记责任；外部对象由统一归还入口登记。
+                        await invokeAsync(() => CleanupRegistry.ReleaseAsync(preparedBindingCommit,
+                            "BindingRebindPreparation", preparedBindingCommit is BindingPreview ? null : activation));
                     }
                     catch (Exception error)
                     {
@@ -477,7 +483,8 @@ namespace MUI
                 {
                     try
                     {
-                        await invokeAsync(preparedOperation.DisposeAsync);
+                        await invokeAsync(() => CleanupRegistry.ReleaseAsync(preparedOperation,
+                            "ViewModelRebindPreparation", activation));
                         if (cleanup == RebindCleanup.NotRequired)
                         {
                             cleanup = RebindCleanup.Complete;

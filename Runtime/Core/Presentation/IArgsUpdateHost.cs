@@ -1,5 +1,4 @@
 using System;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace MUI
@@ -22,7 +21,7 @@ namespace MUI
             get;
         }
 
-        CancellationToken ArgsLifetimeToken
+        LifetimeScope ArgsLifetime
         {
             get;
         }

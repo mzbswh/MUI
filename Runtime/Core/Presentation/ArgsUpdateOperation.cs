@@ -23,7 +23,7 @@ namespace MUI
             this.host = host;
             this.beforeCommit = beforeCommit;
             this.afterCommit = afterCommit;
-            cancellation = CancellationTokenSource.CreateLinkedTokenSource(token, host.ArgsLifetimeToken);
+            cancellation = CancellationTokenSource.CreateLinkedTokenSource(token, host.ArgsLifetime.Token);
         }
 
         internal Task<ArgsUpdateOutcome> Completion => completion.Task;
@@ -166,7 +166,8 @@ namespace MUI
                     cleanup = ArgsUpdateCleanup.Complete;
                     try
                     {
-                        await host.InvokeArgsCallbackAsync(candidate.DisposeAsync);
+                        await host.InvokeArgsCallbackAsync(() => CleanupRegistry.ReleaseAsync(candidate,
+                            "ArgsUpdatePreparation", host.ArgsLifetime));
                     }
                     catch (Exception error)
                     {

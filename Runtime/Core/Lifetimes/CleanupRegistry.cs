@@ -153,6 +153,69 @@ namespace MUI
             return adapters.GetValue(resource, value => new CleanupResponsibility(value.DisposeAsync, owner)).DisposeAsync();
         }
 
+        /// <summary>
+        /// 所属操作收尾时归还候选，并把未确认责任登记到其激活作用域。
+        /// 责任属性失效也继续执行一次真实清理；不根据项目状态查询推断归还成功。
+        /// </summary>
+        internal static async ValueTask ReleaseAsync(IAsyncDisposable resource, string owner, LifetimeScope lifetime)
+        {
+            if (resource == null)
+            {
+                return;
+            }
+
+            var child = resource as LifetimeScope;
+            CleanupResponsibility responsibility = null;
+            Exception registrationFailure = null;
+            if (child == null)
+            {
+                try
+                {
+                    responsibility = GetResponsibility(resource, owner);
+                    if (responsibility == null)
+                    {
+                        throw new InvalidOperationException("Cleanup adapter returned no responsibility.");
+                    }
+                }
+                catch (Exception error)
+                {
+                    registrationFailure = error;
+                    // 登记失败不表示候选已经归还；回退仍持有对象和一次清理回调，不声明安全重试。
+                    responsibility = adapters.GetValue(resource, value => new CleanupResponsibility(value.DisposeAsync, owner));
+                }
+            }
+
+            Exception releaseFailure = null;
+            try
+            {
+                if (registrationFailure == null)
+                {
+                    await ReleaseAsync(resource, owner);
+                }
+                else
+                {
+                    await responsibility.DisposeAsync();
+                }
+            }
+            catch (Exception error)
+            {
+                releaseFailure = error;
+            }
+
+            var failure = registrationFailure == null ? releaseFailure : releaseFailure == null ? registrationFailure :
+                new AggregateException("Candidate cleanup registration and release failed.", registrationFailure, releaseFailure);
+            if (failure != null)
+            {
+                if (lifetime != null)
+                {
+                    lifetime.RecordCleanupFailureWithConfirmation(failure, child == null ?
+                        (Func<bool>)(() => responsibility.CaptureSnapshot().State == CleanupResponsibilityState.Completed) :
+                        () => child.IsCleanupConfirmed);
+                }
+                System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(failure).Throw();
+            }
+        }
+
         internal static void Retain(CleanupResponsibility responsibility)
         {
             lock (gate)

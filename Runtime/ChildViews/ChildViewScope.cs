@@ -15,6 +15,7 @@ namespace MUI.ChildViews
     {
         private readonly int threadId = Thread.CurrentThread.ManagedThreadId;
         private readonly SynchronizationContext synchronizationContext = SynchronizationContext.Current;
+        private readonly UIErrorContext diagnosticContext = UIErrors.CurrentContext;
         private readonly LifetimeScope owner;
         private readonly LifetimeScope operations;
         private readonly List<ChildViewHandle> handles = new List<ChildViewHandle>();
@@ -83,6 +84,18 @@ namespace MUI.ChildViews
 
         internal void Own(IAsyncDisposable resource) => owner.Own(resource);
 
+        /// <summary>直接调用子视图 API 也沿用父页面身份，不由当前调用者或其他宿主替换归属。</summary>
+        internal IDisposable BeginDiagnostic(string operation, string phase) =>
+            UIErrors.BeginOwnedPhase(diagnosticContext, operation, phase);
+
+        internal IDisposable BeginCallbackDiagnostic()
+        {
+            var current = UIErrors.CurrentContext;
+            var sameOwner = diagnosticContext.HostId != Guid.Empty && diagnosticContext.HostId == current.HostId &&
+                diagnosticContext.ViewId == current.ViewId;
+            return BeginDiagnostic("ChildView", sameOwner ? current.Phase ?? "ChildViewLifecycle" : "ChildViewLifecycle");
+        }
+
         /// <summary>在父级绑定提交时调用，与当前是否可见无关。</summary>
         public void CommitActivation()
         {
@@ -143,6 +156,7 @@ namespace MUI.ChildViews
                     CancellationToken callerToken)
                     where TViewModel : ViewModel
         {
+            using var diagnostic = BeginDiagnostic("ChildView.PrepareAsync", "ChildViewPreparation");
             var handle = NewHandle(template, args);
             using (var linked = CancellationTokenSource.CreateLinkedTokenSource(scopeToken, owner.Token, callerToken))
             {

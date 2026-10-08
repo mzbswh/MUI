@@ -21,6 +21,25 @@
 
 ## 当前基础
 
+### 2026-10-08 操作候选清理与子视图诊断归属
+
+- 真实 UGUI 驱动先复现页面/子视图的参数更新与 Presenter 换绑共四条路径：候选清理失败只保存异常，父子 View 仍提前归还；失败日志 `/private/tmp/mui-operation-cleanup-reproduction-play-2-20261008.log`。统一释放入口现捕获稳定责任、从实际资源入口释放，并把未确认责任登记到所属激活。责任属性抛错或返回空值也继续真实清理一次；登记与清理双失败保留两项异常及不可安全重试的回退责任。显式恢复不重复未知回调，也不改写首次失败结果。
+- 子视图作用域保存父页面诊断值快照，准备、公开参数更新、公开及内部换绑、生命周期回调恢复所属身份；异常传播前附加该上下文。验收向公开操作和子视图准备注入其他随机宿主上下文，确认候选准备及释放仍归属于原页面，且释放阶段正确。
+- 临时驱动 `/private/tmp/mui-operation-cleanup-20261008/MuiOperationCleanupObservation.cs` 在 Play Mode 通过 40 组、586 项断言，failed=0/reports=86（预期注入故障）；日志 `/private/tmp/mui-operation-cleanup-registration-play-20261008.log`。四条路径均覆盖同步完成、未知责任、安全恢复、迟到取消、慢清理、提交失败、责任属性异常后的成功及失败收尾；未知失败根节点保留至 Play/进程终止。
+- macOS IL2CPP Development/High stripping Player 通过相同 40 组、586 项断言、reports=86；构建 Succeeded/errors=0/warnings=0，构建及 Player 退出码均为 0。日志分别为 `/private/tmp/mui-operation-cleanup-final-il2cpp-build-20261008.log` 与 `/private/tmp/mui-operation-cleanup-final-il2cpp-player-20261008.log`。退出仍有 13 条 `IL2CPP Free after allocator was destroyed` 提示，不报告干净退出或完整内存验收通过。
+- 当前源码下列表换绑原生回归通过 37 组、509 项断言、reports=30；日志 `/private/tmp/mui-operation-cleanup-list-regression-play-20261008.log`。离线 Navigation 及依赖构建 0 warnings/0 errors；12 个改动 C# 文件成员布局、大括号及空白检查 0 违规。BindingBuilder 的集合引用曾被误删，已恢复，当前原生编译及 Play/AOT 验证包含该修正。未新增仓库测试。
+- 完整目标仍待后续验收：列表候选节点清理失败后的节点保留、多模板、动态测量、缓存版本/预算/过期、宿主销毁、异步焦点、实体输入、八项示例及全仓库规范审查。
+
+### 2026-10-08 换绑准备清理责任
+
+- 扩展列表验收先通过 31 组资源、布局与大规模来源场景，随后复现自定义 IPreparedBindingTarget 回滚释放抛错后，框架只保存异常却仍归还父 View 的缺口；失败日志 `/private/tmp/mui-list-rebind-unknown-play-20261008.log`。BindingPreview 原先直接调用候选 DisposeAsync 后丢弃引用，没有登记稳定责任。
+- BindingPreview 已从 BindingBuilder 拆为独立文件，候选登记时捕获稳定目标责任，逆序释放且继续处理独立项；未知失败由账本保留对象/回调。预览容器提供自己的稳定责任，初次释放实际执行回调，显式重试只确认已登记叶责任；不会重复未知项目清理。失败同步记入本次激活的确认依赖，阻止父 View 提前归还。成功后清除候选、读取检查与目标值快照。自定义 BindingContext 返回的准备对象也由驱动器托管并登记到激活，首次换绑/关闭失败不因后续确认而改写。
+- 最终临时原生 UGUI 驱动 `/private/tmp/mui-list-rebind-20261008/MuiListRebindObservation.cs` 通过 37 组、509 项断言，reports=30（预期注入故障）；日志 `/private/tmp/mui-list-rebind-external-preparation-play-20261008.log`。除原 24 组外，覆盖普通/虚拟列表候选资源部分归还、未知准备目标失败、有明确幂等责任的目标恢复、外部 BindingContext 准备对象清理失败，以及虚拟列表准备期间视口/列数变化和 100/1,000/10,000 条来源换绑。未知失败场景在观察结束后继续保留原生根节点，直至进程或 Play Mode 终止，不人为销毁节点来清空责任。
+- 大规模场景使用 600×240 局部 Canvas 单位视口、60 固定条目尺寸、0 预留行、capacity=16；本地换绑在调用帧完成，每次已提交来源物化和可输入条目均为 4。先后 3 条初始来源及两批大来源只取得 11 个纹理凭证，延迟首项准备时不启动后续项，不为验证精确位置物化全部数据。该项验证固定尺寸单模板换绑范围，不证明动态测量、多模板或滚动性能预算。
+- 最终 macOS IL2CPP Development/High stripping Player 通过相同 37 组、509 项断言、reports=30；构建 Succeeded/errors=0/warnings=0，Player 退出码 0。构建日志 `/private/tmp/mui-list-rebind-preparation-final-il2cpp-build-20261008.log`，运行日志 `/private/tmp/mui-list-rebind-preparation-final-il2cpp-player-20261008.log`，产物 `/private/tmp/mui-list-rebind-il2cpp-20261008.app`。退出仍有 13 条 `IL2CPP Free after allocator was destroyed` 提示，不报告干净退出或完整内存验收通过。
+- 最新核心行为修改下原七组父子换绑回归通过，reports=2；日志 `/private/tmp/mui-prepared-target-rebind-regression-play-20261008.log`。最终离线 Navigation 及依赖构建 0 warnings/0 errors；四个 C# 文件成员布局、控制流大括号及空白检查 0 违规，新 BindingPreview 配套 meta 已提供。未新增仓库测试，未自动提交。
+- 本轮审查发现 Presenter 换绑准备对象与参数更新候选的释放入口直接调用 DisposeAsync，仅保存失败结果；该缺口已由上方“操作候选清理与子视图诊断归属”记录的后续实现及验收补齐。完整目标验收继续保留。
+
 ### 2026-10-08 普通与虚拟列表换绑
 
 - 换绑提交前的来源、布局或资格失效通过取消结果返回，保留旧绑定；不再因内部取消未触发显式令牌而额外记录异常。已开始解绑或候选清理失败仍按故障处理。

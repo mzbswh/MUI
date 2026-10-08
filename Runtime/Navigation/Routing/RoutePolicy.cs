@@ -171,9 +171,12 @@ namespace MUI.Navigation
         public static RoutePolicy Default { get; } = new RoutePolicy();
 
         /// <summary>默认拒绝重复打开；ReturnReady 仅返回参数和指定模型兼容的就绪实例。</summary>
-        public ExistingInstancePolicy ExistingInstance { get; }
+        public ExistingInstancePolicy ExistingInstance
+        {
+            get;
+        }
 
-        /// <summary>正常关闭后尝试缓存；仅接纳框架拥有模型且 Presenter 显式支持复用的实例。</summary>
+        /// <summary>正常关闭后尝试缓存已重置的 View；View 与取得凭证均须显式支持缓存，业务实例始终清理。</summary>
         public ViewCacheMode CacheMode
         {
             get;

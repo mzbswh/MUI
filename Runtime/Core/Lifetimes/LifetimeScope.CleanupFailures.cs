@@ -21,6 +21,13 @@ namespace MUI
 
         internal void RecordCleanupFailure(Exception failure, CleanupResponsibility responsibility)
         {
+            RecordCleanupFailureWithConfirmation(failure, responsibility == null ? null :
+                (Func<bool>)(() => responsibility.CaptureSnapshot().State == CleanupResponsibilityState.Completed));
+        }
+
+        /// <summary>框架容器按自身清理状态确认，首次错误仍写入最终结果，不据历史异常猜测归还状态。</summary>
+        internal void RecordCleanupFailureWithConfirmation(Exception failure, Func<bool> confirmed)
+        {
             if (failure == null)
             {
                 throw new ArgumentNullException(nameof(failure));
@@ -40,7 +47,7 @@ namespace MUI
                 {
                     ++operationCleanupFailureCount;
                 }
-                if (responsibility == null)
+                if (confirmed == null)
                 {
                     hasUnknownOperationCleanupFailure = true;
                 }
@@ -50,8 +57,25 @@ namespace MUI
                     {
                         unconfirmedReleases = new List<Func<bool>>();
                     }
-                    unconfirmedReleases.Add(() => responsibility.CaptureSnapshot().State == CleanupResponsibilityState.Completed);
+                    unconfirmedReleases.Add(confirmed);
                 }
+            }
+        }
+
+        /// <summary>附加已存在的框架依赖，仅用于确认状态；不启动工作或改写首次释放结果。</summary>
+        internal void TrackCleanupConfirmation(Func<bool> confirmed)
+        {
+            if (confirmed == null)
+            {
+                throw new ArgumentNullException(nameof(confirmed));
+            }
+            lock (gate)
+            {
+                if (unconfirmedReleases == null)
+                {
+                    unconfirmedReleases = new List<Func<bool>>();
+                }
+                unconfirmedReleases.Add(confirmed);
             }
         }
 

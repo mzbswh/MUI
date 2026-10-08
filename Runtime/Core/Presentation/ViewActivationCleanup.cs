@@ -51,11 +51,16 @@ namespace MUI
 
             // 解绑先同步撤销订阅和命令资格，之后与激活资源清理共同排空。
             Task unbind = Task.CompletedTask;
+            var unbindStarted = false;
             if (binding != null)
             {
+                // 解绑与激活资源可并行排空，但激活不能在仍有订阅或命令时确认完成。
+                activation.TrackCleanupConfirmation(() =>
+                    (unbindStarted && unbind.Status == TaskStatus.RanToCompletion) || binding.IsCleanupConfirmed);
                 try
                 {
                     unbind = binding.UnbindAsync().AsTask();
+                    unbindStarted = true;
                 }
                 catch (Exception error)
                 {

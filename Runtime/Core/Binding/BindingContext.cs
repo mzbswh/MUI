@@ -35,6 +35,9 @@ namespace MUI
         /// <summary>所有调用链的在途绑定命令数量，只读取会话内部计数。</summary>
         internal virtual int ExecutingCommandCount => 0;
 
+        /// <summary>只读取框架会话状态；外部上下文由驱动器按其实际解绑任务确认，不调用项目查询属性。</summary>
+        internal virtual bool IsCleanupConfirmed => false;
+
         /// <summary>绑定前设置本次激活的命令目标，避免共享模型持有特定界面。</summary>
         public abstract void SetCommandTarget(ICommandTarget target);
 
@@ -104,6 +107,8 @@ namespace MUI
     public abstract partial class BindingContext<TViewModel> : BindingContext, IFreezableBindingContext, IImmediateRebindDetach, IBindingRebindPreparation where TViewModel : ViewModel
     {
         private BindingSession session;
+        private BindingSession cleanupSession;
+        private bool completedSessionCleanupConfirmed = true;
         private BindingState state;
         private bool committing;
         private bool freezing;
@@ -135,6 +140,9 @@ namespace MUI
         public override ViewModel Model => ViewModel;
 
         public override BindingState State => state;
+
+        internal override bool IsCleanupConfirmed => !cleanupPending && session == null &&
+            (cleanupSession == null ? completedSessionCleanupConfirmed : cleanupSession.IsCleanupConfirmed);
 
         /// <summary>按需物化可重复等待的清理任务；清理状态由会话持有。</summary>
         public override Task CleanupCompletion
@@ -417,6 +425,7 @@ namespace MUI
                 new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
             deferredUnbind = null;
             var previous = session;
+            cleanupSession = previous;
             session = null;
             cleanup = cleanupCompletion.Task;
             cleanupPending = true;
@@ -454,6 +463,11 @@ namespace MUI
 
         private void CompleteSessionCleanup(List<Exception> errors)
         {
+            completedSessionCleanupConfirmed = cleanupSession == null || cleanupSession.IsCleanupConfirmed;
+            if (completedSessionCleanupConfirmed)
+            {
+                cleanupSession = null;
+            }
             state = errors.Count == 0 ? BindingState.Unbound : BindingState.Faulted;
             cleanupFailure = errors.Count == 0 ? null : new AggregateException("Binding cleanup failed.", errors);
             cleanupPending = false;

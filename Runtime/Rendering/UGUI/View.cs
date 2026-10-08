@@ -8,7 +8,7 @@ namespace MUI.UGUI
 {
     [DisallowMultipleComponent]
     [RequireComponent(typeof(CanvasGroup))]
-    public sealed partial class View : MonoBehaviour, IOrderedView, IChildViewHost, IModalView, IInputGestureView, IFocusView, IVisibilityView, IChildTickHost, IEnterTransitionView, IExitTransitionView, IDisposable
+    public sealed partial class View : MonoBehaviour, IOrderedView, IChildViewHost, IModalView, IInputGestureView, IFocusView, IVisibilityView, IChildTickHost, IEnterTransitionView, IExitTransitionView, ICacheableView, IDisposable
     {
         private InputGate inputGate;
         private bool lastInputEnabled;
@@ -89,9 +89,9 @@ namespace MUI.UGUI
         internal void ConfigureBeforeActivation(Action<View> configure)
         {
             RequireAlive();
-            if (configuringCreation || childViews != null)
+            if (configuringCreation || (childViews != null && !childViews.IsCleanupConfirmed))
             {
-                throw new InvalidOperationException("创建配置必须在 View 首次激活之前执行，且不能重入。");
+                throw new InvalidOperationException("View 配置必须在首次激活前或旧激活完全清理后执行，且不能重入。");
             }
 
             configuringCreation = true;
@@ -124,7 +124,7 @@ namespace MUI.UGUI
                 throw new InvalidOperationException("End visual retention before starting a new activation.");
             }
 
-            if (childViews != null && !childViews.IsDisposedSuccessfully)
+            if (childViews != null && !childViews.IsCleanupConfirmed)
             {
                 throw new InvalidOperationException("Previous child activation has not finished cleanup.");
             }

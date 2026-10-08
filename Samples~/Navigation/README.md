@@ -45,12 +45,12 @@ Enable **Show Enter Transition Preview** on NavigationDemo to display a dedicate
 
 ## 顶层页面缓存演示
 
-Play 前启用 NavigationDemo 的 **Show Cache Walkthrough**，建议关闭两个 Preview 选项。示例先异步打开页面并关闭入缓存，再同步用新参数打开同一路由。观察日志：模型和 View 引用相同，Handle 不同，Selection 从 10 变为 20；关闭旧句柄不会关闭新激活。第二次关闭后等待 ClearCacheAsync，缓存数量应为 0，并出现最终 OnDestroy。OnCreate 应仅调用一次，OnOpen/OnClose 应各两次。CachedPagePresenter 显式重置每次激活的子模型、列表与选择，动态内容源设为 null。
+Play 前启用 NavigationDemo 的 **Show Cache Walkthrough**，建议关闭两个 Preview 选项。示例先异步打开页面并等待关闭清理，再用新参数打开同一路由。观察日志：View 引用相同，模型与 Handle 不同，Selection 从 10 变为 20；关闭旧句柄不会关闭新激活。每次打开创建新的 Presenter，OnCreate/OnOpen/OnClose/OnDestroy 各执行一次，实例资源与模型在关闭时清理。第二次关闭后等待 ClearCacheAsync，缓存数量应为 0，View 凭证已实际归还。缓存需要 View 实现 ICacheableView，凭证通过 ICacheableViewAcquisition 显式保证归还依赖可延长；PrefabViewProvider 已支持，缓存命中前重新执行配置回调以注入当前资源加载器。
 
-缓存仅保留顶层实例内容，初次异步准备仍可能涉及子视图；重新打开会重建子激活。示例未在 Unity 中运行，上述为人工验收预期，不是通过记录。
+缓存仅保留解除绑定的 View 凭证与其原生节点，初次异步准备仍可能涉及子视图；重新打开会重建子激活。示例未在 Unity 中运行，上述为人工验收预期，不是通过记录。
 
 
-缓存演示开启时 UIHost 使用容量 2。基础复开流程后增加两段：Timed 路由保留 100ms，等待 200ms 后应创建新模型；随后按 A、B、A、C 顺序打开并关闭 KeepAlive 路由，预期 B 被淘汰，A 仍能复用。日志同时记录目录数量与待释放数量，最后等待 ClearCacheAsync。过期是否已被扫描移出不影响命中拒绝；上述流程仍仅完成离线编译，未取得实际运行结果。
+缓存演示开启时 UIHost 使用容量 2。基础复开流程后增加两段：Timed 路由保留 100ms，等待 200ms 后应创建新 View；随后按 A、B、A、C 顺序打开并等待关闭清理，预期 B 被淘汰，A 的 View 仍能复用。模型与 Presenter 每次都重新创建，不用模型身份判断是否命中缓存。日志同时记录目录数量与待释放数量，最后等待 ClearCacheAsync。过期是否已被扫描移出不影响命中拒绝；上述流程仍仅完成离线编译，未取得实际运行结果。
 
 
 同一缓存演示配置 2 MiB 估算预算：普通路由声明每实例 1 MiB；字节段先缓存 1 MiB 条目，再关闭 1.5 MiB 条目，即使数量上限 2 尚未用满也需要淘汰旧内容。未知大小和 3 MiB 条目均不进入缓存。若旧内容释放立即成功，预期目录保持 1、预留为 1572864 字节；如释放异步未结束，新项可能拒绝入缓存，待释放字节不会提前扣减。最后成功清空应预留为 0；任何释放失败都保留相应失败额度并报告异常。数字仅展示预算机制，未测量实际内存。

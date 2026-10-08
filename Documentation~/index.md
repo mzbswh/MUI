@@ -110,4 +110,10 @@ ImageElement.Sprite、RawImageElement.Texture、TextElement.Font 和 GraphicElem
 
 ## 固定容量内容
 
+页面缓存只持有解除绑定并重置的 View 凭证，每次打开仍创建新的模型、Presenter、实例作用域、激活、句柄和结果。正常关闭清理模型与 Presenter 的实例资源后才尝试缓存，外部传入模型仍只借用；故障关闭、强制关闭与宿主退出直接归还。缓存命中不重复获取 View，但会重新执行当前激活所需的资源配置；重置或重新配置失败的 View 淘汰并归还，不继续复用。
+
+渲染器通过 `ICacheableView.ResetForCache()` 清除旧模型引用、焦点、输入与资源上下文；凭证通过 `ICacheableViewAcquisition` 显式保证必要后端依赖能延长至实际归还，并通过 `PrepareForReuse()` 注入当前配置。`AcquiredView` 默认 `supportsCaching: false`，项目后端满足此保证才显式启用。UGUI View 和 PrefabViewProvider 已支持；Prefab 的配置回调在缓存命中后再次执行，须允许重复配置。旧 `IReusableViewPresenter` 标记已弃用，不能使 Presenter 或模型跨关闭保留。缓存未接管任何旧实例的 LifetimeScope 或业务资源。
+
+自定义 UGUI Element 可覆盖 `OnResetForCache()`，解除自己保存的模型、参数和活动引用。此钩子在旧业务实例已清理、View 隐藏且不可交互时同步调用，不能启动新工作；抛错时整个 View 淘汰并执行最终释放。
+
 少量已有槽位或显式挂点可使用 [固定槽位列表](slot-lists.md)，共用子视图生命周期与候选换绑。

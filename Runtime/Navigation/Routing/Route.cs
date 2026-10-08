@@ -4,7 +4,7 @@ using MUI.Resources;
 
 namespace MUI.Navigation
 {
-    /// <summary>不可变身份、创建配置与策略；缓存可复用兼容的实例组。</summary>
+    /// <summary>不可变身份、创建配置与策略；缓存只复用兼容的 View 凭证。</summary>
     public abstract class Route
     {
         protected Route(string key, ViewResource resource, RoutePolicy policy,
@@ -49,7 +49,6 @@ namespace MUI.Navigation
         {
             get;
         }
-
     }
 
     public sealed class Route<TViewModel, TArgs, TResult> : Route where TViewModel : ViewModel

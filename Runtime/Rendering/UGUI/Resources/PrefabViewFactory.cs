@@ -103,7 +103,21 @@ namespace MUI.UGUI
                 }
                 // 独立保留原生根对象；View 组件提前销毁后仍要负责释放整个预制体实例。
                 return new AcquiredView(view, released => ReleaseAsync(released, instance),
-                    System.Threading.Thread.CurrentThread.ManagedThreadId);
+                    System.Threading.Thread.CurrentThread.ManagedThreadId, supportsCaching: true,
+                    prepareForReuse: reused =>
+                    {
+                        requireCurrent?.Invoke();
+                        var cached = (View)reused;
+                        if (cached == null || !cached.IsAlive || parent == null || cached.transform.parent != parent)
+                        {
+                            throw new InvalidOperationException("Cached View no longer belongs to its mounting root.");
+                        }
+                        if (configureView != null)
+                        {
+                            cached.ConfigureBeforeActivation(configureView);
+                        }
+                        requireCurrent?.Invoke();
+                    });
             }
             catch (Exception failure)
             {

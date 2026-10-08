@@ -392,20 +392,15 @@ namespace MUI.Navigation
 
         public override void CreateModel()
         {
-            // 缓存命中只转移内容所有权，淘汰通过统一清理流程释放。
-            content = assignedModel == null ? Owner.TakeCachedContent(route) : null;
-            if (content == null)
+            // 缓存只移交 View 凭证；每次打开仍创建新的模型、Presenter 和实例作用域。
+            content = new ViewContent<TViewModel, TArgs, TResult>(Owner.CacheGeneration,
+                BindingRegistry.Generation, Owner.CaptureProviderVersion());
+            var cached = Owner.TakeCachedContent(route);
+            if (cached != null)
             {
-                // 在工厂执行前捕获代际，之后的失效不能被迟到内容重新登记为当前缓存。
-                content = new ViewContent<TViewModel, TArgs, TResult>(Owner.CacheGeneration,
-                    BindingRegistry.Generation, Owner.CaptureProviderVersion());
-                content.Create(route, assignedModel, InvokeLifecycle, InvokeLifecycleAsync, RequirePreparationCurrent);
+                AdoptViewResource(cached.TakeAcquisition());
             }
-            else
-            {
-                lifecycle.RebindHost(InvokeLifecycle, InvokeLifecycleAsync);
-                AttachHost();
-            }
+            content.Create(route, assignedModel, InvokeLifecycle, InvokeLifecycleAsync, RequirePreparationCurrent);
 
             RequirePreparationCurrent();
             TickInterval = lifecycle.TickInterval;
@@ -663,13 +658,27 @@ namespace MUI.Navigation
             {
                 DetachHost(errors);
                 var retained = false;
-                if (wasCommitted && !CleanupTimedOut && errors.Count == 0 && lifecycleFailure == null && lifecycle.OwnsModel &&
-                    route.Policy.CacheMode != ViewCacheMode.None && presenter is IReusableViewPresenter &&
+                if (wasCommitted && !CleanupTimedOut && errors.Count == 0 && lifecycleFailure == null &&
+                    route.Policy.CacheMode != ViewCacheMode.None &&
                     (reason == DismissReason.Closed || reason == DismissReason.Back || reason == DismissReason.Replaced))
                 {
                     try
                     {
-                        retained = Owner.RetainContent(route, content);
+                        var cached = await content.DetachForCacheAsync(errors, activationLifetime);
+                        if (cached != null)
+                        {
+                            try
+                            {
+                                retained = !CleanupTimedOut && Owner.RetainContent(route, cached);
+                            }
+                            finally
+                            {
+                                if (!retained)
+                                {
+                                    await cached.ReleaseCachedAsync(errors, beginResourceRelease);
+                                }
+                            }
+                        }
                     }
                     catch (Exception error)
                     {

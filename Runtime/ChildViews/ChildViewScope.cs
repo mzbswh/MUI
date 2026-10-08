@@ -11,7 +11,7 @@ namespace MUI.ChildViews
     /// 取消，都在所属 UI 线程执行。准备中的子项保持隐藏，
     /// 必须同时满足已提交和父级门控条件才能显示。
     /// </summary>
-    public sealed partial class ChildViewScope : IAsyncDisposable
+    public sealed partial class ChildViewScope : IAsyncDisposable, ICleanupResponsibilitySource
     {
         private readonly int threadId = Thread.CurrentThread.ManagedThreadId;
         private readonly SynchronizationContext synchronizationContext = SynchronizationContext.Current;
@@ -22,6 +22,9 @@ namespace MUI.ChildViews
         private readonly CancellationTokenRegistration parentCancellation;
         private TaskCompletionSource<bool> disposal;
         private Exception disposalFailure;
+        private bool cleanupFinished;
+        private bool hasUnknownCleanupFailure;
+        private readonly List<Func<bool>> unconfirmedChildren = new List<Func<bool>>();
         private bool ended;
         private bool closeRequested;
         private bool visible;
@@ -36,6 +39,8 @@ namespace MUI.ChildViews
             this.owner = owner ?? throw new ArgumentNullException(nameof(owner));
 
             operations = new LifetimeScope();
+            CleanupResponsibility = new CleanupResponsibility(ReleaseOwnedScopeAsync,
+                "ChildViewScope", true, threadId);
             owner.Own(this);
             parentCancellation = owner.Token.Register(OnParentCancelled);
         }
@@ -45,10 +50,18 @@ namespace MUI.ChildViews
         public bool IsDisposed => disposal != null && disposal.Task.IsCompleted;
 
         /// <summary>
-        /// 子作用域已完成释放且没有清理错误，父 View 才能开始新的激活。
+        /// 首次释放已完成且没有历史清理错误；当前实际归还状态由 IsCleanupConfirmed 表示。
         /// 未开始释放或清理尚未完成时返回 false。
         /// </summary>
         public bool IsDisposedSuccessfully => IsDisposed && disposalFailure == null;
+
+        /// <summary>当前真实归还已确认；历史任务失败不会改写，安全叶责任恢复后须显式确认本容器。</summary>
+        public bool IsCleanupConfirmed => CleanupResponsibility.CaptureSnapshot().State == CleanupResponsibilityState.Completed;
+
+        public CleanupResponsibility CleanupResponsibility
+        {
+            get;
+        }
 
         public Task CleanupCompletion => disposal == null ? Task.CompletedTask : disposal.Task;
 
@@ -308,6 +321,46 @@ namespace MUI.ChildViews
             }
 
             disposal = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+            _ = CompleteDisposalAsync();
+            return new ValueTask(disposal.Task);
+        }
+
+        private async Task CompleteDisposalAsync()
+        {
+            try
+            {
+                await CleanupResponsibility.DisposeAsync();
+            }
+            catch (Exception error)
+            {
+                disposalFailure = disposalFailure ?? error;
+            }
+            if (disposalFailure == null)
+            {
+                disposal.TrySetResult(true);
+            }
+            else
+            {
+                disposal.TrySetException(disposalFailure);
+                _ = disposal.Task.Exception;
+            }
+        }
+
+        /// <summary>首次执行清理；后续显式重试只核对依赖，不重复生命周期或未知后端回调。</summary>
+        private async ValueTask ReleaseOwnedScopeAsync()
+        {
+            if (!cleanupFinished)
+            {
+                await DisposeCoreAsync();
+            }
+            if (!AreCleanupDependenciesConfirmed())
+            {
+                throw disposalFailure ?? new InvalidOperationException("ChildView scope cleanup dependencies are unconfirmed.");
+            }
+        }
+
+        private async Task DisposeCoreAsync()
+        {
             try
             {
                 EndVisualRetention();
@@ -315,6 +368,7 @@ namespace MUI.ChildViews
             catch (Exception error)
             {
                 cleanupErrors.Add(error);
+                hasUnknownCleanupFailure = true;
             }
 
             try
@@ -326,13 +380,6 @@ namespace MUI.ChildViews
                 cleanupErrors.Add(error);
             }
 
-            // 清理任务一旦发布，必须始终存在使其完成的执行路径。
-            _ = DisposeCoreAsync();
-            return new ValueTask(disposal.Task);
-        }
-
-        private async Task DisposeCoreAsync()
-        {
             try
             {
                 try
@@ -354,23 +401,44 @@ namespace MUI.ChildViews
                     { /* Remove 会记录每个清理错误。 */
                     }
                 }
-
-                if (cleanupErrors.Count != 0)
-                {
-                    throw new AggregateException("ChildView scope cleanup failed.", cleanupErrors);
-                }
-
-                disposal.TrySetResult(true);
             }
             catch (Exception error)
             {
-                disposalFailure = error;
-                disposal.TrySetException(error);
+                cleanupErrors.Add(error);
+                hasUnknownCleanupFailure = true;
             }
             finally
             {
-                parentCancellation.Dispose();
+                try
+                {
+                    parentCancellation.Dispose();
+                }
+                catch (Exception error)
+                {
+                    cleanupErrors.Add(error);
+                    hasUnknownCleanupFailure = true;
+                }
+                cleanupFinished = true;
+                disposalFailure = cleanupErrors.Count == 0 ? null :
+                    new AggregateException("ChildView scope cleanup failed.", cleanupErrors);
             }
+        }
+
+        private bool AreCleanupDependenciesConfirmed()
+        {
+            if (!cleanupFinished || hasUnknownCleanupFailure || handles.Count != 0 || !operations.IsCleanupConfirmed)
+            {
+                return false;
+            }
+            for (var i = unconfirmedChildren.Count - 1; i >= 0; --i)
+            {
+                if (!unconfirmedChildren[i]())
+                {
+                    return false;
+                }
+                unconfirmedChildren.RemoveAt(i);
+            }
+            return true;
         }
 
         internal void Remove(ChildViewHandle handle, Exception failure)
@@ -379,6 +447,11 @@ namespace MUI.ChildViews
             if (failure != null)
             {
                 cleanupErrors.Add(failure);
+                var confirmed = handle.CaptureCleanupConfirmation();
+                if (!confirmed())
+                {
+                    unconfirmedChildren.Add(confirmed);
+                }
             }
 
             try

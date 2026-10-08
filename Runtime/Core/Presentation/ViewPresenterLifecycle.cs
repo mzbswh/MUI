@@ -15,8 +15,8 @@ namespace MUI
         private readonly ViewModelOwnership<TViewModel> modelOwnership;
         private readonly Presenter<TViewModel, TArgs, TResult> presenter;
         private readonly LifetimeScope instance;
-        private Action<Action> invoke;
-        private Func<Func<ValueTask>, ValueTask> invokeAsync;
+        private readonly Action<Action> invoke;
+        private readonly Func<Func<ValueTask>, ValueTask> invokeAsync;
         private bool created;
         private bool opened;
         private bool destroyed;
@@ -39,8 +39,6 @@ namespace MUI
 
         internal TViewModel Model => model;
 
-        internal bool OwnsModel => modelOwnership.OwnsCurrentModel;
-
         internal Presenter<TViewModel, TArgs, TResult> Presenter => presenter;
 
         internal bool HasTick => presenter is IViewTick || presenter is ILowFrequencyViewTick;
@@ -53,18 +51,6 @@ namespace MUI
         internal BindingContext Binding
         {
             get; private set;
-        }
-
-        /// <summary>仅在旧激活已排空后移交宿主，缓存内容不保留旧导航身份的回调委托。</summary>
-        internal void RebindHost(Action<Action> invoke, Func<Func<ValueTask>, ValueTask> invokeAsync)
-        {
-            if (opened || Binding != null || destroyed)
-            {
-                throw new InvalidOperationException("View lifecycle must be inactive before changing its host.");
-            }
-
-            this.invoke = invoke ?? throw new ArgumentNullException(nameof(invoke));
-            this.invokeAsync = invokeAsync ?? throw new ArgumentNullException(nameof(invokeAsync));
         }
 
         /// <summary>

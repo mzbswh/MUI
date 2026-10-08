@@ -52,7 +52,7 @@ namespace MUI.UGUI
         private void RequireResourceConfigurationIdle()
         {
             RequireAlive();
-            if (retainingVisuals || releasingVisuals || (childViews != null && !childViews.IsDisposedSuccessfully))
+            if (retainingVisuals || releasingVisuals || (childViews != null && !childViews.IsCleanupConfirmed))
             {
                 throw new InvalidOperationException("资源加载器只能在 View 激活前或上次激活成功清理后配置。");
             }

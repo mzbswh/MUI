@@ -45,8 +45,7 @@ namespace MUI.Navigation
                     entry.Route.Policy.CacheMode == ViewCacheMode.Timed &&
                     (now - entry.CachedAt) / (double)Stopwatch.Frequency >= entry.Route.Policy.CacheDuration.Value.TotalSeconds;
 
-        internal ViewContent<TViewModel, TArgs, TResult> TakeCachedContent<TViewModel, TArgs, TResult>(
-                    Route<TViewModel, TArgs, TResult> route) where TViewModel : ViewModel
+        internal CachedViewContent TakeCachedContent(Route route)
         {
             AssertThread();
             var providerVersion = CaptureProviderVersion();
@@ -57,20 +56,52 @@ namespace MUI.Navigation
                 if (ReferenceEquals(entry.Route, route) && IsCacheCompatible(entry.Content, providerVersion) && !CacheExpired(entry, now))
                 {
                     cachedContents.RemoveAt(index);
-                    reservedCacheEstimatedBytes -= entry.Route.EstimatedRetainedBytes ?? 0;
-                    return (ViewContent<TViewModel, TArgs, TResult>)entry.Content;
+                    try
+                    {
+                        using (EnterCallback(null))
+                        {
+                            if (!entry.Content.IsAlive)
+                            {
+                                BeginCacheRetirement(new[] { entry });
+                                continue;
+                            }
+                            using (UIErrors.BeginPhase("CachePrepare"))
+                            {
+                                try
+                                {
+                                    entry.Content.PrepareForReuse();
+                                }
+                                catch (Exception error)
+                                {
+                                    UIErrors.AttachPhase(error, "CachePrepare");
+                                    throw;
+                                }
+                            }
+                        }
+                        providerVersion = CaptureProviderVersion();
+                        if (!IsShutdown && entry.Content.IsAlive && IsCacheCompatible(entry.Content, providerVersion))
+                        {
+                            reservedCacheEstimatedBytes -= entry.Route.EstimatedRetainedBytes ?? 0;
+                            return entry.Content;
+                        }
+                    }
+                    catch (Exception error)
+                    {
+                        UIErrors.Report(error);
+                    }
+                    BeginCacheRetirement(new[] { entry });
                 }
             }
 
             return null;
         }
 
-        internal bool RetainContent<TViewModel, TArgs, TResult>(Route<TViewModel, TArgs, TResult> route,
-                    ViewContent<TViewModel, TArgs, TResult> content) where TViewModel : ViewModel
+        internal bool RetainContent(Route route, CachedViewContent content)
         {
             AssertThread();
             var providerVersion = CaptureProviderVersion();
-            if (IsShutdown || IsClearingInactiveContent || IsCacheClearing || cacheCapacity == 0 || !IsCacheCompatible(content, providerVersion))
+            if (IsShutdown || IsClearingInactiveContent || IsCacheClearing || cacheCapacity == 0 ||
+                !content.IsAlive || !IsCacheCompatible(content, providerVersion))
             {
                 return false;
             }
@@ -82,12 +113,11 @@ namespace MUI.Navigation
 
             // 淘汰回调可能重建绑定注册表，准入检查必须覆盖回调后的代际。
             providerVersion = CaptureProviderVersion();
-            if (IsShutdown || IsCacheClearing || !IsCacheCompatible(content, providerVersion))
+            if (IsShutdown || IsClearingInactiveContent || IsCacheClearing || !content.IsAlive || !IsCacheCompatible(content, providerVersion))
             {
                 return false;
             }
 
-            content.Lifecycle.RebindHost(InvokeCachedCallback, InvokeCachedCallbackAsync);
             cachedContents.Add(new CachedContent { Route = route, Content = content, CachedAt = Stopwatch.GetTimestamp() });
             reservedCacheEstimatedBytes += route.EstimatedRetainedBytes ?? 0;
             return true;
@@ -117,7 +147,7 @@ namespace MUI.Navigation
             var expired = new List<CachedContent>();
             for (var index = cachedContents.Count - 1; index >= 0; --index)
             {
-                if (!IsCacheCompatible(cachedContents[index].Content, providerVersion) || CacheExpired(cachedContents[index], now))
+                if (!cachedContents[index].Content.IsAlive || !IsCacheCompatible(cachedContents[index].Content, providerVersion) || CacheExpired(cachedContents[index], now))
                 {
                     expired.Add(cachedContents[index]);
                     cachedContents.RemoveAt(index);
@@ -152,10 +182,19 @@ namespace MUI.Navigation
         private void BeginCacheRetirement(CachedContent[] saved)
         {
             var completion = new TaskCompletionSource<Exception>(TaskCreationOptions.RunContinuationsAsynchronously);
-            cacheRetiring = completion.Task;
+            // 已报告的历史失败由有界错误目录保留，不把每次已完成的淘汰永久串成任务链。
+            cacheRetiring = JoinCacheRetirementAsync(IsCacheRetiring ? cacheRetiring : null, completion.Task);
             retiringCachedViews += saved.Length;
             _ = ReleaseCachedContentsAsync(saved, completion);
             _ = ReportCacheRetirementAsync(completion.Task);
+        }
+
+        private static async Task<Exception> JoinCacheRetirementAsync(Task<Exception> previous, Task<Exception> current)
+        {
+            var failure = await current;
+            var prior = previous == null ? null : await previous;
+            return failure == null ? prior : prior == null ? failure :
+                new AggregateException("Navigation cache retirements failed.", prior, failure);
         }
 
         private static async Task ReportCacheRetirementAsync(Task<Exception> operation)
@@ -164,22 +203,6 @@ namespace MUI.Navigation
             if (error != null)
             {
                 UIErrors.Report(error);
-            }
-        }
-
-        private void InvokeCachedCallback(Action action)
-        {
-            using (EnterCallback(null))
-            {
-                action();
-            }
-        }
-
-        private async ValueTask InvokeCachedCallbackAsync(Func<ValueTask> action)
-        {
-            using (EnterCallback(null))
-            {
-                await action();
             }
         }
 
@@ -307,7 +330,7 @@ namespace MUI.Navigation
         private sealed class CachedContent
         {
             public Route Route;
-            public ViewContent Content;
+            public CachedViewContent Content;
             public long CachedAt;
         }
     }

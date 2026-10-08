@@ -353,7 +353,7 @@ namespace MUI.Samples.Navigation
         }
 
         private sealed class PagePresenter : Presenter<NavigationPageViewModel, string, int>,
-                    IReusableViewPresenter, ICloseGuard, IArgsUpdatePresenter<string>
+                    ICloseGuard, IArgsUpdatePresenter<string>
         {
             private readonly LocalNavigationDemo owner;
 
@@ -417,7 +417,6 @@ namespace MUI.Samples.Navigation
                         throw new InvalidOperationException("示例在写入标题后故意失败，框架应撤销输入并故障关闭。");
                     }
                 }
-
 
                 public ValueTask DisposeAsync()
                 {

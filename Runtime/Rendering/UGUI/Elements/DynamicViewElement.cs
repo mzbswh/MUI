@@ -192,6 +192,23 @@ namespace MUI.UGUI
             model = null;
             pending = null;
             preparation = null;
+            lifetime.OnDispose(() =>
+            {
+                if (ReferenceEquals(slot, activationSlot))
+                {
+                    refreshVersion = null;
+                    source = null;
+                    model = null;
+                    showUnbound = false;
+                    slot = null;
+                    this.scope = null;
+                    displayedProvider = null;
+                    provider = null;
+                    pending = null;
+                    preparation = null;
+                    preparedRebind = null;
+                }
+            });
         }
 
         async ValueTask<IPreparedBindingTarget> IBindingRebindTarget.PrepareRebindAsync(

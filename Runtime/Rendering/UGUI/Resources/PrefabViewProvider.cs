@@ -17,7 +17,7 @@ namespace MUI.UGUI
         private bool disposed;
 
         /// <summary>
-        /// configureView 在每个新实例激活前同步调用，可配置资源加载器；缓存复用不重复调用。
+        /// configureView 在首次创建与缓存命中后的激活前同步调用，可注入当前资源加载器。
         /// 回调只能配置实例，不应激活、销毁、重新挂载实例或启动异步工作。
         /// </summary>
         public PrefabViewProvider(Transform parent, IEnumerable<KeyValuePair<ViewResource, GameObject>> prefabs,

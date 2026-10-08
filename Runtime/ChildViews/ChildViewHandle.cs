@@ -50,6 +50,12 @@ namespace MUI.ChildViews
             get;
         }
 
+        /// <summary>当前作用域和 View 取得凭证均已确认归还；首次清理失败任务仍保持原值。</summary>
+        public abstract bool IsCleanupConfirmed
+        {
+            get;
+        }
+
         internal abstract bool IsExecuting
         {
             get;
@@ -79,6 +85,8 @@ namespace MUI.ChildViews
         {
             get;
         }
+
+        internal abstract Func<bool> CaptureCleanupConfirmation();
 
         internal bool BelongsTo(ChildViewScope scope) => ReferenceEquals(Owner, scope);
 
@@ -179,6 +187,9 @@ namespace MUI.ChildViews
         private Presenter<TViewModel, TArgs, Unit> presenter;
         private ViewPresenterLifecycle<TViewModel, TArgs, Unit> lifecycle;
         private IAcquiredView ownedResource;
+        private CleanupResponsibility viewRelease;
+        private bool resourceAcquired;
+        private Func<bool> cleanupConfirmation;
         private IView view;
         private TaskCompletionSource<bool> close;
         private bool closeStarted;
@@ -208,6 +219,10 @@ namespace MUI.ChildViews
         public override ViewResource Resource => template.Resource;
 
         public override Task CleanupCompletion => close == null ? Task.CompletedTask : close.Task;
+
+        public override bool IsCleanupConfirmed =>
+            (State == ChildViewState.Closed || State == ChildViewState.Failed) &&
+            cleanupConfirmation != null && cleanupConfirmation();
 
         internal override bool IsTransitioning => State == ChildViewState.Preparing || State == ChildViewState.Deactivating || committing;
 
@@ -252,6 +267,8 @@ namespace MUI.ChildViews
             }
         }
 
+        internal override Func<bool> CaptureCleanupConfirmation() => cleanupConfirmation ?? (() => false);
+
         internal void CreateModel(TViewModel assigned)
         {
             lifecycle = ViewPresenterLifecycle<TViewModel, TArgs, Unit>.Create(
@@ -265,6 +282,8 @@ namespace MUI.ChildViews
         internal void Adopt(IAcquiredView acquired)
         {
             ownedResource = acquired ?? throw new InvalidOperationException("ChildView provider returned a null resource acquisition.");
+            resourceAcquired = true;
+            viewRelease = CleanupRegistry.GetResponsibility(ownedResource, "ChildView.ViewResource");
             view = ownedResource.View;
             if (view == null || !view.IsAlive)
             {
@@ -610,6 +629,13 @@ namespace MUI.ChildViews
 
         private async Task ReleaseAsync()
         {
+            // 只捕获稳定清理依赖，不让父容器的失败记录继续持有业务句柄和参数。
+            var instanceScope = instance;
+            var activationScope = activation;
+            var acquisition = viewRelease;
+            var acquired = resourceAcquired;
+            cleanupConfirmation = () => instanceScope.IsCleanupConfirmed && activationScope.IsCleanupConfirmed &&
+                (!acquired || (acquisition != null && acquisition.CaptureSnapshot().State == CleanupResponsibilityState.Completed));
             var errors = new List<Exception>(earlyErrors);
             await EndActivationAsync(errors);
 
@@ -626,8 +652,6 @@ namespace MUI.ChildViews
                 }
             });
 
-            var instanceScope = instance;
-            var activationScope = activation;
             await ViewInstanceCleanup.ReleaseViewResourceAsync(ownedResource, errors,
                 () => instanceScope.IsCleanupConfirmed && activationScope.IsCleanupConfirmed);
 

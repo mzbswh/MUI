@@ -14,11 +14,30 @@
 - 目标第 2 节的嵌套属性路径已实现 SourcePath/NullValue、编译期访问器、逐层通知链及捕获叶拥有者的读写；生成器声明矩阵和同一模型的 Legacy/TMP Play Mode、IL2CPP 观察均通过。当前证据覆盖模型替换、null、转换/getter 重入、初始反向写入和换绑候选失效；自定义通知访问器的清理异常及复杂子容器交错仍随完整生命周期矩阵验收。
 - AcquiredView / AcquiredResource 命名已迁移；资源键状态快照和非法列表测量回退已接入，仍须验证运行时迟到结果、资源归还与布局交互。
 - 清理失败以前只保留错误而丢弃凭证/回调，且没有安全重试能力；已接入统一 CleanupResponsibility/Registry。资源与作用域的首次结果保持不变，显式幂等重试更新同一责任记录。本轮补齐宿主筛选、历史与当前责任的分别呈现，以及独立绑定/命令/资源通知链的上下文；复杂容器的依赖清理、失效责任的容量限制和完整退出矩阵仍待验收。
-- 目标第 3 节要求缓存不保存旧模型与 Presenter，但当前 `ViewContent` 缓存仍保存 Lifecycle/Model/Presenter，`RetainContent` 只切换回调宿主，缓存命中继续接管旧内容。该行为与设计冲突，须将缓存拆为解除绑定后的 View 凭证及明确可复用资源；现有缓存运行记录不能证明目标完成。
+- 目标第 3 节的旧模型与 Presenter 缓存冲突已修正：目录只持有 CachedViewContent 中的独立 View 凭证，业务生命周期在关闭时清理。取得了原生 View 百次复用及代表性故障运行证据；版本、预算、过期与完整子容器缓存矩阵仍待复核。
+- 父子换绑回归暴露的历史提交失败阻止顶层 View 归还问题已修正：ChildViewScope 提供稳定清理责任，分别保存首次失败与当前依赖确认；原七组驱动重新全部通过。多层叶责任恢复及解绑故障交错矩阵仍待验收，未知外部容器不能猜测确认。
 
 后续实现优先消除上述契约冲突，再按目标第 2 至 7 节补齐能力，最终按第 8 节逐项验收。不能以删除文件数量或局部编译通过替代目标完成率。
 
 ## 当前基础
+
+### 2026-10-08 子容器当前清理确认
+
+- ChildViewScope 接入稳定 CleanupResponsibility，首次清理排空全部子项；后续显式重试只检查依赖，不重新执行生命周期或未知后端回调。子句柄保存实例、激活和 View 凭证的稳定确认依赖，历史失败任务仍保留原值。
+- 激活作用域同时等待绑定会话真实解绑。框架会话按订阅、最终清理与命令作用域状态确认；外部 BindingContext 按实际解绑任务确认，不查询项目状态属性推测成功。未知退订及最终清理故障继续阻止确认。
+- 原父子换绑 Play Mode 驱动重新通过全部 7 组，预期两项注入故障各报告一次，包含提交失败后顶层 View 实际归还；日志 `/private/tmp/mui-child-confirmation-rebind-play-20261008.log`。多层叶责任恢复、解绑故障矩阵及此次修改后的 IL2CPP 验收尚未完成；下述缓存 IL2CPP 产物早于本次子容器修改。
+
+### 2026-10-08 页面缓存所有权拆分
+
+- CachedViewContent 仅保存 View 取得凭证与缓存/绑定/Provider 代际，不持有 ViewModel、Presenter 或旧实例作用域。关闭先结束激活和解绑，再执行 Presenter 销毁及实例资源清理；全部确认后重置 View 并移交唯一凭证。缓存命中建立新 ViewContent、模型和 Presenter，外部传入模型继续只借用。移交拒绝或重置失败沿用同一凭证归还流程，不重复执行业务实例清理。
+- 新增 ICacheableView 与 ICacheableViewAcquisition，前者提供旧渲染状态重置，后者显式保证后端依赖能延长到实际归还并提供重新配置入口。AcquiredView 默认不支持缓存，不能延长依赖的适配器保持直接归还；PrefabViewFactory 的归还独立持有原生根对象，显式支持移交。Prefab 缓存命中执行当前配置回调，不沿用旧活动加载器。IReusableViewPresenter 保留兼容声明但已弃用，示例不再用该标记决定缓存资格。
+- UGUI 重置清除自身及静态/池化子 View 的焦点、旧输入阻挡、局部返回、模态屏障、已排空的子作用域和资源加载器，维持隐藏且不可交互。DynamicViewElement 在父激活清理时解除来源、模型、子槽及借用 Provider 引用；列表沿用已有激活引用清理协议。缓存中被外部销毁的 View 在维护扫描或命中时淘汰。并行淘汰的清空等待覆盖全部在途归还，不把已结束的历史淘汰无限串成任务链。
+- 临时驱动 `/private/tmp/MuiViewCacheObservation.cs` 在独立桌面工程完成 100 次真实 Prefab View 复用：每次创建新模型/Presenter/句柄，旧订阅回到 0、模型归还一次、Presenter 销毁和实例资源归还各一次，旧句柄和旧模型通知不影响新激活；首批 100 次本地打开关闭均在调用帧完成，纹理凭证每次实际归还，View 由缓存唯一持有，清空等待其原生销毁。另覆盖延迟实例清理阻止入缓存、新页面取得独立 View、缓存配置失败淘汰、借用模型不释放、未声明凭证能力不入缓存及 ResetForCache 失败后实际归还。该基线不替代进程内存或全部子容器矩阵。
+- 最终 Play Mode 与 macOS IL2CPP Development/High stripping Player 均通过 1011 项断言，包含自定义 Element 100 次入缓存解除旧模型引用，以及 CachePrepare/CacheReset 原始诊断阶段，cycles=100、configurations=107、textureReturns=106、预期故障 reports=2、最终 frame=21。日志 `/private/tmp/mui-view-cache-play-20261008.log` 与 `/private/tmp/mui-view-cache-il2cpp-player-20261008.log`；最终构建 Succeeded/errors=0/warnings=0，日志 `/private/tmp/mui-view-cache-il2cpp-build-20261008.log`，产物 `/private/tmp/mui-view-cache-il2cpp-20261008.app`，Player 退出码 0。退出仍有 13 条 allocator 提示，不报告干净退出或全部退出矩阵完成。
+- 修改后的 Navigation 示例离线编译为 0 错误、0 警告，连同 Core/Resources/Navigation/ChildViews/UGUI 与资源后端示例依赖均通过；真实 Sample 画面与鼠标/键盘输入仍待验收。临时驱动位于 `/private/tmp` 与独立验收工程，没有新增仓库测试或自动提交。
+- 自定义 UGUI Element 可覆盖 OnResetForCache 清除项目控件保存的模型、参数和活动引用；钩子失败沿用 View 淘汰，不能在重置期间启动新工作。DynamicViewElement 同时恢复 ShowUnbound 默认值，避免把旧激活的显示选项带入未绑定的新内容。
+- 本轮 19 个新增或修改的 C# 文件在临时副本通过成员布局、控制流大括号和空白检查，0 个违规；Runtime/Editor/Samples/Analyzers/docs 的 728 个 meta 无无效或重复 GUID，无缺失脚本 meta。全仓库 CodeStyle 检查仍有其他未修改的 16 个文件需调整成员布局、7 处控制流缺少大括号，留待最终规范审计，不声称全仓库规范已通过。
+- 资源/Legacy/TMP 转换回归通过，资源 created=7/released=7，两项注入故障各报告一次；日志 `/private/tmp/mui-cache-regression-contracts-play-20261008.log`。此前父子换绑回归的提交故障组暴露 ChildViewScope 当前确认与历史失败未拆分，失败日志 `/private/tmp/mui-cache-regression-rebind-play-20261008.log`；上述子容器修改后原驱动七组全部通过，保留失败记录用于追溯。
 
 ### 2026-10-08 清理依赖与百次开关基线
 
@@ -27,7 +46,7 @@
 - ResourceSlot 的清空回调登记为内部幂等步骤，完成清空后不重复执行原生 setter。资源归还故障把同一凭证责任交给作用域确认；ElementResourceOwner 使用自身责任，槽的叶责任确认后才解除剩余控件持有。首次槽错误及计数保持历史原值。后端回滚没有可查询责任时仍按未知保留，不由此推断归还完成。
 - 顶层及子视图的最终 View 凭证归还检查实例与激活作用域；依赖不明则保留 ViewInstance.DependencyRelease 到独立账本，不提前交回池或销毁。显式重试检查依赖及原凭证状态，不自行重试后端。Navigator 清理容量补计移出 entries 后仍有责任的页面，同页多个记录合并为一个名额；无页面身份记录逐项保守计入。
 - 临时 Core 驱动通过 50 项断言，追加父子作用域失败后叶责任重试确认、父首错任务不变、未知回滚/取消回调不能确认，以及正常释放只执行一次。日志 `/private/tmp/mui-cleanup-dependencies-core-20261008.log`，入口仍为 `/private/tmp/mui-cleanup-acceptance-20261008/Program.cs`，没有新增仓库测试。
-- 提交前修正 Own 的条件 lambda 写法以兼容 C# 8；最终源码的 Core 50 项断言再次通过，MUI.UGUI 离线构建及其 Core/Resources/Navigation/ChildViews 依赖均为 0 错误、0 警告。此前同一清理场景的 macOS IL2CPP 构建成功、0 错误、0 警告，日志 `/private/tmp/mui-dependency-cleanup-il2cpp-build-20261008.log`；该产物尚未执行，不作为 Player 运行证据。
+- 提交前修正 Own 的条件 lambda 写法以兼容 C# 8；最终源码的 Core 50 项断言再次通过，MUI.UGUI 离线构建及其 Core/Resources/Navigation/ChildViews 依赖均为 0 错误、0 警告。此前同一清理场景的 macOS IL2CPP 构建成功、0 错误、0 警告，日志 `/private/tmp/mui-dependency-cleanup-il2cpp-build-20261008.log`；随后执行该产物通过 515 项断言与 100 次开关、获取/归还 100/100、frame=1，退出码 0，日志 `/private/tmp/mui-dependency-cleanup-il2cpp-player-20261008.log`。退出有 13 条 allocator 提示，不报告干净退出；该产物构建早于缓存重构，不作为新缓存行为证据。
 - 独立桌面工程的 Play Mode 通过 515 项断言，涵盖纹理/模型部分归还失败、父视图持续保留、过早外层重试拒绝、叶责任与外层持有者逐层显式确认、后端实际归还仅一次、原关闭失败不变，以及清理容量为 1 的拒绝与恢复。日志 `/private/tmp/mui-dependency-cleanup-play-20261008.log`，入口 `/private/tmp/MuiDependencyCleanupObservation.cs`。
 - 同一场景完成 100 次真实 View 创建、强制关闭与 WaitForCleanupAsync：每次路径订阅从 1 回到 0，活动实例/在途请求/超时清理/未确认责任及纹理凭证均回到 0，View 获取/归还 100/100、纹理归还 100 次，模型均归还一次；退役模型通知不写 UI。所有本地开关在调用帧完成，随后检查原生 View 对象均已销毁。该循环不启用缓存，不作为进程内存、全部业务订阅或复杂嵌套容器的完整基线证据。
 - 缓存源码审计发现仍保留旧模型与 Presenter，记录为当前设计冲突。缓存启用/清空后的百次基线、普通/虚拟列表的完整换绑和依赖清理矩阵、故障父子容器确认、实体输入及全部示例视觉验收仍未完成；完整目标保持进行中，本轮未自动提交。

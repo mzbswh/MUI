@@ -102,6 +102,20 @@ namespace MUI.UGUI
 
         internal void EndVisualRetention() => OnVisualRetentionEnded();
 
+        internal void ResetForCache()
+        {
+            RequireAlive();
+            OnResetForCache();
+        }
+
+        /// <summary>
+        /// 所属 View 的旧激活完全清理后解除自定义控件保存的模型、参数及活动引用。
+        /// 此钩子不启动新工作；抛错会淘汰整个 View，后续仍执行最终 Dispose。
+        /// </summary>
+        protected virtual void OnResetForCache()
+        {
+        }
+
         /// <summary>显示保留结束后应用期间积累的表现状态；不会恢复旧激活。</summary>
         protected virtual void OnVisualRetentionEnded()
         {

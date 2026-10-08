@@ -10,6 +10,7 @@ namespace MUI
         private readonly List<Exception> detachErrors = new List<Exception>();
         private bool subscriptionsDetached;
         private bool finalized;
+        private bool hasUnknownCleanupFailure;
         private readonly List<Action> readyActions = new List<Action>();
         private readonly List<Action> initialWrites = new List<Action>();
         internal readonly UIErrorContext DiagnosticContext;
@@ -24,6 +25,8 @@ namespace MUI
         {
             get;
         }
+
+        internal bool IsCleanupConfirmed => finalized && !hasUnknownCleanupFailure && Commands.IsCleanupConfirmed;
 
         public ICommandTarget CommandTarget
         {
@@ -146,6 +149,7 @@ namespace MUI
                 }
                 catch (Exception error)
                 {
+                    hasUnknownCleanupFailure = true;
                     detachErrors.Add(error);
                 }
             }
@@ -173,6 +177,7 @@ namespace MUI
                 }
                 catch (Exception error)
                 {
+                    hasUnknownCleanupFailure = true;
                     errors.Add(error);
                 }
             }

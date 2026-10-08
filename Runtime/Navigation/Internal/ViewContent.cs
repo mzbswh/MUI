@@ -6,8 +6,7 @@ using MUI.Resources;
 namespace MUI.Navigation
 {
     /// <summary>
-    /// 页面实例内容的所有权单元：持有 View、模型、Presenter 及实例资源。
-    /// 不持有导航 Handle、业务结果或激活令牌；结束一次激活不等于销毁内容。
+    /// 视图内容的兼容代际；活动内容与缓存凭证各自承担独立的所有权。
     /// </summary>
     internal abstract class ViewContent
     {
@@ -41,6 +40,7 @@ namespace MUI.Navigation
         private readonly LifetimeScope instance;
         private IAcquiredView ownedResource;
         private bool creationStarted;
+        private bool instanceReleased;
 
         internal ViewContent(object cacheGeneration, object bindingGeneration, object providerVersion)
                     : base(cacheGeneration, bindingGeneration, providerVersion)
@@ -61,6 +61,9 @@ namespace MUI.Navigation
         internal TViewModel Model => Lifecycle == null ? null : Lifecycle.Model;
 
         internal Presenter<TViewModel, TArgs, TResult> Presenter => Lifecycle == null ? null : Lifecycle.Presenter;
+
+        internal bool CanCache => View is ICacheableView &&
+            ownedResource is ICacheableViewAcquisition acquisition && acquisition.SupportsCaching;
 
         internal void Create(Route<TViewModel, TArgs, TResult> route, TViewModel assignedModel,
                     Action<Action> invoke, Func<Func<ValueTask>, ValueTask> invokeAsync, Action requireCurrent)
@@ -96,6 +99,43 @@ namespace MUI.Navigation
         internal override ValueTask ReleaseCachedAsync(List<Exception> errors,
             Func<IViewResourceReleaseTraceScope> beginResourceRelease = null) => ReleaseAsync(errors, beginResourceRelease);
 
+        /// <summary>销毁业务实例并排空其资源，成功后才把独立 View 凭证移交缓存。</summary>
+        internal async ValueTask<CachedViewContent> DetachForCacheAsync(List<Exception> errors, LifetimeScope activation)
+        {
+            if (!CanCache)
+            {
+                return null;
+            }
+            var before = errors.Count;
+            await ReleaseInstanceAsync(errors, Array.Empty<Action>());
+            if (errors.Count != before || !instance.IsCleanupConfirmed || !activation.IsCleanupConfirmed)
+            {
+                return null;
+            }
+
+            using (UIErrors.BeginPhase("CacheReset"))
+            {
+                try
+                {
+                    ((ICacheableView)View).ResetForCache();
+                }
+                catch (Exception error)
+                {
+                    UIErrors.AttachPhase(error, "CacheReset");
+                    throw;
+                }
+            }
+            if (!View.IsAlive)
+            {
+                throw new InvalidOperationException("View was destroyed while resetting for cache.");
+            }
+            var cached = new CachedViewContent(ownedResource, CacheGeneration, BindingGeneration, ProviderVersion);
+            ownedResource = null;
+            View = null;
+            Lifecycle = null;
+            return cached;
+        }
+
         /// <summary>调用方先结束激活；最终销毁继续执行全部资源收尾，错误写入同一集合。</summary>
         internal ValueTask ReleaseAsync(List<Exception> errors,
             Func<IViewResourceReleaseTraceScope> beginResourceRelease = null, params Action[] detachHost)
@@ -112,12 +152,7 @@ namespace MUI.Navigation
         private async ValueTask ReleaseCoreAsync(List<Exception> errors,
             Func<IViewResourceReleaseTraceScope> beginResourceRelease, LifetimeScope activation, Action[] detachHost)
         {
-            if (Lifecycle != null)
-            {
-                Lifecycle.Destroy(errors);
-            }
-
-            await ViewInstanceCleanup.RunAsync(instance, null, errors, detachHost);
+            await ReleaseInstanceAsync(errors, detachHost);
             if (ownedResource != null)
             {
                 using (var phase = beginResourceRelease == null ? null : beginResourceRelease())
@@ -132,6 +167,20 @@ namespace MUI.Navigation
             ownedResource = null;
             View = null;
             Lifecycle = null;
+        }
+
+        private async ValueTask ReleaseInstanceAsync(List<Exception> errors, Action[] detachHost)
+        {
+            if (instanceReleased)
+            {
+                return;
+            }
+            instanceReleased = true;
+            if (Lifecycle != null)
+            {
+                Lifecycle.Destroy(errors);
+            }
+            await ViewInstanceCleanup.RunAsync(instance, null, errors, detachHost);
         }
 
         private static void FinishResourceReleaseTrace(IViewResourceReleaseTraceScope phase, List<Exception> errors, int before)

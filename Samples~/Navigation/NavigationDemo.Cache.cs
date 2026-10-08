@@ -8,7 +8,7 @@ namespace MUI.Samples.Navigation
 {
     public sealed partial class NavigationDemo
     {
-        /// <summary>展示关闭后复用实例，但重新建立导航身份和业务激活。</summary>
+        /// <summary>展示关闭后仅复用 View，重新创建模型、Presenter 与导航身份。</summary>
         private async Task DemonstrateCacheAsync(Navigator navigator, ViewResource resource,
             Func<IView, PageViewModel, BindingContext<PageViewModel>> binding)
         {
@@ -45,7 +45,7 @@ namespace MUI.Samples.Navigation
 
             await navigator.CloseAsync(second.Handle);
             await navigator.ClearCacheAsync();
-            Debug.Log($"MUI 缓存清空：剩余={navigator.CachedViewCount}；此时应已调用最终销毁回调");
+            Debug.Log($"MUI 缓存清空：剩余={navigator.CachedViewCount}；此时 View 凭证应已实际归还");
             await DemonstrateCacheInvalidationAsync(navigator, route);
             await DemonstrateCachePoliciesAsync(navigator, resource, binding);
         }
@@ -86,16 +86,18 @@ namespace MUI.Samples.Navigation
                 new Route<PageViewModel, PageArgs, int>(key, resource, () => new PageViewModel(),
                     _ => new CachedPagePresenter(), binding, policy, estimatedRetainedBytes: estimate);
 
-            async Task<PageViewModel> OpenAndCloseAsync(Route<PageViewModel, PageArgs, int> route)
+            async Task<IView> OpenAndCloseAsync(Route<PageViewModel, PageArgs, int> route)
             {
                 var opened = await navigator.OpenAsync(route, new PageArgs(route.Key, 1));
-                if (!opened.IsSuccess || !navigator.TryGetViewModel<PageViewModel>(opened.Handle.Identity, out var model))
+                if (!opened.IsSuccess)
                 {
                     throw new InvalidOperationException("Cache policy walkthrough open failed.", opened.Error);
                 }
 
+                var view = FindFrontView();
                 await navigator.CloseAsync(opened.Handle);
-                return model;
+                await navigator.WaitForCleanupAsync(opened.Handle.Identity);
+                return view;
             }
 
             var timed = CreateRoute("demo.cache.timed", new RoutePolicy(
@@ -103,21 +105,21 @@ namespace MUI.Samples.Navigation
             var beforeExpiry = await OpenAndCloseAsync(timed);
             await Task.Delay(200, cancellation.Token);
             var afterExpiry = await OpenAndCloseAsync(timed);
-            Debug.Log($"MUI 缓存过期：重新创建模型={!ReferenceEquals(beforeExpiry, afterExpiry)}");
+            Debug.Log($"MUI 缓存过期：重新创建视图={!ReferenceEquals(beforeExpiry, afterExpiry)}");
             navigator.RefreshCache();
             await navigator.ClearCacheAsync();
 
             var first = CreateRoute("demo.cache.lru.first", new RoutePolicy(cacheMode: ViewCacheMode.KeepAlive));
             var second = CreateRoute("demo.cache.lru.second", new RoutePolicy(cacheMode: ViewCacheMode.KeepAlive));
             var third = CreateRoute("demo.cache.lru.third", new RoutePolicy(cacheMode: ViewCacheMode.KeepAlive));
-            var firstModel = await OpenAndCloseAsync(first);
-            var secondModel = await OpenAndCloseAsync(second);
+            var firstView = await OpenAndCloseAsync(first);
+            var secondView = await OpenAndCloseAsync(second);
             await OpenAndCloseAsync(first);
             await OpenAndCloseAsync(third);
             var firstAgain = await OpenAndCloseAsync(first);
             var secondAgain = await OpenAndCloseAsync(second);
-            Debug.Log($"MUI 缓存淘汰：最近使用项保留={ReferenceEquals(firstModel, firstAgain)}，" +
-                $"较旧项重新创建={!ReferenceEquals(secondModel, secondAgain)}，" +
+            Debug.Log($"MUI 缓存淘汰：最近使用视图保留={ReferenceEquals(firstView, firstAgain)}，" +
+                $"较旧视图重新创建={!ReferenceEquals(secondView, secondAgain)}，" +
                 $"目录={navigator.CachedViewCount}，待释放={navigator.RetiringCachedViewCount}");
             await navigator.ClearCacheAsync();
 
@@ -139,8 +141,8 @@ namespace MUI.Samples.Navigation
             Debug.Log($"MUI 预算清空：预留字节={navigator.ReservedCacheEstimatedBytes}，失败字节={navigator.FailedCacheEstimatedBytes}");
         }
 
-        /// <summary>明确重置每次激活的数据；仅实例级资源允许跨关闭保留。</summary>
-        private sealed class CachedPagePresenter : PagePresenter, IReusableViewPresenter
+        /// <summary>每次打开使用新实例，业务资源随本次关闭清理。</summary>
+        private sealed class CachedPagePresenter : PagePresenter
         {
             protected override void OnOpen(PageArgs args)
             {

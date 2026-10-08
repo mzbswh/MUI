@@ -15,11 +15,29 @@
 - AcquiredView / AcquiredResource 命名已迁移；资源键状态快照和非法列表测量回退已接入，仍须验证运行时迟到结果、资源归还与布局交互。
 - 清理失败以前只保留错误而丢弃凭证/回调，且没有安全重试能力；已接入统一 CleanupResponsibility/Registry。资源与作用域的首次结果保持不变，显式幂等重试更新同一责任记录。本轮补齐宿主筛选、历史与当前责任的分别呈现，以及独立绑定/命令/资源通知链的上下文；复杂容器的依赖清理、失效责任的容量限制和完整退出矩阵仍待验收。
 - 目标第 3 节的旧模型与 Presenter 缓存冲突已修正：目录只持有 CachedViewContent 中的独立 View 凭证，业务生命周期在关闭时清理。取得了原生 View 百次复用及代表性故障运行证据；版本、预算、过期与完整子容器缓存矩阵仍待复核。
-- 父子换绑回归暴露的历史提交失败阻止顶层 View 归还问题已修正：ChildViewScope 提供稳定清理责任，分别保存首次失败与当前依赖确认；原七组驱动重新全部通过。多层叶责任恢复及解绑故障交错矩阵仍待验收，未知外部容器不能猜测确认。
+- 父子换绑回归暴露的历史提交失败阻止顶层 View 归还问题已修正：ChildViewScope 提供稳定清理责任，分别保存首次失败与当前依赖确认；原七组驱动重新全部通过。核心四层叶责任恢复及代表性解绑故障已取得运行证据，原生普通/虚拟列表与复杂容器的完整交错矩阵仍待验收，未知外部容器不能猜测确认。
 
 后续实现优先消除上述契约冲突，再按目标第 2 至 7 节补齐能力，最终按第 8 节逐项验收。不能以删除文件数量或局部编译通过替代目标完成率。
 
 ## 当前基础
+
+### 2026-10-08 普通与虚拟列表换绑
+
+- 换绑提交前的来源、布局或资格失效通过取消结果返回，保留旧绑定；不再因内部取消未触发显式令牌而额外记录异常。已开始解绑或候选清理失败仍按故障处理。
+- 临时原生 UGUI 驱动 `/private/tmp/mui-list-rebind-20261008/MuiListRebindObservation.cs` 在 RecyclingList 与 VirtualList 各覆盖 12 组场景：本地换源、准备失败后重试、忽略取消的迟到结果、其他页面关闭、父关闭、候选来源变化、旧来源变化、回调重入拒绝、旧异步命令排空、父关闭排空命令、提交失败，以及资源部分归还后的显式恢复。Unity Play Mode 全部通过，cases=24、assertions=249、reports=10；日志 `/private/tmp/mui-list-rebind-commands-play-20261008.log`。报告均为预期注入故障，来源变化取消明确断言无新增异常、结果 Error 为空。
+- 当前源码的 Navigation 及其依赖离线构建通过，0 warnings/0 errors。本批列表矩阵与取消诊断修复尚未进行 IL2CPP 验收；候选回滚清理故障、大规模虚拟列表、布局变化、多模板与实体输入矩阵仍待完成，不代表完整设计目标已验收。
+
+### 2026-10-08 子容器释放入口与多层依赖
+
+- 直接释放公开 ChildViewScope.CleanupResponsibility 原先会实际完成归还，但没有发布容器的 IsDisposed/CleanupCompletion。本轮统一两种入口，由 CleanupResponsibility 在实际状态确定后同步通知框架容器，发布其首次结果，不重新进入自己的责任或额外加入异步等待；通知只更新框架状态，不执行项目代码。两种入口均检查子生命周期/命令自等待，直接责任释放与直接重试也同步完成容器任务；合法显式恢复只更新当前确认，IsDisposedSuccessfully 直接读取首次共享任务状态，不被后续恢复改写。
+- 临时驱动 `/private/tmp/mui-nested-confirmation-20261008/MuiNestedCleanupVerification.cs` 使用公开 IView/IChildViewHost 协议构造 Root→A→B→C 与独立 Sibling，验证叶模型、叶 View 部分归还失败后兄弟项正常归还、所有祖先继续保留、过早外层重试不重复后端、逐层显式确认及历史任务不变。两个可恢复场景最终 View 获取/实际归还均为 5/5，责任回到各自基线；未知模型保持不可重试并保留责任。还覆盖直接责任释放状态、子生命周期中的两种自等待拒绝及其显式恢复。该核心驱动使用协议实现，不证明完整原生 UGUI 树或物理输入。
+- 同一批的 `/private/tmp/mui-nested-confirmation-20261008/MuiBindingCleanupVerification.cs` 覆盖外部 BindingContext 同步抛错、任务失败、延迟失败/成功，及框架泛型会话的路径退订和最终清理故障。延迟解绑完成前持有 View；未知失败后父责任和 View 责任重试均不能提前归还，不重复调用外部解绑/退订/最终清理，也不读取项目 State/CleanupCompletion getter 猜测确认。未知失败保留责任，不把整批责任清零作为验收结果。
+- 最终离线与 Unity Play Mode 均通过多层清理 126 项断言、解绑 6 类 54 项断言；日志 `/private/tmp/mui-nested-cleanup-final-core-20261008.log`、`/private/tmp/mui-nested-cleanup-final-play-20261008.log`。断言明确要求同步直接责任归还后容器任务立即完成，并覆盖直接责任自等待拒绝后、尚未调用普通容器释放的显式恢复，不靠额外等待掩盖状态差异。
+- 中途原生缓存回归发现新的完成观察使本地清理多等待一次，保留失败日志 `/private/tmp/mui-child-scope-cache-regression-play-20261008.log`；最终同步通知实现下原驱动未经修改通过全部 1011 项断言，cycles=100、configurations=107、textureReturns=106、reports=2、frame=21，百次本地开关仍在调用帧完成。日志 `/private/tmp/mui-child-scope-cache-final-play-20261008.log`。不沿用修正前的 IL2CPP 结果证明当前完成点。
+- 最终原生资源/模型依赖清理驱动通过 515 项断言与百次开关，View 获取/归还 100/100、textureReturns=100、frame=1；日志 `/private/tmp/mui-child-scope-dependencies-final-play-20261008.log`。原七组父子换绑驱动全部通过，预期注入故障 reports=2，日志 `/private/tmp/mui-child-scope-rebind-final-play-20261008.log`；Core 原有 50 项清理责任断言也通过，日志 `/private/tmp/mui-child-scope-core-final-regression-20261008.log`。
+- 最终 macOS IL2CPP Development/High stripping 的多层清理 Player 通过相同 126 项及解绑 54 项断言；构建 Succeeded/errors=0/warnings=0，Player 退出码 0。日志 `/private/tmp/mui-nested-cleanup-final-il2cpp-build-20261008.log`、`/private/tmp/mui-nested-cleanup-final-il2cpp-player-20261008.log`，产物 `/private/tmp/mui-nested-cleanup-il2cpp-20261008.app`。未知解绑及模型失败按设计继续保留责任，该协议驱动不证明全部原生容器退出已清零。
+- 当前源码的原生缓存 IL2CPP Player 也通过全部 1011 项断言，cycles=100、configurations=107、textureReturns=106、reports=2、frame=21；构建 Succeeded/errors=0/warnings=0，Player 退出码 0。日志 `/private/tmp/mui-child-scope-cache-final-il2cpp-build-20261008.log`、`/private/tmp/mui-child-scope-cache-final-il2cpp-player-20261008.log`，产物 `/private/tmp/mui-view-cache-il2cpp-20261008.app`。两套最终 Player 退出仍各有 13 条 `IL2CPP Free after allocator was destroyed` 提示，不报告干净退出或完整内存验收通过。
+- 本轮两个 C# 文件通过成员布局、控制流大括号及空白检查，0 个违规，git diff --check 通过；未新增仓库测试，未自动提交。原生复杂容器、完整列表交错、实体输入与最终全部目标验收继续保留。
 
 ### 2026-10-08 子容器当前清理确认
 

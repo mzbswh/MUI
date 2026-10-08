@@ -19,10 +19,18 @@ namespace MUI
         private Task currentAttempt;
         private CleanupResponsibilityState state;
         private Exception failure;
+        private Action<Exception> attemptCompleted;
         private UIErrorContext context;
         private long attempts;
 
         public CleanupResponsibility(Func<ValueTask> release, string owner,
+            bool supportsIdempotentRetry = false, int? releaseThreadId = null)
+            : this(release, owner, null, supportsIdempotentRetry, releaseThreadId)
+        {
+        }
+
+        /// <summary>框架容器在责任状态确定后同步发布首次结果；通知只更新框架状态，不执行项目代码。</summary>
+        internal CleanupResponsibility(Func<ValueTask> release, string owner, Action<Exception> attemptCompleted,
             bool supportsIdempotentRetry = false, int? releaseThreadId = null)
         {
             this.release = release ?? throw new ArgumentNullException(nameof(release));
@@ -40,6 +48,7 @@ namespace MUI
             Owner = owner.Length > 256 ? owner.Substring(0, 256) : owner;
             this.supportsIdempotentRetry = supportsIdempotentRetry;
             this.releaseThreadId = releaseThreadId;
+            this.attemptCompleted = attemptCompleted;
             context = UIErrors.CurrentContext;
         }
 
@@ -162,6 +171,7 @@ namespace MUI
                     failure = null;
                     release = null;
                     CleanupRegistry.ConfirmCompleted(this);
+                    NotifyAttemptCompleted(null);
                     completion.TrySetResult(true);
                 }
             }
@@ -172,6 +182,7 @@ namespace MUI
                 {
                     state = CleanupResponsibilityState.Failed;
                     failure = error;
+                    NotifyAttemptCompleted(error);
                     completion.TrySetException(error);
                     _ = completion.Task.Exception;
                 }
@@ -182,6 +193,17 @@ namespace MUI
                 frame.Owner = null;
                 currentRelease.Value = previous;
             }
+        }
+
+        private void NotifyAttemptCompleted(Exception error)
+        {
+            var notify = attemptCompleted;
+            // 初次尝试可能在容器开始清理前被拒绝；保留通知供后续合法尝试发布结果。
+            if (error == null)
+            {
+                attemptCompleted = null;
+            }
+            notify?.Invoke(error);
         }
 
         private sealed class ReleaseFrame

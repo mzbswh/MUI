@@ -357,7 +357,9 @@ namespace MUI
                     cleanup = RebindCleanup.Failed;
                 }
 
-                if (detachStarted || cleanup == RebindCleanup.Failed || !(error is OperationCanceledException) || !cancellation.IsCancellationRequested)
+                // 提交前来源、布局或资格失效与令牌取消一样保留旧会话，通过取消结果返回。
+                // 已开始解绑则无法恢复旧绑定，仍按故障关闭保留异常和清理责任。
+                if (detachStarted || cleanup == RebindCleanup.Failed || !(error is OperationCanceledException))
                 {
                     AddFailure(error);
                 }

@@ -40,7 +40,7 @@ namespace MUI.ChildViews
 
             operations = new LifetimeScope();
             CleanupResponsibility = new CleanupResponsibility(ReleaseOwnedScopeAsync,
-                "ChildViewScope", true, threadId);
+                "ChildViewScope", CompleteDisposal, true, threadId);
             owner.Own(this);
             parentCancellation = owner.Token.Register(OnParentCancelled);
         }
@@ -53,7 +53,7 @@ namespace MUI.ChildViews
         /// 首次释放已完成且没有历史清理错误；当前实际归还状态由 IsCleanupConfirmed 表示。
         /// 未开始释放或清理尚未完成时返回 false。
         /// </summary>
-        public bool IsDisposedSuccessfully => IsDisposed && disposalFailure == null;
+        public bool IsDisposedSuccessfully => disposal != null && disposal.Task.Status == TaskStatus.RanToCompletion;
 
         /// <summary>当前真实归还已确认；历史任务失败不会改写，安全叶责任恢复后须显式确认本容器。</summary>
         public bool IsCleanupConfirmed => CleanupResponsibility.CaptureSnapshot().State == CleanupResponsibilityState.Completed;
@@ -306,6 +306,31 @@ namespace MUI.ChildViews
 
         public ValueTask DisposeAsync()
         {
+            RequireDisposalAllowed();
+            if (disposal == null)
+            {
+                disposal = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+                var attempt = CleanupResponsibility.DisposeAsync().AsTask();
+                if (!disposal.Task.IsCompleted && attempt.IsCompleted)
+                {
+                    // 直接责任入口先前可能已拒绝自等待；此时观察既有首次结果，不重试清理。
+                    Exception failure = null;
+                    try
+                    {
+                        attempt.GetAwaiter().GetResult();
+                    }
+                    catch (Exception error)
+                    {
+                        failure = error;
+                    }
+                    CompleteDisposal(failure);
+                }
+            }
+            return new ValueTask(disposal.Task);
+        }
+
+        private void RequireDisposalAllowed()
+        {
             RequireThread();
             foreach (var handle in handles)
             {
@@ -314,27 +339,15 @@ namespace MUI.ChildViews
                     throw new InvalidOperationException("Cannot await parent cleanup from its child lifecycle or command.");
                 }
             }
-
-            if (disposal != null)
-            {
-                return new ValueTask(disposal.Task);
-            }
-
-            disposal = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
-            _ = CompleteDisposalAsync();
-            return new ValueTask(disposal.Task);
         }
 
-        private async Task CompleteDisposalAsync()
+        private void CompleteDisposal(Exception attemptFailure)
         {
-            try
+            if (disposal == null || disposal.Task.IsCompleted)
             {
-                await CleanupResponsibility.DisposeAsync();
+                return;
             }
-            catch (Exception error)
-            {
-                disposalFailure = disposalFailure ?? error;
-            }
+            disposalFailure = disposalFailure ?? attemptFailure;
             if (disposalFailure == null)
             {
                 disposal.TrySetResult(true);
@@ -351,6 +364,11 @@ namespace MUI.ChildViews
         {
             if (!cleanupFinished)
             {
+                RequireDisposalAllowed();
+                if (disposal == null)
+                {
+                    disposal = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+                }
                 await DisposeCoreAsync();
             }
             if (!AreCleanupDependenciesConfirmed())

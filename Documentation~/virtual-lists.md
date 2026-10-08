@@ -83,6 +83,28 @@ Unity 2022.3.62f3 编辑器内已运行 2000 条动态尺寸演示：初次定�
 
 父页面换绑时，列表在旧来源和旧位置仍有效时准备新视口；提交前不替换订阅或显示节点。候选准备失败保留旧 UI，已进入提交的异常交给页面故障关闭。该流程及条目故障隔离的完整运行矩阵仍待验收。
 
+## 性能观察
+
+`list.MeasurementSnapshot` 返回最近维护帧的 `Frame`、该帧原生测量尝试数 `Attempts` 和此 Element 创建以来的 `TotalAttempts`。读取要求 Element 存活且位于主线程，不会强制布局或物化条目；首次维护前 Frame 为 -1。计数包括测量失败和无效尺寸回退，累计值达到 long.MaxValue 后保持饱和。读取发生在本帧 LateUpdate 前时，Frame 可能仍是上一帧，须依据 Frame 对齐采样。
+
+Unity Profiler 提供以下标记：
+
+| 标记 | 观察范围 |
+| --- | --- |
+| `MUI.VirtualList.Maintenance` | LateUpdate 与 RefreshCells 的同步维护片段；同步重入及两者嵌套只计一次 |
+| `MUI.VirtualList.LateUpdate` | 每帧列表维护，包括尺寸修正、刷新与范围发布 |
+| `MUI.VirtualList.RefreshSlice` | 每次刷新迭代器推进的同步执行片段 |
+| `MUI.VirtualList.VisibleRange` | 刷新时计算物化范围 |
+| `MUI.VirtualList.CellLayout` | Content 尺寸与单元布局写入 |
+| `MUI.VirtualList.NativeMeasurement` | 已物化条目的原生布局重建及首选尺寸读取 |
+| `MUI.VirtualList.ItemBinding` | 设置子节点模型触发的同步绑定和准备入口 |
+
+标记结束后才等待异步准备，不把等待时间当作 CPU。Maintenance 包含在其片段内同步执行的绑定与项目回调；项目应给业务绑定和资源后端增加自身标记，并在相同帧和调用范围内核对开销。异步完成后的其他回调、原生 Canvas 后续重建及数据源批量变更不由该维护标记完整覆盖。各子阶段是包含关系，不能简单相加作为总耗时。
+
+使用 ProfilerRecorder 时按 `SumAllSamplesInFrame` 汇总单帧调用，容量须大于零，在下一帧读取 `LastValue`。具体语义参见 Unity 的 [帧内汇总](https://docs.unity3d.com/2022.3/Documentation/ScriptReference/Unity.Profiling.ProfilerRecorderOptions.SumAllSamplesInFrame.html) 和 [LastValue](https://docs.unity3d.com/2022.3/Documentation/ScriptReference/Unity.Profiling.ProfilerRecorder.LastValue.html)。GC 每帧总量还包含 Unity、输入、渲染及其他脚本，应记录采样环境，不直接归因于列表。
+
+100/1,000/10,000 项、固定/测量尺寸和双模板的桌面 IL2CPP 基线见 [性能记录](../docs/VIRTUAL-LIST-BASELINE.md)。该记录不包含目标设备预算或异步资源加载性能。
+
 ## 当前限制
 
 Unity 2022.3.62f3 的 macOS IL2CPP Player 已通过真实方向键从 1501 连续移动到 1513，跨视口与普通/featured 模板保持正确稳定键。Editor Play Mode 已验证 Secondary 原生控件的逻辑移动、回收后的自动恢复，以及物化期间新用户选择使旧请求失效。真实拖动、Grid/Slider 方向交互、全部竞争路径与列表 Player 资源退出仍需完整验收。

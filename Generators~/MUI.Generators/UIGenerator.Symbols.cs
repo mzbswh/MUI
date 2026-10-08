@@ -110,6 +110,14 @@ namespace MUI.Generators
                         {
                             output.Append(", ValidationProperty = ").Append(Literal(argument.Value.Value as string));
                         }
+                        else if (argument.Key == "SourcePath")
+                        {
+                            output.Append(", SourcePath = ").Append(Literal(argument.Value.Value as string));
+                        }
+                        else if (argument.Key == "NullValue")
+                        {
+                            output.Append(", NullValue = ").Append(AttributeConstant(argument.Value));
+                        }
                     }
                 }
 

@@ -112,7 +112,7 @@ Show Args Update Walkthrough 也启用 ThingItem 子视图演示：UpdateArgsAsy
 
 ## ViewModel 换绑演示
 
-开启默认关闭的 **Show Rebind Walkthrough**。拒绝模型会在 Presenter 已撤销旧订阅后抛错，预期 Failed、旧模型恢复、原模型释放数为 0；成功换绑后，同句柄查询得到新模型，OpenCount=1，分别修改旧/新模型时 Presenter 通知增量为 1，原工厂模型释放数为 1。关闭后的借用模型释放数仍为 0，由示例调用方随后释放。
+开启默认关闭的 **Show Rebind Walkthrough**。先成功换绑，同句柄查询得到新模型，OpenCount=1，分别修改旧/新模型时 Presenter 通知增量为 1，原工厂模型释放数为 1。随后拒绝模型在 Presenter 已撤销旧订阅的提交钩子中抛错，预期 Failed、ViewFaulted=true，宿主撤销输入并故障关闭页面；不恢复已被部分修改的旧绑定。关闭后的借用模型释放数仍为 0，由示例调用方随后释放。
 
 第二个页面的原模型使用受控释放信号。实际进入模型释放后才强制关闭，预期换绑与关闭均尚未完成；放行后换绑 Applied、关闭 Closed，原模型只释放一次。ThingItem 还演示换绑到新道具模型并恢复原借用模型，OpenCount 不变。提交故障关闭会输出预期诊断。以上为运行预期，仅通过离线编译，尚未取得 Unity 实测结果。
 

@@ -808,6 +808,7 @@ namespace MUI.UGUI
                 return;
             }
 
+            using var maintenance = MaintenanceSample.Begin();
             using var sample = updateMarker.Auto();
             BeginMeasurementFrame();
             if (scope == null || !scope.IsActive || Error != null)

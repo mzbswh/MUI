@@ -229,15 +229,17 @@ namespace MUI.Generators
                         Fail(member, "Unsupported binding mode.");
                     }
 
+                    var source = ResolveSourcePath(type, member, sourceName, sourceType, sourceReadable, sourceWritable, receiver, attribute);
+
                     if (mode == 1 || mode == 2)
                     {
                         var input = elementName + "." + targetName;
-                        if (reverseSources.TryGetValue(sourceName, out var previousInput))
+                        if (reverseSources.TryGetValue(source.Name, out var previousInput))
                         {
-                            Fail(member, "Multiple reverse bindings write " + sourceName + ": " + previousInput + ", " + input + ". Use one input binding or explicit business coordination.");
+                            Fail(member, "Multiple reverse bindings write " + source.Name + ": " + previousInput + ", " + input + ". Use one input binding or explicit business coordination.");
                         }
 
-                        reverseSources.Add(sourceName, input);
+                        reverseSources.Add(source.Name, input);
                     }
                     var elementType = ResolveElement(context, attribute);
                     if (elementType == null)
@@ -257,12 +259,12 @@ namespace MUI.Generators
                         Fail(member, "Missing or ambiguous instance Element property: " + targetName);
                     }
 
-                    if (mode != 2 && (!sourceReadable || !Accessible(target.SetMethod)))
+                    if (mode != 2 && (!source.Readable || !Accessible(target.SetMethod)))
                     {
                         Fail(member, "Forward binding requires a readable source and a public writable target.");
                     }
 
-                    if ((mode == 1 || mode == 2) && (!sourceWritable || !Accessible(target.GetMethod)))
+                    if ((mode == 1 || mode == 2) && (!source.Writable || !Accessible(target.GetMethod)))
                     {
                         Fail(member, "Reverse binding requires a public writable source and readable target.");
                     }
@@ -270,7 +272,8 @@ namespace MUI.Generators
                     var converter = attribute.ConstructorArguments.Length > 2 ? attribute.ConstructorArguments[2].Value as INamedTypeSymbol : null;
                     string forward = "value => value", reverse = "value => value";
                     string validationConverter = null;
-                    var validationWriter = BuildValidationWriter(type, member, attribute, sourceName, mode, reverseSources);
+                    var validationWriter = BuildValidationWriter(type, member, attribute, source.Name, mode, reverseSources);
+                    var nullValue = PathNullValue(context, member, attribute, target.Type, source, mode);
                     if (converter != null)
                     {
                         // BindingContext 是独立的顶层类型，不能借用 ViewModel 的私有或受保护访问权限。
@@ -281,10 +284,10 @@ namespace MUI.Generators
                         }
 
                         var validating = converter.AllInterfaces.Any(i => i.OriginalDefinition.ToDisplayString() == "MUI.IValidatingBindingConverter<TSource, TTarget>" &&
-                            SymbolEqualityComparer.Default.Equals(i.TypeArguments[0], sourceType) &&
+                            SymbolEqualityComparer.Default.Equals(i.TypeArguments[0], source.Type) &&
                             SymbolEqualityComparer.Default.Equals(i.TypeArguments[1], target.Type));
                         var valid = validating || converter.AllInterfaces.Any(i => i.OriginalDefinition.ToDisplayString() == "MUI.IBindingConverter<TSource, TTarget>" &&
-                            SymbolEqualityComparer.Default.Equals(i.TypeArguments[0], sourceType) &&
+                            SymbolEqualityComparer.Default.Equals(i.TypeArguments[0], source.Type) &&
                             SymbolEqualityComparer.Default.Equals(i.TypeArguments[1], target.Type));
                         if (!valid || converter.IsAbstract || !converter.InstanceConstructors.Any(c => c.Parameters.Length == 0 && c.DeclaredAccessibility == Accessibility.Public))
                         {
@@ -292,7 +295,7 @@ namespace MUI.Generators
                         }
 
                         var local = "converter" + bindingCount;
-                        bindings.Append(validating ? "            global::MUI.IValidatingBindingConverter<" : "            global::MUI.IBindingConverter<").Append(TypeName(sourceType)).Append(", ").Append(TypeName(target.Type)).Append("> ").Append(local).Append(" = new ").Append(TypeName(converter)).Append("();\n");
+                        bindings.Append(validating ? "            global::MUI.IValidatingBindingConverter<" : "            global::MUI.IBindingConverter<").Append(TypeName(source.Type)).Append(", ").Append(TypeName(target.Type)).Append("> ").Append(local).Append(" = new ").Append(TypeName(converter)).Append("();\n");
                         forward = local + ".Convert";
                         reverse = validating ? "null" : local + ".ConvertBack";
                         if (validating && (mode == 1 || mode == 2))
@@ -303,21 +306,21 @@ namespace MUI.Generators
                     else
                     {
                         var compilation = (CSharpCompilation)context.Compilation;
-                        if (mode != 2 && !compilation.ClassifyConversion(sourceType, target.Type).IsImplicit)
+                        if (mode != 2 && !compilation.ClassifyConversion(source.Type, target.Type).IsImplicit)
                         {
                             Fail(member, "Forward types require an explicit binding converter.");
                         }
 
-                        if ((mode == 1 || mode == 2) && !compilation.ClassifyConversion(target.Type, sourceType).IsImplicit)
+                        if ((mode == 1 || mode == 2) && !compilation.ClassifyConversion(target.Type, source.Type).IsImplicit)
                         {
                             Fail(member, "Reverse types require an explicit binding converter.");
                         }
                     }
                     var modeName = mode == 3 ? "OneTime" : mode == 0 ? "OneWay" : mode == 1 ? "TwoWay" : "OneWayToSource";
-                    bindings.Append("            builder.Property<").Append(TypeName(elementType)).Append(", ").Append(TypeName(sourceType)).Append(", ").Append(TypeName(target.Type)).Append(">(\n")
-                        .Append("                ").Append(Literal(elementName)).Append(", ").Append(Literal(sourceName)).Append(", ")
-                        .Append(mode == 2 ? "null" : "model => " + receiver + "." + Escape(sourceName)).Append(", ")
-                        .Append((mode == 0 || mode == 3) ? "null" : "(model, value) => " + receiver + "." + Escape(sourceName) + " = value").Append(",\n")
+                    bindings.Append("            builder.Property<").Append(TypeName(elementType)).Append(", ").Append(TypeName(source.Type)).Append(", ").Append(TypeName(target.Type)).Append(">(\n")
+                        .Append("                ").Append(Literal(elementName)).Append(", ").Append(Literal(source.Name)).Append(", ")
+                        .Append(mode == 2 ? "null" : "model => " + source.Expression).Append(", ")
+                        .Append((mode == 0 || mode == 3) ? "null" : "(model, value) => " + source.Expression + " = value").Append(",\n")
                         .Append("                ").Append(Literal(targetName)).Append(", ")
                         .Append((mode == 0 || mode == 3) ? "null" : "element => element." + Escape(targetName)).Append(", ")
                         .Append(mode == 2 ? "null" : "(element, value) => element." + Escape(targetName) + " = value").Append(",\n")
@@ -328,8 +331,12 @@ namespace MUI.Generators
                         bindings.Append(", tryConvertBack: ").Append(validationConverter ?? "null")
                             .Append(", writeValidation: ").Append(validationWriter ?? "null");
                     }
+                    if (source.Definition != null)
+                    {
+                        bindings.Append(", sourcePath: ").Append(source.Definition).Append(", nullValue: ").Append(nullValue);
+                    }
                     bindings.Append(");\n");
-                    manifest.Append("                new global::MUI.BindingEntry(").Append(Literal(sourceName)).Append(", ").Append(Literal(elementName))
+                    manifest.Append("                new global::MUI.BindingEntry(").Append(Literal(source.Name)).Append(", ").Append(Literal(elementName))
                         .Append(", typeof(").Append(TypeName(elementType)).Append("), ").Append(Literal(targetName)).Append(", global::MUI.BindingMode.").Append(modeName)
                         .Append(", global::MUI.BindingEntryKind.Property, \"Interactable\"");
                     AppendSourceLocation(manifest, attribute, member);

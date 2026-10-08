@@ -11,11 +11,29 @@
 - 目标第 2、4 节要求换绑准备失败保留旧界面、外部等待不占导航队列。换绑及参数更新现在释放队列执行候选准备，提交前重新取许可；静态嵌套、普通回收列表与虚拟列表已接入提交前候选准备。取消、重入、失败恢复和实际资源归还的完整运行矩阵仍未验收，不能将本轮编译视为契约完成。
 - 固定槽位和虚拟条目失败隔离已补上运行时、Editor 和示例接入，尚未完成真实交互验收；虚拟列表原生方向导航、异步焦点恢复仲裁和按内容版本迁移的动态尺寸缓存已实现，仍需完整运行矩阵。
 - 目标第 2 节的 Legacy/TMP 公共控件契约、输入提交模式和转换校验已补齐，并取得同一生成模型的 Play Mode 与 IL2CPP 运行证据；实体输入、输入法及换绑交错的完整矩阵仍待验收。
+- 目标第 2 节的嵌套属性路径已加入初步实现：BindAttribute.SourcePath/NullValue、编译期强类型访问器及运行时通知链，用于嵌套模型替换、缺失路径回退和反向写入门控。该实现仍待完整运行验收，尤其是转换/订阅重入、换绑、清理异常及跨程序集声明；静态子 View 的既有观察不能作为新路径契约完成的证据。
 - AcquiredView / AcquiredResource 命名已迁移；资源键状态快照和非法列表测量回退已接入，仍须验证运行时迟到结果、资源归还与布局交互。
 
 后续实现优先消除上述契约冲突，再按目标第 2 至 7 节补齐能力，最终按第 8 节逐项验收。不能以删除文件数量或局部编译通过替代目标完成率。
 
 ## 当前基础
+
+### 2026-10-08 父页与静态子视图换绑矩阵
+
+- 通过官方 Sample.FindByPackage/Import API 重导入全部八个 Sample，刷新 Settings 校验及 Navigation 命名。日志 `/private/tmp/mui-current-samples-import-20261008.log`；不作为 GUI Add package from disk 或八个示例完整交互验收的证据。
+- 临时桌面场景使用实际 Navigator、View、NestedViewElement、BindingContext 和主线程受控准备目标，完成七组观察：同帧本地换绑与 null 隐藏/恢复；嵌套准备失败保留旧 UI 并允许重试；忽略取消的迟到候选仅释放不提交；候选外部等待不阻塞同 Navigator 的其他页面关闭；父关闭期间不接管迟到候选；准备回调内换绑明确拒绝 Reentrant；嵌套提交已改写目标后抛错时故障关闭父页。七组 Play Mode 均通过，日志 `/private/tmp/mui-rebind-matrix-play-20261008.log`。
+- 候选准备期间原父/子模型与输入保留，失败后旧子模型继续更新文字，候选模型不写旧 UI；成功后旧模型通知不再写子控件。原工厂父模型释放一次，借用的新父模型及所有子模型不被页面误释放；候选 Prepared/Committed/Disposed 与取消或提交结果匹配。关闭与原生节点清理由父所有者完成。两项有意注入故障各报告一次，均携带 host/view/route/operation 及 RebindPreparation 或 RebindCommit 阶段。
+- 同一七组场景构建 macOS arm64/x64 IL2CPP Development/High stripping、960×640 Player；BuildReport Succeeded/errors=0/warnings=0，运行退出码 0，cases=7/reports=2。构建日志 `/private/tmp/mui-rebind-matrix-il2cpp-build-20261008.log`，运行日志 `/private/tmp/mui-rebind-matrix-il2cpp-player-20261008.log`。退出仍有 13 条 allocator 提示，不报告干净退出。
+- 观察源码为 `/private/tmp/MuiRebindMatrixObservation.cs` 与 `/private/tmp/MuiRebindMatrixObservationMenu.cs`，未作为仓库测试发布。首轮把 Child.Text 作为 Property 的通知属性名，导致 null 回退观察失败；该 API 不解析路径，改为 Child 绑定及转换器处理 null 后通过。该结果仅证明静态子 View 与现有转换器路径，不证明设计目标要求的可声明嵌套属性路径、回退值和 null 反向写入门控；已将其明确列入当前设计冲突。
+- Navigation README 修正拒绝模型时“恢复旧绑定”的过时说明，与提交钩子异常导致故障关闭的实际示例一致。尚未覆盖多层子容器、普通/虚拟列表候选换绑的全部异常组合，以及换绑后的清理故障恢复；完整目标仍在执行，未自动提交。
+
+### 2026-10-08 虚拟列表统计与性能基线
+
+- 新增 MUI.VirtualList.Maintenance，将 LateUpdate 和刷新迭代器的同步区间合并计时；同步嵌套与跨列表重入只计一次，标记不跨异步等待。各细分标记及 MeasurementSnapshot 的帧号、尝试计数、饱和累计值在虚拟列表文档公开说明。
+- 在既有桌面本地 UPM 工程运行 100/1,000/10,000 项 × 固定/测量尺寸，两种模式均有双模板和原生 Image/RectMask2D。Editor 六组功能观察通过；多数 ProfilerRecorder LastValue 为零，舍弃其 CPU/GC 结果。
+- 最新 macOS 通用 IL2CPP Development/High stripping、960×640 Player 构建 Succeeded/errors=0/warnings=0，运行退出码 0。六组共 3,600 帧有效采样，无 Maintenance 零值缺口；每帧 Ready、无条目失败、物化和模板实例总数最多 11、测量最多 4 次，Shutdown 后原生子节点归零。10,000 项测量累计 1,134 次，未物化全部前置条目。退出仍有 13 条 allocator 提示，不报告干净退出。
+- 框架维护 P95 为 1.537–2.681 ms，P99 为 3.877–4.021 ms；整帧 GC 均值约 94–100 KiB，尚未独立归因。业务绑定单独采样，资源加载次数为零；完整环境、逐组分位数、计数与局限见 [性能基线](VIRTUAL-LIST-BASELINE.md)。目标设备与预算未指定，仅记录基线，不宣称性能达标。
+- MUI.UGUI 离线编译 0 警告、0 错误；4 个相关文件的成员布局、大括号及空白检查通过。README 清除“Basic 尚无任何运行验证”和 Provider 仍为目标契约的过时表述，继续区分历史键盘证据与完整示例验收。未新增仓库测试或自动提交，完整设计目标仍在执行。
 
 ### 2026-10-08 当前提交检查点
 

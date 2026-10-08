@@ -48,5 +48,17 @@ namespace MUI
         {
             get; set;
         }
+
+        /// <summary>相对于被标注模型成员的属性路径，如 "Profile.Name"；中间拥有者须为 ViewModel。</summary>
+        public string SourcePath
+        {
+            get; set;
+        }
+
+        /// <summary>嵌套路径中间模型为 null 时投影的目标值；省略时使用目标类型默认值。</summary>
+        public object NullValue
+        {
+            get; set;
+        }
     }
 }

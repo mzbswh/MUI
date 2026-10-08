@@ -49,7 +49,9 @@ namespace MUI
                     Func<TTarget, TSource> convertBack,
                     BindingMode mode = BindingMode.OneWay,
                     Func<TTarget, BindingConversionResult<TSource>> tryConvertBack = null,
-                    Action<TViewModel, BindingValidationState> writeValidation = null)
+                    Action<TViewModel, BindingValidationState> writeValidation = null,
+                    BindingSourcePath<TViewModel> sourcePath = null,
+                    TTarget nullValue = default)
                     where TElement : class, IElement
         {
             if (string.IsNullOrEmpty(sourceProperty))
@@ -109,14 +111,22 @@ namespace MUI
             session.RegisterPropertyWriter(element, sourceProperty, targetProperty, mode);
             if (preview != null)
             {
-                if (mode != BindingMode.OneWayToSource)
+                var owners = sourcePath == null ? null : sourcePath.CaptureOwners(model);
+                if (owners != null)
                 {
-                    var value = convert(readSource(model));
-                    preview.Add(element, targetProperty, value,
-                        () => EqualityComparer<TTarget>.Default.Equals(value, convert(readSource(model))));
+                    preview.AddCheck(sourceProperty, () => sourcePath.HasOwners(model, owners));
                 }
 
-                if (mode == BindingMode.OneWayToSource)
+                if (mode != BindingMode.OneWayToSource)
+                {
+                    var available = owners == null || owners[owners.Length - 1] != null;
+                    var value = available ? convert(readSource(model)) : nullValue;
+                    preview.Add(element, targetProperty, value,
+                        () => (owners == null || sourcePath.HasOwners(model, owners)) &&
+                            EqualityComparer<TTarget>.Default.Equals(value, available ? convert(readSource(model)) : nullValue));
+                }
+
+                if (mode == BindingMode.OneWayToSource && (owners == null || owners[owners.Length - 1] != null))
                 {
                     ConvertReverse(readTarget(element));
                 }
@@ -126,6 +136,11 @@ namespace MUI
 
             var updating = false;
             var forwardPending = false;
+            SourcePathSubscription pathSubscription = null;
+            INotifyPropertyChanged SourceOwner() => sourcePath == null ? model : sourcePath.GetOwner(model);
+            long SourceRevision() => pathSubscription == null ? 0 : pathSubscription.Revision;
+            bool SourceIsCurrent(INotifyPropertyChanged owner, long revision) => session.IsActive &&
+                revision == SourceRevision() && ReferenceEquals(owner, SourceOwner());
             void Forward()
             {
                 if (!IsBindingThread())
@@ -149,6 +164,7 @@ namespace MUI
                 {
                     var hasApplied = false;
                     var previous = default(TSource);
+                    INotifyPropertyChanged previousOwner = null;
                     var passes = 0;
                     while (forwardPending && session.IsActive)
                     {
@@ -158,29 +174,45 @@ namespace MUI
                             throw new InvalidOperationException($"Element '{elementName}' was destroyed.");
                         }
 
-                        var current = readSource(model);
+                        if (++passes > 32)
+                        {
+                            throw new InvalidOperationException($"Binding '{sourceProperty}' did not stabilize after 32 synchronous updates.");
+                        }
+
+                        var revision = SourceRevision();
+                        var owner = SourceOwner();
+                        var current = owner == null ? default : readSource(model);
                         if (!session.IsActive)
                         {
                             return;
                         }
 
                         // 来源值回传无害，但新值仍必须到达目标。
-                        if (hasApplied && System.Collections.Generic.EqualityComparer<TSource>.Default.Equals(previous, current))
+                        if (!SourceIsCurrent(owner, revision))
+                        {
+                            forwardPending = true;
+                            continue;
+                        }
+
+                        if (hasApplied && ReferenceEquals(owner, previousOwner) && EqualityComparer<TSource>.Default.Equals(previous, current))
                         {
                             continue;
                         }
 
-                        if (++passes > 32)
-                        {
-                            throw new InvalidOperationException($"Binding '{sourceProperty}' did not stabilize after 32 synchronous updates.");
-                        }
-
                         previous = current;
+                        previousOwner = owner;
                         hasApplied = true;
-                        var converted = convert(current);
+                        var converted = owner == null ? nullValue : convert(current);
                         if (!session.IsActive)
                         {
                             return;
+                        }
+
+                        if (!SourceIsCurrent(owner, revision))
+                        {
+                            hasApplied = false;
+                            forwardPending = true;
+                            continue;
                         }
 
                         if (!element.IsAlive)
@@ -212,6 +244,13 @@ namespace MUI
                     return;
                 }
 
+                var revision = SourceRevision();
+                var owner = SourceOwner();
+                if (owner == null)
+                {
+                    return;
+                }
+
                 if (!element.IsAlive)
                 {
                     throw new InvalidOperationException($"Element '{elementName}' was destroyed.");
@@ -223,13 +262,13 @@ namespace MUI
                 try
                 {
                     var targetValue = readTarget(element);
-                    if (!session.IsActive)
+                    if (!SourceIsCurrent(owner, revision))
                     {
                         return;
                     }
 
                     var converted = ConvertReverse(targetValue);
-                    if (!session.IsActive)
+                    if (!SourceIsCurrent(owner, revision))
                     {
                         return;
                     }
@@ -250,7 +289,7 @@ namespace MUI
                     updating = false;
                     if (!succeeded)
                     {
-                        var sourceChangedDuringValidation = rejected && forwardPending;
+                        var sourceChangedDuringValidation = (rejected || sourcePath != null) && forwardPending;
                         forwardPending = false;
                         if (sourceChangedDuringValidation && mode == BindingMode.TwoWay)
                         {
@@ -268,9 +307,17 @@ namespace MUI
                 }
             }
 
+            if (sourcePath != null && mode != BindingMode.OneTime)
+            {
+                pathSubscription = new SourcePathSubscription(this, sourcePath,
+                    () => { if (mode != BindingMode.OneWayToSource) { Forward(); } });
+                session.AddDetach(pathSubscription.Dispose);
+                pathSubscription.Connect();
+            }
+
             if (mode != BindingMode.OneWayToSource)
             {
-                if (mode != BindingMode.OneTime)
+                if (mode != BindingMode.OneTime && sourcePath == null)
                 {
                     PropertyChangedEventHandler onSource = (sender, args) =>
                     {
@@ -299,9 +346,21 @@ namespace MUI
                 element.PropertyChanged += onTarget;
                 if (mode == BindingMode.OneWayToSource)
                 {
+                    var owner = SourceOwner();
+                    var revision = SourceRevision();
+                    if (owner == null)
+                    {
+                        return;
+                    }
+
                     var staged = ConvertReverse(readTarget(element));
                     session.StageSourceWrite(() =>
                     {
+                        if (!SourceIsCurrent(owner, revision))
+                        {
+                            return;
+                        }
+
                         if (staged.Succeeded)
                         {
                             writeSource(model, staged.Value);
@@ -346,7 +405,7 @@ namespace MUI
 
         internal void Add(IElement element, string property, object value, Func<bool> stillCurrent)
         {
-            checks.Add(new ReadCheck(property, stillCurrent));
+            AddCheck(property, stillCurrent);
             if (!(element is IBindingRebindTarget))
             {
                 return;
@@ -370,6 +429,8 @@ namespace MUI
 
             target.Values.Add(property, value);
         }
+
+        internal void AddCheck(string property, Func<bool> stillCurrent) => checks.Add(new ReadCheck(property, stillCurrent));
 
         internal async ValueTask PrepareAsync(CancellationToken token)
         {

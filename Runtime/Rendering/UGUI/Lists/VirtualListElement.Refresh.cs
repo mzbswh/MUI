@@ -196,6 +196,7 @@ namespace MUI.UGUI
                 {
                     Task[] batch;
                     // 每段只计所属帧的同步 CPU；标记不得跨越外部等待或 iterator 的 yield。
+                    using (MaintenanceSample.Begin())
                     using (refreshMarker.Auto())
                     {
                         if (!batches.MoveNext())

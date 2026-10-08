@@ -27,7 +27,9 @@ namespace MUI.Generators
             }
 
             var nodes = new List<string> { PathMember(root, name, "model") };
-            var guards = new List<string>();
+            var ownerStatements = new List<string>();
+            string leafExpression = null;
+            string leafAccess = null;
             var segments = path.Split('.');
             for (var index = 0; index < segments.Length; ++index)
             {
@@ -42,10 +44,10 @@ namespace MUI.Generators
                     Fail(declaration, "Each SourcePath property owner must derive from ViewModel: " + name);
                 }
 
-                var ownerExpression = guards.Count == 0 ? expression :
-                    string.Join(" || ", guards) + " ? null : " + expression;
-                nodes.Add(PathMember(root, segment, ownerExpression));
-                guards.Add("(" + expression + ") == null");
+                var ownerLocal = "owner" + index;
+                var ownerRead = index == 0 ? expression : leafExpression;
+                ownerStatements.Add("var " + ownerLocal + " = " + ownerRead + "; if (" + ownerLocal + " == null) { return null; }");
+                nodes.Add(PathMember(root, segment, "{ " + string.Join(" ", ownerStatements) + " return " + ownerLocal + "; }"));
                 var property = FindPathProperty((INamedTypeSymbol)sourceType, segment, declaration);
                 if (property is IPropertySymbol declared)
                 {
@@ -61,6 +63,8 @@ namespace MUI.Generators
 
                 // 强制声明类型接收者，保证继承与同名成员不会改变已校验的路径。
                 expression = "((" + TypeName(property.ContainingType) + ")(" + expression + "))." + Escape(segment);
+                leafExpression = "((" + TypeName(property.ContainingType) + ")" + ownerLocal + ")." + Escape(segment);
+                leafAccess = "((" + TypeName(property.ContainingType) + ")owner)." + Escape(segment);
                 name += "." + segment;
                 if (index < segments.Length - 1 && !readable)
                 {
@@ -68,7 +72,10 @@ namespace MUI.Generators
                 }
             }
 
-            var definition = "new global::MUI.BindingSourcePath<" + TypeName(root) + ">(" + string.Join(", ", nodes) + ")";
+            // 叶属性读写直接使用运行时捕获的拥有者，禁止在反向提交时再次读取中间模型。
+            var definition = "new global::MUI.BindingSourcePath<" + TypeName(root) + ", " + TypeName(sourceType) + ">(" +
+                (readable ? "owner => " + leafAccess : "null") + ", " +
+                (writable ? "(owner, value) => " + leafAccess + " = value" : "null") + ", " + string.Join(", ", nodes) + ")";
             return new PathSource(name, sourceType, readable, writable, expression, definition);
         }
 
@@ -138,7 +145,7 @@ namespace MUI.Generators
                 Fail(member, "NullValue must be implicitly assignable to the Element target type.");
             }
 
-            return "(" + TypeName(target) + ")(" + AttributeConstant(constant) + ")";
+            return "(" + TypeName(target) + ")(" + AttributeConstant(constant, member) + ")";
         }
 
         private static bool FitsIntegralConstant(TypedConstant constant, ITypeSymbol target)
@@ -178,7 +185,7 @@ namespace MUI.Generators
             }
         }
 
-        private static string AttributeConstant(TypedConstant constant)
+        private static string AttributeConstant(TypedConstant constant, ISymbol declaration)
         {
             if (constant.IsNull)
             {
@@ -187,7 +194,17 @@ namespace MUI.Generators
 
             if (constant.Kind != TypedConstantKind.Primitive && constant.Kind != TypedConstantKind.Enum)
             {
-                throw new ContractException(Location.None, "NullValue must be a primitive, enum or null constant.");
+                Fail(declaration, "NullValue must be a primitive, enum or null constant.");
+            }
+
+            if (constant.Value is float single && (float.IsNaN(single) || float.IsInfinity(single)))
+            {
+                return "global::System.Single." + (float.IsNaN(single) ? "NaN" : single > 0 ? "PositiveInfinity" : "NegativeInfinity");
+            }
+
+            if (constant.Value is double number && (double.IsNaN(number) || double.IsInfinity(number)))
+            {
+                return "global::System.Double." + (double.IsNaN(number) ? "NaN" : number > 0 ? "PositiveInfinity" : "NegativeInfinity");
             }
 
             return "(" + TypeName(constant.Type) + ")(" + Microsoft.CodeAnalysis.CSharp.SymbolDisplay.FormatPrimitive(constant.Value, true, false) + ")";

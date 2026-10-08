@@ -144,7 +144,7 @@ namespace MUI.Navigation
                         {
                             using (EnterCallback(null))
                             {
-                                await ownedResource.DisposeAsync();
+                                await CleanupRegistry.ReleaseAsync(ownedResource, "Navigator.LatePreload");
                             }
                         }
                         catch (Exception cleanup)
@@ -299,7 +299,7 @@ namespace MUI.Navigation
 
         private async ValueTask ReleasePreloadResourceAsync(IAcquiredPreload ownedResource)
         {
-            await ownedResource.DisposeAsync();
+            await CleanupRegistry.ReleaseAsync(ownedResource, "Navigator.Preload");
             --preloadReservations;
         }
 

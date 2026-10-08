@@ -305,7 +305,7 @@ namespace MUI.UGUI
 
             try
             {
-                await ownedResource.DisposeAsync();
+                await CleanupRegistry.ReleaseAsync(ownedResource, "ResourceSlot<" + typeof(T).Name + ">");
             }
             catch (Exception error)
             {

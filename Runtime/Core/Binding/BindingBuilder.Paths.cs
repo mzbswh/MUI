@@ -7,10 +7,10 @@ namespace MUI
     public sealed partial class BindingBuilder<TViewModel> where TViewModel : ViewModel
     {
         // 每个绑定会话独立持有通知链；退订先使会话失效，再移除全部旧拥有者监听。
-        private sealed class SourcePathSubscription : IDisposable
+        private sealed class SourcePathSubscription<TValue> : IDisposable
         {
             private readonly BindingBuilder<TViewModel> builder;
-            private readonly BindingSourcePath<TViewModel> path;
+            private readonly BindingSourcePath<TViewModel, TValue> path;
             private readonly Action changed;
             private readonly INotifyPropertyChanged[] owners;
             private readonly PropertyChangedEventHandler[] handlers;
@@ -19,7 +19,7 @@ namespace MUI
             private bool disposed;
 
             internal SourcePathSubscription(BindingBuilder<TViewModel> builder,
-                BindingSourcePath<TViewModel> path, Action changed)
+                BindingSourcePath<TViewModel, TValue> path, Action changed)
             {
                 this.builder = builder;
                 this.path = path;

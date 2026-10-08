@@ -116,7 +116,7 @@ namespace MUI.Generators
                         }
                         else if (argument.Key == "NullValue")
                         {
-                            output.Append(", NullValue = ").Append(AttributeConstant(argument.Value));
+                            output.Append(", NullValue = ").Append(AttributeConstant(argument.Value, member));
                         }
                     }
                 }

@@ -319,8 +319,8 @@ namespace MUI.Generators
                     var modeName = mode == 3 ? "OneTime" : mode == 0 ? "OneWay" : mode == 1 ? "TwoWay" : "OneWayToSource";
                     bindings.Append("            builder.Property<").Append(TypeName(elementType)).Append(", ").Append(TypeName(source.Type)).Append(", ").Append(TypeName(target.Type)).Append(">(\n")
                         .Append("                ").Append(Literal(elementName)).Append(", ").Append(Literal(source.Name)).Append(", ")
-                        .Append(mode == 2 ? "null" : "model => " + source.Expression).Append(", ")
-                        .Append((mode == 0 || mode == 3) ? "null" : "(model, value) => " + source.Expression + " = value").Append(",\n")
+                        .Append(mode == 2 || source.Definition != null ? "null" : "model => " + source.Expression).Append(", ")
+                        .Append((mode == 0 || mode == 3 || source.Definition != null) ? "null" : "(model, value) => " + source.Expression + " = value").Append(",\n")
                         .Append("                ").Append(Literal(targetName)).Append(", ")
                         .Append((mode == 0 || mode == 3) ? "null" : "element => element." + Escape(targetName)).Append(", ")
                         .Append(mode == 2 ? "null" : "(element, value) => element." + Escape(targetName) + " = value").Append(",\n")

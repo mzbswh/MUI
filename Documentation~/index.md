@@ -37,6 +37,25 @@ InputGate 控制新输入准入；临时关门不自动取消已接纳的业务�
 
 下拉框公共接口提供文本 Options、原生 Value、Interactable 和 SelectionChanged；模型赋值不发布用户选择事件。空选项和 TMP 占位项保留各原生后端的值语义。
 
+## 嵌套属性路径
+
+`Bind.SourcePath` 声明相对于被标注成员的属性路径。例如模型的 `Child` 属性指向另一个 ViewModel，可在该成员上声明：
+
+```csharp
+[ObservableProperty]
+[Bind("Name", nameof(IInputFieldElement.Value), bindingMode: BindingMode.TwoWay,
+    SourcePath = "Profile.Name", NullValue = "")]
+private ChildViewModel child;
+```
+
+这会绑定 `Child.Profile.Name`。中间模型必须派生自 ViewModel，路径只包含属性名，支持普通公共属性、生成属性及继承属性；不支持索引器、集合索引或方法调用。普通属性的 setter 应发布对应属性名或全部属性通知。生成器在编译期校验访问权限及转换类型，生成访问器和逐层通知订阅，运行时不解析字符串或使用反射。
+
+替换 Child 或 Profile 后，绑定同步移除旧链订阅并投影新值。任意中间模型为 null 时，目标使用 `NullValue`；未声明时使用目标类型默认值，转换器不会收到该缺失路径。`NullValue` 必须是可隐式赋给目标类型的属性常量，仅用于含前向更新的路径绑定。实际叶属性的值为 null 仍交给转换器，和中间模型缺失分别处理。
+
+TwoWay 默认用模型初始化控件，路径缺失期间忽略反向写入。路径恢复不会回放旧输入；转换或读取期间替换路径，会使正在处理的旧输入失效，即使随后恢复同一个模型也如此。OneTime 仅投影首次读取的值，不订阅后续模型替换；OneWayToSource 初始路径缺失时跳过初始源写入，路径恢复后只接纳新的输入。叶属性读写使用本次捕获的拥有者，避免在提交输入时再次遍历已变化的模型链。
+
+需要手写自定义绑定时，可向 `BindingBuilder.Property` 传入 `BindingSourcePath<TViewModel, TValue>`：其读写委托访问捕获的叶拥有者，`BindingSourceMember` 依次提供属性名和拥有者选择委托。选择委托必须在中间模型缺失时返回 null，使用所属 UI 线程，沿用同一绑定会话的退订与换绑规则。
+
 ## 主线程状态更新
 
 `ObservableObject` 和 `ObservableList` 归创建线程所有。生成属性通过 `SetProperty` 在字段修改前检查线程；自定义 setter 应先调用 `RequireOwningThread()`。自定义模型或集合从后台发出的通知会被绑定与列表适配拒绝，不会更新 Unity 控件。
@@ -66,6 +85,18 @@ InputGate 控制新输入准入；临时关门不自动取消已接纳的业务�
 ImageElement.Sprite、RawImageElement.Texture、TextElement.Font 和 GraphicElement.Material 可在资源键槽存在时直接赋值。赋值立即使旧请求失效，成功替换显示后归还旧凭证；异步归还仍由同一激活生命周期跟踪。直接 null 清空，直接对象只借用，不自动销毁。调用方必须覆盖整个显示期间的持有权；即使赋予槽已显示的同一对象，也须有独立持有权。
 
 直接对象赋值将请求键和显示键都置空，非空对象的 Snapshot.State 为 Displayed，清空为 Empty；查询实际对象使用控件属性。被取代请求即使忽略取消，其迟到凭证也归还。Snapshot.CleanupFailure 和 CleanupFailureCount 保留旧归还、回滚及最终清空失败的诊断，不改写新资源的显示结果。释放失败仍使最终生命周期清理失败，重复等待不会自动重试。
+
+## 清理责任与显式重试
+
+`CleanupResponsibility` 记录归还责任的稳定 Id、拥有者标签、状态、错误、诊断上下文与尝试次数。状态区分未启动的 Retained、在途 Pending、失败或归还状态不明的 Failed，以及已确认的 Completed。`CleanupRegistry.CaptureSnapshot(maxEntries)` 按上限读取在途或失败记录，`UnconfirmedCount` 返回总数；完成记录立即移出全局账本，不长期保存成功历史。账本独立于 UIHost 组件，场景或作用域结束后仍持有未确认责任及回调。
+
+`AcquiredResource<T>`、`AcquiredView` 和 `AcquiredPreload` 公开同一 `CleanupResponsibility`。后端能保证完整释放回调可幂等重复执行时，构造凭证显式设置 `supportsIdempotentRetry: true`，并用 `owner` 标明资源或池身份。回调必须记录部分完成的步骤：已经扣除的引用、已归还的池对象或已经请求的销毁不能再次执行。默认不允许重试，失败不能推断为未释放。
+
+项目选择失败责任后调用 `await CleanupRegistry.RetryAsync(id)`，或直接使用凭证的 `CleanupResponsibility.RetryAsync()`。并发重试共享当前尝试，成功更新同一记录并解除其持有；已确认完成的责任不再次执行释放。线程约束沿用凭证的 `releaseThreadId`，线程拒绝不接管新的尝试。重试任务由账本持有，调用方负责观察其结果；没有自动重试调度或丢弃失败记录的入口。
+
+重复 `DisposeAsync` 始终观察首次清理结果。显式重试成功不改写已经交付的关闭、Shutdown 或 LifetimeScope 失败任务，也不复活页面、作用域或输入；判断当前未完成责任使用账本快照。控件 Snapshot 的 CleanupFailure/Count 继续表示历史上已记录的错误。
+
+`LifetimeScope.OnDisposeAsync` 也可显式声明回调的幂等重试、拥有者标签和释放线程。未声明能力的普通清理回调、外部自定义凭证和同步清理按不可安全重试处理，失败仍保留对象与回调。自定义凭证若自己管理责任，应实现 `ICleanupResponsibilitySource` 并让释放入口更新该记录，框架不会再为它建立第二份归还责任。
 
 无法确认原生 setter 失败后的引用时，槽冻结并暂停相关 Graphic 渲染，保留可能仍被引用的凭证；最终清理先清空原生引用再归还。框架不会自动恢复该控件的渲染。新的资源拥有者须等原槽成功清理后配置；TMP 换 FontAsset 可能间接替换材质，因此仍拒绝在材质槽持有期间执行该操作。
 

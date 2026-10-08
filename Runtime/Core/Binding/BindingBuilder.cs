@@ -50,7 +50,7 @@ namespace MUI
                     BindingMode mode = BindingMode.OneWay,
                     Func<TTarget, BindingConversionResult<TSource>> tryConvertBack = null,
                     Action<TViewModel, BindingValidationState> writeValidation = null,
-                    BindingSourcePath<TViewModel> sourcePath = null,
+                    BindingSourcePath<TViewModel, TSource> sourcePath = null,
                     TTarget nullValue = default)
                     where TElement : class, IElement
         {
@@ -69,13 +69,13 @@ namespace MUI
                 throw new ArgumentOutOfRangeException(nameof(mode));
             }
 
-            if (mode != BindingMode.OneWayToSource && (readSource == null || writeTarget == null || convert == null))
+            if (mode != BindingMode.OneWayToSource && ((sourcePath == null ? readSource == null : sourcePath.Read == null) || writeTarget == null || convert == null))
             {
                 throw new ArgumentException("Forward binding requires readable source, writable target and converter.");
             }
 
             var reverseBinding = mode == BindingMode.TwoWay || mode == BindingMode.OneWayToSource;
-            if (reverseBinding && (readTarget == null || writeSource == null || (convertBack == null && tryConvertBack == null)))
+            if (reverseBinding && (readTarget == null || (sourcePath == null ? writeSource == null : sourcePath.Write == null) || (convertBack == null && tryConvertBack == null)))
             {
                 throw new ArgumentException("Reverse binding requires readable target, writable source and reverse converter.");
             }
@@ -109,6 +109,18 @@ namespace MUI
 
             var element = view.GetElement<TElement>(elementName);
             session.RegisterPropertyWriter(element, sourceProperty, targetProperty, mode);
+            TSource ReadSource(INotifyPropertyChanged owner) => sourcePath == null ? readSource(model) : sourcePath.Read(owner);
+            void WriteSource(INotifyPropertyChanged owner, TSource value)
+            {
+                if (sourcePath == null)
+                {
+                    writeSource(model, value);
+                }
+                else
+                {
+                    sourcePath.Write(owner, value);
+                }
+            }
             if (preview != null)
             {
                 var owners = sourcePath == null ? null : sourcePath.CaptureOwners(model);
@@ -120,10 +132,12 @@ namespace MUI
                 if (mode != BindingMode.OneWayToSource)
                 {
                     var available = owners == null || owners[owners.Length - 1] != null;
-                    var value = available ? convert(readSource(model)) : nullValue;
+                    var owner = owners == null ? model : owners[owners.Length - 1];
+                    var value = available ? convert(ReadSource(owner)) : nullValue;
                     preview.Add(element, targetProperty, value,
                         () => (owners == null || sourcePath.HasOwners(model, owners)) &&
-                            EqualityComparer<TTarget>.Default.Equals(value, available ? convert(readSource(model)) : nullValue));
+                            EqualityComparer<TTarget>.Default.Equals(value, available ? convert(ReadSource(owner)) : nullValue) &&
+                            (owners == null || sourcePath.HasOwners(model, owners)));
                 }
 
                 if (mode == BindingMode.OneWayToSource && (owners == null || owners[owners.Length - 1] != null))
@@ -136,11 +150,14 @@ namespace MUI
 
             var updating = false;
             var forwardPending = false;
-            SourcePathSubscription pathSubscription = null;
+            SourcePathSubscription<TSource> pathSubscription = null;
             INotifyPropertyChanged SourceOwner() => sourcePath == null ? model : sourcePath.GetOwner(model);
             long SourceRevision() => pathSubscription == null ? 0 : pathSubscription.Revision;
-            bool SourceIsCurrent(INotifyPropertyChanged owner, long revision) => session.IsActive &&
-                revision == SourceRevision() && ReferenceEquals(owner, SourceOwner());
+            bool SourceIsCurrent(INotifyPropertyChanged owner, long revision)
+            {
+                var current = SourceOwner();
+                return session.IsActive && revision == SourceRevision() && ReferenceEquals(owner, current);
+            }
             void Forward()
             {
                 if (!IsBindingThread())
@@ -181,7 +198,12 @@ namespace MUI
 
                         var revision = SourceRevision();
                         var owner = SourceOwner();
-                        var current = owner == null ? default : readSource(model);
+                        if (!session.IsActive)
+                        {
+                            return;
+                        }
+
+                        var current = owner == null ? default : ReadSource(owner);
                         if (!session.IsActive)
                         {
                             return;
@@ -246,7 +268,7 @@ namespace MUI
 
                 var revision = SourceRevision();
                 var owner = SourceOwner();
-                if (owner == null)
+                if (owner == null || !session.IsActive)
                 {
                     return;
                 }
@@ -280,7 +302,7 @@ namespace MUI
                         return;
                     }
 
-                    writeSource(model, converted.Value);
+                    WriteSource(owner, converted.Value);
                     PublishValidation(default);
                     succeeded = true;
                 }
@@ -309,8 +331,14 @@ namespace MUI
 
             if (sourcePath != null && mode != BindingMode.OneTime)
             {
-                pathSubscription = new SourcePathSubscription(this, sourcePath,
-                    () => { if (mode != BindingMode.OneWayToSource) { Forward(); } });
+                pathSubscription = new SourcePathSubscription<TSource>(this, sourcePath,
+                    () =>
+                    {
+                        if (mode != BindingMode.OneWayToSource)
+                        {
+                            Forward();
+                        }
+                    });
                 session.AddDetach(pathSubscription.Dispose);
                 pathSubscription.Connect();
             }
@@ -348,7 +376,7 @@ namespace MUI
                 {
                     var owner = SourceOwner();
                     var revision = SourceRevision();
-                    if (owner == null)
+                    if (owner == null || !session.IsActive)
                     {
                         return;
                     }
@@ -363,7 +391,7 @@ namespace MUI
 
                         if (staged.Succeeded)
                         {
-                            writeSource(model, staged.Value);
+                            WriteSource(owner, staged.Value);
                             PublishValidation(default);
                         }
                         else

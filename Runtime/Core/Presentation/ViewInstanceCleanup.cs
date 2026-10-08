@@ -48,7 +48,7 @@ namespace MUI
             {
                 try
                 {
-                    await viewResource.DisposeAsync();
+                    await CleanupRegistry.ReleaseAsync(viewResource, "ViewInstance.ViewResource");
                 }
                 catch (Exception error)
                 {

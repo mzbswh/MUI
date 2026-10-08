@@ -75,7 +75,7 @@ namespace MUI.UGUI
             {
                 try
                 {
-                    await ownedResource.DisposeAsync();
+                    await CleanupRegistry.ReleaseAsync(ownedResource, "ContentViewProvider.Rollback");
                 }
                 catch (Exception cleanup)
                 {

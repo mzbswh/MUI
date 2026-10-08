@@ -11,12 +11,32 @@
 - 目标第 2、4 节要求换绑准备失败保留旧界面、外部等待不占导航队列。换绑及参数更新现在释放队列执行候选准备，提交前重新取许可；静态嵌套、普通回收列表与虚拟列表已接入提交前候选准备。取消、重入、失败恢复和实际资源归还的完整运行矩阵仍未验收，不能将本轮编译视为契约完成。
 - 固定槽位和虚拟条目失败隔离已补上运行时、Editor 和示例接入，尚未完成真实交互验收；虚拟列表原生方向导航、异步焦点恢复仲裁和按内容版本迁移的动态尺寸缓存已实现，仍需完整运行矩阵。
 - 目标第 2 节的 Legacy/TMP 公共控件契约、输入提交模式和转换校验已补齐，并取得同一生成模型的 Play Mode 与 IL2CPP 运行证据；实体输入、输入法及换绑交错的完整矩阵仍待验收。
-- 目标第 2 节的嵌套属性路径已加入初步实现：BindAttribute.SourcePath/NullValue、编译期强类型访问器及运行时通知链，用于嵌套模型替换、缺失路径回退和反向写入门控。该实现仍待完整运行验收，尤其是转换/订阅重入、换绑、清理异常及跨程序集声明；静态子 View 的既有观察不能作为新路径契约完成的证据。
+- 目标第 2 节的嵌套属性路径已实现 SourcePath/NullValue、编译期访问器、逐层通知链及捕获叶拥有者的读写；生成器声明矩阵和同一模型的 Legacy/TMP Play Mode、IL2CPP 观察均通过。当前证据覆盖模型替换、null、转换/getter 重入、初始反向写入和换绑候选失效；自定义通知访问器的清理异常及复杂子容器交错仍随完整生命周期矩阵验收。
 - AcquiredView / AcquiredResource 命名已迁移；资源键状态快照和非法列表测量回退已接入，仍须验证运行时迟到结果、资源归还与布局交互。
+- 清理失败以前只保留错误而丢弃凭证/回调，且没有安全重试能力；本轮已接入统一 CleanupResponsibility/Registry。资源与作用域的首次结果保持不变，显式幂等重试更新同一责任记录。复杂容器的依赖清理、历史失败与当前未完成责任的宿主诊断整合、资源通知链的上下文及容量限制仍需完整矩阵验证。
 
 后续实现优先消除上述契约冲突，再按目标第 2 至 7 节补齐能力，最终按第 8 节逐项验收。不能以删除文件数量或局部编译通过替代目标完成率。
 
 ## 当前基础
+
+### 2026-10-08 清理责任与显式幂等重试
+
+- Core 新增 `CleanupResponsibility`、只读状态快照、`ICleanupResponsibilitySource` 和独立于宿主组件的 `CleanupRegistry`。记录稳定 Id、拥有者标签、有界上下文、当前状态/错误及饱和尝试次数。账本只持有在途或失败的真实责任，成功后移除；快照按 1–4096 上限采集，不自动重试或删除未知责任。
+- AcquiredResource/AcquiredView/AcquiredPreload 改为使用同一 Core 责任。首次尝试失败后继续保留资产与释放回调；`supportsIdempotentRetry` 默认 false，只有后端显式声明完整回调可幂等重试时才允许再次调用。并发 DisposeAsync 共享首次任务，并发重试共享当前尝试；重试成功不改写已交付的首次失败。释放线程检查在接管尝试前执行，拒绝不使资产或重试资格失效；直接自等待检测统一到 Core，不保留第二套资源释放调用链。
+- 资源槽、页面视图归还、预加载和 ContentViewProvider 回滚通过账本接入外部凭证，未知适配器按不可重试保留。LifetimeScope 的普通同步/异步回调失败后继续保留回调；异步回调可声明幂等能力、拥有者与线程。已有凭证、直接持有的责任和子作用域沿用各自记录，不再叠加第二份归还责任。作用域、关闭与 Shutdown 首次失败仍属于历史结果，不能用重试成功复活它们；当前实际责任通过账本查询。
+- 临时 .NET 驱动通过 32 项断言：首次共享结果、Pending/Completed、部分归还后的失败、稳定身份与上下文、显式重试、首次失败保留、并发重试、不可重试拒绝、直接自等待、作用域结束后的回调重试、未知适配器共享责任、直接 Own 责任无重复记录，以及初始/重试线程拒绝与正确线程恢复。入口 `/private/tmp/mui-cleanup-acceptance-20261008/Program.cs`，日志 `/private/tmp/mui-cleanup-acceptance-20261008.log`，未新增仓库测试。首次 dotnet run 的构建进程停滞，定位并终止该任务进程后改用现有单工作进程构建及 DLL 运行方式，编译和断言通过。
+- 临时原生 RawImage 场景通过 7 项 Play Mode 断言：新纹理提交后旧凭证归还失败不撤销显示；失败责任可查询；并发重试共享任务；后端已部分归还的步骤只执行一次；Pending 仍可查询；确认成功后同一责任移出账本；最终清空当前显示并归还新凭证，首次生命周期失败仍保留。首次资源尝试 2 次、后端归还 1 次，第二资源归还 1 次，全部同步本地步骤在 frame=1 完成。日志 `/private/tmp/mui-cleanup-retry-play-20261008.log`，源码 `/private/tmp/MuiCleanupRetryObservation.cs`。
+- macOS IL2CPP Development/High stripping、960×640 Player 构建 Succeeded/errors=0/warnings=0；最终 Player 的同一 7 项断言通过，firstAttempts=2/firstReturns=1/secondReturns=1，退出码 0。产物 `/private/tmp/mui-cleanup-retry-il2cpp-20261008.app`，日志 `/private/tmp/mui-cleanup-retry-il2cpp-build-20261008.log` 与 `/private/tmp/mui-cleanup-retry-il2cpp-player-20261008.log`。退出仍有 13 条 allocator 提示，不报告干净退出；未以该局部场景证明复杂容器的全部依赖清理。
+- 最新代码的既有资源/转换、七组父子换绑和 38 项 Legacy/TMP 嵌套路径 Play Mode 回归通过；日志分别为 `/private/tmp/mui-cleanup-regression-contracts-play-20261008.log`、`/private/tmp/mui-cleanup-regression-rebind-play-20261008.log`、`/private/tmp/mui-cleanup-regression-paths-play-20261008.log`。后两类容器完整清理/重试矩阵、独立通知链的宿主上下文及实体交互仍待验收；既有性能基线早于本轮基础生命周期改动。完整设计目标未完成，未自动提交。
+
+### 2026-10-08 嵌套属性路径绑定
+
+- `BindAttribute.SourcePath` 相对于声明成员解析普通、生成及继承属性；中间模型须派生自 ViewModel。`NullValue` 使用目标类型常量，省略时取目标类型默认值。生成器输出无反射的访问器、完整属性路径清单和跨程序集绑定元数据；包内 Analyzer DLL 已同步更新。公开用法及各模式语义见 [入门文档](../Documentation~/index.md#嵌套属性路径)。
+- `BindingSourcePath<TViewModel, TValue>` 保存通知链及叶属性读写委托。运行时捕获叶拥有者后读取、转换、检查代际再写入，不在反向提交时重新遍历中间属性；同一模型移除后恢复也会使旧输入失效。中间模型缺失不调用转换器，禁止反向写入，不回放路径恢复前的输入。OneTime 不订阅；OneWayToSource 在初始缺失时跳过源写入，转换期间替换模型也使已暂存写入失效。换绑预览只读捕获路径身份，准备后模型替换会拒绝旧候选。
+- 临时 Roslyn 驱动完成 19 组声明观察：生成叶属性、多层同名节点、跨程序集基类元数据及派生绑定、NaN/Infinity 回退，以及缺失/私有/static/indexer/非模型路径、空或非法路径、错误回退、重复反向写入等。非法声明均产生定位到源代码的 MUI001；有效声明的完整生成代码编译通过。入口 `/private/tmp/mui-path-generator-20261008/Program.cs`，日志 `/private/tmp/mui-path-generator-20261008.log`，未新增仓库测试。
+- 临时原生场景使用相同 PathRoot 生成模型，Legacy 与 TMP 各通过 19 项断言：初始化/规范化/校验草稿；叶替换及旧叶退订；根与中间模型 null；恢复及无旧输入回放；反向转换替换；同一叶移除恢复；前向转换和叶 getter 重入；解绑；只读准备及候选身份失效；新父绑定；初始缺失与初始转换期间替换。Play Mode 和 macOS IL2CPP Development/High stripping Player 均为 cases=38，首次本地绑定及这些同步操作在 frame=1 完成。未以此证明实体键盘、输入法或多帧异步子容器换绑。
+- 构建 Succeeded/errors=0/warnings=0，Player 退出码 0；日志 `/private/tmp/mui-path-binding-play-20261008.log`、`/private/tmp/mui-path-binding-il2cpp-build-20261008.log`、`/private/tmp/mui-path-binding-il2cpp-player-20261008.log`，产物 `/private/tmp/mui-path-binding-il2cpp-20261008.app`。Player 退出仍有 11 条 allocator 提示，不报告干净退出。
+- 用最新运行时代码复查既有资源/转换和七组父子换绑场景，Play Mode 均通过；前者包括 Legacy/TMP 校验重入、迟到资源及两项注入故障，后者含准备失败/取消/关闭竞争/提交故障，两组均报告预期的两项故障。日志 `/private/tmp/mui-path-regression-contracts-play-20261008.log` 与 `/private/tmp/mui-path-regression-rebind-play-20261008.log`。这些回归未重新执行 IL2CPP，早前 IL2CPP 与性能基线保留其原版本范围。完整设计目标仍未完成，本轮修改未自动提交。
 
 ### 2026-10-08 父页与静态子视图换绑矩阵
 

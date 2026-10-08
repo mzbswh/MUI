@@ -62,7 +62,7 @@ namespace MUI.Resources
                     {
                         try
                         {
-                            await ownedResource.DisposeAsync();
+                            await CleanupRegistry.ReleaseAsync(ownedResource, "LifetimeScope.LatePreload");
                         }
                         catch (Exception cleanup)
                         {

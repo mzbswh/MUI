@@ -92,7 +92,8 @@ namespace MUI
                 throw new ArgumentException("A lifetime cannot own itself.", nameof(resource));
             }
 
-            Register(resource, resource.DisposeAsync);
+            Register(resource, () => resource is LifetimeScope ? resource.DisposeAsync() :
+                CleanupRegistry.ReleaseAsync(resource, typeof(T).Name), hasResponsibility: true);
             return resource;
         }
 
@@ -132,18 +133,23 @@ namespace MUI
             });
         }
 
-        /// <summary>登记可等待清理，与托管资源按同一逆序执行。</summary>
-        public void OnDisposeAsync(Func<ValueTask> cleanup)
+        /// <summary>
+        /// 登记可等待清理，与托管资源按同一逆序执行。失败责任继续保留回调；
+        /// 仅完整回调明确支持幂等重复执行时声明重试能力，重复 DisposeAsync 本身不重试。
+        /// </summary>
+        public void OnDisposeAsync(Func<ValueTask> cleanup, bool supportsIdempotentRetry = false,
+            string owner = "LifetimeScope.Callback", int? releaseThreadId = null)
         {
             if (cleanup == null)
             {
                 throw new ArgumentNullException(nameof(cleanup));
             }
 
-            Register(new object(), cleanup);
+            var responsibility = new CleanupResponsibility(cleanup, owner, supportsIdempotentRetry, releaseThreadId);
+            Register(responsibility, responsibility.DisposeAsync);
         }
 
-        private void Register(object identity, Func<ValueTask> release)
+        private void Register(object identity, Func<ValueTask> release, bool hasResponsibility = false)
         {
             lock (gate)
             {
@@ -153,7 +159,10 @@ namespace MUI
                     throw new InvalidOperationException("Resource is already owned by this lifetime.");
                 }
 
-                releases.Add(new ReleaseRegistration(release));
+                // 凭证和子作用域已经持有自己的记录；普通清理回调失败时必须继续保留该回调。
+                Func<ValueTask> tracked = hasResponsibility || identity is CleanupResponsibility
+                    ? release : new CleanupResponsibility(release, "LifetimeScope.Cleanup").DisposeAsync;
+                releases.Add(new ReleaseRegistration(tracked));
             }
         }
 
@@ -445,7 +454,10 @@ namespace MUI
         {
             internal ReleaseRegistration(Func<ValueTask> release) => Asynchronous = release;
 
-            internal Func<ValueTask> Asynchronous { get; }
+            internal Func<ValueTask> Asynchronous
+            {
+                get;
+            }
         }
 
         private sealed class ReferenceComparer : IEqualityComparer<object>

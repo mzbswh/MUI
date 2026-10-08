@@ -1,0 +1,10 @@
+{
+  "name": "MUI.Samples.ResourceIntegration",
+  "rootNamespace": "MUI.Samples.ResourceIntegration",
+  "references": [
+    "MUI.Core",
+    "MUI.Resources",
+    "MUI.UGUI"
+  ],
+  "autoReferenced": false
+}

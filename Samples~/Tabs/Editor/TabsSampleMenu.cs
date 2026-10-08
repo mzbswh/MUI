@@ -1,0 +1,101 @@
+using System;
+using UnityEditor;
+using UnityEditor.SceneManagement;
+using UnityEngine;
+
+namespace MUI.Samples.Tabs.Editor
+{
+    /// <summary>示例启动器，也支持限定时长的无界面运行模式预览。</summary>
+    public static class TabsSampleMenu
+    {
+        private static double deadline;
+        private static double stopAt;
+        private static bool failed;
+        private static bool completed;
+
+        [MenuItem("Tools/MUI/Samples/Open Tabs Scene")]
+        public static void Open()
+        {
+            if (!Application.isBatchMode && !EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo())
+            {
+                return;
+            }
+
+            var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+            var sample = new GameObject("TabsDemo", typeof(TabsDemo)).GetComponent<TabsDemo>();
+            sample.AutomaticWalkthrough = Application.isBatchMode;
+            if (!AssetDatabase.IsValidFolder("Assets/MUI Samples"))
+            {
+                AssetDatabase.CreateFolder("Assets", "MUI Samples");
+            }
+
+            var path = AssetDatabase.GenerateUniqueAssetPath("Assets/MUI Samples/Tabs.unity");
+            EditorSceneManager.SaveScene(scene, path);
+        }
+
+        public static void RunPreviewBatch()
+        {
+            if (!Application.isBatchMode)
+            {
+                throw new InvalidOperationException("Use Open Tabs Scene for interactive preview.");
+            }
+
+            Open();
+            SessionState.SetBool("MUI.TabsPreview", true);
+            SessionState.SetFloat("MUI.TabsPreviewStart", (float)EditorApplication.timeSinceStartup);
+            // 在进入运行模式前订阅，兼容关闭域重载的编辑器配置。
+            ResumePreview();
+            EditorApplication.isPlaying = true;
+        }
+
+        [InitializeOnLoadMethod]
+        private static void ResumePreview()
+        {
+            if (!SessionState.GetBool("MUI.TabsPreview", false))
+            {
+                return;
+            }
+
+            deadline = SessionState.GetFloat("MUI.TabsPreviewStart", 0) + 45;
+            stopAt = 0;
+            failed = false;
+            completed = false;
+            EditorApplication.update -= UpdatePreview;
+            EditorApplication.update += UpdatePreview;
+            Application.logMessageReceived -= OnLog;
+            Application.logMessageReceived += OnLog;
+        }
+
+        private static void OnLog(string condition, string trace, LogType type)
+        {
+            if (type == LogType.Exception || type == LogType.Error || type == LogType.Assert)
+            {
+                failed = true;
+            }
+
+            // 只接受演示末尾的清理完成标记，进入运行模式本身不代表演示完成。
+            if (type == LogType.Log && string.Equals(condition, "MUI Tabs cleanup complete", StringComparison.Ordinal))
+            {
+                completed = true;
+                stopAt = EditorApplication.timeSinceStartup + 0.25;
+            }
+        }
+
+        private static void UpdatePreview()
+        {
+            var now = EditorApplication.timeSinceStartup;
+            // 完成后留出少量帧接收迟到错误；未完成必须等到截止时间并报告失败。
+            if (now < deadline && (!completed || now < stopAt))
+            {
+                return;
+            }
+
+            SessionState.SetBool("MUI.TabsPreview", false);
+            EditorApplication.update -= UpdatePreview;
+            Application.logMessageReceived -= OnLog;
+            var timedOut = !completed;
+            Debug.Log(timedOut ? "MUI Tabs 演示超时，未收到清理完成标记。" : "MUI Tabs Play-mode preview finished.");
+            EditorApplication.Exit(failed || timedOut ? 1 : 0);
+        }
+    }
+}

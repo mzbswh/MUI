@@ -1,0 +1,14 @@
+{
+  "name": "MUI.Samples.Navigation",
+  "rootNamespace": "MUI.Samples.Navigation",
+  "references": [
+    "MUI.Core",
+    "MUI.Resources",
+    "MUI.Samples.ResourceIntegration",
+    "MUI.Navigation",
+    "MUI.ChildViews",
+    "MUI.UGUI",
+    "Unity.ugui"
+  ],
+  "autoReferenced": true
+}

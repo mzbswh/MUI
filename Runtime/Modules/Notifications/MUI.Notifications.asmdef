@@ -1,0 +1,7 @@
+{
+  "name": "MUI.Notifications",
+  "rootNamespace": "MUI.Notifications",
+  "references": ["MUI.Core"],
+  "autoReferenced": true,
+  "noEngineReferences": true
+}

@@ -1,0 +1,11 @@
+{
+  "name": "MUI.UGUI.Notifications",
+  "rootNamespace": "MUI.UGUI",
+  "references": [
+    "MUI.Core",
+    "MUI.UGUI",
+    "MUI.Notifications",
+    "Unity.ugui"
+  ],
+  "autoReferenced": true
+}

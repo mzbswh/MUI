@@ -1,0 +1,12 @@
+{
+  "name": "MUI.BasicExample",
+  "rootNamespace": "MUI.BasicExample",
+  "references": [
+    "MUI.Core",
+    "MUI.Resources",
+    "MUI.Navigation",
+    "MUI.UGUI",
+    "Unity.ugui"
+  ],
+  "autoReferenced": true
+}

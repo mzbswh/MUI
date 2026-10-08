@@ -1,0 +1,10 @@
+{
+  "name": "MUI.UGUI.Themes",
+  "rootNamespace": "MUI.UGUI",
+  "references": [
+    "MUI.Core",
+    "MUI.Themes",
+    "Unity.ugui"
+  ],
+  "autoReferenced": true
+}

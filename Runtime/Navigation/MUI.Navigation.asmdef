@@ -1,0 +1,7 @@
+{
+  "name": "MUI.Navigation",
+  "rootNamespace": "MUI.Navigation",
+  "references": ["MUI.Core", "MUI.Resources"],
+  "autoReferenced": true,
+  "noEngineReferences": true
+}

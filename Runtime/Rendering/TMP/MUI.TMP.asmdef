@@ -1,0 +1,21 @@
+{
+  "name": "MUI.TMP",
+  "rootNamespace": "MUI.TMP",
+  "references": [
+    "MUI.Core",
+    "MUI.UGUI",
+    "Unity.TextMeshPro",
+    "Unity.ugui"
+  ],
+  "defineConstraints": [
+    "MUI_TEXTMESHPRO"
+  ],
+  "versionDefines": [
+    {
+      "name": "com.unity.textmeshpro",
+      "expression": "3.0.0",
+      "define": "MUI_TEXTMESHPRO"
+    }
+  ],
+  "autoReferenced": true
+}

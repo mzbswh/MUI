@@ -104,3 +104,19 @@ InitTestScene*.unity*
 
 # Auto-generated cache in Assets folder
 /[Aa]ssets/[Ss]ceneDependencyCache*
+
+# Nested Unity acceptance project and local .NET build outputs
+/ExampleProject~/[Ll]ibrary/
+/ExampleProject~/[Tt]emp/
+/ExampleProject~/[Ll]ogs/
+/ExampleProject~/[Uu]ser[Ss]ettings/
+/Tools~/**/bin/
+/Tools~/**/obj/
+/Generators~/**/bin/
+/Generators~/**/obj/
+.DS_Store
+
+# These projects are authored build tools, not Unity-generated projects.
+!/Tools~/Build/*.csproj
+!/Tools~/CodeStyle/*.csproj
+!/Generators~/MUI.Generators/*.csproj

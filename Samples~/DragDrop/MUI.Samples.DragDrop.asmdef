@@ -1,0 +1,12 @@
+{
+  "name": "MUI.Samples.DragDrop",
+  "rootNamespace": "MUI.Samples.DragDrop",
+  "references": [
+    "MUI.Core",
+    "MUI.DragDrop",
+    "MUI.UGUI",
+    "Unity.ugui",
+    "MUI.UGUI.DragDrop"
+  ],
+  "autoReferenced": true
+}

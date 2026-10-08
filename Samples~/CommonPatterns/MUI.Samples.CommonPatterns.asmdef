@@ -1,0 +1,15 @@
+{
+  "name": "MUI.Samples.CommonPatterns",
+  "rootNamespace": "MUI.Samples.CommonPatterns",
+  "references": [
+    "MUI.Core",
+    "MUI.Loading",
+    "MUI.Notifications",
+    "MUI.Themes",
+    "MUI.UGUI",
+    "MUI.UGUI.Themes",
+    "MUI.Samples.ResourceIntegration",
+    "Unity.ugui"
+  ],
+  "autoReferenced": true
+}

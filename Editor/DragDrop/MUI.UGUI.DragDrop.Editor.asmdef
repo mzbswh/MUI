@@ -1,0 +1,15 @@
+{
+  "name": "MUI.UGUI.DragDrop.Editor",
+  "rootNamespace": "MUI.UGUI.DragDrop.Editor",
+  "references": [
+    "MUI.Core",
+    "MUI.UGUI",
+    "MUI.Editor",
+    "MUI.UGUI.DragDrop",
+    "Unity.ugui"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "autoReferenced": true
+}

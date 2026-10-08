@@ -1,0 +1,7 @@
+{
+  "name": "MUI.Resources",
+  "rootNamespace": "MUI.Resources",
+  "references": ["MUI.Core"],
+  "autoReferenced": true,
+  "noEngineReferences": true
+}

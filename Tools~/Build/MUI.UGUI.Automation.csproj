@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <LangVersion>8.0</LangVersion>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="../../Runtime/Rendering/UGUI.Automation/**/*.cs" />
+    <ProjectReference Include="MUI.Core.csproj" />
+    <ProjectReference Include="MUI.Navigation.csproj" />
+    <ProjectReference Include="MUI.UGUI.csproj" />
+    <Reference Include="UnityEngine.CoreModule"><HintPath>$(UnityManagedPath)/UnityEngine.CoreModule.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="UnityEngine.ScreenCaptureModule"><HintPath>$(UnityManagedPath)/UnityEngine.ScreenCaptureModule.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="UnityEngine.ImageConversionModule"><HintPath>$(UnityManagedPath)/UnityEngine.ImageConversionModule.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="UnityEngine.UIModule"><HintPath>$(UnityManagedPath)/UnityEngine.UIModule.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="UnityEngine.UI"><HintPath>$(UnityUIAssemblyPath)</HintPath><Private>false</Private></Reference>
+  </ItemGroup>
+  <Target Name="CheckUnityReferences" BeforeTargets="ResolveReferences">
+    <Error Condition="!Exists('$(UnityManagedPath)/UnityEngine.CoreModule.dll')" Text="Set UnityManagedPath to the Unity Editor Managed/UnityEngine directory." />
+    <Error Condition="!Exists('$(UnityUIAssemblyPath)')" Text="Set UnityUIAssemblyPath to UnityEngine.UI.dll from a matching Unity project." />
+  </Target>
+</Project>

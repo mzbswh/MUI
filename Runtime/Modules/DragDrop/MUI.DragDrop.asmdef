@@ -1,0 +1,7 @@
+{
+  "name": "MUI.DragDrop",
+  "rootNamespace": "MUI.DragDrop",
+  "references": ["MUI.Core"],
+  "autoReferenced": true,
+  "noEngineReferences": true
+}

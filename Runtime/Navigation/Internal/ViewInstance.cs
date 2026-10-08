@@ -679,7 +679,7 @@ namespace MUI.Navigation
 
                 if (!retained)
                 {
-                    await content.ReleaseAsync(errors, beginResourceRelease);
+                    await content.ReleaseWithActivationAsync(errors, activationLifetime, beginResourceRelease);
                 }
 
                 content = null;

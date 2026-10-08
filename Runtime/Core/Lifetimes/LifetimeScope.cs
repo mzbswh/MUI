@@ -29,11 +29,41 @@ namespace MUI
         private bool ended;
         private bool disposed;
         private Exception disposalFailure;
+        private List<Func<bool>> unconfirmedReleases;
 
         public LifetimeScope()
         {
             cancellationFinished = NewCompletion();
             token = cancellation.Token;
+        }
+
+        /// <summary>实际清理已确认；首次失败任务保持原值，显式重试已登记责任后此查询可变为 true。</summary>
+        public bool IsCleanupConfirmed
+        {
+            get
+            {
+                Func<bool>[] remaining;
+                lock (gate)
+                {
+                    if (!disposed || hasUnknownOperationCleanupFailure || cancellationErrors.Count != 0)
+                    {
+                        return false;
+                    }
+                    remaining = unconfirmedReleases == null ? Array.Empty<Func<bool>>() : unconfirmedReleases.ToArray();
+                }
+                foreach (var confirmed in remaining)
+                {
+                    if (!confirmed())
+                    {
+                        return false;
+                    }
+                    lock (gate)
+                    {
+                        unconfirmedReleases?.Remove(confirmed);
+                    }
+                }
+                return true;
+            }
         }
 
         /// <summary>释放后仍可读取令牌。</summary>
@@ -92,8 +122,20 @@ namespace MUI
                 throw new ArgumentException("A lifetime cannot own itself.", nameof(resource));
             }
 
-            Register(resource, () => resource is LifetimeScope ? resource.DisposeAsync() :
-                CleanupRegistry.ReleaseAsync(resource, typeof(T).Name), hasResponsibility: true);
+            // 登记时取得稳定记录，后续诊断只读取框架状态，不重新调用项目属性访问器。
+            var child = resource as LifetimeScope;
+            var responsibility = child == null ? CleanupRegistry.GetResponsibility(resource, typeof(T).Name) : null;
+            Func<bool> confirmed;
+            if (child == null)
+            {
+                confirmed = () => responsibility.CaptureSnapshot().State == CleanupResponsibilityState.Completed;
+            }
+            else
+            {
+                confirmed = () => child.IsCleanupConfirmed;
+            }
+            Register(resource, () => child == null ? CleanupRegistry.ReleaseAsync(resource, typeof(T).Name) :
+                child.DisposeAsync(), hasResponsibility: true, confirmed: confirmed);
             return resource;
         }
 
@@ -149,7 +191,8 @@ namespace MUI
             Register(responsibility, responsibility.DisposeAsync);
         }
 
-        private void Register(object identity, Func<ValueTask> release, bool hasResponsibility = false)
+        private void Register(object identity, Func<ValueTask> release, bool hasResponsibility = false,
+            Func<bool> confirmed = null)
         {
             lock (gate)
             {
@@ -160,9 +203,17 @@ namespace MUI
                 }
 
                 // 凭证和子作用域已经持有自己的记录；普通清理回调失败时必须继续保留该回调。
-                Func<ValueTask> tracked = hasResponsibility || identity is CleanupResponsibility
-                    ? release : new CleanupResponsibility(release, "LifetimeScope.Cleanup").DisposeAsync;
-                releases.Add(new ReleaseRegistration(tracked));
+                var responsibility = identity as CleanupResponsibility;
+                if (!hasResponsibility && responsibility == null)
+                {
+                    responsibility = new CleanupResponsibility(release, "LifetimeScope.Cleanup");
+                }
+                if (responsibility != null)
+                {
+                    release = responsibility.DisposeAsync;
+                    confirmed = () => responsibility.CaptureSnapshot().State == CleanupResponsibilityState.Completed;
+                }
+                releases.Add(new ReleaseRegistration(release, confirmed));
             }
         }
 
@@ -333,6 +384,7 @@ namespace MUI
         private async Task DisposeCoreAsync(TaskCompletionSource<bool> completion)
         {
             var errors = new List<Exception>();
+            var unresolved = new List<Func<bool>>();
             try
             {
                 await cancellationFinished.Task;
@@ -374,6 +426,7 @@ namespace MUI
                     catch (Exception error)
                     {
                         errors.Add(error);
+                        unresolved.Add(cleanup[i].Confirmed);
                     }
                     finally
                     {
@@ -389,6 +442,17 @@ namespace MUI
             }
             finally
             {
+                lock (gate)
+                {
+                    if (unconfirmedReleases == null)
+                    {
+                        unconfirmedReleases = unresolved;
+                    }
+                    else
+                    {
+                        unconfirmedReleases.AddRange(unresolved);
+                    }
+                }
                 CompleteDisposal(completion, errors);
             }
         }
@@ -401,7 +465,7 @@ namespace MUI
                 releases.Clear();
                 owned.Clear();
                 operations.Clear();
-                cancellationErrors.Clear();
+                // 取消回调失败没有可查询的幂等责任，必须保留未确认状态。
                 AppendOperationCleanupFailures(errors);
                 disposed = true;
                 disposalFailure = errors.Count == 0 ? null : new AggregateException("LifetimeScope cleanup failed.", errors);
@@ -452,7 +516,16 @@ namespace MUI
 
         private readonly struct ReleaseRegistration
         {
-            internal ReleaseRegistration(Func<ValueTask> release) => Asynchronous = release;
+            internal ReleaseRegistration(Func<ValueTask> release, Func<bool> confirmed)
+            {
+                Asynchronous = release;
+                Confirmed = confirmed ?? (() => false);
+            }
+
+            internal Func<bool> Confirmed
+            {
+                get;
+            }
 
             internal Func<ValueTask> Asynchronous
             {

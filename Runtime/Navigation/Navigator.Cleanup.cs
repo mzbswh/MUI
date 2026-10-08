@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
@@ -9,7 +10,7 @@ namespace MUI.Navigation
     {
         private int pendingCleanupCount;
         private readonly int cleanupCapacity;
-        private bool hasUnconfirmedCleanup;
+        private bool hasCleanupFailure;
 
         /// <summary>准备、关闭决策或关闭清理超时后仍由宿主持有资源的实例数。</summary>
         public int PendingCleanupCount
@@ -28,6 +29,7 @@ namespace MUI.Navigation
                 // 关闭提交已经释放路由额度，但退出动画与清理仍持有真实资源。
                 // 从提交起计入清理上限，不能等超时后才限流，否则快速开关会无限堆积实例。
                 var retained = 0;
+                HashSet<long> retainedViews = null;
                 foreach (var instance in entries.Values)
                 {
                     if (instance.HasCloseStarted || quarantinedPreparations.Contains(instance.Handle) ||
@@ -37,10 +39,16 @@ namespace MUI.Navigation
                         {
                             return false;
                         }
+                        if (retainedViews == null)
+                        {
+                            retainedViews = new HashSet<long>();
+                        }
+                        retainedViews.Add(instance.Handle.Id);
                     }
                 }
 
-                return true;
+                // 失败实例移出 entries 后，账本仍持有真实责任；安全重试确认前不得归还名额。
+                return CleanupRegistry.GetUnconfirmedOwnerCount(host, retainedViews) < cleanupCapacity - retained;
             }
         }
 

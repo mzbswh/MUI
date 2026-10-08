@@ -10,7 +10,8 @@ namespace MUI.Navigation
                     ViewHandle focused, int totalInstances, ViewInstanceSnapshot[] instances, int historyCount,
                     ViewHandle[] history, int pendingRequests, int postedRequests, int cachedViews,
                     int retiringCachedViews, int preloadReservations, int pendingCleanup,
-                    bool hasUnconfirmedCleanup, long droppedEvents)
+                    bool hasCleanupFailure, long droppedEvents, Guid hostId, int unconfirmedCleanupCount,
+                    IReadOnlyList<CleanupResponsibilitySnapshot> cleanupResponsibilities)
         {
             IsShutdown = shutdown;
             CommitVersion = version;
@@ -26,10 +27,12 @@ namespace MUI.Navigation
             RetiringCachedViewCount = retiringCachedViews;
             PreloadReservationCount = preloadReservations;
             PendingCleanupCount = pendingCleanup;
-            HasUnconfirmedCleanup = hasUnconfirmedCleanup;
+            HasCleanupFailure = hasCleanupFailure;
+            HostId = hostId;
+            UnconfirmedCleanupCount = unconfirmedCleanupCount;
+            CleanupResponsibilities = cleanupResponsibilities;
             DroppedLifecycleEventCount = droppedEvents;
         }
-
 
         public bool IsShutdown
         {
@@ -109,11 +112,33 @@ namespace MUI.Navigation
             get;
         }
 
-        /// <summary>页面或缓存清理曾失败，不能据此确认其所有资源均已归还。</summary>
-        public bool HasUnconfirmedCleanup
+        /// <summary>历史保守标记：页面或缓存清理曾失败；重试成功不改写它。当前责任见 UnconfirmedCleanupCount。</summary>
+        public bool HasCleanupFailure
         {
             get;
         }
+
+        /// <summary>沿用原有历史标记语义；当前责任数量使用 UnconfirmedCleanupCount，历史失败使用 HasCleanupFailure。</summary>
+        public bool HasUnconfirmedCleanup => HasCleanupFailure;
+
+        /// <summary>宿主稳定身份，用于在组件销毁后从全局账本查询其责任。</summary>
+        public Guid HostId
+        {
+            get;
+        }
+
+        /// <summary>采集时属于此宿主的在途或失败责任总数；显式重试确认成功后减少。</summary>
+        public int UnconfirmedCleanupCount
+        {
+            get;
+        }
+
+        public IReadOnlyList<CleanupResponsibilitySnapshot> CleanupResponsibilities
+        {
+            get;
+        }
+
+        public bool CleanupResponsibilitiesTruncated => CleanupResponsibilities.Count < UnconfirmedCleanupCount;
 
         public long DroppedLifecycleEventCount
         {

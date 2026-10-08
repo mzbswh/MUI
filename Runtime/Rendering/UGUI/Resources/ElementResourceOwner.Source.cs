@@ -104,7 +104,7 @@ namespace MUI.UGUI
                     throw;
                 }
                 var completion = operation.AsTask();
-                _ = ObserveSourceAsync(completion, activation, request);
+                _ = ObserveSourceAsync(completion, request);
                 sourceOperationChanged?.Invoke(completion);
             }
             finally
@@ -137,7 +137,7 @@ namespace MUI.UGUI
             try
             {
                 var operation = Slot.SetBorrowedAsync(value).AsTask();
-                _ = ObserveSourceAsync(operation, sourceLifetime, request,
+                _ = ObserveSourceAsync(operation, request,
                     borrowedState);
                 sourceOperationChanged?.Invoke(operation);
                 // setter 不等待异步归还，但原生同步赋值失败必须立即反馈给调用方。
@@ -202,19 +202,22 @@ namespace MUI.UGUI
         /// <summary>原生赋值已提交后隔离通知异常，同时阻止通知内的资源键重入。</summary>
         internal void Notify(Action notification)
         {
-            var previous = notifying;
-            notifying = true;
-            try
+            using (BeginResourcePhase("Notification"))
             {
-                notification();
-            }
-            catch (Exception error)
-            {
-                UIErrors.Report(error);
-            }
-            finally
-            {
-                notifying = previous;
+                var previous = notifying;
+                notifying = true;
+                try
+                {
+                    notification();
+                }
+                catch (Exception error)
+                {
+                    UIErrors.Report(error);
+                }
+                finally
+                {
+                    notifying = previous;
+                }
             }
         }
 
@@ -245,7 +248,7 @@ namespace MUI.UGUI
             Notify(sourceStateChanged);
         }
 
-        private async Task ObserveSourceAsync(Task<bool> operation, LifetimeScope activation, long request,
+        private async Task ObserveSourceAsync(Task<bool> operation, long request,
             ResourceSourceState? completedState = null)
         {
             try
@@ -258,9 +261,9 @@ namespace MUI.UGUI
                     Notify(sourceStateChanged);
                 }
             }
-            catch (OperationCanceledException) when (activation.IsEnded)
+            catch (OperationCanceledException)
             {
-                // 生命周期结束造成的取消不作为加载错误重复报告。
+                // 加载或所属生命周期的可预期取消只更新状态，不产生错误报告。
                 if (request == sourceGeneration)
                 {
                     sourceState = ResourceSourceState.Cancelled;
@@ -271,9 +274,8 @@ namespace MUI.UGUI
             {
                 if (request == sourceGeneration)
                 {
-                    sourceState = error is OperationCanceledException
-                        ? ResourceSourceState.Cancelled : ResourceSourceState.Failed;
-                    sourceFailure = error is OperationCanceledException ? null : error;
+                    sourceState = ResourceSourceState.Failed;
+                    sourceFailure = error;
                     Notify(sourceStateChanged);
                 }
                 UIErrors.Report(error);

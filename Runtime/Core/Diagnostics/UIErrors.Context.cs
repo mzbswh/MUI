@@ -16,6 +16,16 @@ namespace MUI
         internal static IDisposable BeginPhase(string phase) =>
             BeginContext(new UIErrorContext(Guid.Empty, 0, null, null, phase));
 
+        /// <summary>固定通知所属页面；只有同一页面的调用链才可贡献当前操作名。</summary>
+        internal static IDisposable BeginOwnedPhase(UIErrorContext owner, string operation, string phase)
+        {
+            var current = CurrentContext;
+            var sameOwner = owner.HostId != Guid.Empty && owner.HostId == current.HostId &&
+                owner.ViewId == current.ViewId;
+            return BeginContext(new UIErrorContext(owner.HostId, owner.ViewId, owner.RouteKey,
+                sameOwner ? current.Operation ?? operation : operation, phase));
+        }
+
         internal static void AttachPhase(Exception error, string phase) =>
             AttachContext(error, new UIErrorContext(Guid.Empty, 0, null, null, phase).WithFallback(CurrentContext));
 

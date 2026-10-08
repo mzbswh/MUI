@@ -26,6 +26,8 @@ namespace MUI.UGUI
         private bool frozen;
         private bool assignmentUncertain;
         private LoadRequest latestLoad;
+        private readonly UIErrorContext diagnosticContext;
+        private bool targetReleased;
 
         /// <param name="assign">
         /// 同步赋值借用资源，null 表示清空目标。操作必须原子化：
@@ -38,11 +40,12 @@ namespace MUI.UGUI
         /// </param>
         public ResourceSlot(IResourceLoader loader, Action<T> assign, CancellationToken ownerToken = default)
         {
+            diagnosticContext = UIErrors.CurrentContext;
             lifetime = new LifetimeScope();
             this.loader = loader ?? throw new ArgumentNullException(nameof(loader));
             this.assign = assign ?? throw new ArgumentNullException(nameof(assign));
             this.ownerToken = ownerToken;
-            lifetime.OnDisposeAsync(ReleaseCurrentAsync);
+            lifetime.OnDisposeAsync(ReleaseCurrentAsync, true, "ResourceSlot<" + typeof(T).Name + ">.Clear", threadId);
         }
 
         /// <summary>借用资源，仅在替换、清空或销毁前有效。</summary>
@@ -179,11 +182,18 @@ namespace MUI.UGUI
                 throw new InvalidOperationException("Cannot dispose a resource slot from its assignment callback.");
             }
 
-            return lifetime.DisposeAsync();
+            using (BeginResourcePhase("Release"))
+            {
+                return lifetime.DisposeAsync();
+            }
         }
+
+        internal IDisposable BeginResourcePhase(string phase) =>
+            UIErrors.BeginOwnedPhase(diagnosticContext, "Resource", phase);
 
         private async ValueTask<bool> ReplaceCoreAsync(string key, long request, CancellationToken lifetimeToken, CancellationToken callerToken, LoadRequest load)
         {
+            using (BeginResourcePhase("Load"))
             using (var linked = CancellationTokenSource.CreateLinkedTokenSource(lifetimeToken, ownerToken, callerToken, load.Cancellation.Token))
             {
                 IAcquiredResource<T> candidate = null;
@@ -227,8 +237,9 @@ namespace MUI.UGUI
                     await ReleaseAsync(previous);
                     return true;
                 }
-                catch (ResourceAssignmentException) when (assigningCandidate)
+                catch (ResourceAssignmentException error) when (assigningCandidate)
                 {
+                    UIErrors.AttachContext(error, UIErrors.CurrentContext);
                     // SetTarget 已冻结槽，后续请求不能再产生第二份不确定候选。
                     uncertainCandidate = candidate;
                     candidate = null;
@@ -240,14 +251,19 @@ namespace MUI.UGUI
                 }
                 catch (ResourceLoadException failure) when (candidate == null)
                 {
-                    try
+                    UIErrors.AttachContext(failure, UIErrors.CurrentContext);
+                    using (BeginResourcePhase("Rollback"))
                     {
-                        await failure.CleanupCompletion;
-                    }
-                    catch (Exception cleanup)
-                    {
-                        RecordReleaseError(cleanup);
-                        throw new AggregateException("资源槽加载与后端回滚均失败。", failure, cleanup);
+                        try
+                        {
+                            await failure.CleanupCompletion;
+                        }
+                        catch (Exception cleanup)
+                        {
+                            UIErrors.AttachContext(cleanup, UIErrors.CurrentContext);
+                            RecordReleaseError(cleanup);
+                            throw new AggregateException("资源槽加载与后端回滚均失败。", failure, cleanup);
+                        }
                     }
 
                     Exception cause = failure;
@@ -266,6 +282,11 @@ namespace MUI.UGUI
                     }
                     throw;
                 }
+                catch (Exception error)
+                {
+                    UIErrors.AttachContext(error, UIErrors.CurrentContext);
+                    throw;
+                }
                 finally
                 {
                     // 赋值流程未接管已被取代或失败结果的所有权。
@@ -276,23 +297,30 @@ namespace MUI.UGUI
 
         private void SetTarget(T asset)
         {
-            RequireThread();
-            assigning = true;
-            try
+            using (BeginResourcePhase("Assignment"))
             {
-                assign(asset);
-            }
-            catch (ResourceAssignmentException)
-            {
-                // 外部原生回调可能在修改引用后抛错；保留当前显示状态和凭证，禁止继续写入。
-                frozen = true;
-                assignmentUncertain = true;
-                ++generation;
-                throw;
-            }
-            finally
-            {
-                assigning = false;
+                RequireThread();
+                assigning = true;
+                try
+                {
+                    assign(asset);
+                }
+                catch (Exception error)
+                {
+                    UIErrors.AttachContext(error, UIErrors.CurrentContext);
+                    // 外部原生回调可能在修改引用后抛错；保留当前显示状态和凭证，禁止继续写入。
+                    if (error is ResourceAssignmentException)
+                    {
+                        frozen = true;
+                        assignmentUncertain = true;
+                        ++generation;
+                    }
+                    throw;
+                }
+                finally
+                {
+                    assigning = false;
+                }
             }
         }
 
@@ -303,15 +331,20 @@ namespace MUI.UGUI
                 return;
             }
 
-            try
+            using (BeginResourcePhase("Release"))
             {
-                await CleanupRegistry.ReleaseAsync(ownedResource, "ResourceSlot<" + typeof(T).Name + ">");
-            }
-            catch (Exception error)
-            {
-                // 释放失败不能撤销已提交赋值，也不能掩盖原加载错误，
-                // 该错误同时保留到最终清理时报告。
-                RecordReleaseError(error);
+                try
+                {
+                    await CleanupRegistry.ReleaseAsync(ownedResource, "ResourceSlot<" + typeof(T).Name + ">");
+                }
+                catch (Exception error)
+                {
+                    UIErrors.AttachContext(error, UIErrors.CurrentContext);
+                    // 释放失败不能撤销已提交赋值，也不能掩盖原加载错误，
+                    // 该错误同时保留到最终清理时报告。
+                    RecordReleaseError(error, responsibility: CleanupRegistry.GetResponsibility(ownedResource,
+                        "ResourceSlot<" + typeof(T).Name + ">"));
+                }
             }
         }
 
@@ -334,7 +367,11 @@ namespace MUI.UGUI
         {
             // 销毁在执行此回调前等待所有在途请求。
             // 清空失败时保留所有权，避免卸载仍被显示的资源。
-            ClearTargetForRelease();
+            if (!targetReleased)
+            {
+                ClearTargetForRelease();
+                targetReleased = true;
+            }
             var previous = current;
             current = null;
             borrowed = null;

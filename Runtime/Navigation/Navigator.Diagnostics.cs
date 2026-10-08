@@ -11,13 +11,17 @@ namespace MUI.Navigation
         /// 直接捕获导航账本；不创建任务，不读取渲染器或业务属性。
         /// 实例截断时可用 TryGetInstanceSnapshot 定位指定句柄；不从诊断入口强制重算表现。
         /// </summary>
-        public NavigationSnapshot CaptureSnapshot(int maxInstances = 256)
+        public NavigationSnapshot CaptureSnapshot(int maxInstances = 256) => CaptureSnapshot(maxInstances, 256);
+
+        /// <summary>分别限制实例与清理责任的诊断采集量；截断不改变真实责任总数。</summary>
+        public NavigationSnapshot CaptureSnapshot(int maxInstances, int maxCleanupResponsibilities)
         {
             AssertThread();
             if (maxInstances < 1 || maxInstances > 4096)
             {
                 throw new ArgumentOutOfRangeException(nameof(maxInstances), "快照实例上限必须在 1 至 4096 之间。");
             }
+            var cleanup = CleanupRegistry.CaptureSnapshot(host, maxCleanupResponsibilities, out var cleanupCount);
             var selected = new List<ViewInstance>(Math.Min(maxInstances, entries.Count));
             foreach (var instance in entries.Values)
             {
@@ -63,7 +67,7 @@ namespace MUI.Navigation
                 !recomputingPresentation && !presentationDirty && presentationDeferrals == 0 && !IsReentrant,
                 focused, entries.Count, snapshots, history.Count, recentHistory, pending, posted.Count,
                 cachedContents.Count, retiringCachedViews, preloadReservations, PendingCleanupCount,
-                hasUnconfirmedCleanup, DroppedLifecycleEventCount);
+                hasCleanupFailure, DroppedLifecycleEventCount, host, cleanupCount, cleanup);
         }
 
         /// <summary>取得仍在账本中的实例，包括准备中和等待清理的实例；终态历史不伪造活动快照。</summary>

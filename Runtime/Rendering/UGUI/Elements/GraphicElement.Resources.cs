@@ -70,7 +70,10 @@ namespace MUI.UGUI
             configuringDefaultResource = true;
             try
             {
-                configureAsync(context.Scope, context.Loader);
+                using (UIErrors.BeginContext(context.DiagnosticContext))
+                {
+                    configureAsync(context.Scope, context.Loader);
+                }
             }
             finally
             {

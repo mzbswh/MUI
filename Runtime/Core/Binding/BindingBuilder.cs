@@ -14,6 +14,7 @@ namespace MUI
         private readonly TViewModel model;
         private readonly BindingSession session;
         private readonly BindingPreview preview;
+        private readonly UIErrorContext diagnosticContext;
         private readonly int bindingThreadId = Thread.CurrentThread.ManagedThreadId;
         private int wrongThreadReported;
 
@@ -23,6 +24,7 @@ namespace MUI
             this.model = model;
             this.session = session;
             this.preview = preview;
+            diagnosticContext = session.DiagnosticContext;
         }
 
         public void Property<TElement, TValue>(string elementName,
@@ -158,7 +160,9 @@ namespace MUI
                 var current = SourceOwner();
                 return session.IsActive && revision == SourceRevision() && ReferenceEquals(owner, current);
             }
-            void Forward()
+            Action forwardAction = ForwardCore;
+            void Forward() => RunBinding(forwardAction, "Forward");
+            void ForwardCore()
             {
                 if (!IsBindingThread())
                 {
@@ -253,7 +257,9 @@ namespace MUI
                 }
             }
 
-            void Reverse()
+            Action reverseAction = ReverseCore;
+            void Reverse() => RunBinding(reverseAction, "Reverse");
+            void ReverseCore()
             {
                 if (!IsBindingThread())
                 {
@@ -416,11 +422,21 @@ namespace MUI
 
             if (Interlocked.Exchange(ref wrongThreadReported, 1) == 0)
             {
-                UIErrors.Report(new InvalidOperationException("Binding notifications must run on the owning UI thread."));
+                using (BeginBindingPhase("NotificationThread"))
+                {
+                    UIErrors.Report(new InvalidOperationException("Binding notifications must run on the owning UI thread."));
+                }
             }
 
             return false;
         }
+
+        private IDisposable BeginBindingPhase(string phase, string operation = "Binding") =>
+            UIErrors.BeginOwnedPhase(diagnosticContext, operation, phase);
+
+        // 保存绑定所属页面的值身份，外部通知或另一宿主的调用链不能替换它。
+        // 附加发生位置后保留原传播契约；错误出口按异常身份去重。
+        private void RunBinding(Action callback, string phase) => session.RunCallback(callback, phase);
     }
 
     /// <summary>候选绑定只读快照。异步目标准备失败时不订阅或写入当前 View。</summary>

@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace MUI
@@ -7,14 +9,26 @@ namespace MUI
     /// 单个视图内容的模型所有权。外部模型只借用，工厂模型由实例负责释放。
     /// 宿主必须串行执行创建与销毁，不能在模型工厂返回前释放此对象。
     /// </summary>
-    internal sealed class ViewModelOwnership<TViewModel> : IAsyncDisposable
+    internal sealed class ViewModelOwnership<TViewModel> : IAsyncDisposable, ICleanupResponsibilitySource
         where TViewModel : ViewModel
     {
         private bool ownsModel;
         private bool initialized;
         private TViewModel ownedModel;
-        private TaskCompletionSource<bool> disposal;
         private bool disposalStarted;
+        private CleanupResponsibility modelRelease;
+        private readonly List<CleanupResponsibility> retiredModels = new List<CleanupResponsibility>();
+
+        public ViewModelOwnership()
+        {
+            CleanupResponsibility = new CleanupResponsibility(ReleaseOwnedModelAsync,
+                "ViewModelOwnership<" + typeof(TViewModel).Name + ">", true, Thread.CurrentThread.ManagedThreadId);
+        }
+
+        public CleanupResponsibility CleanupResponsibility
+        {
+            get;
+        }
 
         internal TViewModel Model
         {
@@ -62,61 +76,75 @@ namespace MUI
             }
 
             var previous = ownedModel;
+            var responsibility = CreateModelRelease(previous);
             ownedModel = null;
             ownsModel = false;
-            return ReleaseModelAsync(previous);
+            if (responsibility == null)
+            {
+                return default;
+            }
+            retiredModels.Add(responsibility);
+            return responsibility.DisposeAsync();
         }
 
         /// <summary>
         /// 释放入口共享完成结果，即使释放失败也不重复调用模型。
-        /// 本异步入口清除持有引用，同时支持两种接口时优先调用异步释放。
+        /// 清除业务借用引用，但失败仍由责任持有模型；同时支持两种接口时优先异步释放。
         /// </summary>
         public ValueTask DisposeAsync()
         {
-            if (disposal != null)
+            if (!disposalStarted)
             {
-                return new ValueTask(disposal.Task);
+                disposalStarted = true;
+                Model = null;
+                ownsModel = false;
             }
-
-            // 先发布完成信号，重入释放只观察同一次操作。
-            disposal = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
-            disposalStarted = true;
-            var previous = ownedModel;
-            ownedModel = null;
-            Model = null;
-            var release = ownsModel;
-            ownsModel = false;
-            _ = ReleaseAsync(previous, release, disposal);
-            return new ValueTask(disposal.Task);
+            return CleanupResponsibility.DisposeAsync();
         }
 
-        private async Task ReleaseAsync(TViewModel model, bool owned, TaskCompletionSource<bool> completion)
+        private async ValueTask ReleaseOwnedModelAsync()
         {
-            try
+            foreach (var retired in retiredModels)
             {
-                if (owned)
+                var snapshot = retired.CaptureSnapshot();
+                if (snapshot.State != CleanupResponsibilityState.Completed)
                 {
-                    await ReleaseModelAsync(model);
+                    throw snapshot.Failure ?? new InvalidOperationException("Retired ViewModel cleanup is not confirmed.");
                 }
-
-                completion.TrySetResult(true);
             }
-            catch (Exception error)
+            if (modelRelease == null)
             {
-                completion.TrySetException(error);
+                modelRelease = CreateModelRelease(ownedModel);
+                if (modelRelease != null)
+                {
+                    await modelRelease.DisposeAsync();
+                }
             }
+            else if (modelRelease.CaptureSnapshot().State != CleanupResponsibilityState.Completed)
+            {
+                // 只核对已经显式处理的子责任，不重复调用未知模型的释放回调。
+                throw modelRelease.CaptureSnapshot().Failure ?? new InvalidOperationException("ViewModel cleanup is not confirmed.");
+            }
+            ownedModel = null;
+            modelRelease = null;
+            retiredModels.Clear();
         }
 
-        private static async ValueTask ReleaseModelAsync(TViewModel model)
+        private static CleanupResponsibility CreateModelRelease(TViewModel model)
         {
             if (model is IAsyncDisposable asynchronous)
             {
-                await asynchronous.DisposeAsync();
+                return CleanupRegistry.GetResponsibility(asynchronous, "ViewModel<" + typeof(TViewModel).Name + ">");
             }
             else if (model is IDisposable synchronous)
             {
-                synchronous.Dispose();
+                return new CleanupResponsibility(() =>
+                {
+                    synchronous.Dispose();
+                    return default;
+                }, "ViewModel<" + typeof(TViewModel).Name + ">");
             }
+            return null;
         }
     }
 }

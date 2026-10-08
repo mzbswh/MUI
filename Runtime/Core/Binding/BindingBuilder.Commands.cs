@@ -48,7 +48,9 @@ namespace MUI
 
             var refreshing = false;
             var refreshPending = false;
-            void Refresh()
+            Action refreshAction = RefreshCore;
+            void Refresh() => RunBinding(refreshAction, "CommandRefresh");
+            void RefreshCore()
             {
                 if (!IsBindingThread())
                 {
@@ -152,28 +154,31 @@ namespace MUI
 
         private async Task ExecuteObservedAsync(IUICommand command)
         {
-            try
+            using (BeginBindingPhase("Execute", "Command"))
             {
-                CommandOutcome outcome;
-                using (session.EnterCommandExecution())
+                try
                 {
-                    outcome = await session.Commands.RunAsync(token => command.ExecuteAsync(session.CommandTarget, token));
-                }
+                    CommandOutcome outcome;
+                    using (session.EnterCommandExecution())
+                    {
+                        outcome = await session.Commands.RunAsync(token => command.ExecuteAsync(session.CommandTarget, token));
+                    }
 
-                if (outcome.Status == CommandStatus.Failed)
-                {
-                    UIErrors.Report(outcome.Error);
+                    if (outcome.Status == CommandStatus.Failed)
+                    {
+                        UIErrors.Report(outcome.Error);
+                    }
                 }
-            }
-            catch (OperationCanceledException)
-            {
-            }
-            catch (ObjectDisposedException) when (!session.IsActive)
-            {
-            }
-            catch (Exception error)
-            {
-                UIErrors.Report(error);
+                catch (OperationCanceledException)
+                {
+                }
+                catch (ObjectDisposedException) when (!session.IsActive)
+                {
+                }
+                catch (Exception error)
+                {
+                    UIErrors.Report(error);
+                }
             }
         }
     }

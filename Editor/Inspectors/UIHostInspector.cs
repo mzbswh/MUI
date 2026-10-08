@@ -115,12 +115,13 @@ namespace MUI.Editor
                 summary.text = $"采集于 {capturedAt}\n宿主退出：{snapshot.IsShutdown}；提交版本：{snapshot.CommitVersion}\n" +
                     $"实例：{snapshot.Instances.Count}/{snapshot.TotalInstances}；历史：{snapshot.RecentHistory.Count}/{snapshot.HistoryCount}\n" +
                     $"缓存：{snapshot.CachedViewCount}；正在释放缓存：{snapshot.RetiringCachedViewCount}；预加载占位：{snapshot.PreloadReservationCount}\n" +
-                    $"排队请求：{snapshot.PendingRequestCount}；延后请求：{snapshot.PostedRequestCount}；超时未清理：{snapshot.PendingCleanupCount}；丢弃事件：{snapshot.DroppedLifecycleEventCount}";
+                    $"排队请求：{snapshot.PendingRequestCount}；延后请求：{snapshot.PostedRequestCount}；超时未清理：{snapshot.PendingCleanupCount}；丢弃事件：{snapshot.DroppedLifecycleEventCount}\n" +
+                    $"当前未确认清理责任：{snapshot.UnconfirmedCleanupCount}；历史清理失败：{snapshot.HasCleanupFailure}";
                 message.text = snapshot.IsPresentationSettled ? "采集成功。门控只代表导航策略，不证明最终显示或点击资格。" : "采集时表现尚未收敛，门控和覆盖来源可能处于过渡状态。";
                 message.messageType = snapshot.IsPresentationSettled ? HelpBoxMessageType.Info : HelpBoxMessageType.Warning;
-                if (snapshot.InstancesTruncated || snapshot.HistoryTruncated)
+                if (snapshot.InstancesTruncated || snapshot.HistoryTruncated || snapshot.CleanupResponsibilitiesTruncated)
                 {
-                    message.text += " 实例或历史已截断，不能视为完整账本。";
+                    message.text += " 实例、历史或清理责任已截断，不能视为完整账本。";
                 }
                 RebuildList();
                 ShowOverview();

@@ -43,7 +43,10 @@ namespace MUI.UGUI
             }
         }
 
-        private void RecordReleaseError(Exception error, bool recordInLifetime = true)
+        internal bool IsCleanupConfirmed => lifetime.IsCleanupConfirmed;
+
+        private void RecordReleaseError(Exception error, bool recordInLifetime = true,
+            CleanupResponsibility responsibility = null)
         {
             lock (diagnosticGate)
             {
@@ -60,7 +63,7 @@ namespace MUI.UGUI
             // 普通归还错误先登记到生命周期；目标清空错误由当前清理回调抛出后汇总。
             if (recordInLifetime)
             {
-                lifetime.RecordCleanupFailure(error);
+                lifetime.RecordCleanupFailure(error, responsibility);
             }
             UIErrors.Report(error);
         }

@@ -90,13 +90,21 @@ ImageElement.Sprite、RawImageElement.Texture、TextElement.Font 和 GraphicElem
 
 `CleanupResponsibility` 记录归还责任的稳定 Id、拥有者标签、状态、错误、诊断上下文与尝试次数。状态区分未启动的 Retained、在途 Pending、失败或归还状态不明的 Failed，以及已确认的 Completed。`CleanupRegistry.CaptureSnapshot(maxEntries)` 按上限读取在途或失败记录，`UnconfirmedCount` 返回总数；完成记录立即移出全局账本，不长期保存成功历史。账本独立于 UIHost 组件，场景或作用域结束后仍持有未确认责任及回调。
 
+`Navigator.CaptureSnapshot()` 提供稳定 `HostId`、`UnconfirmedCleanupCount` 和有界 `CleanupResponsibilities`；使用双参数重载可分别限制实例与责任采集数量，截断由 `CleanupResponsibilitiesTruncated` 标明。`HasCleanupFailure` 表示页面或缓存清理曾失败，旧属性 `HasUnconfirmedCleanup` 沿用此历史语义；显式重试成功后当前责任数量减少，历史失败及已交付的关闭结果保持原值。UIHost Inspector 分别显示这两类信息，不从快照启动重试。
+
+组件销毁后可用保存的 HostId 调用 `CleanupRegistry.GetUnconfirmedCount(hostId)` 或 `CaptureSnapshot(hostId, maxEntries)` 查询当前责任；`Guid.Empty` 只查询没有宿主身份的责任，不是全部宿主的通配符。账本选择和每项状态读取不冻结异步完成，采集期间完成的项可能显示 Completed，下一次采集消失。责任登记保存值身份作备用；合法移交后首次归还采用实际所有者的上下文，公布到账本后不随重试改变归属。
+
 `AcquiredResource<T>`、`AcquiredView` 和 `AcquiredPreload` 公开同一 `CleanupResponsibility`。后端能保证完整释放回调可幂等重复执行时，构造凭证显式设置 `supportsIdempotentRetry: true`，并用 `owner` 标明资源或池身份。回调必须记录部分完成的步骤：已经扣除的引用、已归还的池对象或已经请求的销毁不能再次执行。默认不允许重试，失败不能推断为未释放。
 
 项目选择失败责任后调用 `await CleanupRegistry.RetryAsync(id)`，或直接使用凭证的 `CleanupResponsibility.RetryAsync()`。并发重试共享当前尝试，成功更新同一记录并解除其持有；已确认完成的责任不再次执行释放。线程约束沿用凭证的 `releaseThreadId`，线程拒绝不接管新的尝试。重试任务由账本持有，调用方负责观察其结果；没有自动重试调度或丢弃失败记录的入口。
 
 重复 `DisposeAsync` 始终观察首次清理结果。显式重试成功不改写已经交付的关闭、Shutdown 或 LifetimeScope 失败任务，也不复活页面、作用域或输入；判断当前未完成责任使用账本快照。控件 Snapshot 的 CleanupFailure/Count 继续表示历史上已记录的错误。
 
+`LifetimeScope.IsCleanupConfirmed` 查询当前实际责任是否均已确认，区别于首次释放任务是否失败。子作用域和已登记凭证的安全重试可使确认状态变化；没有责任记录的回滚错误或取消回调异常仍按未知处理。视图归还前检查激活和实例作用域，未确认时在账本中保留 `ViewInstance.DependencyRelease`。项目先显式处理允许重试的叶责任，再重试控件/模型持有者和视图的剩余步骤；外层检查不自动重试未知后端。已移出导航实例列表的失败页面仍占一个清理名额，同页多个责任不重复计数；没有页面身份的责任逐项保守计入，确认归还后才恢复新请求准入。
+
 `LifetimeScope.OnDisposeAsync` 也可显式声明回调的幂等重试、拥有者标签和释放线程。未声明能力的普通清理回调、外部自定义凭证和同步清理按不可安全重试处理，失败仍保留对象与回调。自定义凭证若自己管理责任，应实现 `ICleanupResponsibilitySource` 并让释放入口更新该记录，框架不会再为它建立第二份归还责任。
+
+绑定会话及 View 资源激活保存宿主、页面句柄和路由的值快照。导航回调结束后的模型通知、命令执行和资源换键仍沿用所属页面身份；前向、反向、路径通知、命令刷新、加载、原生赋值、通知、回滚及归还使用各自阶段。绑定故障保留异常传播并向错误出口报告一次；输入转换拒绝和加载取消仍属于可预期分支。错误上下文不持有 View、宿主组件或模型。
 
 无法确认原生 setter 失败后的引用时，槽冻结并暂停相关 Graphic 渲染，保留可能仍被引用的凭证；最终清理先清空原生引用再归还。框架不会自动恢复该控件的渲染。新的资源拥有者须等原槽成功清理后配置；TMP 换 FontAsset 可能间接替换材质，因此仍拒绝在材质槽持有期间执行该操作。
 

@@ -24,6 +24,21 @@ namespace MUI.Editor
             {
                 details.Add(new HelpBox("历史展示已截断。", HelpBoxMessageType.Warning));
             }
+            AddDetail("宿主", snapshot.HostId.ToString("N"));
+            AddDetail("清理责任", $"{snapshot.CleanupResponsibilities.Count}/{snapshot.UnconfirmedCleanupCount}；仅包含当前在途或失败责任。");
+            foreach (var responsibility in snapshot.CleanupResponsibilities)
+            {
+                AddDetail("责任", $"{responsibility.Id:N}；{responsibility.Owner}；{responsibility.State}；尝试 {responsibility.Attempts} 次；允许重试 {responsibility.CanRetry}");
+                AddDetail("位置", responsibility.Context.ToString());
+                if (responsibility.Failure != null)
+                {
+                    AddDetail("错误", $"{responsibility.DiagnosticId:N}；{responsibility.Failure.Message}");
+                }
+            }
+            if (snapshot.CleanupResponsibilitiesTruncated)
+            {
+                details.Add(new HelpBox("清理责任已截断；实际责任仍由全局账本持有。", HelpBoxMessageType.Warning));
+            }
         }
 
         private void ShowInstance(ViewInstanceSnapshot item)

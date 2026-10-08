@@ -53,7 +53,6 @@ namespace MUI.Navigation
                 throw new OperationCanceledException("View already entered closing.");
             }
 
-
             Observe(BeginRequestedClose(instance, DismissReason.Closed, acceptResult));
         }
 
@@ -85,7 +84,6 @@ namespace MUI.Navigation
 
                 return instance.Closing;
             }
-
 
             var trace = CurrentTraceOperation;
             acceptResult?.Invoke();
@@ -274,7 +272,7 @@ namespace MUI.Navigation
             instance.CompletedCloseOutcome = result;
             if (result.Cleanup == CleanupStatus.Failed || result.Cleanup == CleanupStatus.Pending)
             {
-                hasUnconfirmedCleanup = true;
+                hasCleanupFailure = true;
             }
             ownership.Remove(instance.Handle);
             entries.Remove(instance.Handle);

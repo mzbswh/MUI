@@ -33,8 +33,6 @@ namespace MUI.Navigation
             get;
         }
 
-
-
         internal abstract ValueTask ReleaseCachedAsync(List<Exception> errors, Func<IViewResourceReleaseTraceScope> beginResourceRelease = null);
     }
 
@@ -49,7 +47,6 @@ namespace MUI.Navigation
         {
             instance = new LifetimeScope();
         }
-
 
         internal IView View
         {
@@ -73,18 +70,14 @@ namespace MUI.Navigation
                 throw new InvalidOperationException("View content has already been created or released.");
             }
 
-
-
             creationStarted = true;
             Lifecycle = ViewPresenterLifecycle<TViewModel, TArgs, TResult>.Create(
                 assignedModel, route.ModelFactory, route.PresenterFactory, instance,
                 invoke, invokeAsync, requireCurrent);
-
         }
 
         internal void Adopt(IAcquiredView acquired)
         {
-
 
             if (ownedResource != null || instance.IsEnded)
             {
@@ -107,11 +100,17 @@ namespace MUI.Navigation
         internal ValueTask ReleaseAsync(List<Exception> errors,
             Func<IViewResourceReleaseTraceScope> beginResourceRelease = null, params Action[] detachHost)
         {
-            return ReleaseCoreAsync(errors, beginResourceRelease, detachHost);
+            return ReleaseCoreAsync(errors, beginResourceRelease, null, detachHost);
+        }
+
+        internal ValueTask ReleaseWithActivationAsync(List<Exception> errors, LifetimeScope activation,
+            Func<IViewResourceReleaseTraceScope> beginResourceRelease)
+        {
+            return ReleaseCoreAsync(errors, beginResourceRelease, activation, Array.Empty<Action>());
         }
 
         private async ValueTask ReleaseCoreAsync(List<Exception> errors,
-            Func<IViewResourceReleaseTraceScope> beginResourceRelease, Action[] detachHost)
+            Func<IViewResourceReleaseTraceScope> beginResourceRelease, LifetimeScope activation, Action[] detachHost)
         {
             if (Lifecycle != null)
             {
@@ -124,7 +123,9 @@ namespace MUI.Navigation
                 using (var phase = beginResourceRelease == null ? null : beginResourceRelease())
                 {
                     var before = errors.Count;
-                    await ViewInstanceCleanup.ReleaseViewResourceAsync(ownedResource, errors);
+                    var instanceScope = instance;
+                    await ViewInstanceCleanup.ReleaseViewResourceAsync(ownedResource, errors,
+                        () => instanceScope.IsCleanupConfirmed && (activation == null || activation.IsCleanupConfirmed));
                     FinishResourceReleaseTrace(phase, errors, before);
                 }
             }

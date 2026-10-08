@@ -260,7 +260,6 @@ namespace MUI.ChildViews
             presenter = lifecycle.Presenter;
             hasPresenterTick = lifecycle.HasTick;
             tickInterval = lifecycle.TickInterval;
-
         }
 
         internal void Adopt(IAcquiredView acquired)
@@ -484,7 +483,6 @@ namespace MUI.ChildViews
             _ = LifetimeScope.StartIndependentCleanup(ReleaseAfterTransitionAsync);
         }
 
-
         internal override IVisualRetentionView GetVisualRetentionView()
         {
             // 已 Retained 的子项持有自己的显示保留，父级不能重复取得后提前释放。
@@ -620,13 +618,18 @@ namespace MUI.ChildViews
                 lifecycle.Destroy(errors);
             }
 
-            await ViewInstanceCleanup.RunAsync(instance, ownedResource, errors, () =>
+            await ViewInstanceCleanup.RunAsync(instance, null, errors, () =>
             {
                 if (view is IChildTickHost tickHost)
                 {
                     tickHost.ChildTickActivityChanged -= Owner.RefreshTicks;
                 }
             });
+
+            var instanceScope = instance;
+            var activationScope = activation;
+            await ViewInstanceCleanup.ReleaseViewResourceAsync(ownedResource, errors,
+                () => instanceScope.IsCleanupConfirmed && activationScope.IsCleanupConfirmed);
 
             CompleteRelease(errors);
         }

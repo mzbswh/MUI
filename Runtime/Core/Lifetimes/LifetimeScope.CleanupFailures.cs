@@ -7,6 +7,7 @@ namespace MUI
     {
         private Exception firstOperationCleanupFailure;
         private long operationCleanupFailureCount;
+        private bool hasUnknownOperationCleanupFailure;
 
         /// <summary>
         /// 记录所属操作已发生的回滚或资源归还失败，使最终释放也报告失败。
@@ -14,6 +15,11 @@ namespace MUI
         /// 须在所属操作退出前登记，释放完成后不能追加。
         /// </summary>
         public void RecordCleanupFailure(Exception failure)
+        {
+            RecordCleanupFailure(failure, null);
+        }
+
+        internal void RecordCleanupFailure(Exception failure, CleanupResponsibility responsibility)
         {
             if (failure == null)
             {
@@ -33,6 +39,18 @@ namespace MUI
                 if (operationCleanupFailureCount < long.MaxValue)
                 {
                     ++operationCleanupFailureCount;
+                }
+                if (responsibility == null)
+                {
+                    hasUnknownOperationCleanupFailure = true;
+                }
+                else
+                {
+                    if (unconfirmedReleases == null)
+                    {
+                        unconfirmedReleases = new List<Func<bool>>();
+                    }
+                    unconfirmedReleases.Add(() => responsibility.CaptureSnapshot().State == CleanupResponsibilityState.Completed);
                 }
             }
         }

@@ -14,6 +14,8 @@ namespace MUI
             private readonly Action changed;
             private readonly INotifyPropertyChanged[] owners;
             private readonly PropertyChangedEventHandler[] handlers;
+            private readonly Action connectAction;
+            private readonly Action notificationAction;
             private bool refreshing;
             private bool pending;
             private bool disposed;
@@ -24,6 +26,8 @@ namespace MUI
                 this.builder = builder;
                 this.path = path;
                 this.changed = changed;
+                connectAction = () => RefreshCore(false);
+                notificationAction = () => RefreshCore(true);
                 owners = new INotifyPropertyChanged[path.Count];
                 handlers = new PropertyChangedEventHandler[path.Count];
                 for (var i = 0; i < handlers.Length; ++i)
@@ -89,6 +93,11 @@ namespace MUI
             }
 
             private void Refresh(bool notify)
+            {
+                builder.RunBinding(notify ? notificationAction : connectAction, "PathNotification");
+            }
+
+            private void RefreshCore(bool notify)
             {
                 pending = true;
                 if (refreshing)

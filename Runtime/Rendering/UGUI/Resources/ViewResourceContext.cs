@@ -11,6 +11,7 @@ namespace MUI.UGUI
     {
         internal readonly LifetimeScope Scope;
         internal readonly IResourceLoader Loader;
+        internal readonly UIErrorContext DiagnosticContext;
         private readonly bool waitForSources;
         private Dictionary<object, Preparation> preparations;
         private bool committed;
@@ -22,6 +23,7 @@ namespace MUI.UGUI
         {
             Scope = lifetime;
             Loader = loader;
+            DiagnosticContext = UIErrors.CurrentContext;
             this.waitForSources = waitForSources;
         }
 

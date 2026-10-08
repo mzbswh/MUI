@@ -326,7 +326,7 @@ namespace MUI.UGUI
             return snapshot.TotalInstances != 0 || snapshot.PendingRequestCount != 0 ||
                 snapshot.CachedViewCount != 0 || snapshot.RetiringCachedViewCount != 0 ||
                 snapshot.PreloadReservationCount != 0 || snapshot.PendingCleanupCount != 0 ||
-                snapshot.HasUnconfirmedCleanup;
+                snapshot.HasCleanupFailure;
         }
 
         private async Task ShutdownCoreAsync(TaskCompletionSource<bool> completion)

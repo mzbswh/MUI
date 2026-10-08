@@ -12,9 +12,11 @@ namespace MUI
         private bool finalized;
         private readonly List<Action> readyActions = new List<Action>();
         private readonly List<Action> initialWrites = new List<Action>();
+        internal readonly UIErrorContext DiagnosticContext;
 
         public BindingSession()
         {
+            DiagnosticContext = UIErrors.CurrentContext;
             Commands = new LifetimeScope();
         }
 
@@ -45,6 +47,26 @@ namespace MUI
             get; private set;
         }
 
+        internal void RunCallback(Action callback, string phase)
+        {
+            using (UIErrors.BeginOwnedPhase(DiagnosticContext, "Binding", phase))
+            {
+                try
+                {
+                    callback();
+                }
+                catch (Exception error)
+                {
+                    UIErrors.AttachContext(error, UIErrors.CurrentContext);
+                    if (!(error is OperationCanceledException))
+                    {
+                        UIErrors.Report(error);
+                    }
+                    throw;
+                }
+            }
+        }
+
         public void AddDetach(Action action) => detach.Add(action);
 
         public void AddFinalizer(Action action) => finalizers.Add(action);
@@ -72,7 +94,7 @@ namespace MUI
                 // 来源设置器或就绪回调内部的解绑可能清空这些列表。
                 for (var i = 0; IsActive && i < initialWrites.Count; ++i)
                 {
-                    initialWrites[i]();
+                    RunCallback(initialWrites[i], "CommitSource");
                 }
 
                 if (!IsActive)
@@ -83,7 +105,7 @@ namespace MUI
                 IsReady = true;
                 for (var i = 0; IsActive && i < readyActions.Count; ++i)
                 {
-                    readyActions[i]();
+                    RunCallback(readyActions[i], "Ready");
                 }
             }
             finally
@@ -120,7 +142,7 @@ namespace MUI
             {
                 try
                 {
-                    detach[i]();
+                    RunCallback(detach[i], "Detach");
                 }
                 catch (Exception error)
                 {
@@ -147,7 +169,7 @@ namespace MUI
             {
                 try
                 {
-                    finalizers[i]();
+                    RunCallback(finalizers[i], "Finalize");
                 }
                 catch (Exception error)
                 {

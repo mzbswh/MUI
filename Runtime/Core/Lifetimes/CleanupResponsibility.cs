@@ -40,6 +40,7 @@ namespace MUI
             Owner = owner.Length > 256 ? owner.Substring(0, 256) : owner;
             this.supportsIdempotentRetry = supportsIdempotentRetry;
             this.releaseThreadId = releaseThreadId;
+            context = UIErrors.CurrentContext;
         }
 
         public Guid Id
@@ -51,6 +52,11 @@ namespace MUI
         {
             get;
         }
+
+        // 首次登记到账本前确定身份；在途、失败及重试期间不改写，账本锁内无需再取得责任锁。
+        internal Guid HostId => context.HostId;
+
+        internal long ViewId => context.ViewId;
 
         /// <summary>只读值快照，不调用资源或适配器的属性。</summary>
         public CleanupResponsibilitySnapshot CaptureSnapshot()
@@ -116,7 +122,12 @@ namespace MUI
                 if (firstAttempt == null)
                 {
                     firstAttempt = currentAttempt;
-                    context = UIErrors.CurrentContext;
+                    var current = UIErrors.CurrentContext;
+                    // 合法移交或缓存接管后，以实际归还所有者为准；无宿主上下文时使用登记位置。
+                    // 宿主级清理的 ViewId=0 是明确身份，不能混入原页面的句柄或路由。
+                    var owner = current.HostId == Guid.Empty ? context : current;
+                    context = new UIErrorContext(owner.HostId, owner.ViewId, owner.RouteKey,
+                        current.Operation ?? "Cleanup", current.Phase ?? "Release");
                 }
 
                 state = CleanupResponsibilityState.Pending;

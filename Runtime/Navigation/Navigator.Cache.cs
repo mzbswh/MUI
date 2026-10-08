@@ -278,7 +278,7 @@ namespace MUI.Navigation
             }
             else
             {
-                hasUnconfirmedCleanup = true;
+                hasCleanupFailure = true;
                 var failure = new AggregateException("Navigation cache cleanup failed.", errors);
                 if (cacheReleaseErrors.Count < terminalCapacity)
                 {

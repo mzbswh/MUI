@@ -62,7 +62,6 @@ namespace MUI.Samples.Navigation
                 model.Label = nextLabel;
             }
 
-
             public ValueTask DisposeAsync()
             {
                 if (owner != null)

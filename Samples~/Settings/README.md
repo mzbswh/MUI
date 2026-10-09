@@ -1,9 +1,11 @@
 # Settings sample
 
+> 最终验收：2026-10-09 的设计必需条件已闭合，具体后端、输入方式及证据见包内 `docs/IMPLEMENTATION-STATUS.md`。本文中“尚未验收/离线编译”等开发阶段说明保留当时范围；当前状态以该记录顶部的最终审计为准，未列入原设计的补充操作不扩展完成门槛。
+
 1. Import **Settings** from the MUI package in Unity Package Manager.
-2. Choose **Tools → MUI → Samples → Open Settings Scene**, then enter Play mode. Alternatively add `SettingsDemo` to an empty GameObject in an empty scene.
+2. Choose **Tools → MUI → Samples → Open Settings Scene**, then enter Play mode. The launcher keeps the scene camera. Alternatively add `SettingsDemo` to an empty GameObject in a scene with an active Camera; the camera prevents Unity's “No cameras rendering” message from covering the Overlay UI.
 3. Move the slider: generated two-way binding updates Volume and the status label.
-4. Click Save: the generated async command disables its button while saving, then updates Status through CommandContext.Apply. At volume zero, CanExecute disables Save. Reset demonstrates a synchronous generated command.
+4. Click Save: the generated async command disables its button while saving, then updates Status through CommandContext.Apply. At volume zero, CanExecute disables Save. Reset uses the same generated async command contract with an immediately completed business delegate.
 
 Enable Automatic Walkthrough on SettingsDemo to see these actions demonstrated automatically. The editor launcher also provides a bounded `RunPreviewBatch` entry point for headless Play-mode preview; it creates a sample scene, runs for three seconds, logs the walkthrough and exits. It operates on the supplied project, so use a disposable project for unattended preview.
 
@@ -19,13 +21,13 @@ The analyzer DLL is included under Analyzers with the RoslynAnalyzer label. Afte
 
 Value 和范围拒绝 NaN/Infinity。范围和整数模式写入沿用原生裁剪/舍入，并通知实际属性变化；即使界面处于隐藏准备阶段，也不会仅依赖被输入门控拦截的原生事件。配置写入可能触发项目注册的原生 onValueChanged 监听器，不保证静默。项目应先设置有效范围和整数模式，再写入期望值；多属性配置不是原子事务。直接操作原生 Slider 不由 Element 保证完整通知。
 
-本次已验证示例和依赖编译及生成绑定顺序，尚未验证 Unity 拖动、原生回调与动态范围切换。
+已验证示例和依赖编译、生成绑定顺序及公开菜单启动后的实际画面。真实鼠标拖动与动态范围切换仍须单独验收；已有原生属性/事件观察不代替真实输入。
 
 ## 显示名输入绑定
 
 PlayerName 输入框展示 Standard 内容预设、单行、16 字符上限、ReadOnly 单向绑定及公共 IInputFieldElement 文本双向绑定。PlayerNameConverter 去除首尾空白；空名称保留输入草稿及原模型值，NameValidation 接收校验失败，NameError 显示错误，Save 暂停接纳。有效名称清除错误并回写规范化文字。点击 Lock / Unlock 切换用户编辑权限；模型仍可主动更新只读文本。Save 沿用原示例的延迟命令，将当前显示名和音量显示在状态文字中，不保存到账号或服务器。Reset 仍只重置音量。
 
-输入节点构建位于 SettingsDemo.Input.cs，业务示例状态位于 SettingsViewModel.cs。生成代码先配置输入模式与限制，再建立文本绑定；输入框显示文字关闭富文本。这里只演示旧版 InputField，不能用它证明 TMP、输入法或移动软键盘行为。已完成五条属性绑定和切换命令的生成/编译检查，新增布局与真实输入尚未在 Unity 运行验收；原自动 walkthrough 不会替代手动输入与只读切换验收。
+输入节点构建位于 SettingsDemo.Input.cs，业务示例状态位于 SettingsViewModel.cs。生成代码先配置输入模式与限制，再建立文本绑定；输入框显示文字关闭富文本。这里只演示旧版 InputField，不能用它证明 TMP、输入法或移动软键盘行为。已完成属性绑定和切换命令的生成/编译检查，并核对实际输入布局；真实输入与只读切换仍待验收，自动 walkthrough 不替代手动输入。
 
 ## 独立滚动条契约
 

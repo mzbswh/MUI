@@ -87,6 +87,11 @@ namespace MUI.UGUI
                 throw new InvalidOperationException("Screen.safeArea applies only to the primary display.");
             }
 
+            if (canvas.renderMode == RenderMode.ScreenSpaceCamera && canvas.worldCamera == null)
+            {
+                throw new InvalidOperationException("Screen-space Camera safe areas require an explicit Canvas camera.");
+            }
+
             if (canvas.renderMode == RenderMode.ScreenSpaceCamera && canvas.worldCamera != null && canvas.worldCamera.targetTexture != null)
             {
                 throw new InvalidOperationException("SafeAreaFitter does not map screen safe areas into render textures.");
@@ -113,6 +118,12 @@ namespace MUI.UGUI
             if (rootCanvas.renderMode == RenderMode.WorldSpace || rootCanvas.targetDisplay != 0)
             {
                 return;
+            }
+
+            if (rootCanvas.renderMode == RenderMode.ScreenSpaceCamera && rootCanvas.worldCamera == null)
+            {
+                // 相机配置失效后解除旧引用，避免每帧继续映射或重复报告同一配置错误。
+                ResolveCanvas();
             }
 
             if (rootCanvas.renderMode == RenderMode.ScreenSpaceCamera && rootCanvas.worldCamera != null && rootCanvas.worldCamera.targetTexture != null)

@@ -28,6 +28,7 @@ namespace MUI.Samples.Navigation
         private ViewHandle shared;
         private bool initialized;
         private int sharedCreated;
+        private bool running;
 
         private void Start()
         {
@@ -128,10 +129,16 @@ namespace MUI.Samples.Navigation
                 return;
             }
             first = a.Handle;
-            if (!initialized || host == null) return;
+            if (!initialized || host == null)
+            {
+                return;
+            }
             var b = await host.Navigator.OpenAsync(secondRoute, "第二个父页面");
             second = b.Handle;
-            if (!initialized || host == null) return;
+            if (!initialized || host == null)
+            {
+                return;
+            }
             var dependencies = host.Navigator.GetDependencies(first.Identity);
             shared = dependencies.Count == 0 ? default : dependencies[0];
             Debug.Log($"父页面打开={a.Status}/{b.Status}，共享创建次数={sharedCreated}");
@@ -296,20 +303,33 @@ namespace MUI.Samples.Navigation
             }
         }
 
-        private bool running;
-
         private async void Run(Func<Task> operation)
         {
-            if (running || !initialized || host == null) return;
+            if (running || !initialized || host == null)
+            {
+                return;
+            }
             running = true;
-            try { await operation(); }
-            catch (Exception error) { Debug.LogException(error); }
-            finally { running = false; }
+            try
+            {
+                await operation();
+            }
+            catch (Exception error)
+            {
+                Debug.LogException(error);
+            }
+            finally
+            {
+                running = false;
+            }
         }
 
         private void ReportOwners()
         {
-            if (!initialized || host == null) return;
+            if (!initialized || host == null)
+            {
+                return;
+            }
             ReportOptionalParents();
             Debug.Log($"共享父拥有者数={host.Navigator.GetOwners(shared).Count}，显式持有={host.Navigator.HasExplicitOwnership(shared)}，共享状态={host.Navigator.GetState(shared)}");
         }
@@ -359,7 +379,6 @@ namespace MUI.Samples.Navigation
             }
 
             public void Commit() => model.Title = next;
-
 
             public ValueTask DisposeAsync()
             {

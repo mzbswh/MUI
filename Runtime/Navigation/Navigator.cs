@@ -293,7 +293,11 @@ namespace MUI.Navigation
                 return Reject<TResult>(OpenRejection.CleanupCapacity);
             }
 
-            return count >= route.Policy.MaxInstances ? Reject<TResult>(OpenRejection.InstanceLimit) : (OpenOutcome<TResult>?)null;
+            // InstanceLimit 仅作为显式溢出替换的内部接纳信号；普通满额请求统一返回 Busy。
+            return count >= route.Policy.MaxInstances
+                ? Reject<TResult>(route.Policy.Overflow == OverflowPolicy.CloseOldest
+                    ? OpenRejection.InstanceLimit : OpenRejection.Busy)
+                : (OpenOutcome<TResult>?)null;
         }
 
         /// <summary>关闭提交释放逻辑额度；尚未归还的资源由独立清理账本持有。</summary>

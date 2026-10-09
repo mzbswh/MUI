@@ -84,9 +84,17 @@ namespace MUI.Samples.Navigation
 
         private async void Run(Func<Task> operation)
         {
-            try { await operation(); }
-            catch (OperationCanceledException) when (lifetime.IsEnded) { }
-            catch (Exception error) { Debug.LogException(error); }
+            try
+            {
+                await operation();
+            }
+            catch (OperationCanceledException) when (lifetime.IsEnded)
+            {
+            }
+            catch (Exception error)
+            {
+                Debug.LogException(error);
+            }
         }
 
         private async void OnDestroy() => await ReleaseAsync();

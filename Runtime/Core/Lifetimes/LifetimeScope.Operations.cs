@@ -5,7 +5,6 @@ namespace MUI
 {
     public sealed partial class LifetimeScope
     {
-
         /// <summary>
         /// 登记并在当前线程执行同步操作。
         /// DisposeAsync 等待操作退出后再归还资源。

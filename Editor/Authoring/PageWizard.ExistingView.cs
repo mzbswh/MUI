@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using MUI.UGUI;
 using UnityEditor;
 using UnityEngine;
@@ -10,7 +11,7 @@ namespace MUI.Editor
         [SerializeField] private GameObject existingPrefab;
         [SerializeField] private string titleElementName = "Title";
         [SerializeField] private string closeElementName = "Close";
-        private (int Instance, string Path, string Backend, string Title, string Close)? existingValidationKey;
+        private (int Instance, string Path, string Backend, string Title, string Close, PagePreset Preset)? existingValidationKey;
         private string existingValidationError;
 
         private string ExistingPrefabGuid => existingPrefab == null ? null :
@@ -22,7 +23,10 @@ namespace MUI.Editor
             if (existingPrefab != null)
             {
                 titleElementName = EditorGUILayout.TextField("标题 Element 名称", titleElementName);
-                closeElementName = EditorGUILayout.TextField("关闭按钮 Element 名称", closeElementName);
+                if (preset != PagePreset.Notice)
+                {
+                    closeElementName = EditorGUILayout.TextField("关闭按钮 Element 名称", closeElementName);
+                }
                 EditorGUILayout.HelpBox("复用原 Prefab，仅在新页面目录生成源码。请按原控件选择文本组件；原资产不修改。创建后仍需将页面资源键映射到该 Prefab。", MessageType.Info);
             }
         }
@@ -40,7 +44,7 @@ namespace MUI.Editor
                 return null;
             }
             var path = AssetDatabase.GetAssetPath(existingPrefab);
-            var key = (existingPrefab.GetInstanceID(), path, backend.Id, titleElementName, closeElementName);
+            var key = (existingPrefab.GetInstanceID(), path, backend.Id, titleElementName, closeElementName, preset);
             if (existingValidationKey.HasValue && key == existingValidationKey.Value)
             {
                 return existingValidationError;
@@ -70,16 +74,35 @@ namespace MUI.Editor
             {
                 return "已有 Prefab 根节点必须包含 View 和 RectTransform。";
             }
-            if (string.IsNullOrWhiteSpace(titleElementName) || string.IsNullOrWhiteSpace(closeElementName))
+            if (string.IsNullOrWhiteSpace(titleElementName) ||
+                preset != PagePreset.Notice && string.IsNullOrWhiteSpace(closeElementName))
             {
                 return "请填写原 Prefab 中的标题和关闭按钮 Element 名称。";
             }
-            var manifest = new BindingManifest(typeof(ViewModel), new[]
+            var entries = new List<BindingEntry>
             {
-                new BindingEntry("Title", titleElementName, backend.ElementType, "Content", BindingMode.OneWay),
-                new BindingEntry("Close", closeElementName, typeof(ButtonElement), nameof(ButtonElement.Clicked),
-                    BindingMode.OneWay, BindingEntryKind.Command)
-            });
+                new BindingEntry("Title", titleElementName, backend.ElementType, "Content", BindingMode.OneWay)
+            };
+            if (preset == PagePreset.Notice)
+            {
+                if (existingPrefab.GetComponentsInChildren<UnityEngine.UI.Selectable>(true).Length != 0)
+                {
+                    return "非交互提示不能包含 Selectable 控件；已有 Prefab 不会被自动修改。";
+                }
+                foreach (var graphic in existingPrefab.GetComponentsInChildren<UnityEngine.UI.Graphic>(true))
+                {
+                    if (graphic.raycastTarget)
+                    {
+                        return "非交互提示的 Graphic 必须关闭 Raycast Target；已有 Prefab 不会被自动修改。";
+                    }
+                }
+            }
+            else
+            {
+                entries.Add(new BindingEntry("Close", closeElementName, typeof(ButtonElement), nameof(ButtonElement.Clicked),
+                    BindingMode.OneWay, BindingEntryKind.Command));
+            }
+            var manifest = new BindingManifest(typeof(ViewModel), entries);
             var errors = ViewContractValidator.Validate(view, manifest);
             return errors.Count == 0 ? null : "已有 Prefab 不符合页面骨架契约：\n" + string.Join("\n", errors);
         }

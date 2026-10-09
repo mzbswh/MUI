@@ -6,7 +6,7 @@ namespace MUI.Navigation
     {
         /// <summary>参数更新和模型换绑共用实例资格；各操作分别检查依赖关系是否允许变更。</summary>
         private bool CanMutateInstance(ViewInstance instance) => instance.IsActive && instance.ActivationCommitted &&
-            !instance.EnterPending && !instance.HasCloseStarted && instance.CloseRequest == null &&
+            !instance.EnterPending && !instance.HasCloseStarted &&
             !retiringDependencies.Contains(instance.Handle);
 
         /// <summary>换绑可保留父页面的依赖，但不能替换其他父页面正在共享的模型。</summary>

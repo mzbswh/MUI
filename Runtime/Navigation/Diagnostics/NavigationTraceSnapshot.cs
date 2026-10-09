@@ -248,7 +248,10 @@ namespace MUI.Navigation
         }
 
         /// <summary>与错误出口及操作结果中的同一异常关联；无异常时为 Guid.Empty。</summary>
-        public Guid DiagnosticId { get; }
+        public Guid DiagnosticId
+        {
+            get;
+        }
 
         /// <summary>仅异常类型名，不读取可能包含业务数据的消息、堆栈或自定义属性。</summary>
         public string ErrorType

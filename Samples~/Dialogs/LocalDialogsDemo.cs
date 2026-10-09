@@ -136,32 +136,66 @@ namespace MUI.Samples.Dialogs
         [ContextMenu("关闭当前对话框")]
         public async void CloseDialog()
         {
-            if (!initialized || host == null || !active.IsValid) return;
-            try { await host.Navigator.CloseAsync(active, lifetime.Token); }
-            catch (OperationCanceledException) when (lifetime.IsEnded) { }
-            catch (Exception error) { Debug.LogException(error); }
+            if (!initialized || host == null || !active.IsValid)
+            {
+                return;
+            }
+            try
+            {
+                await host.Navigator.CloseAsync(active, lifetime.Token);
+            }
+            catch (OperationCanceledException) when (lifetime.IsEnded)
+            {
+            }
+            catch (Exception error)
+            {
+                Debug.LogException(error);
+            }
         }
 
         /// <summary>沿用导航器的返回与模态规则。</summary>
         [ContextMenu("返回")]
         public async void Back()
         {
-            if (!initialized || host == null) return;
-            try { await host.Navigator.BackAsync(lifetime.Token); }
-            catch (OperationCanceledException) when (lifetime.IsEnded) { }
-            catch (Exception error) { Debug.LogException(error); }
+            if (!initialized || host == null)
+            {
+                return;
+            }
+            try
+            {
+                await host.Navigator.BackAsync(lifetime.Token);
+            }
+            catch (OperationCanceledException) when (lifetime.IsEnded)
+            {
+            }
+            catch (Exception error)
+            {
+                Debug.LogException(error);
+            }
         }
 
         private async void OnDestroy()
         {
             var shutdown = initialized;
             initialized = false;
-            try { await lifetime.DisposeAsync(); }
-            catch (Exception error) { Debug.LogException(error); }
+            try
+            {
+                await lifetime.DisposeAsync();
+            }
+            catch (Exception error)
+            {
+                Debug.LogException(error);
+            }
             if (shutdown && host != null)
             {
-                try { await host.ShutdownAsync(); }
-                catch (Exception error) { Debug.LogException(error); }
+                try
+                {
+                    await host.ShutdownAsync();
+                }
+                catch (Exception error)
+                {
+                    Debug.LogException(error);
+                }
             }
             active = default;
         }

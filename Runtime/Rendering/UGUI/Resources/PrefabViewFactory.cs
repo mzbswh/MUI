@@ -1,6 +1,6 @@
 using System;
-using System.Collections.Generic;
 using System.Runtime.ExceptionServices;
+using System.Threading;
 using System.Threading.Tasks;
 using MUI.Resources;
 using UnityEngine;
@@ -8,30 +8,19 @@ using UnityEngine;
 namespace MUI.UGUI
 {
     /// <summary>仅创建和清理已提供的 Prefab 界面实例；不加载或缓存资源。</summary>
-    public static class PrefabViewFactory
+    public static partial class PrefabViewFactory
     {
+        /// <summary>等待失败创建的实际归还；首次回滚结果仍由 ResourceLoadException 保存。</summary>
         public static async ValueTask WaitForFailedInstanceAsync(Exception failure)
         {
             UnityMainThread.Require();
             if (failure is ResourceLoadException rollback)
             {
+                if (rollback.InnerException is CreationFailure recovered && recovered.IsCleanupConfirmed)
+                {
+                    return;
+                }
                 await rollback.CleanupCompletion;
-                return;
-            }
-
-            if (failure is CreationFailure creation)
-            {
-                if (creation.Instance != null && !creation.DestructionRequested)
-                {
-                    // 销毁请求未成功时不能无限等待，也不能归还仍被原生实例使用的依赖。
-                    throw new InvalidOperationException("Failed prefab instance was not scheduled for destruction.", creation);
-                }
-
-                while (creation.Instance != null)
-                {
-                    await Task.Yield();
-                    UnityMainThread.Require();
-                }
             }
         }
 
@@ -41,10 +30,9 @@ namespace MUI.UGUI
             if (instance != null && failure != null &&
                 (!(failure is ReleaseFailure release) || !release.DestructionRequested))
             {
-                // 已知销毁失败或释放未进入工厂时保留依赖，不能等待一个尚未发出的销毁请求。
+                // 未发出销毁请求时保留依赖，不能等待一个不会发生的原生销毁。
                 ExceptionDispatchInfo.Capture(failure).Throw();
             }
-
             while (instance != null)
             {
                 await Task.Yield();
@@ -53,11 +41,12 @@ namespace MUI.UGUI
         }
 
         public static AcquiredView Create(GameObject prefab, Transform parent, Transform staging,
-                    Action requireCurrent = null, Action<View> configureView = null)
+            Action requireCurrent = null, Action<View> configureView = null)
         {
             UnityMainThread.Require();
             GameObject instance = null;
             View view = null;
+            CleanupResponsibility rootCleanup = null;
             try
             {
                 requireCurrent?.Invoke();
@@ -65,7 +54,6 @@ namespace MUI.UGUI
                 {
                     throw new InvalidOperationException("Prefab creation requires live prefab and mounting roots.");
                 }
-
                 instance = UnityEngine.Object.Instantiate(prefab, staging, false);
                 instance.name = prefab.name;
                 instance.SetActive(false);
@@ -74,8 +62,7 @@ namespace MUI.UGUI
                 {
                     throw new InvalidOperationException("Prefab has no root View.");
                 }
-
-                // 配置属于创建事务，在原生激活和绑定前完成；异常沿用统一回滚。
+                rootCleanup = view.CleanupResponsibility;
                 if (configureView != null)
                 {
                     view.ConfigureBeforeActivation(configureView);
@@ -89,21 +76,22 @@ namespace MUI.UGUI
                 {
                     throw new InvalidOperationException("界面配置不能激活实例或改变临时挂载位置。");
                 }
-
                 view.Initialize();
                 view.SetHostState(false, false);
                 instance.transform.SetParent(parent, false);
                 instance.SetActive(true);
-                // 初始化和原生回调可能使资源代际失效；交出凭证前再次校验。
                 requireCurrent?.Invoke();
                 if (instance == null || view == null || !view.IsAlive || parent == null ||
                     instance.transform.parent != parent || !instance.activeSelf)
                 {
                     throw new InvalidOperationException("原生激活回调改变了界面实例的有效性或挂载状态。");
                 }
-                // 独立保留原生根对象；View 组件提前销毁后仍要负责释放整个预制体实例。
-                return new AcquiredView(view, released => ReleaseAsync(released, instance),
-                    System.Threading.Thread.CurrentThread.ManagedThreadId, supportsCaching: true,
+
+                // 稳定根责任在交付前捕获；View 组件被外部销毁后仍负责整个原生实例。
+                var cleanup = new InstanceCleanup(instance, rootCleanup);
+                return new AcquiredView(view, _ => cleanup.DisposeAsync(),
+                    Thread.CurrentThread.ManagedThreadId, supportsIdempotentRetry: true,
+                    owner: "PrefabViewFactory.Instance", supportsCaching: true,
                     prepareForReuse: reused =>
                     {
                         requireCurrent?.Invoke();
@@ -121,107 +109,122 @@ namespace MUI.UGUI
             }
             catch (Exception failure)
             {
-                var cleanup = ReleaseNativeInstance(view, instance, out var destructionRequested);
-                if (instance != null || cleanup != null)
+                if (instance == null && rootCleanup == null)
                 {
-                    var creation = new CreationFailure(failure, instance, destructionRequested);
-                    throw new ResourceLoadException(creation, CompleteFailedCreationAsync(creation, cleanup));
+                    throw;
                 }
-
-                throw;
+                var cleanup = new InstanceCleanup(instance, rootCleanup);
+                var rollback = new CleanupResponsibility(cleanup.DisposeAsync, "PrefabViewFactory.Rollback",
+                    true, Thread.CurrentThread.ManagedThreadId);
+                throw new ResourceLoadException(new CreationFailure(failure, rollback), rollback.DisposeAsync().AsTask());
             }
         }
 
-        private static async Task CompleteFailedCreationAsync(CreationFailure creation, Exception cleanup)
+        /// <summary>
+        /// 分开记录视图归还、隐藏和销毁请求。恢复只检查视图责任，已尝试的未知原生步骤不重复。
+        /// Destroy 成功请求后仍等待原生根实际消失，才能归还后端依赖。
+        /// </summary>
+        private sealed class InstanceCleanup
         {
-            try
+            private readonly GameObject instance;
+            private readonly CleanupResponsibility rootCleanup;
+            private ViewHierarchyCleanup hierarchy;
+            private bool captureAttempted;
+            private Exception captureFailure;
+            private bool hideAttempted;
+            private Exception hideFailure;
+            private bool destructionRequested;
+            private Exception destructionFailure;
+
+            internal InstanceCleanup(GameObject instance, CleanupResponsibility rootCleanup)
             {
-                await WaitForFailedInstanceAsync(creation);
+                this.instance = instance;
+                this.rootCleanup = rootCleanup;
             }
-            catch (Exception destruction)
+
+            internal async ValueTask DisposeAsync()
             {
-                if (cleanup != null)
+                UnityMainThread.Require();
+                if (!captureAttempted)
                 {
-                    throw new AggregateException("Prefab rollback and destruction failed.", cleanup, destruction);
+                    captureAttempted = true;
+                    try
+                    {
+                        hierarchy = new ViewHierarchyCleanup(instance, rootCleanup);
+                    }
+                    catch (Exception error)
+                    {
+                        captureFailure = error;
+                    }
+                }
+                if (!hideAttempted)
+                {
+                    hideAttempted = true;
+                    try
+                    {
+                        if (instance != null)
+                        {
+                            instance.SetActive(false);
+                        }
+                    }
+                    catch (Exception error)
+                    {
+                        hideFailure = error;
+                    }
                 }
 
-                throw;
-            }
-
-            if (cleanup != null)
-            {
-                ExceptionDispatchInfo.Capture(cleanup).Throw();
-            }
-        }
-
-        private static async ValueTask ReleaseAsync(IView released, GameObject instance)
-        {
-            var view = (View)released;
-            var cleanup = ReleaseNativeInstance(view, instance, out var destructionRequested);
-            var failure = cleanup == null ? null : new ReleaseFailure(cleanup, destructionRequested);
-            // Destroy 延迟到帧末执行；凭证只在原生实例实际消失后完成归还。
-            await WaitForReleasedInstanceAsync(instance, failure);
-            if (failure != null)
-            {
-                throw failure;
-            }
-        }
-
-        /// <summary>逐项尝试逻辑清理、隐藏与原生销毁，前一项失败不能跳过后一项。</summary>
-        private static Exception ReleaseNativeInstance(View view, GameObject instance, out bool destructionRequested)
-        {
-            var errors = new List<Exception>();
-            if (view != null)
-            {
                 try
                 {
-                    view.Dispose();
+                    if (captureFailure != null)
+                    {
+                        ExceptionDispatchInfo.Capture(captureFailure).Throw();
+                    }
+                    if (!hierarchy.IsCleanupConfirmed)
+                    {
+                        await hierarchy.DisposeAsync();
+                    }
+                    if (hideFailure != null)
+                    {
+                        ExceptionDispatchInfo.Capture(hideFailure).Throw();
+                    }
+                    if (destructionFailure != null)
+                    {
+                        ExceptionDispatchInfo.Capture(destructionFailure).Throw();
+                    }
+                    if (!destructionRequested)
+                    {
+                        try
+                        {
+                            if (instance != null)
+                            {
+                                UnityEngine.Object.Destroy(instance);
+                            }
+                            destructionRequested = true;
+                        }
+                        catch (Exception error)
+                        {
+                            destructionFailure = error;
+                            throw;
+                        }
+                    }
+                    await WaitForReleasedInstanceAsync(instance, null);
                 }
                 catch (Exception error)
                 {
-                    errors.Add(error);
+                    throw new ReleaseFailure(error, destructionRequested);
                 }
             }
-
-            if (instance != null)
-            {
-                try
-                {
-                    instance.SetActive(false);
-                }
-                catch (Exception error)
-                {
-                    errors.Add(error);
-                }
-            }
-
-            destructionRequested = instance == null;
-            if (instance != null)
-            {
-                try
-                {
-                    UnityEngine.Object.Destroy(instance);
-                    destructionRequested = true;
-                }
-                catch (Exception error)
-                {
-                    errors.Add(error);
-                }
-            }
-
-            return errors.Count == 0 ? null : errors.Count == 1 ? errors[0]
-                : new AggregateException("Prefab instance cleanup failed.", errors);
         }
 
         private sealed class ReleaseFailure : Exception
         {
-            public ReleaseFailure(Exception cleanup, bool destructionRequested)
-                            : base("Prefab instance cleanup failed.", cleanup)
+            internal ReleaseFailure(Exception cleanup, bool destructionRequested)
+                : base("Prefab instance cleanup failed.", cleanup)
             {
                 DestructionRequested = destructionRequested;
             }
 
-            public bool DestructionRequested
+            internal bool DestructionRequested
             {
                 get;
             }
@@ -229,21 +232,18 @@ namespace MUI.UGUI
 
         private sealed class CreationFailure : Exception
         {
-            public CreationFailure(Exception cause, GameObject instance, bool destructionRequested) : base("Prefab construction failed.", cause)
+            internal CreationFailure(Exception cause, CleanupResponsibility cleanup)
+                : base("Prefab construction failed.", cause)
             {
-                Instance = instance;
-                DestructionRequested = destructionRequested;
+                Cleanup = cleanup;
             }
 
-            public GameObject Instance
+            internal CleanupResponsibility Cleanup
             {
                 get;
             }
 
-            public bool DestructionRequested
-            {
-                get;
-            }
+            internal bool IsCleanupConfirmed => Cleanup.CaptureSnapshot().State == CleanupResponsibilityState.Completed;
         }
     }
 }

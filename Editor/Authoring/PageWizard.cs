@@ -254,10 +254,10 @@ namespace MUI.Editor
                 root.SetActive(false);
                 SceneManager.MoveGameObjectToScene(root, scene);
                 var rect = (RectTransform)root.transform;
-                if (preset == PagePreset.Popup)
+                if (preset == PagePreset.Popup || preset == PagePreset.Notice)
                 {
                     rect.anchorMin = rect.anchorMax = new Vector2(0.5f, 0.5f);
-                    rect.sizeDelta = new Vector2(600, 400);
+                    rect.sizeDelta = preset == PagePreset.Notice ? new Vector2(480, 80) : new Vector2(600, 400);
                 }
                 else
                 {
@@ -274,19 +274,20 @@ namespace MUI.Editor
                 title.rectTransform.pivot = new Vector2(0.5f, 1);
                 title.rectTransform.anchoredPosition = new Vector2(-48, -16);
                 title.rectTransform.sizeDelta = new Vector2(-128, 48);
-                var close = new GameObject("Close", typeof(RectTransform), typeof(Image), typeof(Button), typeof(ButtonElement));
-                close.transform.SetParent(rect, false);
-                var closeRect = (RectTransform)close.transform;
-                closeRect.anchorMin = closeRect.anchorMax = Vector2.one;
-                closeRect.pivot = Vector2.one;
-                closeRect.anchoredPosition = new Vector2(-16, -16);
-                closeRect.sizeDelta = new Vector2(80, 48);
-                close.GetComponent<Button>().targetGraphic = close.GetComponent<Image>();
-                close.GetComponent<ButtonElement>().AccessibilityLabel = "关闭";
-                // 默认模板使用基础字体包含的关闭符号；语义名称独立保留，字体和语言由项目配置。
-                var label = backend.CreateText("Label", closeRect, "×");
-                label.color = Color.black;
-                Stretch(label.rectTransform);
+                if (preset == PagePreset.Notice)
+                {
+                    // 路由不抢焦点，原生图形也不拦截下层射线；提示由业务持有的句柄关闭。
+                    var group = root.GetComponent<CanvasGroup>();
+                    group.interactable = false;
+                    group.blocksRaycasts = false;
+                    background.raycastTarget = false;
+                    title.raycastTarget = false;
+                    Stretch(title.rectTransform);
+                }
+                else
+                {
+                    CreateCloseButton(rect, backend);
+                }
                 root.SetActive(true);
                 if (PrefabUtility.SaveAsPrefabAsset(root, path) == null)
                 {
@@ -302,6 +303,23 @@ namespace MUI.Editor
 
                 EditorSceneManager.ClosePreviewScene(scene);
             }
+        }
+
+        private static void CreateCloseButton(RectTransform rect, PageTextBackend backend)
+        {
+            var close = new GameObject("Close", typeof(RectTransform), typeof(Image), typeof(Button), typeof(ButtonElement));
+            close.transform.SetParent(rect, false);
+            var closeRect = (RectTransform)close.transform;
+            closeRect.anchorMin = closeRect.anchorMax = Vector2.one;
+            closeRect.pivot = Vector2.one;
+            closeRect.anchoredPosition = new Vector2(-16, -16);
+            closeRect.sizeDelta = new Vector2(80, 48);
+            close.GetComponent<Button>().targetGraphic = close.GetComponent<Image>();
+            close.GetComponent<ButtonElement>().AccessibilityLabel = "关闭";
+            // 默认模板使用基础字体包含的关闭符号；语义名称独立保留，字体和语言由项目配置。
+            var label = backend.CreateText("Label", closeRect, "×");
+            label.color = Color.black;
+            Stretch(label.rectTransform);
         }
 
         private static void Stretch(RectTransform rect)

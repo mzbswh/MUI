@@ -62,11 +62,10 @@ namespace MUI.Resources
                     {
                         try
                         {
-                            await CleanupRegistry.ReleaseAsync(ownedResource, "LifetimeScope.LatePreload");
+                            await CleanupRegistry.ReleaseAsync(ownedResource, "LifetimeScope.LatePreload", lifetime);
                         }
                         catch (Exception cleanup)
                         {
-                            lifetime.RecordCleanupFailure(cleanup);
                             throw new AggregateException("Preload and late-result cleanup failed.", failure, cleanup);
                         }
                     }
@@ -74,11 +73,10 @@ namespace MUI.Resources
                     {
                         try
                         {
-                            await ResourceLoadCleanup.AwaitAsync(failure);
+                            await ResourceLoadCleanup.AwaitAsync(failure, lifetime);
                         }
                         catch (Exception cleanup)
                         {
-                            lifetime.RecordCleanupFailure(cleanup);
                             throw new AggregateException("预加载与后端回滚均失败。", failure, cleanup);
                         }
                     }

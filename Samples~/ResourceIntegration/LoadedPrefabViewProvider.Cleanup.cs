@@ -51,10 +51,12 @@ namespace MUI.Samples.ResourceIntegration
 
         private Task TrackFailedCreation(Entry entry, Exception failure)
         {
+            var cleanup = CreateFailedCreationCleanup(entry, failure);
+            rollbacks.Own(cleanup);
             // Create 已登记到 loading；退出先排空创建，再结束回滚登记，避免回调内退出的竞态。
             var operation = rollbacks.RunAsync(async _ =>
             {
-                await ReleaseFailedCreationAsync(entry, failure);
+                await cleanup.DisposeAsync();
                 return true;
             });
             var completion = operation.AsTask();
@@ -103,10 +105,7 @@ namespace MUI.Samples.ResourceIntegration
 
             try
             {
-                if (staging != null)
-                {
-                    UnityEngine.Object.Destroy(staging);
-                }
+                await stagingCleanup.DisposeAsync();
             }
             catch (Exception error)
             {

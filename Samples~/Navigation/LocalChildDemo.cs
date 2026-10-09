@@ -22,6 +22,7 @@ namespace MUI.Samples.Navigation
         private ChildViewScope scope;
         private ChildViewTemplate<ThingItemViewModel, string> template;
         private ChildViewHandle<ThingItemViewModel, string> item;
+        private bool running;
 
         private async void Start()
         {
@@ -190,16 +191,28 @@ namespace MUI.Samples.Navigation
             }
         }
 
-        private bool running;
-
         private async void Run(Func<Task> operation)
         {
-            if (running || lifetime.IsEnded) return;
+            if (running || lifetime.IsEnded)
+            {
+                return;
+            }
             running = true;
-            try { await operation(); }
-            catch (OperationCanceledException) when (lifetime.IsEnded) { }
-            catch (Exception error) { Debug.LogException(error, this); }
-            finally { running = false; }
+            try
+            {
+                await operation();
+            }
+            catch (OperationCanceledException) when (lifetime.IsEnded)
+            {
+            }
+            catch (Exception error)
+            {
+                Debug.LogException(error, this);
+            }
+            finally
+            {
+                running = false;
+            }
         }
 
         private void ForgetClosedItem()

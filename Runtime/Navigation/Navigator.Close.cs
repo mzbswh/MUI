@@ -48,7 +48,8 @@ namespace MUI.Navigation
         internal void RequestCompletion(ViewInstance instance, Action acceptResult)
         {
             AssertThread();
-            if (instance.State != ViewState.Open || instance.HasCloseStarted || instance.CloseRequest != null)
+            if (instance.State != ViewState.Open || instance.HasCloseStarted ||
+                instance.PendingCloseIntent.HasValue || instance.CloseRequest != null)
             {
                 throw new OperationCanceledException("View already entered closing.");
             }

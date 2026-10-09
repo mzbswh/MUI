@@ -14,6 +14,7 @@ namespace MUI
             private readonly Action changed;
             private readonly INotifyPropertyChanged[] owners;
             private readonly PropertyChangedEventHandler[] handlers;
+            private readonly Exception[] detachmentFailures;
             private readonly Action connectAction;
             private readonly Action notificationAction;
             private bool refreshing;
@@ -30,6 +31,7 @@ namespace MUI
                 notificationAction = () => RefreshCore(true);
                 owners = new INotifyPropertyChanged[path.Count];
                 handlers = new PropertyChangedEventHandler[path.Count];
+                detachmentFailures = new Exception[path.Count];
                 for (var i = 0; i < handlers.Length; ++i)
                 {
                     var index = i;
@@ -56,15 +58,22 @@ namespace MUI
                 for (var i = owners.Length - 1; i >= 0; --i)
                 {
                     var owner = owners[i];
-                    owners[i] = null;
                     if (owner != null)
                     {
+                        // 退订异常可能发生在部分完成之后，保留拥有者且不隐式再调用。
+                        if (detachmentFailures[i] != null)
+                        {
+                            errors.Add(detachmentFailures[i]);
+                            continue;
+                        }
                         try
                         {
                             owner.PropertyChanged -= handlers[i];
+                            owners[i] = null;
                         }
                         catch (Exception error)
                         {
+                            detachmentFailures[i] = error;
                             errors.Add(error);
                         }
                     }
@@ -78,7 +87,8 @@ namespace MUI
 
             private void OnChanged(int index, object sender, PropertyChangedEventArgs args)
             {
-                if (disposed || !builder.IsBindingThread() || !builder.session.IsActive ||
+                if (disposed || detachmentFailures[index] != null ||
+                    !builder.IsBindingThread() || !builder.session.IsActive ||
                     !ReferenceEquals(sender, owners[index]) ||
                     (!string.IsNullOrEmpty(args.PropertyName) && args.PropertyName != path[index].PropertyName))
                 {
@@ -119,6 +129,11 @@ namespace MUI
 
                         for (var i = 0; i < owners.Length && !disposed && builder.session.IsActive; ++i)
                         {
+                            if (detachmentFailures[i] != null)
+                            {
+                                throw detachmentFailures[i];
+                            }
+
                             var next = path[i].Owner(builder.model);
                             if (ReferenceEquals(next, owners[i]))
                             {
@@ -126,11 +141,19 @@ namespace MUI
                             }
 
                             var previous = owners[i];
-                            owners[i] = null;
                             if (previous != null)
                             {
-                                previous.PropertyChanged -= handlers[i];
+                                try
+                                {
+                                    previous.PropertyChanged -= handlers[i];
+                                }
+                                catch (Exception error)
+                                {
+                                    detachmentFailures[i] = error;
+                                    throw;
+                                }
                             }
+                            owners[i] = null;
 
                             if (disposed || !builder.session.IsActive)
                             {

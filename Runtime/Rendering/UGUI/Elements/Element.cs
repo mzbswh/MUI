@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using UnityEngine;
@@ -8,10 +7,10 @@ using UnityEngine.UI;
 namespace MUI.UGUI
 {
     /// <summary>原生控件适配器，只初始化一次，在最终释放时退订监听器。</summary>
-    public abstract partial class Element : MonoBehaviour, IElement, IAccessibleElement, IDisposable
+    public abstract partial class Element : MonoBehaviour, IElement, IAccessibleElement, IDisposable, IAsyncDisposable, ICleanupResponsibilitySource
     {
-        private readonly List<Action> cleanup = new List<Action>();
         private bool elementInitialized;
+        private bool elementInitializing;
         private bool disposed;
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -79,10 +78,16 @@ namespace MUI.UGUI
             {
                 return;
             }
+            if (elementInitializing)
+            {
+                throw new InvalidOperationException("Cannot initialize an element from its own initialization callback.");
+            }
 
+            elementInitializing = true;
             try
             {
                 OnInitialize();
+                RequireAlive();
                 elementInitialized = true;
             }
             catch (Exception failure)
@@ -97,6 +102,10 @@ namespace MUI.UGUI
                 }
 
                 throw;
+            }
+            finally
+            {
+                elementInitializing = false;
             }
         }
 
@@ -144,16 +153,8 @@ namespace MUI.UGUI
             return host == null || host.CanReceiveSharedPointerInput();
         }
 
-        protected void OnDispose(Action callback)
-        {
-            if (callback == null)
-            {
-                throw new ArgumentNullException(nameof(callback));
-            }
-
-            RequireAlive();
-            cleanup.Add(callback);
-        }
+        /// <summary>框架原生监听的清理入口，与项目的 TrackCleanup 共用最终作用域。</summary>
+        protected void OnDispose(Action callback) => TrackCleanup(callback);
 
         protected T RequireComponent<T>()
                     where T : UnityEngine.Component
@@ -182,38 +183,15 @@ namespace MUI.UGUI
             PropertyChanged?.Invoke(this, PropertyChangedEventArgsCache.Get(property));
         }
 
-        public void Dispose()
+        protected virtual void OnDestroy()
         {
-            UnityMainThread.Require();
-            if (disposed)
+            // 显式恢复已经确认实际清理时，原生销毁兜底不再重新报告首次任务的历史失败。
+            if (cleanupResponsibility != null &&
+                cleanupResponsibility.CaptureSnapshot().State == CleanupResponsibilityState.Completed)
             {
                 return;
             }
 
-            disposed = true;
-            var errors = new List<Exception>();
-            for (var i = cleanup.Count - 1; i >= 0; --i)
-            {
-                try
-                {
-                    cleanup[i]();
-                }
-                catch (Exception error)
-                {
-                    errors.Add(error);
-                }
-            }
-
-            cleanup.Clear();
-            PropertyChanged = null;
-            if (errors.Count > 0)
-            {
-                throw new AggregateException("Element cleanup failed.", errors);
-            }
-        }
-
-        protected virtual void OnDestroy()
-        {
             try
             {
                 Dispose();

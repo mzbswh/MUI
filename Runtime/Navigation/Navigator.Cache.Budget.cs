@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace MUI.Navigation
 {
@@ -7,6 +8,7 @@ namespace MUI.Navigation
         private readonly long? maxCachedEstimatedBytes;
         private long reservedCacheEstimatedBytes;
         private long failedCacheEstimatedBytes;
+        private readonly List<FailedCacheBudget> failedCacheBudgets = new List<FailedCacheBudget>();
 
         /// <summary>缓存、在途淘汰及释放失败所占估算额度；命中转为活动实例后移出本预算。</summary>
         public long ReservedCacheEstimatedBytes
@@ -14,7 +16,7 @@ namespace MUI.Navigation
             get
             {
                 AssertThread();
-                return reservedCacheEstimatedBytes;
+                return reservedCacheEstimatedBytes - ConfirmedFailedCacheEstimatedBytes;
             }
         }
 
@@ -24,12 +26,45 @@ namespace MUI.Navigation
             get
             {
                 AssertThread();
-                return failedCacheEstimatedBytes;
+                return failedCacheEstimatedBytes - ConfirmedFailedCacheEstimatedBytes;
+            }
+        }
+
+        // 诊断读取只计算值；已确认的记录由下一次缓存维护或准入移除，不从查询启动工作。
+        private long ConfirmedFailedCacheEstimatedBytes
+        {
+            get
+            {
+                long confirmed = 0;
+                foreach (var entry in failedCacheBudgets)
+                {
+                    if (entry.Content.IsCleanupConfirmed)
+                    {
+                        confirmed += entry.EstimatedBytes;
+                    }
+                }
+                return confirmed;
+            }
+        }
+
+        private void RefreshFailedCacheBudget()
+        {
+            for (var index = failedCacheBudgets.Count - 1; index >= 0; --index)
+            {
+                var entry = failedCacheBudgets[index];
+                if (!entry.Content.IsCleanupConfirmed)
+                {
+                    continue;
+                }
+                reservedCacheEstimatedBytes -= entry.EstimatedBytes;
+                failedCacheEstimatedBytes -= entry.EstimatedBytes;
+                failedCacheBudgets.RemoveAt(index);
             }
         }
 
         private bool TryMakeCacheRoom(Route route)
         {
+            RefreshFailedCacheBudget();
             if (maxCachedEstimatedBytes.HasValue && !route.EstimatedRetainedBytes.HasValue)
             {
                 return false;
@@ -76,6 +111,12 @@ namespace MUI.Navigation
             // 最终销毁回调可以请求宿主退出，因此接纳前同时复核宿主状态。
             return !IsShutdown && !IsCacheClearing &&
                 cachedContents.Count < cacheCapacity && estimate <= limit - reservedCacheEstimatedBytes;
+        }
+
+        private sealed class FailedCacheBudget
+        {
+            internal CachedViewContent Content;
+            internal long EstimatedBytes;
         }
     }
 }

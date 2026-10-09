@@ -6,6 +6,13 @@ using MUI.Resources;
 
 namespace MUI.Navigation
 {
+    internal enum CloseRequestIntent
+    {
+        Dismiss,
+        Complete,
+        Replace
+    }
+
     internal abstract partial class ViewInstance : ICommandTarget
     {
         private readonly ViewCompletion<ViewReadiness> readiness = new ViewCompletion<ViewReadiness>();
@@ -129,6 +136,12 @@ namespace MUI.Navigation
         }
 
         public Task<CloseOutcome> CloseRequest
+        {
+            get; set;
+        }
+
+        /// <summary>同一激活只接纳一个关闭意图；Replace 的确认阶段也使用此记录。</summary>
+        internal CloseRequestIntent? PendingCloseIntent
         {
             get; set;
         }

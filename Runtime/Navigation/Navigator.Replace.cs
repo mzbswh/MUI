@@ -32,7 +32,18 @@ namespace MUI.Navigation
                 return ReplacementRejected<TResult>(ReplaceRejection.Busy);
             }
 
-            if (IsShutdown || !entries.TryGetValue(source, out var current) || !CanReplace(current))
+            if (IsShutdown || !entries.TryGetValue(source, out var current) ||
+                !current.IsActive || current.HasCloseStarted)
+            {
+                return ReplacementRejected<TResult>(ReplaceRejection.SourceUnavailable);
+            }
+
+            if (current.PendingCloseIntent.HasValue || current.CloseRequest != null)
+            {
+                return ReplacementRejected<TResult>(ReplaceRejection.Busy);
+            }
+
+            if (!CanReplace(current))
             {
                 return ReplacementRejected<TResult>(ReplaceRejection.SourceUnavailable);
             }
@@ -79,6 +90,7 @@ namespace MUI.Navigation
         {
             var acquired = queueAcquired;
             var committed = false;
+            var ownsCloseIntent = false;
             Task<CloseOutcome> sourceCleanup = null;
             ViewInstance<TViewModel, TArgs, TResult> candidate = null;
             using (var cancellation = CancellationTokenSource.CreateLinkedTokenSource(token, shutdown.Token, source.ActivationToken))
@@ -128,13 +140,21 @@ namespace MUI.Navigation
                     }
 
                     cancellation.Token.ThrowIfCancellationRequested();
-                    long approvedVersion = 0;
+                    CloseApproval approval = default;
                     if (source.HasCloseGuard)
                     {
+                        if (!CanReplace(source) || source.PendingCloseIntent.HasValue)
+                        {
+                            throw new NavigationPreparationRejectedException(OpenRejection.Busy,
+                                "The source is already evaluating a different close request.");
+                        }
+
+                        source.PendingCloseIntent = CloseRequestIntent.Replace;
+                        ownsCloseIntent = true;
                         // 确认框可使用同一导航队列；候选保持隐藏，由当前操作继续持有。
                         var evaluation = await AwaitCloseEvaluationAsync(source,
                             activationToken => EvaluateReplacementCloseAsync(source, cancellation.Token,
-                                activationToken, version => approvedVersion = version), cancellation.Token);
+                                activationToken, approved => approval = approved), cancellation.Token);
                         if (evaluation.Error != null)
                         {
                             var cleanup = BeginClose(candidate, DismissReason.OpenCancelled);
@@ -161,7 +181,6 @@ namespace MUI.Navigation
                             await BeginClose(candidate, DismissReason.OpenCancelled);
                             return new ReplaceOutcome<TResult>(ReplaceStatus.Rejected, new OpenOutcome<TResult>(OpenStatus.CancelledBeforeCommit, cleanup: CleanupState(candidate.Closing)), rejection);
                         }
-
                     }
 
                     await requests.WaitAsync(cancellation.Token);
@@ -173,7 +192,7 @@ namespace MUI.Navigation
                     {
                         using (EnterCallback(source))
                         {
-                            sourceValid = source.CloseGuardVersion == approvedVersion;
+                            sourceValid = approval.IsCurrent(source, source.CloseGuardVersion);
                         }
                     }
 
@@ -267,6 +286,11 @@ namespace MUI.Navigation
                         requests.Release();
                     }
 
+                    if (ownsCloseIntent && source.PendingCloseIntent == CloseRequestIntent.Replace)
+                    {
+                        source.PendingCloseIntent = null;
+                    }
+
                     if (ownsRequest)
                     {
                         EndNavigationRequest();
@@ -278,7 +302,7 @@ namespace MUI.Navigation
         private async ValueTask<CloseStatus> EvaluateReplacementCloseAsync(ViewInstance source,
                     CancellationToken requestToken,
                     CancellationToken activationToken,
-                    Action<long> approve)
+                    Action<CloseApproval> approve)
         {
             using (var linked = CancellationTokenSource.CreateLinkedTokenSource(requestToken, activationToken))
             {

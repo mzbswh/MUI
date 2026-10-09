@@ -40,16 +40,16 @@ namespace MUI.UGUI
             }
         }
 
-        private sealed class PreparedRebind : IPreparedBindingTarget
+        private sealed class PreparedRebind : IPreparedBindingTarget, ICleanupResponsibilitySource
         {
             private readonly VirtualListElement element;
             private readonly ChildViewScope scope;
             private readonly LifetimeScope lifetime;
-            private readonly Task priorChange;
+            private Task priorChange;
             private readonly long assignment;
             private readonly long revision;
-            private readonly IReadOnlyObservableList<VirtualListItem> previousSource;
-            private readonly IReadOnlyObservableList<VirtualListItem> source;
+            private IReadOnlyObservableList<VirtualListItem> previousSource;
+            private IReadOnlyObservableList<VirtualListItem> source;
             private readonly int previousColumns;
             private readonly int columns;
             private readonly float viewportExtent;
@@ -58,8 +58,9 @@ namespace MUI.UGUI
             private readonly bool bindsItems;
             private readonly bool bindsColumns;
             private readonly bool bindsSelection;
-            private readonly object selection;
+            private object selection;
             private readonly List<PreparedCell> prepared = new List<PreparedCell>();
+            private readonly List<Func<bool>> cleanupConfirmations = new List<Func<bool>>();
             private readonly List<Task> retirements = new List<Task>();
             private List<VirtualListItem> items;
             private VirtualRowIndex offsets;
@@ -107,6 +108,21 @@ namespace MUI.UGUI
                 {
                     throw new InvalidOperationException("Prepared virtual list columns are invalid.");
                 }
+
+                var failureRecorded = false;
+                CleanupResponsibility = new CleanupResponsibility(ReleasePreparedAsync, "VirtualListRebindPreparation", error =>
+                {
+                    if (error != null && lifetime != null && !failureRecorded)
+                    {
+                        failureRecorded = true;
+                        lifetime.RecordCleanupFailure(error, CleanupResponsibility);
+                    }
+                }, true, Thread.CurrentThread.ManagedThreadId);
+            }
+
+            public CleanupResponsibility CleanupResponsibility
+            {
+                get;
             }
 
             internal async ValueTask PrepareAsync(CancellationToken token)
@@ -429,10 +445,21 @@ namespace MUI.UGUI
                 }
             }
 
-            public async ValueTask DisposeAsync()
+            public ValueTask DisposeAsync() => CleanupResponsibility.DisposeAsync();
+
+            private async ValueTask ReleasePreparedAsync()
             {
                 if (disposed)
                 {
+                    // 不重放候选回调；叶责任与节点归还后才确认本容器，不改写首次失败结果。
+                    foreach (var confirmed in cleanupConfirmations)
+                    {
+                        if (!confirmed())
+                        {
+                            throw new InvalidOperationException("Virtual list preparation cleanup dependencies are unconfirmed.");
+                        }
+                    }
+                    cleanupConfirmations.Clear();
                     return;
                 }
 
@@ -456,6 +483,7 @@ namespace MUI.UGUI
                     catch (Exception error)
                     {
                         errors.Add(error);
+                        cleanupConfirmations.Add(entry.Cell.Element.CaptureChildViewCleanupConfirmation());
                     }
 
                     if (!entry.Adopted)
@@ -467,11 +495,18 @@ namespace MUI.UGUI
                         catch (Exception error)
                         {
                             errors.Add(error);
+                            cleanupConfirmations.Add(entry.Cell.Element.CaptureNodeCleanupConfirmation());
                         }
                     }
                 }
 
                 items = null;
+                previousSource = null;
+                source = null;
+                priorChange = null;
+                selection = null;
+                measurements = null;
+                offsets = null;
                 prepared.Clear();
                 retirements.Clear();
                 if (errors.Count != 0)

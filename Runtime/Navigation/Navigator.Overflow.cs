@@ -47,7 +47,7 @@ namespace MUI.Navigation
                     rejection = OpenRejection.Reentrant;
                     break;
                 case ReplaceRejection.InstanceLimit:
-                    rejection = OpenRejection.InstanceLimit;
+                    rejection = OpenRejection.Busy;
                     break;
                 case ReplaceRejection.CleanupCapacity:
                     rejection = OpenRejection.CleanupCapacity;

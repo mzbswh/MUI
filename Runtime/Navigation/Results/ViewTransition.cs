@@ -19,10 +19,16 @@ namespace MUI.Navigation
             Error = error;
         }
 
-        public ViewTransitionStatus Status { get; }
+        public ViewTransitionStatus Status
+        {
+            get;
+        }
 
         /// <summary>转场或视觉收尾错误；完成但有错误表示已恢复到可用终态。</summary>
-        public Exception Error { get; }
+        public Exception Error
+        {
+            get;
+        }
 
         /// <summary>与错误出口共享的诊断标识；无异常时为 Guid.Empty。</summary>
         public Guid DiagnosticId => UIErrors.GetDiagnosticId(Error);

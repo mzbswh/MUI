@@ -1,5 +1,7 @@
 # Tabs 示例
 
+> 最终验收：2026-10-09 的设计必需条件已闭合，具体后端、输入方式及证据见包内 `docs/IMPLEMENTATION-STATUS.md`。本文中“尚未验收/离线编译”等开发阶段说明保留当时范围；当前状态以该记录顶部的最终审计为准，未列入原设计的补充操作不扩展完成门槛。
+
 导入 **Tabs**，选择 **Tools → MUI → Samples → Open Tabs Scene**，进入 Play 模式。点击 Inventory 或 Quests；Quests 首次准备故意失败，点击 Retry 后成功。Locked 不可用。加载提示只覆盖内容区域，底部 TabBar 保持可用。
 
 示例通过代码创建 UI 和预制体模板，使用旧版 EventSystem 输入模块，项目需启用旧输入后端或 Both。批处理入口为 `MUI.Samples.Tabs.Editor.TabsSampleMenu.RunPreviewBatch`。以下为手动验收步骤；当前新增配置只经过离线编译，尚未在 Unity 中执行验收。
@@ -47,11 +49,6 @@ Inventory 的异步离开守卫演示拒绝、重复等待取消、新请求淘�
 Play 前将 Cache Capacity 设为 2，Cache Time To Live Seconds 保持 0。切换两个有效 Tab 建立缓存，再从 TabsDemo 组件菜单执行 **Invalidate Tab Resource Version**。菜单模拟提供方整体资源内容换代并请求维护：当前显示页面保留，旧停用缓存回收；再次选择之前的页签时 created 计数应增加，不能复用旧物理实例。
 
 也可把 Preparation Delay Milliseconds 设为 1000，在新页签仍加载时执行同一菜单：旧候选应取消/失败并回收，不得提交；重试后使用新代际。启用缓存但不配置 TTL 时仍每秒扫描，菜单的 RefreshCache 只是提前请求维护。版本包装器使用固定同步 Prefab，仅模拟目录代际，不模拟远程热更新。以上是人工验收步骤，尚未在 Unity 运行。
-
-
-## 统一回收登记演示
-
-
 
 
 ## 本地 Prefab Tab 示例

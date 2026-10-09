@@ -87,7 +87,8 @@ namespace MUI.Navigation
                         var source = OldestOpenInstance(route);
                         if (source == null)
                         {
-                            return existing.Value;
+                            // 名额可能全部被准备中的候选持有，不能启动另一份获取或替换未就绪实例。
+                            return Reject<TResult>(OpenRejection.Busy);
                         }
 
                         if (WouldWaitForSelf(source.Handle))
@@ -333,7 +334,6 @@ namespace MUI.Navigation
                 {
                     posted.Dequeue()();
                 }
-
             }
             finally
             {

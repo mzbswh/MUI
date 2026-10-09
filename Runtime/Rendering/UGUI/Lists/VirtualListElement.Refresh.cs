@@ -451,15 +451,23 @@ namespace MUI.UGUI
                 if (cell != null)
                 {
                     cells.Remove(cell);
+                    Task cleanupPreparation = null;
                     try
                     {
                         cell.Root.gameObject.SetActive(false);
                         cell.Element.ViewModel = null;
-                        await ((IChildViewElement)cell.Element).Preparation;
+                        cleanupPreparation = ((IChildViewElement)cell.Element).Preparation;
+                        await cleanupPreparation;
                     }
                     catch (Exception cleanup)
                     {
-                        errors.Add(cleanup);
+                        // 父激活结束后，旧准备任务可能仍以取消完成；这不是另一次归还失败。
+                        // setter、实际节点释放和未取消的清理故障仍必须保留并报告。
+                        if (cleanupPreparation == null || !cleanupPreparation.IsCanceled ||
+                            IsRefreshCurrent(revision, activation))
+                        {
+                            errors.Add(cleanup);
+                        }
                     }
 
                     try
@@ -607,6 +615,18 @@ namespace MUI.UGUI
 
         private static void ReleaseCell(Cell cell)
         {
+            if (cell.Element != null)
+            {
+                cell.Element.ReleaseOwnedNode(() => ReleaseNativeCell(cell), "VirtualListCell");
+            }
+            else
+            {
+                ReleaseNativeCell(cell);
+            }
+        }
+
+        private static void ReleaseNativeCell(Cell cell)
+        {
             var errors = new List<Exception>();
             try
             {
@@ -627,28 +647,14 @@ namespace MUI.UGUI
                 errors.Add(error);
             }
 
-            try
-            {
-                if (cell.Element != null)
-                {
-                    cell.Element.Dispose();
-                }
-            }
-            catch (Exception error)
-            {
-                errors.Add(error);
-            }
-            finally
-            {
-                if (cell.Root != null)
-                {
-                    Destroy(cell.Root.gameObject);
-                }
-            }
-
             if (errors.Count != 0)
             {
                 throw new AggregateException("Virtual list cell cleanup failed.", errors);
+            }
+
+            if (cell.Root != null)
+            {
+                Destroy(cell.Root.gameObject);
             }
         }
 

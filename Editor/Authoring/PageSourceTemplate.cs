@@ -7,7 +7,8 @@ namespace MUI.Editor
     internal enum PagePreset
     {
         FullScreen,
-        Popup
+        Popup,
+        Notice
     }
 
     internal static class PageSourceTemplate
@@ -55,6 +56,12 @@ namespace MUI.Editor
 
         internal static string Policy(PagePreset preset)
         {
+            if (preset == PagePreset.Notice)
+            {
+                return "new global::MUI.Navigation.RoutePolicy(layer: 200, enterHistory: false, " +
+                    "coverage: global::MUI.Navigation.CoveragePolicy.None, takesFocus: false, " +
+                    "backBehavior: global::MUI.Navigation.BackBehavior.Ignore)";
+            }
             return preset == PagePreset.Popup
                 ? "new global::MUI.Navigation.RoutePolicy(layer: 100, coverage: global::MUI.Navigation.CoveragePolicy.BlockInput, modal: true)"
                 : "new global::MUI.Navigation.RoutePolicy(coverage: global::MUI.Navigation.CoveragePolicy.Hide)";
@@ -107,12 +114,13 @@ namespace MUI.Editor
             var titleContract = typeof(ITextElement).IsAssignableFrom(titleElementType)
                 ? typeof(ITextElement) : titleElementType;
             var titleTypeName = "global::@" + titleContract.FullName.Replace(".", ".@");
-            if (string.IsNullOrWhiteSpace(titleElementName) || string.IsNullOrWhiteSpace(closeElementName))
+            if (string.IsNullOrWhiteSpace(titleElementName) ||
+                preset != PagePreset.Notice && string.IsNullOrWhiteSpace(closeElementName))
             {
                 throw new ArgumentException("页面骨架需要标题和关闭按钮的 Element 名称。");
             }
             var titleName = StringLiteral(titleElementName);
-            var closeName = StringLiteral(closeElementName);
+            var closeName = preset == PagePreset.Notice ? null : StringLiteral(closeElementName);
             var escapedNamespace = "@" + ns.Replace(".", ".@");
             string Wrap(params string[] lines)
             {
@@ -131,7 +139,8 @@ namespace MUI.Editor
             routeDeclaration += ")]";
 
             var files = new Dictionary<string, string>(StringComparer.Ordinal);
-            files.Add(name + "ViewModel.cs", Wrap(
+            var modelLines = new List<string>
+            {
                 "    /// <summary>页面表现状态，通过生成绑定连接到预制控件。</summary>",
                 $"    [global::MUI.ViewContract(\"{name}View\")]",
                 routeDeclaration,
@@ -141,17 +150,25 @@ namespace MUI.Editor
                 "        [global::MUI.ObservableProperty]",
                 $"        [global::MUI.Bind({titleName}, nameof({titleTypeName}.Content),",
                 $"            ElementType = typeof({titleTypeName}))]",
-                $"        private string title = \"{name}\";",
-                "",
-                "        /// <summary>请求关闭本次激活，不等待自身命令清理。</summary>",
-                "        [global::MUI.Command]",
-                $"        [global::MUI.BindCommand({closeName}, nameof(global::MUI.UGUI.ButtonElement.Clicked),",
-                "            ElementType = typeof(global::MUI.UGUI.ButtonElement))]",
-                "        private void Close(global::MUI.CommandContext context)",
-                "        {",
-                "            context.RequestClose();",
-                "        }",
-                "    }"));
+                $"        private string title = \"{name}\";"
+            };
+            if (preset != PagePreset.Notice)
+            {
+                modelLines.AddRange(new[]
+                {
+                    "",
+                    "        /// <summary>请求关闭本次激活，不等待自身命令清理。</summary>",
+                    "        [global::MUI.Command]",
+                    $"        [global::MUI.BindCommand({closeName}, nameof(global::MUI.UGUI.ButtonElement.Clicked),",
+                    "            ElementType = typeof(global::MUI.UGUI.ButtonElement))]",
+                    "        private void Close(global::MUI.CommandContext context)",
+                    "        {",
+                    "            context.RequestClose();",
+                    "        }"
+                });
+            }
+            modelLines.Add("    }");
+            files.Add(name + "ViewModel.cs", Wrap(modelLines.ToArray()));
 
             if (typed)
             {

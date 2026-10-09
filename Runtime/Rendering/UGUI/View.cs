@@ -8,7 +8,7 @@ namespace MUI.UGUI
 {
     [DisallowMultipleComponent]
     [RequireComponent(typeof(CanvasGroup))]
-    public sealed partial class View : MonoBehaviour, IOrderedView, IChildViewHost, IModalView, IInputGestureView, IFocusView, IVisibilityView, IChildTickHost, IEnterTransitionView, IExitTransitionView, ICacheableView, IDisposable
+    public sealed partial class View : MonoBehaviour, IOrderedView, IChildViewHost, IModalView, IInputGestureView, IFocusView, IVisibilityView, IChildTickHost, IEnterTransitionView, IExitTransitionView, ICacheableView, IDisposable, IAsyncDisposable, ICleanupResponsibilitySource
     {
         private InputGate inputGate;
         private bool lastInputEnabled;
@@ -16,13 +16,16 @@ namespace MUI.UGUI
         private ElementIndex index;
         private CanvasGroup group;
         private bool disposed;
+        private bool nativeDestroyed;
         private bool hostVisible;
         private bool hostInteractable;
         private bool localVisible = true;
         private bool localInteractable = true;
         private ChildViewScope childViews;
+        private LifetimeScope activeActivation;
         private CancellationToken childActivationToken;
         private bool configuringCreation;
+        private bool initializing;
 
         public event Action InputStateChanged;
 
@@ -44,7 +47,7 @@ namespace MUI.UGUI
             get
             {
                 UnityMainThread.Require();
-                return this != null && !disposed && (index == null || group != null);
+                return this != null && !disposed && !nativeDestroyed && (index == null || group != null);
             }
         }
 
@@ -132,6 +135,7 @@ namespace MUI.UGUI
             // 在改变激活状态前验证模式；控件仅借用配置，收到 Source 写入时才取得资源。
             InvalidateInputGestures();
             ResetFocusState();
+            activeActivation = activation;
             var resourceContext = CreateResourceContext(activation);
             BeginResourceContext(activation, resourceContext);
 
@@ -169,24 +173,29 @@ namespace MUI.UGUI
             {
                 return;
             }
-
-            if (inputGate == null)
+            if (initializing)
             {
-                inputGate = new InputGate();
+                throw new InvalidOperationException("Cannot initialize a View from its own initialization callback.");
             }
 
-            inputGate.Changed -= ApplyGates;
-            inputGate.Changed += ApplyGates;
-            group = GetComponent<CanvasGroup>();
-            if (group == null)
-            {
-                throw new InvalidOperationException("View requires a CanvasGroup.");
-            }
-
-            ApplyGates();
-            var candidate = new ElementIndex();
+            initializing = true;
             try
             {
+                if (inputGate == null)
+                {
+                    inputGate = new InputGate();
+                }
+
+                inputGate.Changed -= ApplyGates;
+                inputGate.Changed += ApplyGates;
+                group = GetComponent<CanvasGroup>();
+                if (group == null)
+                {
+                    throw new InvalidOperationException("View requires a CanvasGroup.");
+                }
+
+                ApplyGates();
+                var candidate = new ElementIndex();
                 Collect(transform, candidate, true);
                 foreach (var selectable in GetComponentsInChildren<UnityEngine.UI.Selectable>(true))
                 {
@@ -196,6 +205,7 @@ namespace MUI.UGUI
                     }
                 }
 
+                RequireAlive();
                 index = candidate;
             }
             catch (Exception failure)
@@ -210,6 +220,10 @@ namespace MUI.UGUI
                 }
 
                 throw;
+            }
+            finally
+            {
+                initializing = false;
             }
         }
 
@@ -241,6 +255,7 @@ namespace MUI.UGUI
                 }
 
                 elements.Add(element);
+                GetCleanupScope().Own(element);
                 element.Initialize();
                 candidate.Add(element);
             }
@@ -306,19 +321,24 @@ namespace MUI.UGUI
             if (lastInputEnabled != effective)
             {
                 lastInputEnabled = effective;
-                var handlers = InputStateChanged;
-                if (handlers != null)
+                NotifyInputStateChanged();
+            }
+        }
+
+        private void NotifyInputStateChanged()
+        {
+            var handlers = InputStateChanged;
+            if (handlers != null)
+            {
+                foreach (Action handler in handlers.GetInvocationList())
                 {
-                    foreach (Action handler in handlers.GetInvocationList())
+                    try
                     {
-                        try
-                        {
-                            handler();
-                        }
-                        catch (Exception error)
-                        {
-                            UIErrors.Report(error);
-                        }
+                        handler();
+                    }
+                    catch (Exception error)
+                    {
+                        UIErrors.Report(error);
                     }
                 }
             }
@@ -329,114 +349,6 @@ namespace MUI.UGUI
             if (!IsAlive)
             {
                 throw new ObjectDisposedException(nameof(View));
-            }
-        }
-
-        public void Dispose()
-        {
-            UnityMainThread.Require();
-            if (disposed)
-            {
-                return;
-            }
-
-            disposed = true;
-            InvalidateInputGestures();
-            activeResourceContext = null;
-            resourceLoader = null;
-            var errors = new List<Exception>();
-            try
-            {
-                ClearLocalBackHandlers();
-            }
-            catch (Exception error)
-            {
-                errors.Add(error);
-            }
-
-            try
-            {
-                EndVisualRetention();
-            }
-            catch (Exception error)
-            {
-                errors.Add(error);
-            }
-
-            if (inputGate != null)
-            {
-                try
-                {
-                    inputGate.Changed -= ApplyGates;
-                    inputGate.Dispose();
-                }
-                catch (Exception error)
-                {
-                    errors.Add(error);
-                }
-            }
-
-            try
-            {
-                ReleaseModalBarrier();
-            }
-            catch (Exception error)
-            {
-                errors.Add(error);
-            }
-            if (childViews != null)
-            {
-                try
-                {
-                    childViews.Cancel();
-                }
-                catch (Exception error)
-                {
-                    errors.Add(error);
-                }
-                finally
-                {
-                    childViews.TickActivityChanged -= NotifyChildTicks;
-                }
-            }
-
-            ChildTickActivityChanged = null;
-            try
-            {
-                ApplyGates();
-            }
-            catch (Exception error)
-            {
-                errors.Add(error);
-            }
-
-            for (var i = elements.Count - 1; i >= 0; --i)
-            {
-                var element = elements[i];
-                if (element == null)
-                {
-                    continue;
-                }
-
-                try
-                {
-                    element.Dispose();
-                }
-                catch (Exception error)
-                {
-                    errors.Add(error);
-                }
-            }
-
-            InputStateChanged = null;
-            InputGesturesInvalidated = null;
-            nativeGestures.Clear();
-            ResetFocusState();
-            elements.Clear();
-            index = null;
-            if (errors.Count > 0)
-            {
-                throw new AggregateException("View cleanup failed.", errors);
             }
         }
 
@@ -460,14 +372,15 @@ namespace MUI.UGUI
 
         private void OnDestroy()
         {
-            try
+            nativeDestroyed = true;
+            if (cleanupResponsibility != null &&
+                cleanupResponsibility.CaptureSnapshot().State == CleanupResponsibilityState.Completed)
             {
-                Dispose();
+                return;
             }
-            catch (Exception error)
-            {
-                UnityErrorLogging.Report(error);
-            }
+            // 先让拥有者撤销绑定与输入身份，再启动最终责任，避免关闭回调等待正在通知的同一责任。
+            NotifyInputStateChanged();
+            _ = ObserveNativeCleanupAsync(DisposeAsync());
         }
     }
 }

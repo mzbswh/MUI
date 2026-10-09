@@ -8,6 +8,5 @@ namespace MUI.Navigation
             Observe(cleanup);
             return CleanupState(cleanup);
         }
-
     }
 }

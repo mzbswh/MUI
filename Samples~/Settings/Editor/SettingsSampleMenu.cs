@@ -21,7 +21,8 @@ namespace MUI.Samples.Settings.Editor
                 return;
             }
 
-            var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+            // 保留模板相机，避免 Game 视图的无相机提示遮住 Overlay UI。
+            var scene = EditorSceneManager.NewScene(NewSceneSetup.DefaultGameObjects, NewSceneMode.Single);
             var sample = new GameObject("SettingsDemo", typeof(SettingsDemo)).GetComponent<SettingsDemo>();
             sample.AutomaticWalkthrough = Application.isBatchMode;
             if (!AssetDatabase.IsValidFolder("Assets/MUI Samples"))

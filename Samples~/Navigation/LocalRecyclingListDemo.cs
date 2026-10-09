@@ -14,6 +14,7 @@ namespace MUI.Samples.Navigation
         private readonly LifetimeScope lifetime = new LifetimeScope();
         private ObservableList<ViewModel> rewards;
         private int nextReward;
+        private Task releaseTask;
 
         /// <summary>场景启动前选择五槽挂点演示；手工配置的场景应直接提供 SlotListElement 引用。</summary>
         public void ConfigureFixedSlots()
@@ -135,10 +136,15 @@ namespace MUI.Samples.Navigation
 
         private async void OnDestroy() => await ReleaseAsync();
 
+        // 停止播放时原生对象的销毁顺序不确定；先让拥有者启动清理，View 兜底才能观察同一任务。
+        private void OnApplicationQuit() => _ = ReleaseAsync();
+
         [ContextMenu("关闭奖励页并输出资源计数")]
         public async void CloseExample() => await ReleaseAsync();
 
-        private async Task ReleaseAsync()
+        private Task ReleaseAsync() => releaseTask ?? (releaseTask = ReleaseCoreAsync());
+
+        private async Task ReleaseCoreAsync()
         {
             try
             {

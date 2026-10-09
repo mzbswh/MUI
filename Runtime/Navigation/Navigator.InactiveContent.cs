@@ -56,7 +56,7 @@ namespace MUI.Navigation
                 Task cache = null;
                 try
                 {
-                    preloads = ClearInactivePreloadsAsync();
+                    preloads = ClearPreloadSnapshotAsync();
                 }
                 catch (Exception error)
                 {
@@ -104,10 +104,11 @@ namespace MUI.Navigation
             }
         }
 
-        private async Task ClearInactivePreloadsAsync()
+        private async Task ClearPreloadSnapshotAsync()
         {
             var errors = new List<Exception>();
-            var pending = new HashSet<Task>();
+            // 接纳时捕获已移出目录的批次；取消回调可能使其内联结束，也不能丢失这次观察。
+            var pending = new HashSet<Task>(preloadClearings);
             try
             {
                 pending.Add(StartPreloadClear());
@@ -117,8 +118,6 @@ namespace MUI.Navigation
                 errors.Add(error);
             }
 
-            // 包含此前已经移出目录的预加载批次，等待其持有权归还。
-            pending.UnionWith(preloadClearings);
             foreach (var cleanup in pending)
             {
                 try

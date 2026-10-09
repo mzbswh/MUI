@@ -31,6 +31,5 @@ namespace MUI.Navigation
         {
             get; set;
         }
-
     }
 }

@@ -254,14 +254,16 @@ namespace MUI.UGUI
                     UIErrors.AttachContext(failure, UIErrors.CurrentContext);
                     using (BeginResourcePhase("Rollback"))
                     {
+                        var rollback = new CleanupResponsibility(() => new ValueTask(failure.CleanupCompletion),
+                            "ResourceSlot<" + typeof(T).Name + ">.Rollback");
                         try
                         {
-                            await failure.CleanupCompletion;
+                            await rollback.DisposeAsync();
                         }
                         catch (Exception cleanup)
                         {
                             UIErrors.AttachContext(cleanup, UIErrors.CurrentContext);
-                            RecordReleaseError(cleanup);
+                            RecordReleaseError(cleanup, responsibility: rollback);
                             throw new AggregateException("资源槽加载与后端回滚均失败。", failure, cleanup);
                         }
                     }
@@ -335,15 +337,15 @@ namespace MUI.UGUI
             {
                 try
                 {
-                    await CleanupRegistry.ReleaseAsync(ownedResource, "ResourceSlot<" + typeof(T).Name + ">");
+                    await CleanupRegistry.ReleaseAsync(ownedResource, "ResourceSlot<" + typeof(T).Name + ">", lifetime);
                 }
                 catch (Exception error)
                 {
                     UIErrors.AttachContext(error, UIErrors.CurrentContext);
                     // 释放失败不能撤销已提交赋值，也不能掩盖原加载错误，
                     // 该错误同时保留到最终清理时报告。
-                    RecordReleaseError(error, responsibility: CleanupRegistry.GetResponsibility(ownedResource,
-                        "ResourceSlot<" + typeof(T).Name + ">"));
+                    // 公共归还入口已保存同一责任；诊断不再次访问提供方属性或重复登记未知失败。
+                    RecordReleaseError(error, false);
                 }
             }
         }

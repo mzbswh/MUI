@@ -37,13 +37,18 @@ namespace MUI.UGUI
         {
             if (Slot != null)
             {
+                var recovering = Slot.IsCleanupConfirmed;
                 try
                 {
                     await Slot.DisposeAsync();
                 }
-                catch (Exception) when (Slot.IsCleanupConfirmed)
+                catch (Exception)
                 {
-                    // 子责任均已确认后，外层只执行尚未完成的解除持有；不改写槽的首次失败。
+                    if (!recovering)
+                    {
+                        throw;
+                    }
+                    // 进入尝试前已确认的子责任只保留首次错误；外层完成剩余解除持有。
                 }
             }
 

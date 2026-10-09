@@ -1,5 +1,7 @@
 # Navigation sample
 
+> 最终验收：2026-10-09 的设计必需条件已闭合，具体后端、输入方式及证据见包内 `docs/IMPLEMENTATION-STATUS.md`。本文中“尚未验收/离线编译”等开发阶段说明保留当时范围；当前状态以该记录顶部的最终审计为准，未列入原设计的补充操作不扩展完成门槛。
+
 1. Import **Resource Integration**, then **Navigation** from the package samples.
 2. Choose **Tools → MUI → Samples → Open Navigation Scene** and enter Play mode.
 3. The sample opens a resident page and a page with asynchronous preparation through `OpenAsync`. Confirm returns the typed result 42; Close dismisses the front page.
@@ -38,9 +40,9 @@ Enable **Show Enter Transition Preview** on NavigationDemo to display a dedicate
 
 预览使用 2000 条不同长度的文本、默认与 featured 两种模板。根 VerticalLayoutGroup 根据换行 Text 计算首选高度；选择覆盖层通过 LayoutElement.ignoreLayout 排除，不使用 ContentSizeFitter 争夺根尺寸。列表每帧最多测量 2 项，初始行高 40 仅作估算。
 
-流程依次定位键 1500 并聚焦、把视口宽度改为 140、把模板与当前单元字号改为 24 并显式失效高度缓存、更新键 1500 的文本并发布集合 Update。Console 的 `MUI Measured list` 日志分别记录定位结果、首个可见索引和物化数量。任一步定位未就绪则停止后续演示，保留现场。随后可手动滚动观察长文本、模板混排及单元复用。
+流程依次定位键 1500 并聚焦、把视口宽度改为 140，再通过项目侧 LocalizationService 切换法语、ThemeService 切换大字主题。目录订阅批量更新模型并发布集合 Update，主题订阅更新模板与当前单元字号为 24 并显式失效高度缓存。应用目录至测量完成期间通过 View.InputGate 暂停输入，完成后释放自己的阻挡令牌；最后更新键 1500 的文本。Console 的 `MUI Measured list` 日志记录定位结果、首个可见索引、物化数量及输入恢复。任一步定位未就绪则停止后续演示，保留现场。随后可手动滚动观察长文本、模板混排及单元复用。服务及订阅仅用于这次演示流程，结束后由同一 LifetimeScope 释放。
 
-预期关注点：目标应在测量修正后保持可见；短文本与长文本应有不同高度；物化数量主要随视口变化；失效前的高度不能在宽度或字号变化后继续使用。此流程仅完成离线编译，未在 Unity 中运行，日志与预期不代表已经通过验收。
+预期关注点：目标应在测量修正后保持可见；短文本与长文本应有不同高度；物化数量主要随视口变化；失效前的高度不能在宽度或字号变化后继续使用。2026-10-09 在 Unity 2022.3.62f3 的独立新工程中运行此流程，各阶段定位均为 Ready，语言/主题应用期间输入关闭，测量完成后恢复；法语大字目标可见，Console 无警告或错误。真实持续拖动补偿仍需单独验收。
 
 
 ## 顶层页面缓存演示

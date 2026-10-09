@@ -40,12 +40,18 @@ namespace MUI
         /// <summary>指定宿主当前在途或失败责任的总数，不受诊断快照截断影响。</summary>
         public static int GetUnconfirmedCount(Guid hostId)
         {
+            return GetUnconfirmedCount(hostId, Guid.Empty);
+        }
+
+        /// <summary>容器等待其余依赖时排除自身在途责任，避免将自己的清理误认为依赖。</summary>
+        internal static int GetUnconfirmedCount(Guid hostId, Guid excludedResponsibility)
+        {
             lock (gate)
             {
                 var count = 0;
                 foreach (var responsibility in responsibilities.Values)
                 {
-                    if (responsibility.HostId == hostId)
+                    if (responsibility.HostId == hostId && responsibility.Id != excludedResponsibility)
                     {
                         ++count;
                     }
@@ -156,8 +162,9 @@ namespace MUI
         /// <summary>
         /// 所属操作收尾时归还候选，并把未确认责任登记到其激活作用域。
         /// 责任属性失效也继续执行一次真实清理；不根据项目状态查询推断归还成功。
+        /// 必须在所属操作退出前等待此调用；不会接管已结束作用域中的新工作或重试未知回调。
         /// </summary>
-        internal static async ValueTask ReleaseAsync(IAsyncDisposable resource, string owner, LifetimeScope lifetime)
+        public static async ValueTask ReleaseAsync(IAsyncDisposable resource, string owner, LifetimeScope lifetime)
         {
             if (resource == null)
             {

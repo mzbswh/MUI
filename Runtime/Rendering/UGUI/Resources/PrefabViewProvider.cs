@@ -8,7 +8,7 @@ using UnityEngine;
 namespace MUI.UGUI
 {
     /// <summary>常驻 Prefab 目录；远程及 Addressables 加载使用独立提供方适配器。</summary>
-    public sealed class PrefabViewProvider : IPreloadViewProvider, IDisposable
+    public sealed class PrefabViewProvider : IPreloadViewProvider, IDisposable, IAsyncDisposable, ICleanupResponsibilitySource
     {
         private readonly Dictionary<ViewResource, GameObject> prefabs = new Dictionary<ViewResource, GameObject>();
         private readonly Transform parent;
@@ -62,6 +62,12 @@ namespace MUI.UGUI
                 }
 
                 staging = createdStaging;
+                CleanupResponsibility = PrefabViewFactory.CreateStagingCleanup(staging, "PrefabViewProvider.Staging", () =>
+                {
+                    disposed = true;
+                    this.prefabs.Clear();
+                    this.configureView = null;
+                });
             }
             catch (Exception failure)
             {
@@ -79,6 +85,12 @@ namespace MUI.UGUI
 
                 throw;
             }
+        }
+
+        /// <summary>提供方最终责任；未确认回滚占用挂载根时保留根节点，不销毁仍被使用的实例。</summary>
+        public CleanupResponsibility CleanupResponsibility
+        {
+            get;
         }
 
         private GameObject GetPrefab(ViewResource resource)
@@ -128,19 +140,31 @@ namespace MUI.UGUI
 
         public void Dispose()
         {
-            UnityMainThread.Require();
-            if (disposed)
+            var cleanup = DisposeAsync();
+            if (cleanup.IsCompleted)
             {
+                cleanup.GetAwaiter().GetResult();
                 return;
             }
+            // 保留原生同步兜底的启动语义；需要确认实际销毁时使用 DisposeAsync。
+            _ = ObserveCleanupAsync(cleanup.AsTask());
+        }
 
-            disposed = true;
-            prefabs.Clear();
-            // 提供方可能仍被外部持有，结束后不再保留项目配置回调。
-            configureView = null;
-            if (staging != null)
+        public ValueTask DisposeAsync()
+        {
+            UnityMainThread.Require();
+            return CleanupResponsibility.DisposeAsync();
+        }
+
+        private static async Task ObserveCleanupAsync(Task cleanup)
+        {
+            try
             {
-                UnityEngine.Object.Destroy(staging);
+                await cleanup;
+            }
+            catch (Exception error)
+            {
+                UIErrors.Report(error);
             }
         }
     }

@@ -52,6 +52,15 @@ namespace MUI.Navigation
             }
         }
 
+        /// <summary>提供方退出只等待当前持有权；历史失败不阻止已确认资源的剩余清理。</summary>
+        internal bool HasOutstandingProviderUse(Guid providerCleanup)
+        {
+            AssertThread();
+            return !IsShutdown || entries.Count != 0 || pending != 0 || cachedContents.Count != 0 ||
+                retiringCachedViews != 0 || PreloadReservationCount != 0 || PendingCleanupCount != 0 ||
+                CleanupRegistry.GetUnconfirmedCount(host, providerCleanup) != 0;
+        }
+
         private ValueTask<CloseOutcome> WaitForCleanupUntracedAsync(ViewHandle handle, CancellationToken cancellationToken = default)
         {
             AssertThread();

@@ -238,7 +238,7 @@ namespace MUI.UGUI
                 InitializeFixedSlots();
                 uiThread = Thread.CurrentThread.ManagedThreadId;
                 initialized = true;
-                OnDispose(ReleaseCells);
+                TrackCleanup(ReleaseCells, true, "RecyclingList.FinalNodes");
                 return;
             }
             if (content == null || itemTemplate == null || capacity < 1 ||
@@ -252,7 +252,7 @@ namespace MUI.UGUI
 
             uiThread = Thread.CurrentThread.ManagedThreadId;
             initialized = true;
-            OnDispose(ReleaseCells);
+            TrackCleanup(ReleaseCells, true, "RecyclingList.FinalNodes");
         }
 
         /// <summary>层级归属不能只用 IsChildOf 判断；中途的子 View 或容器拥有独立的绑定与生命周期。</summary>

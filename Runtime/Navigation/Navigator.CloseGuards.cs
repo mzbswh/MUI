@@ -47,9 +47,14 @@ namespace MUI.Navigation
                 return new ValueTask<CloseOutcome>(committed);
             }
 
-            if (instance.HasCloseStarted || instance.CloseRequest != null)
+            if (instance.HasCloseStarted)
             {
                 return BackResult(CloseStatus.AlreadyClosing);
+            }
+
+            if (instance.PendingCloseIntent.HasValue || instance.CloseRequest != null)
+            {
+                return BackResult(CloseStatus.Busy);
             }
 
             if (!instance.IsActive)
@@ -68,6 +73,12 @@ namespace MUI.Navigation
                 return instance.Closing;
             }
 
+            if (instance.PendingCloseIntent.HasValue &&
+                (instance.PendingCloseIntent != CloseRequestIntent.Dismiss || acceptResult != null))
+            {
+                return Task.FromResult(BackOutcome(CloseStatus.Busy));
+            }
+
             if (instance.CloseRequest != null)
             {
                 return instance.CloseRequest;
@@ -77,7 +88,6 @@ namespace MUI.Navigation
             {
                 return Task.FromResult(new CloseOutcome(CloseStatus.Blocked, cleanup: CleanupStatus.NotRequired));
             }
-
 
             if (ownership.HasOwners(instance.Handle) || retiringDependencies.Contains(instance.Handle))
             {
@@ -92,6 +102,7 @@ namespace MUI.Navigation
 
             var completion = new TaskCompletionSource<CloseOutcome>(TaskCreationOptions.RunContinuationsAsynchronously);
             instance.CloseRequest = completion.Task;
+            instance.PendingCloseIntent = acceptResult == null ? CloseRequestIntent.Dismiss : CloseRequestIntent.Complete;
             using (EnterCallback(instance))
             {
                 instance.CancelArgsUpdate();
@@ -121,11 +132,11 @@ namespace MUI.Navigation
 
                 // 只有守卫求值归激活周期管理；若在此操作内等待实际关闭，
                 // 会导致生命周期清理等待自身。
-                long approvedVersion = 0;
+                CloseApproval approval = default;
                 var decision = await AwaitCloseEvaluationAsync(instance,
                     token => EvaluateDecisionAsync(instance,
                         new CloseContext(instance.Handle, reason, acceptResult != null), token,
-                        version => approvedVersion = version), CancellationToken.None, completion.Task);
+                        approved => approval = approved), CancellationToken.None, completion.Task);
                 if (decision.Error != null)
                 {
                     retainCloseRequest = true;
@@ -163,7 +174,8 @@ namespace MUI.Navigation
                     {
                         outcome = new CloseOutcome(CloseStatus.InUse, cleanup: CleanupStatus.NotRequired);
                     }
-                    else if (!instance.IsActive || instance.ActivationToken.IsCancellationRequested || version != approvedVersion)
+                    else if (!instance.IsActive || instance.ActivationToken.IsCancellationRequested ||
+                        !approval.IsCurrent(instance, version))
                     {
                         outcome = new CloseOutcome(CloseStatus.Superseded, cleanup: CleanupStatus.NotRequired);
                     }
@@ -198,6 +210,7 @@ namespace MUI.Navigation
             if (!retainCloseRequest && ReferenceEquals(instance.CloseRequest, completion.Task))
             {
                 instance.CloseRequest = null;
+                instance.PendingCloseIntent = null;
             }
 
             completion.TrySetResult(outcome);
@@ -314,6 +327,7 @@ namespace MUI.Navigation
                 if (closeRequest != null && ReferenceEquals(instance.CloseRequest, closeRequest))
                 {
                     instance.CloseRequest = null;
+                    instance.PendingCloseIntent = null;
                 }
             }
         }
@@ -321,7 +335,7 @@ namespace MUI.Navigation
         private async ValueTask<CloseStatus> EvaluateDecisionAsync(ViewInstance instance,
                     CloseContext context,
                     CancellationToken token,
-                    Action<long> approve)
+                    Action<CloseApproval> approve)
         {
             var frame = new CloseEvaluation
             {
@@ -334,6 +348,7 @@ namespace MUI.Navigation
                 token.ThrowIfCancellationRequested();
                 var guard = instance.CloseGuard;
                 long version;
+                var commitVersion = instance.CommitVersion;
                 CloseDecision decision;
                 using (EnterCallback(instance))
                 {
@@ -355,7 +370,7 @@ namespace MUI.Navigation
                 }
 
                 token.ThrowIfCancellationRequested();
-                if (!instance.IsActive || evaluatedVersion != version)
+                if (!instance.IsActive || evaluatedVersion != version || instance.CommitVersion != commitVersion)
                 {
                     return CloseStatus.Superseded;
                 }
@@ -397,12 +412,12 @@ namespace MUI.Navigation
                 }
 
                 token.ThrowIfCancellationRequested();
-                if (!instance.IsActive || currentVersion != version)
+                if (!instance.IsActive || currentVersion != version || instance.CommitVersion != commitVersion)
                 {
                     return CloseStatus.Superseded;
                 }
 
-                approve(version);
+                approve(new CloseApproval(version, commitVersion));
                 return CloseStatus.Closed;
             }
             finally
@@ -410,6 +425,22 @@ namespace MUI.Navigation
                 frame.Active = false;
                 closeEvaluation.Value = frame.Parent;
             }
+        }
+
+        // 业务守卫版本与框架提交版本分别比较，参数或绑定提交不能沿用旧许可。
+        private readonly struct CloseApproval
+        {
+            private readonly long guardVersion;
+            private readonly long commitVersion;
+
+            internal CloseApproval(long guardVersion, long commitVersion)
+            {
+                this.guardVersion = guardVersion;
+                this.commitVersion = commitVersion;
+            }
+
+            internal bool IsCurrent(ViewInstance instance, long version) =>
+                version == guardVersion && instance.CommitVersion == commitVersion;
         }
 
         private readonly struct CloseEvaluationWait

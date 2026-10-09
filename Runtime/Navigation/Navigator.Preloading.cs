@@ -22,7 +22,7 @@ namespace MUI.Navigation
             get
             {
                 AssertThread();
-                return preloadReservations;
+                return preloadReservations - ConfirmedPreloadReturnCount;
             }
         }
 
@@ -55,6 +55,7 @@ namespace MUI.Navigation
             }
 
             Register(route);
+            RefreshPreloadReservations();
             RefreshPreloadProviderVersion();
             if (IsShutdown)
             {
@@ -64,7 +65,7 @@ namespace MUI.Navigation
             var batch = preloadBatch;
             if (batch.Entries.TryGetValue(route.Resource, out var existing))
             {
-                return new ValueTask<PreloadOutcome>(WaitForPreloadAsync(existing.Task, cancellationToken));
+                return new ValueTask<PreloadOutcome>(existing.ObserveAsync(existing.Join(cancellationToken), cancellationToken, true));
             }
 
             if (cancellationToken.IsCancellationRequested)
@@ -77,42 +78,51 @@ namespace MUI.Navigation
                 return PreloadResult(PreloadStatus.CapacityExceeded);
             }
 
-            var completion = new TaskCompletionSource<PreloadOutcome>(TaskCreationOptions.RunContinuationsAsynchronously);
-            batch.Entries.Add(route.Resource, completion);
+            var entry = new PreloadEntry();
+            var consumer = entry.Join(cancellationToken);
+            batch.Entries.Add(route.Resource, entry);
             ++preloadReservations;
             // 调用提供方前先登记，确保 Clear/Shutdown 等待迟到的持有凭证。
-            _ = batch.Scope.RunAsync(token => LoadPreloadAsync(batch, preloader, route.Resource, token, cancellationToken, completion));
-            return cancellationToken.CanBeCanceled
-                ? new ValueTask<PreloadOutcome>(WaitForOwnedPreloadAsync(completion.Task, cancellationToken))
-                : new ValueTask<PreloadOutcome>(completion.Task);
+            _ = batch.Scope.RunAsync(token => LoadPreloadAsync(batch, preloader, route.Resource, token, entry));
+            return new ValueTask<PreloadOutcome>(entry.ObserveAsync(consumer, cancellationToken, false));
         }
 
         private async ValueTask<bool> LoadPreloadAsync(PreloadBatch batch,
                     IPreloadViewProvider preloader,
                     ViewResource resource,
                     CancellationToken ownerToken,
-                    CancellationToken callerToken,
-                    TaskCompletionSource<PreloadOutcome> completion)
+                    PreloadEntry entry)
         {
             IAcquiredPreload ownedResource = null;
+            PreloadReservation reservation = null;
             var adopted = false;
             var cleanupFailed = false;
             var versionChanged = false;
-            using (var linked = CancellationTokenSource.CreateLinkedTokenSource(ownerToken, callerToken, shutdown.Token))
+            using (var linked = CancellationTokenSource.CreateLinkedTokenSource(ownerToken, entry.Token, shutdown.Token))
             {
                 try
                 {
+                    linked.Token.ThrowIfCancellationRequested();
                     using (EnterCallback(null))
                     {
                         ownedResource = await preloader.PreloadAsync(resource, linked.Token);
                     }
 
-                    AssertThread();
                     if (ownedResource == null)
                     {
                         throw new InvalidOperationException("Provider returned no preload acquisition.");
                     }
 
+                    using (EnterCallback(null))
+                    {
+                        reservation = new PreloadReservation(this, ownedResource, "Navigator.Preload");
+                    }
+                    preloadReturns.Add(reservation);
+                    AssertThread();
+                    if (reservation.RegistrationFailure != null)
+                    {
+                        System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(reservation.RegistrationFailure).Throw();
+                    }
                     linked.Token.ThrowIfCancellationRequested();
                     if (!ReferenceEquals(preloadBatch, batch))
                     {
@@ -130,53 +140,99 @@ namespace MUI.Navigation
                         throw new OperationCanceledException("Preload provider content changed.");
                     }
 
-                    var retainedResource = ownedResource;
-                    batch.Scope.OnDisposeAsync(() => ReleasePreloadResourceAsync(retainedResource));
+                    if (!entry.TryRetain(() => batch.Scope.Own(reservation)))
+                    {
+                        throw new OperationCanceledException("All preload requests were cancelled before residency commit.");
+                    }
                     adopted = true;
                     ownedResource = null;
-                    completion.TrySetResult(new PreloadOutcome(PreloadStatus.Ready));
                 }
                 catch (Exception failure)
                 {
+                    var pendingRollback = failure as ResourceLoadException;
+                    CleanupResponsibility cancellationDependency = null;
+                    var cancellationFailure = await entry.EndAdmission();
+                    if (cancellationFailure != null)
+                    {
+                        // 取消回调失败也不能据资源消失宣称整个准备责任已确认。
+                        cancellationDependency = new CleanupResponsibility(
+                            () => new ValueTask(Task.FromException(cancellationFailure)), "Navigator.PreloadCancellation");
+                        try
+                        {
+                            await cancellationDependency.DisposeAsync();
+                        }
+                        catch (Exception)
+                        {
+                            // 已由稳定责任保存同一取消错误，继续独立凭证收尾。
+                        }
+                        cleanupFailed = true;
+                        RecordPreloadCleanupFailure(cancellationFailure);
+                        batch.Scope.RecordCleanupFailure(cancellationFailure, cancellationDependency);
+                        reservation?.RetainCancellationDependency(cancellationDependency);
+                        failure = new AggregateException("Preload cancellation failed.", failure, cancellationFailure);
+                    }
                     if (ownedResource != null)
                     {
                         try
                         {
                             using (EnterCallback(null))
                             {
-                                await CleanupRegistry.ReleaseAsync(ownedResource, "Navigator.LatePreload");
+                                await reservation.DisposeAsync();
                             }
                         }
                         catch (Exception cleanup)
                         {
                             cleanupFailed = true;
                             RecordPreloadCleanupFailure(cleanup);
+                            batch.Scope.RecordCleanupFailure(cleanup, reservation.CleanupResponsibility);
                             failure = new AggregateException("Preload and late cleanup failed.", failure, cleanup);
                         }
                     }
-                    else if (failure is ResourceLoadException pending)
+                    else if (pendingRollback != null)
                     {
+                        // 没有交付凭证的后端回滚也保留一次责任；失败任务不具备安全重试声明。
+                        var rollback = new CleanupResponsibility(async () => await pendingRollback.CleanupCompletion,
+                            "Navigator.PreloadRollback");
+                        reservation = new PreloadReservation(this, rollback, "Navigator.PreloadRollback");
+                        reservation.RetainCancellationDependency(cancellationDependency);
+                        preloadReturns.Add(reservation);
                         try
                         {
-                            await pending.CleanupCompletion;
+                            await reservation.DisposeAsync();
                         }
                         catch (Exception cleanup)
                         {
                             cleanupFailed = true;
                             RecordPreloadCleanupFailure(cleanup);
+                            batch.Scope.RecordCleanupFailure(cleanup, reservation.CleanupResponsibility);
                             failure = new AggregateException("Preload and resource rollback failed.", failure, cleanup);
                         }
                     }
 
+                    if (reservation == null && cancellationDependency != null)
+                    {
+                        reservation = new PreloadReservation(this, cancellationDependency, "Navigator.PreloadCancellation");
+                        preloadReturns.Add(reservation);
+                        try
+                        {
+                            await reservation.DisposeAsync();
+                        }
+                        catch (Exception)
+                        {
+                            // 没有交付凭证时，这次预留仍由未知取消责任持有。
+                        }
+                    }
+
                     var status = cleanupFailed ? PreloadStatus.Failed : IsShutdown ? PreloadStatus.HostClosed : batch.Scope.IsEnded || versionChanged ? PreloadStatus.Superseded : failure is OperationCanceledException ? PreloadStatus.Cancelled : PreloadStatus.Failed;
-                    completion.TrySetResult(new PreloadOutcome(status, status == PreloadStatus.Failed ? failure : null));
+                    entry.Complete(new PreloadOutcome(status, status == PreloadStatus.Failed ? failure : null));
                 }
                 finally
                 {
+                    entry.Dispose();
                     if (!adopted)
                     {
                         batch.Entries.Remove(resource);
-                        if (!cleanupFailed)
+                        if (reservation == null && !cleanupFailed)
                         {
                             --preloadReservations;
                         }
@@ -200,7 +256,7 @@ namespace MUI.Navigation
                 return ShutdownAsync();
             }
 
-            return new ValueTask(StartPreloadClear());
+            return new ValueTask(ClearPreloadSnapshotAsync());
         }
 
         /// <summary>访问预加载或维护时观察资源代际，不复用后端已失效的 Ready 记录。</summary>
@@ -297,14 +353,9 @@ namespace MUI.Navigation
             }
         }
 
-        private async ValueTask ReleasePreloadResourceAsync(IAcquiredPreload ownedResource)
-        {
-            await CleanupRegistry.ReleaseAsync(ownedResource, "Navigator.Preload");
-            --preloadReservations;
-        }
-
         private void RecordPreloadCleanupFailure(Exception error)
         {
+            hasCleanupFailure = true;
             if (preloadCleanupErrors.Count < terminalCapacity)
             {
                 preloadCleanupErrors.Add(error);
@@ -363,37 +414,12 @@ namespace MUI.Navigation
             }
         }
 
-        private static async Task<PreloadOutcome> WaitForOwnedPreloadAsync(Task<PreloadOutcome> task, CancellationToken token)
-        {
-            try
-            {
-                return await AsyncWait.WithCancellation(task, token);
-            }
-            catch (OperationCanceledException)
-            {
-                return new PreloadOutcome(PreloadStatus.Cancelled);
-            }
-        }
-
-        private static async Task<PreloadOutcome> WaitForPreloadAsync(Task<PreloadOutcome> task, CancellationToken token)
-        {
-            try
-            {
-                var result = await AsyncWait.WithCancellation(task, token);
-                return new PreloadOutcome(result.Status, result.Error, reusedReservation: true);
-            }
-            catch (OperationCanceledException)
-            {
-                return new PreloadOutcome(PreloadStatus.WaitCancelled, reusedReservation: true);
-            }
-        }
-
         private static ValueTask<PreloadOutcome> PreloadResult(PreloadStatus status) => new ValueTask<PreloadOutcome>(new PreloadOutcome(status));
 
         private sealed class PreloadBatch
         {
             public readonly LifetimeScope Scope = new LifetimeScope();
-            public readonly Dictionary<ViewResource, TaskCompletionSource<PreloadOutcome>> Entries = new Dictionary<ViewResource, TaskCompletionSource<PreloadOutcome>>();
+            public readonly Dictionary<ViewResource, PreloadEntry> Entries = new Dictionary<ViewResource, PreloadEntry>();
             public object ProviderVersion;
         }
     }

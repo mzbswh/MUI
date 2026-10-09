@@ -67,11 +67,10 @@ namespace MUI.Samples.ResourceIntegration
                     {
                         try
                         {
-                            await ownedResource.DisposeAsync();
+                            await CleanupRegistry.ReleaseAsync(ownedResource, "LifetimeScope.LateResource", lifetime);
                         }
                         catch (Exception cleanupFailure)
                         {
-                            lifetime.RecordCleanupFailure(cleanupFailure);
                             throw new AggregateException("Resource load and late-result cleanup failed.", failure, cleanupFailure);
                         }
                     }
@@ -79,11 +78,10 @@ namespace MUI.Samples.ResourceIntegration
                     {
                         try
                         {
-                            await AwaitCleanupAsync(failure);
+                            await AwaitCleanupAsync(failure, lifetime);
                         }
                         catch (Exception cleanupFailure)
                         {
-                            lifetime.RecordCleanupFailure(cleanupFailure);
                             throw new AggregateException("资源加载与后端回滚均失败。", failure, cleanupFailure);
                         }
                     }
@@ -105,11 +103,13 @@ namespace MUI.Samples.ResourceIntegration
         }
 
         // 后端回滚归加载操作负责；未取得凭证时仍需等待其清理完成。
-        private static async ValueTask AwaitCleanupAsync(Exception failure)
+        private static async ValueTask AwaitCleanupAsync(Exception failure, LifetimeScope lifetime)
         {
             if (failure is ResourceLoadException pending)
             {
-                await pending.CleanupCompletion;
+                var rollback = new CleanupResponsibility(() => new ValueTask(pending.CleanupCompletion),
+                    "LifetimeScope.ResourceRollback");
+                await CleanupRegistry.ReleaseAsync(rollback, rollback.Owner, lifetime);
             }
         }
 

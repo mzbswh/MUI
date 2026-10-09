@@ -18,7 +18,7 @@ namespace MUI.Navigation
         LifetimeScope IArgsUpdateHost<TArgs>.ArgsLifetime => activationLifetime;
 
         bool IArgsUpdateHost<TArgs>.CanUpdateArgs => IsActive && ActivationCommitted &&
-                    !EnterPending && !HasCloseStarted && CloseRequest == null && !IsRebinding;
+                    !EnterPending && !HasCloseStarted && !IsRebinding;
 
         internal ValueTask<ArgsUpdateOutcome> UpdateArgsAsync(TArgs args, CancellationToken token,
             Func<CancellationToken, ValueTask> beforeCommit = null, Action afterCommit = null)

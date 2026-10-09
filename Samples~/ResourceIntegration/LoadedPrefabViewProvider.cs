@@ -20,6 +20,7 @@ namespace MUI.Samples.ResourceIntegration
         private readonly Transform parent;
         private Action<View> configureView;
         private readonly GameObject staging;
+        private readonly CleanupResponsibility stagingCleanup;
         private readonly int thread = Thread.CurrentThread.ManagedThreadId;
         private readonly int loadCapacity;
         private readonly List<Entry> resident = new List<Entry>();
@@ -53,6 +54,7 @@ namespace MUI.Samples.ResourceIntegration
             staging = new GameObject("MUI Loaded Prefab Staging", typeof(RectTransform));
             staging.SetActive(false);
             staging.transform.SetParent(parent, false);
+            stagingCleanup = PrefabViewFactory.CreateStagingCleanup(staging, "LoadedPrefabViewProvider.Staging");
         }
 
         /// <summary>读取不加载资源；提供方关闭后仍可读，以便持有者识别旧缓存已失效。</summary>
@@ -183,13 +185,14 @@ namespace MUI.Samples.ResourceIntegration
             }
             catch (Exception failure)
             {
+                var cleanupCompletion = TrackFailedCreation(entry, failure);
                 try
                 {
-                    await ReleaseFailedCreationAsync(entry, failure);
+                    await cleanupCompletion;
                 }
-                catch (Exception cleanup)
+                catch (Exception)
                 {
-                    throw new ResourceLoadException(failure, Task.FromException(cleanup));
+                    throw new ResourceLoadException(failure, cleanupCompletion);
                 }
 
                 throw;
@@ -276,56 +279,88 @@ namespace MUI.Samples.ResourceIntegration
             var instance = PrefabViewFactory.Create(entry.Asset.Asset, parent, staging.transform,
                 () => RequireCurrent(entry.Version), configureView);
             var native = ((View)instance.View).gameObject;
+            Exception instanceFailure = null;
+            Exception entryFailure = null;
+            var entryReleaseAttempted = false;
             return new AcquiredView(instance.View, async _ =>
             {
-                Exception failure = null;
+                if (instance.CleanupResponsibility.CaptureSnapshot().State != CleanupResponsibilityState.Completed)
+                {
+                    try
+                    {
+                        await instance.DisposeAsync();
+                    }
+                    catch (Exception error)
+                    {
+                        if (instanceFailure == null)
+                        {
+                            instanceFailure = error;
+                            RecordCleanupFailure(error);
+                        }
+                        throw;
+                    }
+                }
+
+                // 原生节点及逻辑责任均已确认后才归还加载引用。恢复不重放已经尝试的未知后端归还。
+                await PrefabViewFactory.WaitForReleasedInstanceAsync(native, null);
+                if (!entryReleaseAttempted)
+                {
+                    entryReleaseAttempted = true;
+                    try
+                    {
+                        await ReleaseAsync(entry);
+                    }
+                    catch (Exception error)
+                    {
+                        entryFailure = error;
+                        throw;
+                    }
+                }
+                if (entryFailure != null)
+                {
+                    System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(entryFailure).Throw();
+                }
+            }, thread, supportsIdempotentRetry: true, owner: "LoadedPrefabViewProvider.Instance");
+        }
+
+        private CleanupResponsibility CreateFailedCreationCleanup(Entry entry, Exception failure)
+        {
+            var entryReleaseAttempted = false;
+            Exception entryFailure = null;
+            Exception nativeFailure = null;
+            return new CleanupResponsibility(async () =>
+            {
                 try
                 {
-                    await instance.DisposeAsync();
+                    await PrefabViewFactory.WaitForFailedInstanceAsync(failure);
                 }
                 catch (Exception error)
                 {
-                    failure = error;
-                    RecordCleanupFailure(error);
-                }
-
-                // 等待完整原生实例，而不是可能提前销毁的 View 组件；失败时不提前归还依赖。
-                await PrefabViewFactory.WaitForReleasedInstanceAsync(native, failure);
-
-                try
-                {
-                    await ReleaseAsync(entry);
-                }
-                catch (Exception cleanup)
-                {
-                    if (failure != null)
+                    if (nativeFailure == null)
                     {
-                        throw new AggregateException(failure, cleanup);
+                        nativeFailure = error;
+                        RecordCleanupFailure(error);
                     }
-
                     throw;
                 }
-
-                if (failure != null)
+                if (!entryReleaseAttempted)
                 {
-                    throw failure;
+                    entryReleaseAttempted = true;
+                    try
+                    {
+                        await ReleaseAsync(entry);
+                    }
+                    catch (Exception error)
+                    {
+                        entryFailure = error;
+                        throw;
+                    }
                 }
-            }, thread);
-        }
-
-        private async ValueTask ReleaseFailedCreationAsync(Entry entry, Exception failure)
-        {
-            try
-            {
-                await PrefabViewFactory.WaitForFailedInstanceAsync(failure);
-            }
-            catch (Exception cleanup)
-            {
-                RecordCleanupFailure(cleanup);
-                throw;
-            }
-
-            await ReleaseAsync(entry);
+                if (entryFailure != null)
+                {
+                    System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(entryFailure).Throw();
+                }
+            }, "LoadedPrefabViewProvider.Rollback", true, thread);
         }
 
         private Entry Find(ViewResource resource)

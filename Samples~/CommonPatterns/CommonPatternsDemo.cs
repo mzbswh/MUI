@@ -24,7 +24,6 @@ namespace MUI.Samples.CommonPatterns
         private static readonly ThemeToken<ThemeColor> ToastToken = new ThemeToken<ThemeColor>("toast");
         private static readonly ThemeToken<ThemeColor> LoadingToken = new ThemeToken<ThemeColor>("loading");
         private static readonly ThemeToken<string> IconToken = new ThemeToken<string>("icon");
-
         private readonly LifetimeScope lifetime = new LifetimeScope();
         private readonly List<UnityEngine.UI.Image> buttonImages = new List<UnityEngine.UI.Image>();
         private readonly List<UnityEngine.UI.Text> buttonTexts = new List<UnityEngine.UI.Text>();
@@ -57,7 +56,6 @@ namespace MUI.Samples.CommonPatterns
         private Texture2D darkIconTexture;
         private Sprite lightIcon;
         private Sprite darkIcon;
-
         private NotificationQueue notifications;
         private LoadingScope loading;
         private InputGate inputGate;

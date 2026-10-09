@@ -48,6 +48,7 @@ namespace MUI.Navigation
         internal CachedViewContent TakeCachedContent(Route route)
         {
             AssertThread();
+            RefreshFailedCacheBudget();
             var providerVersion = CaptureProviderVersion();
             var now = Stopwatch.GetTimestamp();
             for (var index = cachedContents.Count - 1; index >= 0; --index)
@@ -137,6 +138,7 @@ namespace MUI.Navigation
 
         private void SweepExpiredCache()
         {
+            RefreshFailedCacheBudget();
             if (IsCacheClearing || IsCacheRetiring)
             {
                 return;
@@ -170,6 +172,7 @@ namespace MUI.Navigation
                 {
                     PruneTerminals(now);
                     RefreshCacheUntraced();
+                    RefreshPreloadReservations();
                     RefreshPreloadProviderVersion();
                 }
                 catch (Exception error)
@@ -283,7 +286,7 @@ namespace MUI.Navigation
                 {
                     retiringCachedViews--;
                     var estimate = entry.Route.EstimatedRetainedBytes ?? 0;
-                    if (errors.Count == errorsBeforeRelease)
+                    if (errors.Count == errorsBeforeRelease || entry.Content.IsCleanupConfirmed)
                     {
                         reservedCacheEstimatedBytes -= estimate;
                     }
@@ -291,6 +294,10 @@ namespace MUI.Navigation
                     {
                         // 无法证明释放成功时不归还额度，避免错误路径重复透支。
                         failedCacheEstimatedBytes += estimate;
+                        if (estimate != 0)
+                        {
+                            failedCacheBudgets.Add(new FailedCacheBudget { Content = entry.Content, EstimatedBytes = estimate });
+                        }
                     }
                 }
             }

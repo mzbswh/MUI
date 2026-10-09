@@ -132,17 +132,32 @@ namespace MUI
             {
                 using var cleanupDiagnostic = UIErrors.BeginPhase("ArgsCleanup");
                 failurePhase = "ArgsCleanup";
-                if (commitGateAcquired)
+                if (commitGateAcquired && afterCommit != null)
                 {
+                    var releaseGate = afterCommit;
+                    var gateCleanup = new CleanupResponsibility(() =>
+                    {
+                        releaseGate();
+                        return default;
+                    }, "ArgsUpdate.CommitGate", releaseThreadId: Thread.CurrentThread.ManagedThreadId);
                     try
                     {
-                        afterCommit?.Invoke();
+                        await gateCleanup.DisposeAsync();
                     }
                     catch (Exception error)
                     {
                         AddFailure(error);
                         cleanup = ArgsUpdateCleanup.Failed;
                         viewFaulted = true;
+                        try
+                        {
+                            host.ArgsLifetime.RecordCleanupFailure(error, gateCleanup);
+                        }
+                        catch (Exception registrationFailure)
+                        {
+                            // 独立账本仍持有许可回调；记录作用域失败不能跳过其他收尾或完成信号。
+                            AddFailure(registrationFailure);
+                        }
                     }
                 }
 
@@ -163,7 +178,11 @@ namespace MUI
 
                 if (candidate != null)
                 {
-                    cleanup = ArgsUpdateCleanup.Complete;
+                    // 候选归还成功只确认这一项，不能覆盖此前提交许可等收尾的失败。
+                    if (cleanup == ArgsUpdateCleanup.NotRequired)
+                    {
+                        cleanup = ArgsUpdateCleanup.Complete;
+                    }
                     try
                     {
                         await host.InvokeArgsCallbackAsync(() => CleanupRegistry.ReleaseAsync(candidate,

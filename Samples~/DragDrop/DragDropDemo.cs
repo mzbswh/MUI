@@ -18,9 +18,16 @@ namespace MUI.Samples.DragDrop
         private View view;
         private Text status;
         private int committedCount;
+        private Task shutdown;
+        private bool shutdownObserved;
 
         private void Start()
         {
+            if (shutdown != null)
+            {
+                return;
+            }
+
             lifetime = new LifetimeScope();
             try
             {
@@ -30,6 +37,7 @@ namespace MUI.Samples.DragDrop
             {
                 Debug.LogException(error);
                 enabled = false;
+                _ = ObserveShutdownAsync();
             }
         }
 
@@ -152,44 +160,75 @@ namespace MUI.Samples.DragDrop
             }
         }
 
-        private void OnDestroy()
+        // 停止播放时原生对象销毁顺序不确定，先由激活拥有者启动同一次清理。
+        private void OnApplicationQuit() => _ = ObserveShutdownAsync();
+
+        private void OnDestroy() => _ = ObserveShutdownAsync();
+
+        /// <summary>场景切换前等待会话和激活收尾，再归还 View 及示例创建的对象。</summary>
+        public Task ShutdownAsync()
         {
-            if (lifetime != null)
+            if (shutdown != null)
             {
-                lifetime.Cancel();
+                return shutdown;
             }
+
+            // 在取消和原生销毁回调之前发布任务，重入及重复退出共享同一结果。
+            var completion = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+            shutdown = completion.Task;
+            _ = ShutdownCoreAsync(completion);
+            return shutdown;
+        }
+
+        private async Task ShutdownCoreAsync(TaskCompletionSource<bool> completion)
+        {
             try
             {
+                if (view != null && view.IsAlive)
+                {
+                    view.SetHostState(false, false);
+                }
+
+                if (lifetime != null)
+                {
+                    await lifetime.DisposeAsync();
+                }
+
                 if (view != null)
                 {
-                    view.Dispose();
+                    await view.DisposeAsync();
                 }
+
+                if (canvasObject != null)
+                {
+                    Destroy(canvasObject);
+                }
+
+                if (eventSystemObject != null)
+                {
+                    Destroy(eventSystemObject);
+                }
+
+                completion.TrySetResult(true);
             }
             catch (Exception error)
             {
-                // View 清理出错不能跳过会话、LifetimeScope 与示例创建的场景对象。
-                Debug.LogException(error);
-            }
-            if (lifetime != null)
-            {
-                _ = CleanupAsync();
-            }
-            if (canvasObject != null)
-            {
-                Destroy(canvasObject);
-            }
-
-            if (eventSystemObject != null)
-            {
-                Destroy(eventSystemObject);
+                // 未确认的激活或 View 继续持有原生对象，不用销毁掩盖释放失败。
+                completion.TrySetException(error);
             }
         }
 
-        private async Task CleanupAsync()
+        private async Task ObserveShutdownAsync()
         {
+            if (shutdownObserved)
+            {
+                return;
+            }
+
+            shutdownObserved = true;
             try
             {
-                await lifetime.DisposeAsync();
+                await ShutdownAsync();
             }
             catch (Exception error)
             {

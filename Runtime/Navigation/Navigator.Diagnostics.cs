@@ -66,7 +66,7 @@ namespace MUI.Navigation
             return new NavigationSnapshot(IsShutdown, commitVersion,
                 !recomputingPresentation && !presentationDirty && presentationDeferrals == 0 && !IsReentrant,
                 focused, entries.Count, snapshots, history.Count, recentHistory, pending, posted.Count,
-                cachedContents.Count, retiringCachedViews, preloadReservations, PendingCleanupCount,
+                cachedContents.Count, retiringCachedViews, PreloadReservationCount, PendingCleanupCount,
                 hasCleanupFailure, DroppedLifecycleEventCount, host, cleanupCount, cleanup);
         }
 

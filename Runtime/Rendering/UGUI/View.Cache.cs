@@ -38,6 +38,7 @@ namespace MUI.UGUI
                 childViews = null;
             }
             childActivationToken = default;
+            activeActivation = null;
             resourceLoader = null;
             if (inputGate != null)
             {

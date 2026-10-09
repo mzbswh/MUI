@@ -7,6 +7,7 @@
     "MUI.Samples.ResourceIntegration",
     "MUI.Navigation",
     "MUI.ChildViews",
+    "MUI.Themes",
     "MUI.UGUI",
     "Unity.ugui"
   ],

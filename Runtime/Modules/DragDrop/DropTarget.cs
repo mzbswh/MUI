@@ -36,6 +36,5 @@ namespace MUI.DragDrop
         {
             get;
         }
-
     }
 }

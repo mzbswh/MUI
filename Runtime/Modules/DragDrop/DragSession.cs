@@ -13,25 +13,6 @@ namespace MUI.DragDrop
         /// <summary>每个来源 LifetimeScope、每种载荷类型最多同时保留的未结束会话数，不计历史完成会话。</summary>
         public const int MaxConcurrentSessionsPerSource = 256;
         private readonly LifetimeScope sourceLifetime;
-
-        /// <summary>业务结果及视觉收尾尝试是否都已完成，不创建或探测任务。</summary>
-        public bool IsCompleted
-        {
-            get
-            {
-                RequireThread();
-                return finished;
-            }
-        }
-
-        /// <summary>读取已发布结果，未完成时返回 false；不创建完成任务。</summary>
-        public bool TryGetResult(out DropResult result)
-        {
-            RequireThread();
-            result = finalResult;
-            return finished;
-        }
-
         private readonly AsyncLocal<CommitFrame> executing;
         private readonly int thread = Thread.CurrentThread.ManagedThreadId;
         private readonly SynchronizationContext context;
@@ -113,6 +94,16 @@ namespace MUI.DragDrop
             }
         }
 
+        /// <summary>业务结果及视觉收尾尝试是否都已完成，不创建或探测任务。</summary>
+        public bool IsCompleted
+        {
+            get
+            {
+                RequireThread();
+                return finished;
+            }
+        }
+
         /// <summary>本次拖拽的数据载荷。</summary>
         public TPayload Payload
         {
@@ -146,6 +137,14 @@ namespace MUI.DragDrop
             }
         }
 
+        /// <summary>读取已发布结果，未完成时返回 false；不创建完成任务。</summary>
+        public bool TryGetResult(out DropResult result)
+        {
+            RequireThread();
+            result = finalResult;
+            return finished;
+        }
+
         /// <summary>同步查询当前目标是否可接受载荷；业务谓词应无副作用，提交前仍会重新检查。</summary>
         public bool CanDrop(DropTarget<TPayload> target)
         {
@@ -160,8 +159,6 @@ namespace MUI.DragDrop
             {
                 return false;
             }
-
-
 
             evaluating = true;
             try
@@ -227,7 +224,6 @@ namespace MUI.DragDrop
             {
                 throw new ArgumentNullException(nameof(target));
             }
-
         }
 
         private bool BeginDrop(DropTarget<TPayload> target)

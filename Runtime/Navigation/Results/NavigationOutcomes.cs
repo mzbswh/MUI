@@ -118,7 +118,9 @@ namespace MUI.Navigation
         AlreadyClosing,
         ClosedWithCleanupPending,
         /// <summary>界面仍被其他页面持有，普通关闭不会撤销其所有权。</summary>
-        InUse
+        InUse,
+        /// <summary>同一激活正在确认另一个关闭意图；没有接纳本次请求。</summary>
+        Busy
     }
 
     public readonly struct CloseOutcome

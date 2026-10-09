@@ -105,6 +105,18 @@ namespace MUI
             }
         }
 
+        /// <summary>只观察拥有者已经启动的首次清理；未启动时返回 null，不接管释放或重试。</summary>
+        internal Task DisposalCompletion
+        {
+            get
+            {
+                lock (gate)
+                {
+                    return disposal == null ? null : disposal.Task;
+                }
+            }
+        }
+
         /// <summary>
         /// 仅注册成功时转移所有权；注册失败后资源仍归调用者。
         /// 同一个对象不能在本生命周期内重复注册。

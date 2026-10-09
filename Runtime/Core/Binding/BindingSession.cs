@@ -151,6 +151,10 @@ namespace MUI
                 {
                     hasUnknownCleanupFailure = true;
                     detachErrors.Add(error);
+                    using (UIErrors.BeginOwnedPhase(DiagnosticContext, "Binding", "Detach"))
+                    {
+                        CleanupResponsibility.RetainFailedCallback(detach[i], "Binding.Subscription", error);
+                    }
                 }
             }
 
@@ -179,6 +183,10 @@ namespace MUI
                 {
                     hasUnknownCleanupFailure = true;
                     errors.Add(error);
+                    using (UIErrors.BeginOwnedPhase(DiagnosticContext, "Binding", "Finalize"))
+                    {
+                        CleanupResponsibility.RetainFailedCallback(finalizers[i], "Binding.Finalizer", error);
+                    }
                 }
             }
 

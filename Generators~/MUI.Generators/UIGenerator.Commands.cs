@@ -116,7 +116,6 @@ namespace MUI.Generators
                 properties.Append("        public global::MUI.AsyncCommand ").Append(Escape(propertyName)).Append(" => ").Append(fieldName)
                     .Append(" ?? (").Append(fieldName).Append(" = new global::MUI.AsyncCommand(\n            ").Append(body).Append(", ").Append(canExecute)
                     .Append(", (global::MUI.CommandConcurrency)").Append(concurrency).Append(", ").Append(capacity).Append("));\n");
-
             }
             else if (member is IPropertySymbol property)
             {

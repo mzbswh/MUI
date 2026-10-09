@@ -30,6 +30,7 @@ namespace MUI.Editor
                 throw new InvalidOperationException("UI 构建目录数量超过 32。");
             }
             catalogs.Add(id, collect);
+            UIIncrementalValidation.RequestAll();
         }
 
         public static bool UnregisterCatalog(string id)
@@ -38,11 +39,19 @@ namespace MUI.Editor
             {
                 throw new InvalidOperationException("校验期间不能修改 UI 构建目录登记。");
             }
-            return catalogs.Remove(id);
+            var removed = catalogs.Remove(id);
+            if (removed)
+            {
+                UIIncrementalValidation.RequestAll();
+            }
+            return removed;
         }
 
         /// <summary>执行已登记采集回调并只读校验，未登记的页面不能被认定已覆盖。</summary>
-        public static UIBuildValidationReport Validate()
+        public static UIBuildValidationReport Validate() => ValidateAffected(null);
+
+        /// <summary>每次重新采集目录；路径仅筛选受影响目录，不缓存校验结果或项目对象。</summary>
+        internal static UIBuildValidationReport ValidateAffected(ISet<string> affectedPaths)
         {
             if (validating)
             {
@@ -59,7 +68,10 @@ namespace MUI.Editor
                     {
                         registration.Value(catalog);
                         catalog.Seal();
-                        ValidateCatalog(registration.Key, catalog, report);
+                        if (IsAffected(catalog, affectedPaths))
+                        {
+                            ValidateCatalog(registration.Key, catalog, report);
+                        }
                     }
                     catch (Exception error)
                     {
@@ -76,6 +88,30 @@ namespace MUI.Editor
             {
                 validating = false;
             }
+        }
+
+        private static bool IsAffected(UIBuildCatalog catalog, ISet<string> affectedPaths)
+        {
+            if (affectedPaths == null || catalog.Pages.Count == 0)
+            {
+                return true;
+            }
+            foreach (var page in catalog.Pages)
+            {
+                var path = AssetDatabase.GetAssetPath(page.Prefab);
+                if (string.IsNullOrEmpty(path))
+                {
+                    return true;
+                }
+                foreach (var dependency in AssetDatabase.GetDependencies(path, true))
+                {
+                    if (affectedPaths.Contains(dependency))
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
         }
 
         private static void ValidateCatalog(string id, UIBuildCatalog catalog, UIBuildValidationReport report)

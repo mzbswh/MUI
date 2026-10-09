@@ -83,7 +83,6 @@ namespace MUI.Samples.Navigation
                 model.Selection = next.Selection;
             }
 
-
             public ValueTask DisposeAsync()
             {
                 if (owner != null)

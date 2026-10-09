@@ -27,7 +27,7 @@
     },
     {
       "displayName": "Settings",
-      "description": "Generated observable state and two-way uGUI binding. Add SettingsDemo to an empty scene.",
+      "description": "生成状态与双向 uGUI 绑定；导入后使用 Tools/MUI/Samples/Open Settings Scene。",
       "path": "Samples~/Settings"
     },
     {

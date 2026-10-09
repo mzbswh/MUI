@@ -423,7 +423,7 @@ namespace MUI.UGUI
             rowIndex = BuildRowIndex(snapshot, columns);
             initialized = true;
             scrollRect.onValueChanged.AddListener(OnScrolled);
-            OnDispose(ReleaseList);
+            TrackCleanup(ReleaseList, true, "VirtualList.FinalNodes");
             InitializeScrollInput();
             InitializeViewportObserver();
             UpdateContentExtent();

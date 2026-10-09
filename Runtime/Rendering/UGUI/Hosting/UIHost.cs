@@ -19,8 +19,7 @@ namespace MUI.UGUI
         private bool automaticFramePump = true;
         private Navigator navigator;
         private UIThreadDispatcher dispatcher;
-        private IDisposable ownedProvider;
-        private IAsyncDisposable asyncOwnedProvider;
+        private HostProviderCleanup ownedProviderCleanup;
         private Task shutdown;
         private bool logging;
         private bool initializing;
@@ -144,8 +143,10 @@ namespace MUI.UGUI
                 }
 
                 // 导航器构造成功才接管提供方；失败时外部提供方仍完全属于调用者。
-                asyncOwnedProvider = asynchronousDisposable;
-                ownedProvider = disposable;
+                if (ownsProvider)
+                {
+                    ownedProviderCleanup = new HostProviderCleanup(navigator, asynchronousDisposable, disposable);
+                }
                 dispatcher = capturedDispatcher;
                 UnityErrorLogging.RegisterHost();
                 logging = true;
@@ -296,9 +297,10 @@ namespace MUI.UGUI
                 throw new InvalidOperationException("UIHost shutdown requires initialization.");
             }
 
-            if (!navigator.CanAwaitShutdown)
+            if (!navigator.CanAwaitShutdown || (ownedProviderCleanup != null &&
+                ownedProviderCleanup.Responsibility.IsReleaseCallbackActive))
             {
-                return new ValueTask(Task.FromException(new InvalidOperationException("A lifecycle hook or command cannot await its own UIHost shutdown.")));
+                return new ValueTask(Task.FromException(new InvalidOperationException("A lifecycle hook, command or provider cleanup cannot await its own UIHost shutdown.")));
             }
 
             var completion = BeginShutdown();
@@ -318,15 +320,6 @@ namespace MUI.UGUI
             shutdown = completion.Task;
             _ = ShutdownCoreAsync(completion);
             return completion.Task;
-        }
-
-        private bool HasOutstandingProviderUse()
-        {
-            var snapshot = navigator.CaptureSnapshot(maxInstances: 1);
-            return snapshot.TotalInstances != 0 || snapshot.PendingRequestCount != 0 ||
-                snapshot.CachedViewCount != 0 || snapshot.RetiringCachedViewCount != 0 ||
-                snapshot.PreloadReservationCount != 0 || snapshot.PendingCleanupCount != 0 ||
-                snapshot.HasCleanupFailure;
         }
 
         private async Task ShutdownCoreAsync(TaskCompletionSource<bool> completion)
@@ -352,6 +345,19 @@ namespace MUI.UGUI
                 BackInputCompleted = null;
             }
             var errors = new List<Exception>();
+            Task providerCleanup = null;
+            try
+            {
+                // 在等待迟到准备前登记最终拥有者，原生宿主销毁后仍可查询这段在途清理。
+                if (ownedProviderCleanup != null)
+                {
+                    providerCleanup = ownedProviderCleanup.DisposeAsync(navigatorShutdown).AsTask();
+                }
+            }
+            catch (Exception error)
+            {
+                errors.Add(error);
+            }
             try
             {
                 await navigatorShutdown;
@@ -369,31 +375,11 @@ namespace MUI.UGUI
             }
 
             BackInputCompleted = null;
-            var providerInUse = false;
             try
             {
-                providerInUse = navigator != null && HasOutstandingProviderUse();
-            }
-            catch (Exception error)
-            {
-                errors.Add(error);
-                providerInUse = true;
-            }
-
-            if (providerInUse)
-            {
-                errors.Add(new InvalidOperationException("UIHost retained its provider because navigation still owns UI resources."));
-            }
-
-            try
-            {
-                if (!providerInUse && asyncOwnedProvider != null)
+                if (providerCleanup != null)
                 {
-                    await asyncOwnedProvider.DisposeAsync();
-                }
-                else if (!providerInUse && ownedProvider != null)
-                {
-                    ownedProvider.Dispose();
+                    await providerCleanup;
                 }
             }
             catch (Exception error)
@@ -402,10 +388,9 @@ namespace MUI.UGUI
             }
             finally
             {
-                if (!providerInUse)
+                if (ownedProviderCleanup != null && ownedProviderCleanup.IsConfirmed)
                 {
-                    asyncOwnedProvider = null;
-                    ownedProvider = null;
+                    ownedProviderCleanup = null;
                 }
 
                 if (logging)

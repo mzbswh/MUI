@@ -9,6 +9,9 @@ namespace MUI.UGUI
 {
     public partial class RecyclingListElement
     {
+        private LifetimeScope finalNodeCleanup;
+        private Exception finalNodeCleanupFailure;
+
         /// <summary>
         /// 同步与异步执行器共用的协调过程。产出条目表示其本轮换绑必须完成后才能显示。
         /// 复用按位置进行，删除后的节点先隐藏再完成解绑后留池，原生布局只计算活动节点。
@@ -166,6 +169,16 @@ namespace MUI.UGUI
 
         private void ReleaseCells()
         {
+            if (finalNodeCleanup != null)
+            {
+                if (!finalNodeCleanup.IsCleanupConfirmed)
+                {
+                    throw finalNodeCleanupFailure ?? new InvalidOperationException("Recycling list node cleanup is unconfirmed.");
+                }
+                finalNodeCleanupFailure = null;
+                return;
+            }
+            finalNodeCleanup = new LifetimeScope();
             ++itemsAssignmentVersion;
             ++revision;
             scope = null;
@@ -175,18 +188,17 @@ namespace MUI.UGUI
             Error = null;
             running = false;
             dirty = false;
-            var failures = new List<Exception>();
             try
             {
                 DetachSource();
             }
             catch (Exception error)
             {
-                // 来源退订失败仍必须继续销毁每个池节点。
-                failures.Add(error);
+                // 来源退订失败仍逐项收尾；未确认子视图归还的节点由责任账本保留。
+                finalNodeCleanup.RecordCleanupFailure(error);
             }
 
-            foreach (var cell in cells)
+            foreach (var cell in cells.ToArray())
             {
                 try
                 {
@@ -194,16 +206,27 @@ namespace MUI.UGUI
                 }
                 catch (Exception error)
                 {
-                    failures.Add(error);
+                    finalNodeCleanup.RecordCleanupFailureWithConfirmation(error, cell.CaptureNodeCleanupConfirmation());
                 }
             }
 
             cells.Clear();
             fixedCellParents.Clear();
             ownedFixedCells.Clear();
-            if (failures.Count != 0)
+            try
             {
-                throw new AggregateException("回收列表节点清理失败。", failures);
+                // 此作用域只保存已发生的责任确认，不登记异步工作，因此本帧完成。
+                var disposal = finalNodeCleanup.DisposeAsync();
+                if (!disposal.IsCompleted)
+                {
+                    throw new InvalidOperationException("List node confirmation must complete synchronously.");
+                }
+                disposal.GetAwaiter().GetResult();
+            }
+            catch (Exception error)
+            {
+                finalNodeCleanupFailure = error;
+                throw;
             }
         }
 
@@ -214,17 +237,16 @@ namespace MUI.UGUI
                 return;
             }
 
-            try
+            // 释放可能等到显式恢复；列表集合届时已清空，节点所有权须在首次收尾时固定。
+            var ownsNode = !UsesFixedSlots || ownedFixedCells.Contains(cell);
+            cell.ReleaseOwnedNode(() =>
             {
-                cell.Dispose();
-            }
-            finally
-            {
-                if (cell != null && (!UsesFixedSlots || ownedFixedCells.Remove(cell)))
+                if (cell != null && ownsNode)
                 {
+                    ownedFixedCells.Remove(cell);
                     Destroy(cell.gameObject);
                 }
-            }
+            }, "RecyclingListCell");
         }
     }
 }

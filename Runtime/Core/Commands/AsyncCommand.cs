@@ -32,20 +32,6 @@ namespace MUI
         {
         }
 
-        private static Func<CommandContext, ValueTask> Adapt(Action<CommandContext> execute)
-        {
-            if (execute == null)
-            {
-                throw new ArgumentNullException(nameof(execute));
-            }
-
-            return context =>
-            {
-                execute(context);
-                return default;
-            };
-        }
-
         public AsyncCommand(Func<CommandContext, ValueTask> execute,
                     Func<bool> canExecute = null,
                     CommandConcurrency concurrency = CommandConcurrency.RejectWhileRunning,
@@ -109,6 +95,20 @@ namespace MUI
 
                 return canExecute == null || canExecute();
             }
+        }
+
+        private static Func<CommandContext, ValueTask> Adapt(Action<CommandContext> execute)
+        {
+            if (execute == null)
+            {
+                throw new ArgumentNullException(nameof(execute));
+            }
+
+            return context =>
+            {
+                execute(context);
+                return default;
+            };
         }
 
         private bool HasCapacity() => executions.Count < capacity && (Concurrency != CommandConcurrency.RejectWhileRunning || executions.Count == 0);

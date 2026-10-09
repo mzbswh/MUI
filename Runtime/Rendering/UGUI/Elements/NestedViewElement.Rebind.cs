@@ -12,6 +12,7 @@ namespace MUI.UGUI
             IReadOnlyDictionary<string, object> values, CancellationToken cancellationToken)
         {
             RequireAlive();
+            RequireAvailableNode();
             var bindsModel = values.TryGetValue(nameof(ViewModel), out var value);
             if (bindsModel && value != null && !(value is ViewModel))
             {

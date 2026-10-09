@@ -67,6 +67,22 @@ namespace MUI
 
         internal long ViewId => context.ViewId;
 
+        /// <summary>只识别当前异步调用链的直接自等待，不拒绝其他调用方观察同一清理。</summary>
+        internal bool IsReleaseCallbackActive
+        {
+            get
+            {
+                for (var frame = currentRelease.Value; frame != null; frame = frame.Parent)
+                {
+                    if (Volatile.Read(ref frame.Active) && ReferenceEquals(frame.Owner, this))
+                    {
+                        return true;
+                    }
+                }
+                return false;
+            }
+        }
+
         /// <summary>只读值快照，不调用资源或适配器的属性。</summary>
         public CleanupResponsibilitySnapshot CaptureSnapshot()
         {
@@ -83,14 +99,29 @@ namespace MUI
         /// <summary>显式安全重试；在途调用合并，确认成功后不再次调用适配器。</summary>
         public Task RetryAsync() => BeginAttempt(true);
 
+        /// <summary>保留已执行但未确认的同步回调，不再调用状态未知的项目清理代码。</summary>
+        internal static void RetainFailedCallback(Action callback, string owner, Exception error)
+        {
+            var responsibility = new CleanupResponsibility(() =>
+            {
+                callback();
+                return default;
+            }, owner);
+            responsibility.state = CleanupResponsibilityState.Failed;
+            responsibility.failure = error;
+            responsibility.attempts = 1;
+            responsibility.firstAttempt = Task.FromException(error);
+            responsibility.currentAttempt = responsibility.firstAttempt;
+            UIErrors.AttachContext(error, responsibility.context);
+            _ = responsibility.firstAttempt.Exception;
+            CleanupRegistry.Retain(responsibility);
+        }
+
         private Task BeginAttempt(bool retry)
         {
-            for (var frame = currentRelease.Value; frame != null; frame = frame.Parent)
+            if (IsReleaseCallbackActive)
             {
-                if (Volatile.Read(ref frame.Active) && ReferenceEquals(frame.Owner, this))
-                {
-                    return Task.FromException(new InvalidOperationException("A cleanup callback cannot await its own responsibility."));
-                }
+                return Task.FromException(new InvalidOperationException("A cleanup callback cannot await its own responsibility."));
             }
 
             TaskCompletionSource<bool> completion;

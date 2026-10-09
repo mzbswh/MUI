@@ -51,18 +51,19 @@ namespace MUI.UGUI
             }
         }
 
-        private sealed class PreparedRebind : IPreparedBindingTarget
+        private sealed class PreparedRebind : IPreparedBindingTarget, ICleanupResponsibilitySource
         {
             private readonly RecyclingListElement element;
             private readonly ChildViewScope scope;
             private readonly LifetimeScope lifetime;
-            private readonly Task priorChange;
+            private Task priorChange;
             private readonly long assignment;
             private readonly long revision;
-            private readonly IReadOnlyObservableList<ViewModel> previousSource;
-            private readonly IReadOnlyObservableList<ViewModel> source;
+            private IReadOnlyObservableList<ViewModel> previousSource;
+            private IReadOnlyObservableList<ViewModel> source;
             private readonly bool bindsItems;
             private readonly List<PreparedCell> prepared = new List<PreparedCell>();
+            private readonly List<Func<bool>> cleanupConfirmations = new List<Func<bool>>();
             private List<ViewModel> models;
             private long sourceVersion;
             private int writes;
@@ -82,6 +83,20 @@ namespace MUI.UGUI
                 assignment = element.itemsAssignmentVersion;
                 revision = element.revision;
                 previousSource = element.items;
+                var failureRecorded = false;
+                CleanupResponsibility = new CleanupResponsibility(ReleasePreparedAsync, "RecyclingListRebindPreparation", error =>
+                {
+                    if (error != null && lifetime != null && !failureRecorded)
+                    {
+                        failureRecorded = true;
+                        lifetime.RecordCleanupFailure(error, CleanupResponsibility);
+                    }
+                }, true, Thread.CurrentThread.ManagedThreadId);
+            }
+
+            public CleanupResponsibility CleanupResponsibility
+            {
+                get;
             }
 
             internal async ValueTask PrepareAsync(CancellationToken token)
@@ -294,10 +309,21 @@ namespace MUI.UGUI
                 }
             }
 
-            public async ValueTask DisposeAsync()
+            public ValueTask DisposeAsync() => CleanupResponsibility.DisposeAsync();
+
+            private async ValueTask ReleasePreparedAsync()
             {
                 if (disposed)
                 {
+                    // 原清理任务保留失败；恢复只确认已关闭子视图及最终节点责任，不重新解绑。
+                    foreach (var confirmed in cleanupConfirmations)
+                    {
+                        if (!confirmed())
+                        {
+                            throw new InvalidOperationException("Recycling list preparation cleanup dependencies are unconfirmed.");
+                        }
+                    }
+                    cleanupConfirmations.Clear();
                     return;
                 }
 
@@ -321,6 +347,7 @@ namespace MUI.UGUI
                     catch (Exception error)
                     {
                         errors.Add(error);
+                        cleanupConfirmations.Add(entry.Cell.CaptureChildViewCleanupConfirmation());
                     }
 
                     if (entry.Created && !entry.Adopted)
@@ -332,12 +359,16 @@ namespace MUI.UGUI
                         catch (Exception error)
                         {
                             errors.Add(error);
+                            cleanupConfirmations.Add(entry.Cell.CaptureNodeCleanupConfirmation());
                         }
                     }
                 }
 
                 // 已接管节点和快照由列表持有；本准备不再保留业务模型引用。
                 models = null;
+                previousSource = null;
+                source = null;
+                priorChange = null;
                 prepared.Clear();
 
                 if (errors.Count != 0)

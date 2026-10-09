@@ -44,7 +44,6 @@ namespace MUI.Samples.Navigation
                 }
             }
 
-
             public ValueTask DisposeAsync()
             {
                 // 本候选不拥有业务模型，只释放借用引用；实际候选也应在此回收未移交资源。

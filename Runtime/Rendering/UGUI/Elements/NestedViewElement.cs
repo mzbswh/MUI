@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using MUI.ChildViews;
@@ -17,7 +18,9 @@ namespace MUI.UGUI
     {
         [SerializeField]
         private View childView;
-        private BorrowedViewProvider provider;
+        private IViewProvider provider;
+        private readonly List<CleanupResponsibility> childViewReleases = new List<CleanupResponsibility>();
+        private CleanupResponsibility nodeCleanup;
         private ChildViewTemplate<ViewModel, Unit> template;
         private ChildViewScope scope;
         private LifetimeScope parentLifetime;
@@ -34,6 +37,7 @@ namespace MUI.UGUI
             set
             {
                 RequireAlive();
+                RequireAvailableNode();
                 if (preparing)
                 {
                     throw new InvalidOperationException("Cannot change a nested child view while preparing its bindings.");
@@ -115,7 +119,16 @@ namespace MUI.UGUI
             }
 
             var resource = new ViewResource("nested:" + GetInstanceID());
-            provider = new BorrowedViewProvider(resource, childView);
+            var borrowed = new BorrowedViewProvider(resource, childView);
+            provider = new DelegateViewProvider(async (requested, token) =>
+            {
+                RequireAvailableNode();
+                var acquired = await borrowed.AcquireAsync(requested, token);
+                // 借用节点仍有独占持有者时不能销毁；凭证只在子激活及实例责任确认后归还。
+                childViewReleases.RemoveAll(release => release.CaptureSnapshot().State == CleanupResponsibilityState.Completed);
+                childViewReleases.Add(CleanupRegistry.GetResponsibility(acquired, "NestedViewAcquisition"));
+                return acquired;
+            });
             template = new ChildViewTemplate<ViewModel, Unit>(resource, () => throw new InvalidOperationException("Nested child views require an assigned model."), BindingRegistry.Create);
             childView.SetHostState(false, false);
             OnDispose(() =>
@@ -138,6 +151,7 @@ namespace MUI.UGUI
         void IChildViewElement.BeginParentActivation(ChildViewScope parentScope, LifetimeScope lifetime)
         {
             RequireAlive();
+            RequireAvailableNode();
 
             ++version;
             scope = parentScope;

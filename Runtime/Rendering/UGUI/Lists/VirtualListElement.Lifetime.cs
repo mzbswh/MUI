@@ -6,17 +6,29 @@ namespace MUI.UGUI
 {
     public sealed partial class VirtualListElement
     {
-        /// <summary>独立释放各项所有权；来源或原生监听退订失败也不能跳过池节点清理。</summary>
+        private LifetimeScope finalNodeCleanup;
+        private Exception finalNodeCleanupFailure;
+
+        /// <summary>首次独立释放各项；恢复只确认节点责任，来源或原生退订失败不重复执行。</summary>
         private void ReleaseList()
         {
-            var failures = new List<Exception>();
+            if (finalNodeCleanup != null)
+            {
+                if (!finalNodeCleanup.IsCleanupConfirmed)
+                {
+                    throw finalNodeCleanupFailure ?? new InvalidOperationException("Virtual list node cleanup is unconfirmed.");
+                }
+                finalNodeCleanupFailure = null;
+                return;
+            }
+            finalNodeCleanup = new LifetimeScope();
             try
             {
                 ReleaseActivationReferences(lifetime);
             }
             catch (Exception error)
             {
-                failures.Add(error);
+                finalNodeCleanup.RecordCleanupFailure(error);
             }
 
             try
@@ -28,7 +40,7 @@ namespace MUI.UGUI
             }
             catch (Exception error)
             {
-                failures.Add(error);
+                finalNodeCleanup.RecordCleanupFailure(error);
             }
 
             try
@@ -37,7 +49,7 @@ namespace MUI.UGUI
             }
             catch (Exception error)
             {
-                failures.Add(error);
+                finalNodeCleanup.RecordCleanupFailure(error);
             }
 
             var previousCells = cells.ToArray();
@@ -47,7 +59,7 @@ namespace MUI.UGUI
             }
             catch (Exception error)
             {
-                failures.Add(error);
+                finalNodeCleanup.RecordCleanupFailure(error);
             }
             cells.Clear();
             templatesByKey.Clear();
@@ -59,13 +71,24 @@ namespace MUI.UGUI
                 }
                 catch (Exception error)
                 {
-                    failures.Add(error);
+                    finalNodeCleanup.RecordCleanupFailureWithConfirmation(error, cell.Element.CaptureNodeCleanupConfirmation());
                 }
             }
 
-            if (failures.Count != 0)
+            try
             {
-                throw new AggregateException("虚拟列表最终清理失败。", failures);
+                // 此作用域只保存已发生的责任确认，不登记异步工作，因此本帧完成。
+                var disposal = finalNodeCleanup.DisposeAsync();
+                if (!disposal.IsCompleted)
+                {
+                    throw new InvalidOperationException("List node confirmation must complete synchronously.");
+                }
+                disposal.GetAwaiter().GetResult();
+            }
+            catch (Exception error)
+            {
+                finalNodeCleanupFailure = error;
+                throw;
             }
         }
 

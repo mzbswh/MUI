@@ -40,7 +40,8 @@ namespace MUI.Samples.Navigation.Editor
                 return;
             }
 
-            var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+            // 保留模板相机，避免 Game 视图的无相机提示遮住 Overlay UI。
+            var scene = EditorSceneManager.NewScene(NewSceneSetup.DefaultGameObjects, NewSceneMode.Single);
             var sample = new GameObject(typeof(T).Name, typeof(T));
             configure?.Invoke(sample.GetComponent<T>());
             if (!AssetDatabase.IsValidFolder("Assets/MUI Samples"))
@@ -70,7 +71,8 @@ namespace MUI.Samples.Navigation.Editor
             {
                 return;
             }
-            var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+            // 保留模板相机，避免 Game 视图的无相机提示遮住 Overlay UI。
+            var scene = EditorSceneManager.NewScene(NewSceneSetup.DefaultGameObjects, NewSceneMode.Single);
             var sample = new GameObject("NavigationDemo", typeof(NavigationDemo)).GetComponent<NavigationDemo>();
             sample.AutomaticWalkthrough = Application.isBatchMode;
             sample.RecordLifecycleTrace = lifecycleTrace;

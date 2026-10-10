@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using MUI.UGUI;
 using UnityEngine.UI;
+using L = MUI.Editor.Localization.MUIEditorLocalization;
 
 namespace MUI.Editor
 {
@@ -13,25 +14,25 @@ namespace MUI.Editor
             var scrollbar = element.GetComponent<Scrollbar>();
             if (scrollbar == null)
             {
-                errors.Add($"滚动条缺少同节点的 Scrollbar：{path}。");
+                errors.Add(L.Format("editor.ViewContractValidator.Scrollbar.ca55ec7917", path));
                 return;
             }
 
             var handle = scrollbar.handleRect;
             if (handle == null)
             {
-                errors.Add($"滚动条缺少手柄引用：{path}。");
+                errors.Add(L.Format("editor.ViewContractValidator.Scrollbar.9ade8392e6", path));
                 return;
             }
 
             if (handle == scrollbar.transform || !handle.IsChildOf(scrollbar.transform))
             {
-                errors.Add($"滚动条手柄必须位于其子节点，不能驱动滚动条根节点本身：{path}。");
+                errors.Add(L.Format("editor.ViewContractValidator.Scrollbar.7e7412f982", path));
             }
 
             if (handle.GetComponentInParent<View>(true) != view)
             {
-                errors.Add($"滚动条手柄引用不能跨越 View 边界：{path}。");
+                errors.Add(L.Format("editor.ViewContractValidator.Scrollbar.f866df34eb", path));
             }
         }
 
@@ -58,9 +59,9 @@ namespace MUI.Editor
                     continue;
                 }
 
-                errors.Add($"滚动条 {Path(element.transform, view.transform)}.{entry.TargetProperty} " +
-                    $"同时由 ScrollRect {Path(owner.transform, view.transform)} 与绑定 {entry.Source} 写入。" +
-                    "请绑定滚动容器位置，或改为仅反向观察滚动条。");
+                errors.Add(L.Format("editor.ViewContractValidator.Scrollbar.a18e38d519", Path(element.transform, view.transform), entry.TargetProperty) +
+                    L.Format("editor.ViewContractValidator.Scrollbar.7bb6aa750c", Path(owner.transform, view.transform), entry.Source) +
+                    L.Get("editor.ViewContractValidator.Scrollbar.8a643a780c"));
             }
         }
     }

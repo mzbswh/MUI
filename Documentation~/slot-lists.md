@@ -20,4 +20,4 @@ slots.ConfigureMounts(new[] { leftMount, rightMount }, itemTemplate);
 
 Editor 的结构校验、Prefab 增量检查和构建前校验包含固定槽位归属规则。当前源码及离线编译已接入，固定槽位的完整 Unity 运行验收仍见实现记录。
 
-导入 Navigation Sample 后，菜单 `Tools/MUI/Samples/Open Fixed Slot List Scene` 创建五个挂点的奖励栏示例。初始填入三项，Remove 解除该项绑定，Add reward 使用剩余槽位；满额时显示容量提示。普通回收列表菜单复用同一示例组件和生成绑定。
+导入 Navigation Sample 后，菜单 `Tools/MUI/示例 (Samples)/打开固定槽位列表场景 (Open Fixed Slot List Scene)` 创建五个挂点的奖励栏示例。初始填入三项，Remove 解除该项绑定，Add reward 使用剩余槽位；满额时显示容量提示。普通回收列表菜单复用同一示例组件和生成绑定。

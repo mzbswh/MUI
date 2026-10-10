@@ -1,0 +1,5771 @@
+{
+  "id": "en-US",
+  "displayName": "English",
+  "fallbackLanguageId": "zh-CN",
+  "entries": [
+    {
+      "key": "editor.ConfirmationDialogWizard.355c93a223",
+      "text": "Select a new Prefab path."
+    },
+    {
+      "key": "editor.ConfirmationDialogWizard.43e83309d7",
+      "text": "MUI will not overwrite an existing Prefab. Choose a new path."
+    },
+    {
+      "key": "editor.ConfirmationDialogWizard.93c9370677",
+      "text": "Create MUI Dialog"
+    },
+    {
+      "key": "editor.ConfirmationDialogWizard.ad6d4c241d",
+      "text": "Could not save the dialog Prefab."
+    },
+    {
+      "key": "editor.ConfirmationDialogWizard.b736b1be54",
+      "text": "Confirmation message"
+    },
+    {
+      "key": "editor.ConfirmationDialogWizard.df3021fd73",
+      "text": "Notice message"
+    },
+    {
+      "key": "editor.ConfirmationDialogWizard.f56c6c8220",
+      "text": "Notice"
+    },
+    {
+      "key": "editor.ConfirmationDialogWizard.fac2a67ad8",
+      "text": "OK"
+    },
+    {
+      "key": "editor.DragDropElementValidation.07c3e3a8ea",
+      "text": "Drag ghost and source use different root Canvases: {0}."
+    },
+    {
+      "key": "editor.DragDropElementValidation.097ff70a04",
+      "text": "Drop highlight must be a strict child of the target: {0}."
+    },
+    {
+      "key": "editor.DragDropElementValidation.165a5f71ed",
+      "text": "Drag ghost requires both Drag Icon and Ghost Root: {0}."
+    },
+    {
+      "key": "editor.DragDropElementValidation.332ea75fe2",
+      "text": "Drag Icon must belong to the source hierarchy: {0}."
+    },
+    {
+      "key": "editor.DragDropElementValidation.856ef4d269",
+      "text": "Drop highlight must be decorative, without Selectable children: {0}."
+    },
+    {
+      "key": "editor.DragDropElementValidation.a8a32fbe33",
+      "text": "Camera/world-space ghost requires an explicit root Canvas camera: {0}."
+    },
+    {
+      "key": "editor.DragDropElementValidation.dfa4574438",
+      "text": "Ghost Root must be outside the source hierarchy: {0}."
+    },
+    {
+      "key": "editor.DragDropElementValidation.edec36e0d3",
+      "text": "Drop highlight must not intercept pointer raycasts: {0}."
+    },
+    {
+      "key": "editor.DragDropElementValidation.ee19296263",
+      "text": "Drop target capacity must be positive: {0}."
+    },
+    {
+      "key": "editor.DropdownTemplateValidation.05ffe01799",
+      "text": "Dropdown template is missing: {0}."
+    },
+    {
+      "key": "editor.DropdownTemplateValidation.2323fb4b98",
+      "text": "Dropdown template must be inactive: {0}."
+    },
+    {
+      "key": "editor.DropdownTemplateValidation.5d2cad0d1c",
+      "text": "Dropdown template requires an active child Toggle item: {0}."
+    },
+    {
+      "key": "editor.DropdownTemplateValidation.aa11691f69",
+      "text": "Dropdown Toggle item parent requires a RectTransform: {0}."
+    },
+    {
+      "key": "editor.DropdownTemplateValidation.c4d2ef65fd",
+      "text": "Dropdown item text must belong to its Toggle item: {0}."
+    },
+    {
+      "key": "editor.DropdownTemplateValidation.d98d996fa4",
+      "text": "Dropdown item image must belong to its Toggle item: {0}."
+    },
+    {
+      "key": "editor.ElementAuthoringWindow.0ae06aecdf",
+      "text": "TMP text: MUI.TMP adapter assembly is unavailable."
+    },
+    {
+      "key": "editor.ElementAuthoringWindow.26e0256cd8",
+      "text": "Add MUI Elements"
+    },
+    {
+      "key": "editor.ElementAuthoringWindow.29e3c4643d",
+      "text": "Added {0} Elements. Save the scene or Prefab to persist the changes; Undo restores this batch."
+    },
+    {
+      "key": "editor.ElementAuthoringWindow.38399863b6",
+      "text": "Add Selected Elements (Undo Supported)"
+    },
+    {
+      "key": "editor.ElementAuthoringWindow.44cb005ee2",
+      "text": "Root"
+    },
+    {
+      "key": "editor.ElementAuthoringWindow.49f6375235",
+      "text": "Multiple layout components found; choose the required adapter manually."
+    },
+    {
+      "key": "editor.ElementAuthoringWindow.4c72361bea",
+      "text": "Preview native uGUI controls before adding adapters. Nested Views, container boundaries and nested Prefab instances are excluded. Open Prefabs in Prefab Mode to edit them."
+    },
+    {
+      "key": "editor.ElementAuthoringWindow.57ec66460c",
+      "text": "Multiple controls: choose an adapter manually."
+    },
+    {
+      "key": "editor.ElementAuthoringWindow.742f9c0260",
+      "text": "Could not add control adapters: "
+    },
+    {
+      "key": "editor.ElementAuthoringWindow.beb38a6ce0",
+      "text": "Open the Prefab in Prefab Mode, then select its root."
+    },
+    {
+      "key": "editor.ElementAuthoringWindow.cf61a83125",
+      "text": "Adding adapters failed; this batch was undone. Inspect the Console."
+    },
+    {
+      "key": "editor.ElementAuthoringWindow.dd39801df2",
+      "text": "Unsupported TMP control: choose an adapter manually."
+    },
+    {
+      "key": "editor.ElementAuthoringWindow.e52e414963",
+      "text": "TMP control: MUI.TMP adapter assembly is unavailable."
+    },
+    {
+      "key": "editor.ElementAuthoringWindow.e623e26a68",
+      "text": "Missing script: repair before adding an adapter."
+    },
+    {
+      "key": "editor.ElementAuthoringWindow.ea1c510d1d",
+      "text": "Scan"
+    },
+    {
+      "key": "editor.ElementAuthoringWindow.f27fa1ad5c",
+      "text": "MUI Elements"
+    },
+    {
+      "key": "editor.ElementNaming.0bbaa92a18",
+      "text": "Naming rules must return nonempty, trimmed names without a (Clone) suffix."
+    },
+    {
+      "key": "editor.ElementNaming.621399f171",
+      "text": "Naming types must derive from Element."
+    },
+    {
+      "key": "editor.ElementNaming.75c2c05b0b",
+      "text": "Naming rules changed while calculating suggestions; generate them again."
+    },
+    {
+      "key": "editor.ElementNamingWindow.046d5fd2e9",
+      "text": "Suggestions have not been applied. Review names and selections before renaming."
+    },
+    {
+      "key": "editor.ElementNamingWindow.20ca39694d",
+      "text": "Scan Names"
+    },
+    {
+      "key": "editor.ElementNamingWindow.25f9c635ef",
+      "text": "Hierarchy, components or names changed while naming; scan again."
+    },
+    {
+      "key": "editor.ElementNamingWindow.281ad19dde",
+      "text": "Rename preview only. Binding declarations refer to these names: update affected source bindings yourself. Prefixes are optional suggestions. Nested View contents are excluded; nested Prefab names are reserved but not edited. Open Prefab assets in Prefab Mode."
+    },
+    {
+      "key": "editor.ElementNamingWindow.2c1f2dca62",
+      "text": "No name changes selected."
+    },
+    {
+      "key": "editor.ElementNamingWindow.358bb9962f",
+      "text": "MUI Element Names"
+    },
+    {
+      "key": "editor.ElementNamingWindow.3ac473e9b6",
+      "text": "Apply Selected Names (Undo Supported)"
+    },
+    {
+      "key": "editor.ElementNamingWindow.553f3cc103",
+      "text": "Renamed {0} objects. Save the scene or Prefab and update affected binding declarations. Undo restores this batch."
+    },
+    {
+      "key": "editor.ElementNamingWindow.5fb53e10b3",
+      "text": "Proposed name '{0}' conflicts with another Element object. Nothing was renamed."
+    },
+    {
+      "key": "editor.ElementNamingWindow.668fbf85fb",
+      "text": "Names must be non-empty, trimmed, and must not end in (Clone)."
+    },
+    {
+      "key": "editor.ElementNamingWindow.66a01cf520",
+      "text": "Hierarchy, components or names changed. Scan again before applying."
+    },
+    {
+      "key": "editor.ElementNamingWindow.8f31895d55",
+      "text": "Naming rules failed; the existing preview was preserved: "
+    },
+    {
+      "key": "editor.ElementNamingWindow.98e9dc4d39",
+      "text": "Hierarchy, components or names changed; scan again first."
+    },
+    {
+      "key": "editor.ElementNamingWindow.a5e3077f3f",
+      "text": "Open the Prefab in Prefab Mode before scanning."
+    },
+    {
+      "key": "editor.ElementNamingWindow.ae93df9c64",
+      "text": "Reserved: View root, nested Prefab, or multiple Elements on one object."
+    },
+    {
+      "key": "editor.ElementNamingWindow.bae8c2d3dc",
+      "text": "Rename failed; reverted this batch. Inspect the Console."
+    },
+    {
+      "key": "editor.ElementNamingWindow.c3d72457bf",
+      "text": "Suggest Unique Names"
+    },
+    {
+      "key": "editor.ElementNamingWindow.d985880acf",
+      "text": "Rename MUI Elements"
+    },
+    {
+      "key": "editor.ElementNamingWindow.dcc839a401",
+      "text": "View"
+    },
+    {
+      "key": "editor.ElementNamingWindow.ef6c4a64c8",
+      "text": "{0} Element objects; {1} empty names; {2} repeated names. Repeated names can be valid for different concrete types; use View contract validation to check actual ambiguity."
+    },
+    {
+      "key": "editor.ElementNamingWindow.f1eab560bb",
+      "text": "Rename MUI Element"
+    },
+    {
+      "key": "editor.LoadingElementValidation.368fcebb32",
+      "text": "Loading progress requires a Filled Image: {0}."
+    },
+    {
+      "key": "editor.LoadingElementValidation.71eae1a677",
+      "text": "{0} must be {1} its indicator: {2}."
+    },
+    {
+      "key": "editor.LoadingElementValidation.c3d13aadc0",
+      "text": "Loading progress and indeterminate nodes must be independent branches: {0}."
+    },
+    {
+      "key": "editor.LoadingElementValidation.c6205dce35",
+      "text": "Indicator must be a strict child of the adapter: {0}."
+    },
+    {
+      "key": "editor.LoadingElementValidation.e6eaf729ea",
+      "text": "Loading message cannot be inside a conditionally hidden progress branch: {0}."
+    },
+    {
+      "key": "editor.LoadingElementValidation.ee5ca91704",
+      "text": "a strict child of"
+    },
+    {
+      "key": "editor.MUIDashboard.13d2975890",
+      "text": "MUI Dashboard template is missing."
+    },
+    {
+      "key": "editor.MUIDashboard.1797c05538",
+      "text": "{0}: {1}; UI updates: {2}"
+    },
+    {
+      "key": "editor.MUIDashboard.1cf88f53d4",
+      "text": " Inspect page gates and native control click eligibility separately."
+    },
+    {
+      "key": "editor.MUIDashboard.1e5827d7eb",
+      "text": "Not initialized"
+    },
+    {
+      "key": "editor.MUIDashboard.329dce8f48",
+      "text": "No UIHost in the current scene."
+    },
+    {
+      "key": "editor.MUIDashboard.6015cd5b5f",
+      "text": "Captured at {0} · Host shutdown {1} · Version {2}\n"
+    },
+    {
+      "key": "editor.MUIDashboard.788f44b794",
+      "text": "MUI Dashboard"
+    },
+    {
+      "key": "editor.MUIDashboard.7d7704c517",
+      "text": "Configuration is editable. Runtime snapshots require Play Mode and host initialization."
+    },
+    {
+      "key": "editor.MUIDashboard.8c72555563",
+      "text": " Snapshot is truncated."
+    },
+    {
+      "key": "editor.MUIDashboard.Configuration.02c27b7054",
+      "text": "No settings asset selected."
+    },
+    {
+      "key": "editor.MUIDashboard.Configuration.08f8a4af53",
+      "text": "Create MUI Settings"
+    },
+    {
+      "key": "editor.MUIDashboard.Configuration.29a1fe691e",
+      "text": "Select a UIHost in the scene first."
+    },
+    {
+      "key": "editor.MUIDashboard.Configuration.4b62703008",
+      "text": "Recording {0} · Retained {1}/{2} · Overwritten {3} · Dropped notifications {4}"
+    },
+    {
+      "key": "editor.MUIDashboard.Configuration.735d2beebb",
+      "text": "Choose where to save the settings asset"
+    },
+    {
+      "key": "editor.MUIDashboard.Configuration.a4664c33b1",
+      "text": "Host settings assigned. Use host.ResolvePolicy(...) or pass host.Settings when creating routes."
+    },
+    {
+      "key": "editor.MUIDashboard.Configuration.baf3aacd5d",
+      "text": "Use the asset picker above or Create Configuration. Hosts without an asset use the built-in defaults."
+    },
+    {
+      "key": "editor.MUIDashboard.Configuration.d4116b321f",
+      "text": "Enter Play Mode and initialize the host before capturing the timeline."
+    },
+    {
+      "key": "editor.MUIDashboard.Configuration.d81da0cfb4",
+      "text": "Stop Play Mode before assigning host settings."
+    },
+    {
+      "key": "editor.MUIDashboard.Configuration.dd9a6ee5a2",
+      "text": "Settings validation passed."
+    },
+    {
+      "key": "editor.MUIDashboard.Configuration.f5a41d1927",
+      "text": "No trace snapshot · Closing this window does not stop recording"
+    },
+    {
+      "key": "editor.MUIDashboard.Pages.0d996b74d4",
+      "text": "Diagnostic {0:N} · {1}"
+    },
+    {
+      "key": "editor.MUIDashboard.Pages.179b91a07b",
+      "text": "Multiple instances {0} · Limit {1} · Overflow {2} · Existing instance {3}\n"
+    },
+    {
+      "key": "editor.MUIDashboard.Pages.1a7b45484e",
+      "text": "Locate page and open View Inspector"
+    },
+    {
+      "key": "editor.MUIDashboard.Pages.1d9b547915",
+      "text": "Dependencies and owners"
+    },
+    {
+      "key": "editor.MUIDashboard.Pages.24c1f7ab67",
+      "text": "Open history (oldest first)"
+    },
+    {
+      "key": "editor.MUIDashboard.Pages.32fa308cb7",
+      "text": "Explicit owner {0} · Parent owners {1} · Direct dependencies {2}"
+    },
+    {
+      "key": "editor.MUIDashboard.Pages.364909905c",
+      "text": "First readiness {0} · Degraded {1} · Failed {2}"
+    },
+    {
+      "key": "editor.MUIDashboard.Pages.36ecf025c0",
+      "text": "Input blocker reasons are truncated."
+    },
+    {
+      "key": "editor.MUIDashboard.Pages.3a3912b23e",
+      "text": "Owner"
+    },
+    {
+      "key": "editor.MUIDashboard.Pages.3b0f2c1681",
+      "text": "Display position {0} · Layer {1} ({2}) · Navigation order {3}\n"
+    },
+    {
+      "key": "editor.MUIDashboard.Pages.452c7b10d5",
+      "text": "Page"
+    },
+    {
+      "key": "editor.MUIDashboard.Pages.498b52a901",
+      "text": "Unconfirmed cleanup responsibilities"
+    },
+    {
+      "key": "editor.MUIDashboard.Pages.7409a60806",
+      "text": "Unspecified"
+    },
+    {
+      "key": "editor.MUIDashboard.Pages.74ae6efb2d",
+      "text": "Use the located View Inspector for binding validation, resource key slots and native raycast inspection."
+    },
+    {
+      "key": "editor.MUIDashboard.Pages.7767404865",
+      "text": "Dependency"
+    },
+    {
+      "key": "editor.MUIDashboard.Pages.7cdf69142a",
+      "text": "Alive {0} · Hierarchy active {1} · Visible {2} · Input eligible {3}"
+    },
+    {
+      "key": "editor.MUIDashboard.Pages.81145b2e23",
+      "text": "Responsibility {0:N} · {1} · {2} · Attempts {3} · Retryable {4}\n{5}"
+    },
+    {
+      "key": "editor.MUIDashboard.Pages.81dfa1082d",
+      "text": "Hidden by"
+    },
+    {
+      "key": "editor.MUIDashboard.Pages.843ed771bf",
+      "text": "Code configuration"
+    },
+    {
+      "key": "editor.MUIDashboard.Pages.92d0953bb6",
+      "text": "Parent owners are truncated; this view retains the first 128 entries."
+    },
+    {
+      "key": "editor.MUIDashboard.Pages.9436cba475",
+      "text": "Resource preparation: total {0} · Pending {1} · Failed {2} · Committed {3}"
+    },
+    {
+      "key": "editor.MUIDashboard.Pages.98d5200f51",
+      "text": "Not published"
+    },
+    {
+      "key": "editor.MUIDashboard.Pages.a69ef9d4c5",
+      "text": "Capture page input and resource preparation"
+    },
+    {
+      "key": "editor.MUIDashboard.Pages.a800e96c6e",
+      "text": "Host "
+    },
+    {
+      "key": "editor.MUIDashboard.Pages.b4929391ad",
+      "text": "Focus"
+    },
+    {
+      "key": "editor.MUIDashboard.Pages.b69ebb0273",
+      "text": "Local input blockers {0} · Disposed {1}"
+    },
+    {
+      "key": "editor.MUIDashboard.Pages.ba126df79f",
+      "text": "Cache {0} · Tick pause {1} · Prepare timeout {2}s · Cleanup timeout {3}s"
+    },
+    {
+      "key": "editor.MUIDashboard.Pages.bba38edb8b",
+      "text": "The page has no native View yet or has closed; capture again."
+    },
+    {
+      "key": "editor.MUIDashboard.Pages.c67c6dbd0d",
+      "text": "Input blocked by"
+    },
+    {
+      "key": "editor.MUIDashboard.Pages.cc6eee6c18",
+      "text": "Resource preparation entries are truncated."
+    },
+    {
+      "key": "editor.MUIDashboard.Pages.cef9cad2de",
+      "text": "Resolved policy"
+    },
+    {
+      "key": "editor.MUIDashboard.Pages.d2d0fcf76e",
+      "text": "State {0} · Cleanup {1} · Operations {2}\nResource {3} / {4}"
+    },
+    {
+      "key": "editor.MUIDashboard.Pages.d7d27662cb",
+      "text": "Numeric layer"
+    },
+    {
+      "key": "editor.MUIDashboard.Pages.d9ccaad9e7",
+      "text": "Local visibility {0} · Local input allowed {1} · Restrictions {2}"
+    },
+    {
+      "key": "editor.MUIDashboard.Pages.dac2379812",
+      "text": "Configuration {0} · Preset {1}\n"
+    },
+    {
+      "key": "editor.MUIDashboard.Pages.dbc43ed047",
+      "text": "This page is not in the snapshot; capture again."
+    },
+    {
+      "key": "editor.MUIDashboard.Pages.e0d917c75f",
+      "text": "Host visible {0} · Host input allowed {1} · Focus {2}"
+    },
+    {
+      "key": "editor.MUIDashboard.Pages.eb0abcb297",
+      "text": "Native page captured at {0:HH:mm:ss}\n"
+    },
+    {
+      "key": "editor.MUIDashboard.Pages.ec9b640602",
+      "text": "Page View is unavailable; capture again."
+    },
+    {
+      "key": "editor.MUIDashboard.Pages.f017a89dcd",
+      "text": "Coverage {0} · Modal {1} · Takes focus {2} · Back {3}\n"
+    },
+    {
+      "key": "editor.MUIDashboard.Pages.f554f1a3bf",
+      "text": ": None"
+    },
+    {
+      "key": "editor.MUIDashboard.Pages.fcab780068",
+      "text": "Preparation complete {0} · Activation committed {1} · Running commands {2}\n"
+    },
+    {
+      "key": "editor.MUIDashboard.Pages.ff516ae1fc",
+      "text": "Handle {0}\nCommit version {1} · History index {2} · Dependency degradation {3}"
+    },
+    {
+      "key": "editor.MUIDashboard.Report.090aca7127",
+      "text": "#{0} {1} · {2} · Display position {3} · Layer {4}"
+    },
+    {
+      "key": "editor.MUIDashboard.Report.2aadcc0c7c",
+      "text": "Visible {0} · Interactable {1} · Focus {2} · Hidden by #{3} · Input blocked by #{4}"
+    },
+    {
+      "key": "editor.MUIDashboard.Report.516bc8adb6",
+      "text": "Configuration {0} · Preset {1} · Layer {2} · Coverage {3} · Modal {4}"
+    },
+    {
+      "key": "editor.MUIDashboard.Report.7409a60806",
+      "text": "Unspecified"
+    },
+    {
+      "key": "editor.MUIDashboard.Report.8d5d681c62",
+      "text": "Open history (oldest first):"
+    },
+    {
+      "key": "editor.MUIDashboard.Report.a800e96c6e",
+      "text": "Host "
+    },
+    {
+      "key": "editor.MUIDashboard.Report.ae0eb0ae7a",
+      "text": "Responsibility {0:N} · {1} · {2} · Diagnostic {3:N}"
+    },
+    {
+      "key": "editor.MUIDashboard.Report.d5bb561464",
+      "text": "Pages by display position (top first):"
+    },
+    {
+      "key": "editor.MUIDashboard.Report.dc709181e1",
+      "text": "Truncated: instances {0} · History {1} · Cleanup responsibilities {2}"
+    },
+    {
+      "key": "editor.MUIDashboard.bd66520cbe",
+      "text": "A transition or commit is in progress; navigation state is not settled."
+    },
+    {
+      "key": "editor.MUIDashboard.c3f11760c5",
+      "text": "#{0} {1}\nLayer {2} · {3} · Focus {4}"
+    },
+    {
+      "key": "editor.MUIDashboard.c6d125d5b7",
+      "text": "Initialized"
+    },
+    {
+      "key": "editor.MUIDashboard.ced796a048",
+      "text": "Pages {0}/{1} · History {2}/{3} · Focus #{4}\n"
+    },
+    {
+      "key": "editor.MUIDashboard.edf200a690",
+      "text": "Navigation state is settled."
+    },
+    {
+      "key": "editor.MUIDashboard.f0f6586364",
+      "text": "Cleanup timed out {0} · Unconfirmed responsibilities {1} · Previous cleanup failures {2}"
+    },
+    {
+      "key": "editor.MUIDashboard.fbfc4d6291",
+      "text": "Pending requests {0} · Posted {1} · Cached {2} · Cache releases {3} · Preloads {4}\n"
+    },
+    {
+      "key": "editor.MUISettingsInspector.3404498efd",
+      "text": "Project defaults, presets and explicit overrides determine the final policy. Only enabled override fields replace defaults; named layers resolve to orders from the layer list."
+    },
+    {
+      "key": "editor.MUISettingsInspector.b26286234b",
+      "text": "Validate settings"
+    },
+    {
+      "key": "editor.MUISettingsInspector.dd9a6ee5a2",
+      "text": "Settings validation passed."
+    },
+    {
+      "key": "editor.NotificationsElementValidation.143a5b79bd",
+      "text": "Notification message Text is missing: {0}."
+    },
+    {
+      "key": "editor.NotificationsElementValidation.71eae1a677",
+      "text": "{0} must be {1} its indicator: {2}."
+    },
+    {
+      "key": "editor.NotificationsElementValidation.7b34326d17",
+      "text": "Dismiss button"
+    },
+    {
+      "key": "editor.NotificationsElementValidation.c6205dce35",
+      "text": "Indicator must be a strict child of the adapter: {0}."
+    },
+    {
+      "key": "editor.NotificationsElementValidation.ee5ca91704",
+      "text": "a strict child of"
+    },
+    {
+      "key": "editor.OverlayPrefabWizard.28d14ed8ee",
+      "text": "Could not save overlay Prefab."
+    },
+    {
+      "key": "editor.OverlayPrefabWizard.28ea9043a7",
+      "text": "Destination was created while preparing the Prefab."
+    },
+    {
+      "key": "editor.OverlayPrefabWizard.3d439e23e6",
+      "text": "Create MUI "
+    },
+    {
+      "key": "editor.OverlayPrefabWizard.43e83309d7",
+      "text": "MUI will not overwrite an existing Prefab. Choose a new path."
+    },
+    {
+      "key": "editor.OverlayPrefabWizard.613a9a6df1",
+      "text": "Tooltip message"
+    },
+    {
+      "key": "editor.OverlayPrefabWizard.a587f03b9b",
+      "text": "Choose a new Prefab path."
+    },
+    {
+      "key": "editor.OverlayPrefabWizard.da2eb576b5",
+      "text": "Primary action"
+    },
+    {
+      "key": "editor.OverlayPrefabWizard.dbdebc5676",
+      "text": "Secondary action"
+    },
+    {
+      "key": "editor.PageAssemblyInspection.0015a79466",
+      "text": "Multiple assembly definitions or references in the target ancestor directory: "
+    },
+    {
+      "key": "editor.PageAssemblyInspection.11f11aca60",
+      "text": "Could not inspect the target assembly: "
+    },
+    {
+      "key": "editor.PageAssemblyInspection.210d456125",
+      "text": "Missing assembly references: "
+    },
+    {
+      "key": "editor.PageAssemblyInspection.2737b0424d",
+      "text": "The current compiler options do not include MUI.Generators.dll. Check its RoslynAnalyzer label and scope."
+    },
+    {
+      "key": "editor.PageAssemblyInspection.38e6e62259",
+      "text": "The target assembly only includes the Editor platform. Select a runtime assembly directory."
+    },
+    {
+      "key": "editor.PageAssemblyInspection.5d3a39daa3",
+      "text": "The target is an Editor-only assembly. Create game pages in a runtime assembly directory."
+    },
+    {
+      "key": "editor.PageAssemblyInspection.840967a1d8",
+      "text": "Could not resolve the assembly reference: "
+    },
+    {
+      "key": "editor.PageAssemblyInspection.c754dd93d7",
+      "text": "The assembly reference file has no valid reference."
+    },
+    {
+      "key": "editor.PageAssemblyInspection.c7e47c0af2",
+      "text": "The target assembly disables engine references and cannot generate bindings for Unity controls."
+    },
+    {
+      "key": "editor.PageAssemblyInspection.e652119992",
+      "text": "No usable compilation snapshot is available; the assembly may be empty or disabled by platform or defines. References and the generator are unverified; check Unity compilation after creation."
+    },
+    {
+      "key": "editor.PageAssemblyInspection.e80c02e5ee",
+      "text": "The assembly definition has no valid name."
+    },
+    {
+      "key": "editor.PageTextBackend.19baaca2f4",
+      "text": "uGUI Text"
+    },
+    {
+      "key": "editor.PageTextBackend.36e1635db2",
+      "text": "Text Elements must be public, concrete, non-nested, nongeneric types with a readable and writable string Content property."
+    },
+    {
+      "key": "editor.PageTextBackend.865c6e02de",
+      "text": "The text template did not return a correctly parented and named control."
+    },
+    {
+      "key": "editor.PageTextBackend.ce0434eb31",
+      "text": "Text template identifier is already registered: "
+    },
+    {
+      "key": "editor.PageTextBackend.cff54d9fa2",
+      "text": "Text templates require stable identifiers and display names."
+    },
+    {
+      "key": "editor.PageWizard.0156b77f5b",
+      "text": "Creation failed; the new directory was removed. Inspect the Console."
+    },
+    {
+      "key": "editor.PageWizard.02149f5808",
+      "text": "View' and use "
+    },
+    {
+      "key": "editor.PageWizard.03c3f68152",
+      "text": "Built-in defaults"
+    },
+    {
+      "key": "editor.PageWizard.0680c075b1",
+      "text": "Could not save the View Prefab."
+    },
+    {
+      "key": "editor.PageWizard.0706f9cb0a",
+      "text": "Page policy"
+    },
+    {
+      "key": "editor.PageWizard.19288123a4",
+      "text": "Typed arguments and results"
+    },
+    {
+      "key": "editor.PageWizard.1fa1a10b63",
+      "text": "Configuration source"
+    },
+    {
+      "key": "editor.PageWizard.245afa969c",
+      "text": "Page names may contain letters, digits and underscores and cannot start with a digit."
+    },
+    {
+      "key": "editor.PageWizard.275da80635",
+      "text": "Page.CreateRoute(host.Settings). Add a completion command for typed results in project code."
+    },
+    {
+      "key": "editor.PageWizard.2ed479b29e",
+      "text": "Select an existing directory under Assets."
+    },
+    {
+      "key": "editor.PageWizard.3715f68b64",
+      "text": "Route policy"
+    },
+    {
+      "key": "editor.PageWizard.38e702fab3",
+      "text": "Existing asset: "
+    },
+    {
+      "key": "editor.PageWizard.3fd47edce4",
+      "text": "Close"
+    },
+    {
+      "key": "editor.PageWizard.4d0f13b4e9",
+      "text": "Resolved policy"
+    },
+    {
+      "key": "editor.PageWizard.4d698da8c0",
+      "text": "Existing parent directory"
+    },
+    {
+      "key": "editor.PageWizard.4f3f610097",
+      "text": "Creation and cleanup both failed; inspect the new directory: "
+    },
+    {
+      "key": "editor.PageWizard.534ad4e758",
+      "text": "Text backend"
+    },
+    {
+      "key": "editor.PageWizard.576a4a3ca2",
+      "text": "Created "
+    },
+    {
+      "key": "editor.PageWizard.593bb3ad77",
+      "text": "Create a page directory, Prefab and editable source. The target assembly requires MUI.Core, MUI.Resources, MUI.Navigation, MUI.UGUI and the binding generator; TMP also requires MUI.TMP. Place the Prefab under a UIHost Canvas and register its resource key with the provider or host catalog. Page lifecycles use asynchronous APIs; local preparation can complete immediately."
+    },
+    {
+      "key": "editor.PageWizard.5a814a8beb",
+      "text": "MUI Page Wizard"
+    },
+    {
+      "key": "editor.PageWizard.7fe8b9bce7",
+      "text": "Pass UIHost.Settings when creating the route. Settings are resolved at creation; active pages retain their existing policy."
+    },
+    {
+      "key": "editor.PageWizard.89b4e4e0de",
+      "text": "{0} ({1}) / {2} / Modal={3}"
+    },
+    {
+      "key": "editor.PageWizard.8a83cce53b",
+      "text": "Files to create"
+    },
+    {
+      "key": "editor.PageWizard.Assembly.06a3c25a58",
+      "text": "Assembly definition"
+    },
+    {
+      "key": "editor.PageWizard.Assembly.3a7158af88",
+      "text": "Recheck assembly configuration"
+    },
+    {
+      "key": "editor.PageWizard.Assembly.4eaf225048",
+      "text": "Undetermined"
+    },
+    {
+      "key": "editor.PageWizard.Assembly.aeb3fe5fac",
+      "text": "Target assembly"
+    },
+    {
+      "key": "editor.PageWizard.Assembly.b3f8667ef3",
+      "text": "The current compilation snapshot contains required references and the binding generator; generated source still needs to compile."
+    },
+    {
+      "key": "editor.PageWizard.ExistingView.2585437490",
+      "text": "Graphics in noninteractive notices must disable Raycast Target; the existing Prefab will not be modified automatically."
+    },
+    {
+      "key": "editor.PageWizard.ExistingView.358fc7efeb",
+      "text": "Reuse the original Prefab and generate source in the new page directory. Select its text backend; the original asset is not modified. Map the page resource key to this Prefab after creation."
+    },
+    {
+      "key": "editor.PageWizard.ExistingView.36ea1f9e66",
+      "text": "Enter the title and close button Element names from the original Prefab."
+    },
+    {
+      "key": "editor.PageWizard.ExistingView.593ff81861",
+      "text": "Existing View (optional)"
+    },
+    {
+      "key": "editor.PageWizard.ExistingView.885a18c4c8",
+      "text": "Noninteractive notices cannot contain Selectable controls; the existing Prefab will not be modified automatically."
+    },
+    {
+      "key": "editor.PageWizard.ExistingView.9267775c67",
+      "text": "Close button Element name"
+    },
+    {
+      "key": "editor.PageWizard.ExistingView.b0b19dece0",
+      "text": "Existing View validation failed: "
+    },
+    {
+      "key": "editor.PageWizard.ExistingView.b5f1d7bd40",
+      "text": "The existing Prefab root must contain View and RectTransform."
+    },
+    {
+      "key": "editor.PageWizard.ExistingView.d95a7db4f5",
+      "text": "Select a regular Prefab or Variant root asset. Scene objects, models and child nodes are not accepted."
+    },
+    {
+      "key": "editor.PageWizard.ExistingView.e7310d8579",
+      "text": "The existing Prefab does not match the page scaffold contract:\n"
+    },
+    {
+      "key": "editor.PageWizard.ExistingView.f7f2eaad00",
+      "text": "Title Element name"
+    },
+    {
+      "key": "editor.PageWizard.b93a5d933f",
+      "text": "The page directory already exists. Change the name or parent directory; existing contents will not be overwritten."
+    },
+    {
+      "key": "editor.PageWizard.b96a4455b0",
+      "text": "Could not create the page directory."
+    },
+    {
+      "key": "editor.PageWizard.c37f7fe785",
+      "text": "MUI settings"
+    },
+    {
+      "key": "editor.PageWizard.c8e5200b74",
+      "text": "Namespaces must consist of valid identifiers separated by dots."
+    },
+    {
+      "key": "editor.PageWizard.ca7dc34857",
+      "text": "Could not create a page subdirectory."
+    },
+    {
+      "key": "editor.PageWizard.cb599b951d",
+      "text": ". Register resource key '"
+    },
+    {
+      "key": "editor.PageWizard.cf209c44b1",
+      "text": "Create Presenter"
+    },
+    {
+      "key": "editor.PageWizard.db772f3ff7",
+      "text": "Namespace"
+    },
+    {
+      "key": "editor.PageWizard.dd8fd8a18e",
+      "text": "Page name"
+    },
+    {
+      "key": "editor.PageWizard.e3acd6e42a",
+      "text": "The selected text template is unavailable; enable its module or select another."
+    },
+    {
+      "key": "editor.PageWizard.f6f87e2c80",
+      "text": "Create page"
+    },
+    {
+      "key": "editor.RouteGraphSnapshot.01c47b74d0",
+      "text": "Not captured"
+    },
+    {
+      "key": "editor.RouteGraphSnapshot.158410a533",
+      "text": "Captured: {0}; statically valid: {1}; total nodes: {2}; truncated: {3}"
+    },
+    {
+      "key": "editor.RouteGraphSnapshot.51cb866ffa",
+      "text": "Invalid target"
+    },
+    {
+      "key": "editor.RouteGraphSnapshot.537352400c",
+      "text": "Optional"
+    },
+    {
+      "key": "editor.RouteGraphSnapshot.726b6750c3",
+      "text": "Multiple={0}, limit={1}, focus={2}, cache={3}"
+    },
+    {
+      "key": "editor.RouteGraphSnapshot.92707d3318",
+      "text": "Required"
+    },
+    {
+      "key": "editor.RouteGraphSnapshot.9cc9fa8b20",
+      "text": "MUI route dependency graph: {0}"
+    },
+    {
+      "key": "editor.RouteGraphSnapshot.9d4ce01625",
+      "text": "#{0} {1} | Layer={2} | {3}"
+    },
+    {
+      "key": "editor.RouteGraphSnapshot.b375d3caee",
+      "text": "This report does not verify runtime arguments, resource availability or sharing across roots."
+    },
+    {
+      "key": "editor.RouteGraphSnapshot.c4d58b520a",
+      "text": "Error {0} / {1}: {2}"
+    },
+    {
+      "key": "editor.RouteGraphWindow.0133cebb0b",
+      "text": "Dependency graph template is missing: "
+    },
+    {
+      "key": "editor.RouteGraphWindow.Details.01c47b74d0",
+      "text": "Not captured"
+    },
+    {
+      "key": "editor.RouteGraphWindow.Details.273b96485f",
+      "text": "Invalid placement: "
+    },
+    {
+      "key": "editor.RouteGraphWindow.Details.2d40633e66",
+      "text": "Parent owners (pointing to this route)"
+    },
+    {
+      "key": "editor.RouteGraphWindow.Details.404b2b7b9c",
+      "text": "No parent owners in this root's reachable graph."
+    },
+    {
+      "key": "editor.RouteGraphWindow.Details.40e06e6a94",
+      "text": "Display across layers follows Layer order"
+    },
+    {
+      "key": "editor.RouteGraphWindow.Details.4804324f1f",
+      "text": "No direct dependencies."
+    },
+    {
+      "key": "editor.RouteGraphWindow.Details.5853629b17",
+      "text": "Required; failure closes the parent chain"
+    },
+    {
+      "key": "editor.RouteGraphWindow.Details.5e80d84deb",
+      "text": "Layer: {0}"
+    },
+    {
+      "key": "editor.RouteGraphWindow.Details.655f0f0b1a",
+      "text": "Resource: {0}"
+    },
+    {
+      "key": "editor.RouteGraphWindow.Details.695a39529f",
+      "text": "Direct dependencies (from this route)"
+    },
+    {
+      "key": "editor.RouteGraphWindow.Details.76f5a111c9",
+      "text": "Static issues in this graph"
+    },
+    {
+      "key": "editor.RouteGraphWindow.Details.7cbe752ca7",
+      "text": "After parent"
+    },
+    {
+      "key": "editor.RouteGraphWindow.Details.840cc3e250",
+      "text": "Parent owners → current route → direct dependencies. Click a relation to navigate; numbered entries distinguish definitions with the same key."
+    },
+    {
+      "key": "editor.RouteGraphWindow.Details.936ac0c9d9",
+      "text": "This snapshot is truncated and relations may be incomplete. The copied report includes captured relations and truncation markers."
+    },
+    {
+      "key": "editor.RouteGraphWindow.Details.9b73c23f45",
+      "text": "{0} relations; showing the first {1}. Copy the report to inspect other captured relations."
+    },
+    {
+      "key": "editor.RouteGraphWindow.Details.a4c1e252ea",
+      "text": "Before parent"
+    },
+    {
+      "key": "editor.RouteGraphWindow.Details.d3fc914f82",
+      "text": "Same-layer dependencies constrain order"
+    },
+    {
+      "key": "editor.RouteGraphWindow.Details.d5adb4d085",
+      "text": "Optional; missing dependencies allow degraded operation"
+    },
+    {
+      "key": "editor.RouteGraphWindow.Details.efbcfd92f1",
+      "text": "No static declaration errors found; runtime arguments and resources still require verification."
+    },
+    {
+      "key": "editor.RouteGraphWindow.a55f3f74c9",
+      "text": " · Snapshot or issue list is truncated; this is not the complete graph"
+    },
+    {
+      "key": "editor.RouteGraphWindow.a5db00d95d",
+      "text": "Static validation passed"
+    },
+    {
+      "key": "editor.RouteGraphWindow.afa6c08140",
+      "text": "#{0} {1}\nLayer {2}"
+    },
+    {
+      "key": "editor.RouteGraphWindow.be20609b83",
+      "text": "MUI Route Dependencies"
+    },
+    {
+      "key": "editor.RouteGraphWindow.ce2152f7d4",
+      "text": "Static errors found"
+    },
+    {
+      "key": "editor.RouteGraphWindow.dd7478c175",
+      "text": "{0} · Nodes {1}/{2} · Edges {3} · Issues {4} · {5}"
+    },
+    {
+      "key": "editor.RouteGraphWindow.efe8e45d2f",
+      "text": "No route metadata captured."
+    },
+    {
+      "key": "editor.RouteGraphWindow.fbc36492c3",
+      "text": "Provide 1 to 32 route roots."
+    },
+    {
+      "key": "editor.TMPElementValidation.1a3adba300",
+      "text": "TMP input text must be a descendant of its viewport"
+    },
+    {
+      "key": "editor.TMPElementValidation.1ca7e4bdba",
+      "text": "TMP input placeholder cannot also be the editable text"
+    },
+    {
+      "key": "editor.TMPElementValidation.1d8c5c36f6",
+      "text": "TMP input text viewport is missing"
+    },
+    {
+      "key": "editor.TMPElementValidation.1df8e0ccfc",
+      "text": "TMP input text viewport must belong to its hierarchy"
+    },
+    {
+      "key": "editor.TMPElementValidation.1f32665973",
+      "text": "TMP input placeholder reference cannot cross a View boundary"
+    },
+    {
+      "key": "editor.TMPElementValidation.2de1131ac8",
+      "text": "TMP input viewport reference cannot cross a View boundary"
+    },
+    {
+      "key": "editor.TMPElementValidation.4969873d55",
+      "text": "TMP input requires TMP_InputField"
+    },
+    {
+      "key": "editor.TMPElementValidation.5e17708354",
+      "text": "TMP text requires TextMeshProUGUI on the same object"
+    },
+    {
+      "key": "editor.TMPElementValidation.8b054a99fa",
+      "text": "TMP input placeholder must belong to its viewport"
+    },
+    {
+      "key": "editor.TMPElementValidation.e476e0fbaf",
+      "text": "TMP input text component is missing"
+    },
+    {
+      "key": "editor.TMPElementValidation.e88edcb824",
+      "text": "TMP dropdown requires TMP_Dropdown"
+    },
+    {
+      "key": "editor.TMPElementValidation.fbfd3003d5",
+      "text": "TMP input text reference cannot cross a View boundary"
+    },
+    {
+      "key": "editor.TMPElementValidation.fd176822a0",
+      "text": "TMP input requires a uGUI text component"
+    },
+    {
+      "key": "editor.TMPPageTextBackend.539eed99df",
+      "text": "Import TMP Essential Resources and configure a saved default font asset in TMP Settings first."
+    },
+    {
+      "key": "editor.TabsElementValidation.00d63bf64b",
+      "text": "Tab buttons must be children of TabBar and cannot also be templates: {0}, key '{1}'."
+    },
+    {
+      "key": "editor.TabsElementValidation.00fb482d2d",
+      "text": "TabBar must follow the sibling content area to appear above it: {0}."
+    },
+    {
+      "key": "editor.TabsElementValidation.33893eed55",
+      "text": "Retry button"
+    },
+    {
+      "key": "editor.TabsElementValidation.3e961f144a",
+      "text": "Tab button templates cannot contain persistent click listeners: {0}."
+    },
+    {
+      "key": "editor.TabsElementValidation.4996565283",
+      "text": "Content Canvas cannot enable Override Sorting: {0}."
+    },
+    {
+      "key": "editor.TabsElementValidation.58094f5945",
+      "text": "Loading indicator"
+    },
+    {
+      "key": "editor.TabsElementValidation.72d62d1409",
+      "text": "A Button cannot serve multiple tab entries: {0}, key '{1}'."
+    },
+    {
+      "key": "editor.TabsElementValidation.8c7ec59497",
+      "text": "Error message"
+    },
+    {
+      "key": "editor.TabsElementValidation.904f504969",
+      "text": "Tab keys must be nonempty and unique: {0}, key '{1}'."
+    },
+    {
+      "key": "editor.TabsElementValidation.a5417c403b",
+      "text": "Tab entry has no Button: {0}, key '{1}'."
+    },
+    {
+      "key": "editor.TabsElementValidation.b0057ac28f",
+      "text": "Async content requires a child ContentHost: {0}."
+    },
+    {
+      "key": "editor.TabsElementValidation.c4c7744b46",
+      "text": "Selection marks must be strict children of their tab buttons: {0}, key '{1}'."
+    },
+    {
+      "key": "editor.TabsElementValidation.d12c877d65",
+      "text": "Tab button templates must remain inactive: {0}."
+    },
+    {
+      "key": "editor.TabsElementValidation.d8253c485e",
+      "text": "Tab button templates cannot contain MUI View or Element components: {0}."
+    },
+    {
+      "key": "editor.TabsElementValidation.e307f11e2f",
+      "text": "{0} must be inside the content area, outside ContentHost, and cannot contain ContentHost: {1}."
+    },
+    {
+      "key": "editor.UIBuildCatalog.3b1f870adc",
+      "text": "A UI build catalog may register at most 2048 pages."
+    },
+    {
+      "key": "editor.UIBuildCatalog.90e3c22510",
+      "text": "Build catalog capture has already ended."
+    },
+    {
+      "key": "editor.UIBuildCatalog.92487267c4",
+      "text": "Build pages must supply a route, Prefab and binding Manifest."
+    },
+    {
+      "key": "editor.UIBuildCatalog.b403f3aa8b",
+      "text": "A route cannot be registered twice in a build catalog: "
+    },
+    {
+      "key": "editor.UIBuildCatalog.c378f5ca0a",
+      "text": "The binding Manifest model type does not match the route."
+    },
+    {
+      "key": "editor.UIBuildValidation.061c7b88d2",
+      "text": ": dependency route has no registered Prefab/Manifest: "
+    },
+    {
+      "key": "editor.UIBuildValidation.06e2bd7c7c",
+      "text": "Prefab root is missing View or RectTransform."
+    },
+    {
+      "key": "editor.UIBuildValidation.20787e9cdf",
+      "text": "UI build validation cannot be reentrant."
+    },
+    {
+      "key": "editor.UIBuildValidation.4a2b85f80b",
+      "text": "UI build catalog registration cannot change during validation."
+    },
+    {
+      "key": "editor.UIBuildValidation.81196b916d",
+      "text": ": registered catalog contains no pages."
+    },
+    {
+      "key": "editor.UIBuildValidation.83ee63aae8",
+      "text": ": route graph issues are truncated. Fix current issues and validate again."
+    },
+    {
+      "key": "editor.UIBuildValidation.90508dc602",
+      "text": "Catalogs require an identifier of at most 128 characters and a capture callback."
+    },
+    {
+      "key": "editor.UIBuildValidation.99a69df3cd",
+      "text": ": a resource key and version refer to different Prefabs: "
+    },
+    {
+      "key": "editor.UIBuildValidation.a776bc1b72",
+      "text": ": catalog capture or validation failed: "
+    },
+    {
+      "key": "editor.UIBuildValidation.c935d0e33a",
+      "text": "Pages must reference regular or Variant Prefab root assets."
+    },
+    {
+      "key": "editor.UIBuildValidation.e213655721",
+      "text": ": different routes use the same key: "
+    },
+    {
+      "key": "editor.UIBuildValidation.fcab6aa44c",
+      "text": "UI build catalog count exceeds 32."
+    },
+    {
+      "key": "editor.UIBuildValidationReport.0dbf27f994",
+      "text": "No UI build catalog registered; project page coverage was not verified."
+    },
+    {
+      "key": "editor.UIBuildValidationReport.0fb3e9344a",
+      "text": ", pages "
+    },
+    {
+      "key": "editor.UIBuildValidationReport.60b24dd7ab",
+      "text": "Issues exceed the report limit and further details are omitted; validation fails."
+    },
+    {
+      "key": "editor.UIBuildValidationReport.b79876b776",
+      "text": "MUI build validation: catalogs "
+    },
+    {
+      "key": "editor.UIBuildValidationReport.c636b7b038",
+      "text": ", routes "
+    },
+    {
+      "key": "editor.UIHostInspector.07564e6524",
+      "text": "Not initialized"
+    },
+    {
+      "key": "editor.UIHostInspector.0760284bc7",
+      "text": "Automatically Update UI"
+    },
+    {
+      "key": "editor.UIHostInspector.15bfd7c74a",
+      "text": "Node used by the default provider to mount pages. If empty, the host RectTransform is used."
+    },
+    {
+      "key": "editor.UIHostInspector.20fe85fc53",
+      "text": "Edit Mode"
+    },
+    {
+      "key": "editor.UIHostInspector.2b9aba6e39",
+      "text": "Prefabs"
+    },
+    {
+      "key": "editor.UIHostInspector.6447c4dd81",
+      "text": "View Root"
+    },
+    {
+      "key": "editor.UIHostInspector.652ac53466",
+      "text": "Open Dashboard"
+    },
+    {
+      "key": "editor.UIHostInspector.6a909f3547",
+      "text": "Project default policies and layers; assign before host initialization."
+    },
+    {
+      "key": "editor.UIHostInspector.74a883a037",
+      "text": "Settings"
+    },
+    {
+      "key": "editor.UIHostInspector.899df7e244",
+      "text": "Shutdown"
+    },
+    {
+      "key": "editor.UIHostInspector.900d3819f9",
+      "text": "Local Prefab catalog"
+    },
+    {
+      "key": "editor.UIHostInspector.c27f372ac4",
+      "text": "Automatically process UI requests and update UI logic each frame. When disabled, call UIHost.AdvanceFrame from code."
+    },
+    {
+      "key": "editor.UIHostInspector.c6d125d5b7",
+      "text": "Initialized"
+    },
+    {
+      "key": "editor.UIHostInspector.cd9b6f27a4",
+      "text": "The default provider loads pages from this catalog. Projects using an external provider manage their own resources."
+    },
+    {
+      "key": "editor.UIHostInspector.d6e61888b0",
+      "text": "Advanced"
+    },
+    {
+      "key": "editor.UIHostInspector.f23309c686",
+      "text": "Built-in default settings"
+    },
+    {
+      "key": "editor.UIIncrementalValidation.06bf605b8a",
+      "text": "MUI incremental validation:\n"
+    },
+    {
+      "key": "editor.ViewContractValidator.0961434628",
+      "text": "CanvasGroup.ignoreParentGroups can bypass host input gates: {0}."
+    },
+    {
+      "key": "editor.ViewContractValidator.1c85e45608",
+      "text": "DropdownElement requires a native Dropdown: {0}."
+    },
+    {
+      "key": "editor.ViewContractValidator.36fab33a6d",
+      "text": "Multiple reverse writers for {0}: {1}, {2}. Use one input binding or explicit business coordination."
+    },
+    {
+      "key": "editor.ViewContractValidator.654d03c722",
+      "text": "FillAmount binding requires a Filled Image: {0}."
+    },
+    {
+      "key": "editor.ViewContractValidator.6853150e20",
+      "text": "Control binding policy returned an empty write target."
+    },
+    {
+      "key": "editor.ViewContractValidator.70a6c57f8d",
+      "text": "Invalid text input commit mode: {0}."
+    },
+    {
+      "key": "editor.ViewContractValidator.71f7f7caaa",
+      "text": "ScrollRect viewport must belong to its hierarchy: {0}."
+    },
+    {
+      "key": "editor.ViewContractValidator.7d3464be21",
+      "text": "Ambiguous Element for {0}: {1} ({2}): {3}."
+    },
+    {
+      "key": "editor.ViewContractValidator.81efe73d85",
+      "text": "Multiple writers for {0}.{1}: {2}, {3}."
+    },
+    {
+      "key": "editor.ViewContractValidator.8fb811d725",
+      "text": "Missing script on {0}."
+    },
+    {
+      "key": "editor.ViewContractValidator.9e0b272fe8",
+      "text": "command "
+    },
+    {
+      "key": "editor.ViewContractValidator.Accessibility.27a823a589",
+      "text": "Invalid accessibility state flags: {0}."
+    },
+    {
+      "key": "editor.ViewContractValidator.Accessibility.2998c776ae",
+      "text": "Accessible {0} needs a label or a forward AccessibilityLabel binding; hide decorative elements explicitly: {1}."
+    },
+    {
+      "key": "editor.ViewContractValidator.Accessibility.538b93e816",
+      "text": "Accessibility inspection failed at {0}: {1}"
+    },
+    {
+      "key": "editor.ViewContractValidator.Accessibility.852c506d7d",
+      "text": "Invalid accessibility role: {0}."
+    },
+    {
+      "key": "editor.ViewContractValidator.Extensions.4a2dda6f05",
+      "text": "An Editor structure validator is already registered for {0}."
+    },
+    {
+      "key": "editor.ViewContractValidator.Extensions.803353dcf6",
+      "text": "Element validator {0} failed at {1}: {2}"
+    },
+    {
+      "key": "editor.ViewContractValidator.Input.064eb4483e",
+      "text": "placeholder"
+    },
+    {
+      "key": "editor.ViewContractValidator.Input.14b69bd6ee",
+      "text": "text"
+    },
+    {
+      "key": "editor.ViewContractValidator.Input.233424aeac",
+      "text": "Input placeholder and editable text cannot use the same component: {0}."
+    },
+    {
+      "key": "editor.ViewContractValidator.Input.47c241b87f",
+      "text": "Input {0} reference cannot cross a View boundary: {1}."
+    },
+    {
+      "key": "editor.ViewContractValidator.Input.6f265ce9c2",
+      "text": "Input control is missing an InputField on the same object: {0}."
+    },
+    {
+      "key": "editor.ViewContractValidator.Input.9efb123a24",
+      "text": "Input field has no text component: {0}."
+    },
+    {
+      "key": "editor.ViewContractValidator.Input.bf1a049371",
+      "text": "Input {0} component must belong to the input hierarchy: {1}."
+    },
+    {
+      "key": "editor.ViewContractValidator.Overlays.1cc729e41f",
+      "text": "Overlay dismiss area needs AnchoredOverlayElement on the same object: {0}."
+    },
+    {
+      "key": "editor.ViewContractValidator.Overlays.1df5f4ddfd",
+      "text": "Tooltip target and overlay belong to different root Canvases: {0}."
+    },
+    {
+      "key": "editor.ViewContractValidator.Overlays.4e3c940dd7",
+      "text": "Unknown overlay placement: {0}."
+    },
+    {
+      "key": "editor.ViewContractValidator.Overlays.5698adc887",
+      "text": "Menu Button needs enabled ContextMenuItemInput for native Cancel: {0}."
+    },
+    {
+      "key": "editor.ViewContractValidator.Overlays.5d06e12504",
+      "text": "The menu back target must be a View in its hierarchy: {0}."
+    },
+    {
+      "key": "editor.ViewContractValidator.Overlays.62f7957076",
+      "text": "Parent LayoutGroup competes with overlay placement; exclude content from layout: {0}."
+    },
+    {
+      "key": "editor.ViewContractValidator.Overlays.6969df3471",
+      "text": "Overlay background must not also be a Selectable: {0}."
+    },
+    {
+      "key": "editor.ViewContractValidator.Overlays.6e7b5fd142",
+      "text": "Context menu exceeds its item capacity: {0}."
+    },
+    {
+      "key": "editor.ViewContractValidator.Overlays.7000c2e0e2",
+      "text": "Tooltip overlay content is missing: {0}."
+    },
+    {
+      "key": "editor.ViewContractValidator.Overlays.7b287a6832",
+      "text": "{0} must be finite and nonnegative: {1}."
+    },
+    {
+      "key": "editor.ViewContractValidator.Overlays.955db50acf",
+      "text": "Overlay content must be a direct RectTransform child: {0}."
+    },
+    {
+      "key": "editor.ViewContractValidator.Overlays.b49956a282",
+      "text": "Overlay background alpha hit testing can create holes in its input barrier: {0}."
+    },
+    {
+      "key": "editor.ViewContractValidator.Overlays.b7251ed46c",
+      "text": "Tooltip Graphic can intercept hover; disable Raycast Target or use a blocking-disabled CanvasGroup: {0}."
+    },
+    {
+      "key": "editor.ViewContractValidator.Overlays.b7542db637",
+      "text": "Overlay dismiss area needs an Image on the same object: {0}."
+    },
+    {
+      "key": "editor.ViewContractValidator.Overlays.c1585ec208",
+      "text": "Tooltip overlay reference is missing: {0}."
+    },
+    {
+      "key": "editor.ViewContractValidator.Overlays.d8ce0ad48e",
+      "text": "Context menu item capacity must be positive: {0}."
+    },
+    {
+      "key": "editor.ViewContractValidator.Overlays.e5c8bbe300",
+      "text": "Tooltip target cannot belong to its overlay content: {0}."
+    },
+    {
+      "key": "editor.ViewContractValidator.Overlays.e67dc06d2e",
+      "text": "Context menu requires AnchoredOverlayElement: {0}."
+    },
+    {
+      "key": "editor.ViewContractValidator.Overlays.f1f55a0471",
+      "text": "Nested context menus are not supported by this controller: {0}."
+    },
+    {
+      "key": "editor.ViewContractValidator.Overlays.fedcdac7d9",
+      "text": "Overlay content requires unit scale and identity rotation: {0}."
+    },
+    {
+      "key": "editor.ViewContractValidator.RecyclingList.1b9153195e",
+      "text": "Recycling list templates must be inactive RectTransform children inside the boundary; references cannot cross other View or Element boundaries: {0}."
+    },
+    {
+      "key": "editor.ViewContractValidator.RecyclingList.23a28f3e0f",
+      "text": "Recycling list capacity must be positive: {0}."
+    },
+    {
+      "key": "editor.ViewContractValidator.RecyclingList.72c81031ca",
+      "text": "Recycling list template has multiple direct Views; specify childView explicitly: {0}."
+    },
+    {
+      "key": "editor.ViewContractValidator.RecyclingList.7ece7c5b40",
+      "text": "Recycling list templates and content cannot contain each other: {0}."
+    },
+    {
+      "key": "editor.ViewContractValidator.RecyclingList.80fa4d3c4b",
+      "text": "Recycling lists need a separate content child inside the boundary; references cannot cross other View or Element boundaries: {0}."
+    },
+    {
+      "key": "editor.ViewContractValidator.RecyclingList.a48fe7d434",
+      "text": "Recycling list has no NestedViewElement template: {0}."
+    },
+    {
+      "key": "editor.ViewContractValidator.RecyclingList.c30d9540d5",
+      "text": "Recycling list templates must wrap a valid child View in a NestedViewElement: {0}."
+    },
+    {
+      "key": "editor.ViewContractValidator.RecyclingList.e5160942f1",
+      "text": "Recycling list content must be empty; the framework creates entries: {0}."
+    },
+    {
+      "key": "editor.ViewContractValidator.Scrollbar.7bb6aa750c",
+      "text": "is written by both ScrollRect {0} and binding {1}. "
+    },
+    {
+      "key": "editor.ViewContractValidator.Scrollbar.7e7412f982",
+      "text": "Scrollbar handles must be descendants and cannot drive the Scrollbar root itself: {0}."
+    },
+    {
+      "key": "editor.ViewContractValidator.Scrollbar.8a643a780c",
+      "text": "Bind the scroll container position instead, or only observe Scrollbar updates."
+    },
+    {
+      "key": "editor.ViewContractValidator.Scrollbar.9ade8392e6",
+      "text": "Scrollbar handle reference is missing: {0}."
+    },
+    {
+      "key": "editor.ViewContractValidator.Scrollbar.a18e38d519",
+      "text": "Scrollbar {0}.{1} "
+    },
+    {
+      "key": "editor.ViewContractValidator.Scrollbar.ca55ec7917",
+      "text": "Scrollbar is missing a Scrollbar component on the same object: {0}."
+    },
+    {
+      "key": "editor.ViewContractValidator.Scrollbar.f866df34eb",
+      "text": "Scrollbar handle references cannot cross a View boundary: {0}."
+    },
+    {
+      "key": "editor.ViewContractValidator.SlotList.001b23e3b7",
+      "text": "Fixed mounts must be empty nodes inside the boundary and separate from the template: {0}/{1}."
+    },
+    {
+      "key": "editor.ViewContractValidator.SlotList.34a7a64966",
+      "text": "Fixed slots cannot repeat references or contain one another: {0}."
+    },
+    {
+      "key": "editor.ViewContractValidator.SlotList.57b1711cb8",
+      "text": "Fixed slots require existing nodes, or a template with empty mounts: {0}."
+    },
+    {
+      "key": "editor.ViewContractValidator.SlotList.8befb07d44",
+      "text": "Dynamic fixed slots require an inactive template and empty mounts, without existing nodes: {0}."
+    },
+    {
+      "key": "editor.ViewContractValidator.SlotList.8f516c4dbd",
+      "text": "Fixed slots must be NestedViewElements inside the container boundary: {0}/{1}."
+    },
+    {
+      "key": "editor.ViewContractValidator.Transitions.453712be0b",
+      "text": "View Enter Fade Duration must be finite and nonnegative."
+    },
+    {
+      "key": "editor.ViewContractValidator.Transitions.a533a7eab7",
+      "text": "View Exit Fade Duration must be finite and nonnegative."
+    },
+    {
+      "key": "editor.ViewContractValidator.Transitions.f07ffe69c5",
+      "text": "View requires a CanvasGroup for visibility and transition fading."
+    },
+    {
+      "key": "editor.ViewContractValidator.VirtualFailures.167f053c4d",
+      "text": "Virtual list failure templates must be inactive RectTransforms inside the boundary, outside Content and item templates: {0}."
+    },
+    {
+      "key": "editor.ViewContractValidator.VirtualFailures.1ae15331b1",
+      "text": "Failure templates cannot bypass parent CanvasGroup input gates: {0}."
+    },
+    {
+      "key": "editor.ViewContractValidator.VirtualFailures.2c461a7488",
+      "text": "Failure templates and named item templates cannot contain one another: {0}."
+    },
+    {
+      "key": "editor.ViewContractValidator.VirtualFailures.ef171c0ca4",
+      "text": "Failure templates are visual only and cannot contain View or Element ownership: {0}."
+    },
+    {
+      "key": "editor.ViewContractValidator.VirtualList.0028a0908f",
+      "text": "Virtual list content must be empty before initialization: {0}."
+    },
+    {
+      "key": "editor.ViewContractValidator.VirtualList.1ec8ef741e",
+      "text": "Virtual list requires a valid scroll axis and one column for horizontal scrolling: {0}."
+    },
+    {
+      "key": "editor.ViewContractValidator.VirtualList.413554c7ee",
+      "text": "Virtual list end follow tolerance must be finite and nonnegative: {0}."
+    },
+    {
+      "key": "editor.ViewContractValidator.VirtualList.544ef3258d",
+      "text": "Virtual list named template keys must be non-empty and unique: {0}."
+    },
+    {
+      "key": "editor.ViewContractValidator.VirtualList.5cbde16ef0",
+      "text": "Virtual list item template must be inactive: {0}."
+    },
+    {
+      "key": "editor.ViewContractValidator.VirtualList.68fc07fd71",
+      "text": "Virtual list requires an explicit viewport reference: {0}."
+    },
+    {
+      "key": "editor.ViewContractValidator.VirtualList.89039a932d",
+      "text": "Virtual list ScrollRect must belong to the list boundary: {0}."
+    },
+    {
+      "key": "editor.ViewContractValidator.VirtualList.91c54ff8f0",
+      "text": "Virtual list requires positive capacity/columns, columns <= capacity and nonnegative overscan: {0}."
+    },
+    {
+      "key": "editor.ViewContractValidator.VirtualList.922d53d064",
+      "text": "Virtual list item template is missing: {0}."
+    },
+    {
+      "key": "editor.ViewContractValidator.VirtualList.aa0d9f0ab5",
+      "text": "Virtual list named template must be inactive, inside its boundary and outside content: {0}/{1}."
+    },
+    {
+      "key": "editor.ViewContractValidator.VirtualList.b08e766b89",
+      "text": "Automatic grid requires vertical scrolling and a finite positive minimum width: {0}."
+    },
+    {
+      "key": "editor.ViewContractValidator.VirtualList.b4082bbf93",
+      "text": "Virtual list owns content layout; remove LayoutGroup/ContentSizeFitter from content: {0}."
+    },
+    {
+      "key": "editor.ViewContractValidator.VirtualList.bc3ba759d5",
+      "text": "Virtual list item template requires a RectTransform: {0}."
+    },
+    {
+      "key": "editor.ViewContractValidator.VirtualList.bf3ae6ec6b",
+      "text": "Virtual list item extent must be positive and finite: {0}."
+    },
+    {
+      "key": "editor.ViewContractValidator.VirtualList.cbd8e6c32d",
+      "text": "Virtual list measurement budget must be positive: {0}."
+    },
+    {
+      "key": "editor.ViewContractValidator.VirtualList.cbeb11bf2d",
+      "text": "Virtual list item template must be outside content: {0}."
+    },
+    {
+      "key": "editor.ViewContractValidator.VirtualList.cc31c4f87c",
+      "text": "Virtual list spacing must be finite and nonnegative: {0}."
+    },
+    {
+      "key": "editor.ViewContractValidator.VirtualList.cd7fadd5fc",
+      "text": "Virtual list padding must have four nonnegative sides: {0}."
+    },
+    {
+      "key": "editor.ViewContractValidator.VirtualList.cfc374c27a",
+      "text": "Virtual list reveal correction budget must be positive: {0}."
+    },
+    {
+      "key": "editor.ViewContractValidator.VirtualList.d51750887f",
+      "text": "Virtual list named template requires a RectTransform View: {0}/{1}."
+    },
+    {
+      "key": "editor.ViewContractValidator.VirtualList.e5e8afe21e",
+      "text": "Virtual list item template must belong to the list boundary: {0}."
+    },
+    {
+      "key": "editor.ViewContractValidator.VirtualList.f8192fe74e",
+      "text": "Virtual list and ScrollRectElement cannot own the same ScrollRect: {0}."
+    },
+    {
+      "key": "editor.ViewContractValidator.a2c70aba3a",
+      "text": "Missing Element for {0}: {1} ({2})."
+    },
+    {
+      "key": "editor.ViewContractValidator.adc3272193",
+      "text": "Multiple writers for {0}.{1}: {2}, command {3}."
+    },
+    {
+      "key": "editor.ViewContractValidator.cb101437c2",
+      "text": "ScrollRect content must be a descendant of its viewport: {0}."
+    },
+    {
+      "key": "editor.ViewContractValidator.db2b82af20",
+      "text": "Element name is empty: {0}."
+    },
+    {
+      "key": "editor.ViewContractValidator.e901f2c3ba",
+      "text": "Duplicate Element ({0}): {1}, {2}."
+    },
+    {
+      "key": "editor.ViewContractValidator.eb31327ed9",
+      "text": "ScrollRect reference is missing: {0}."
+    },
+    {
+      "key": "editor.ViewContractValidator.fd6da981ad",
+      "text": "ScrollRect content is missing: {0}."
+    },
+    {
+      "key": "editor.ViewInspector.3f95319fe9",
+      "text": "The selected binding contract matches this View."
+    },
+    {
+      "key": "editor.ViewInspector.48bcffa0d4",
+      "text": "No structural issues found. Binding contract was not checked."
+    },
+    {
+      "key": "editor.ViewInspector.52e088acdc",
+      "text": "Validate View Structure"
+    },
+    {
+      "key": "editor.ViewInspector.5f472e2647",
+      "text": "Validate Binding Contract"
+    },
+    {
+      "key": "editor.ViewInspector.6541599e58",
+      "text": "Select a ViewModel contract"
+    },
+    {
+      "key": "editor.ViewInspector.Input.08332dda56",
+      "text": "Local input gate disposed"
+    },
+    {
+      "key": "editor.ViewInspector.Input.1242d676fa",
+      "text": "Unreleased local input blockers"
+    },
+    {
+      "key": "editor.ViewInspector.Input.18cd6c3bdd",
+      "text": "Root CanvasGroup missing"
+    },
+    {
+      "key": "editor.ViewInspector.Input.1fdfe0bd28",
+      "text": "Object or ancestor inactive"
+    },
+    {
+      "key": "editor.ViewInspector.Input.233555df54",
+      "text": "Host visible / Local visible"
+    },
+    {
+      "key": "editor.ViewInspector.Input.23f2db09ee",
+      "text": "Component enabled / Alpha"
+    },
+    {
+      "key": "editor.ViewInspector.Input.3349a0214e",
+      "text": "Local blockers / Disposed"
+    },
+    {
+      "key": "editor.ViewInspector.Input.364755a73e",
+      "text": "Root CanvasGroup disables Selectable interaction"
+    },
+    {
+      "key": "editor.ViewInspector.Input.37cdf97b81",
+      "text": "This manually captured state does not refresh automatically. Zero alpha does not stop raycasts; input eligibility does not prove clicks reach a control. Inspect ancestor groups, Graphics, Selectables, EventSystem and occluders."
+    },
+    {
+      "key": "editor.ViewInspector.Input.37cec66cad",
+      "text": "Hidden by host"
+    },
+    {
+      "key": "editor.ViewInspector.Input.4a558371f9",
+      "text": "Present"
+    },
+    {
+      "key": "editor.ViewInspector.Input.51e0bd7434",
+      "text": "Retaining old visuals without accepting input"
+    },
+    {
+      "key": "editor.ViewInspector.Input.608a5c4956",
+      "text": "No restrictions found on this View or its root CanvasGroup."
+    },
+    {
+      "key": "editor.ViewInspector.Input.65364e6fd8",
+      "text": "Missing"
+    },
+    {
+      "key": "editor.ViewInspector.Input.7728ec29ef",
+      "text": "The target View no longer exists."
+    },
+    {
+      "key": "editor.ViewInspector.Input.7f70336887",
+      "text": "Input and visibility diagnostics (read-only snapshot)"
+    },
+    {
+      "key": "editor.ViewInspector.Input.86ddfd16e6",
+      "text": "View logically disposed"
+    },
+    {
+      "key": "editor.ViewInspector.Input.8ed1685df2",
+      "text": "Interactable / Blocks raycasts"
+    },
+    {
+      "key": "editor.ViewInspector.Input.ac57ab417f",
+      "text": "Host interactable / Local interactable"
+    },
+    {
+      "key": "editor.ViewInspector.Input.afff7f01c3",
+      "text": "Not created; this capture does not create it."
+    },
+    {
+      "key": "editor.ViewInspector.Input.b244abc9ee",
+      "text": "Root CanvasGroup"
+    },
+    {
+      "key": "editor.ViewInspector.Input.b52c53ec93",
+      "text": "Capture input snapshot"
+    },
+    {
+      "key": "editor.ViewInspector.Input.badd13f4e1",
+      "text": "View alive / Initialized"
+    },
+    {
+      "key": "editor.ViewInspector.Input.bebdcdf08d",
+      "text": "Observed restrictions"
+    },
+    {
+      "key": "editor.ViewInspector.Input.c1335a5110",
+      "text": "Host input disabled"
+    },
+    {
+      "key": "editor.ViewInspector.Input.cbead0ea59",
+      "text": "Capture reads current state without initializing, activating or changing the View."
+    },
+    {
+      "key": "editor.ViewInspector.Input.d3cb8ab8ca",
+      "text": "Showing the first {0} reasons; actual blocker count is {1}."
+    },
+    {
+      "key": "editor.ViewInspector.Input.d5269a8a96",
+      "text": "View unavailable (released or missing root component)"
+    },
+    {
+      "key": "editor.ViewInspector.Input.dbcbb1d915",
+      "text": "Local input gate"
+    },
+    {
+      "key": "editor.ViewInspector.Input.df0f92ba65",
+      "text": "View initialization incomplete"
+    },
+    {
+      "key": "editor.ViewInspector.Input.df734ade65",
+      "text": "Hidden locally"
+    },
+    {
+      "key": "editor.ViewInspector.Input.e7d20c7470",
+      "text": "Ignore parent groups"
+    },
+    {
+      "key": "editor.ViewInspector.Input.ef99d4b265",
+      "text": "Root CanvasGroup disables raycasts"
+    },
+    {
+      "key": "editor.ViewInspector.Input.f344af45ed",
+      "text": "Local input disabled"
+    },
+    {
+      "key": "editor.ViewInspector.Input.f3c337bf0c",
+      "text": "View visible / Input eligible"
+    },
+    {
+      "key": "editor.ViewInspector.Input.f62cc4c61e",
+      "text": "Retaining old visuals"
+    },
+    {
+      "key": "editor.ViewInspector.Input.fb254a3bb8",
+      "text": "Active in hierarchy"
+    },
+    {
+      "key": "editor.ViewInspector.Input.fbfb60e549",
+      "text": "Captured at"
+    },
+    {
+      "key": "editor.ViewInspector.Raycast.06404dfdd1",
+      "text": "Captured at / Coordinates"
+    },
+    {
+      "key": "editor.ViewInspector.Raycast.0bf5670e7f",
+      "text": "Inspect hits at these coordinates"
+    },
+    {
+      "key": "editor.ViewInspector.Raycast.189804d838",
+      "text": "Enter screen coordinates in Game pixels with the origin at the bottom left. Inspection invokes Raycasters and project filters without dispatching clicks or changing focus. Results do not refresh automatically."
+    },
+    {
+      "key": "editor.ViewInspector.Raycast.1fc3b8b8cd",
+      "text": "Event system (empty uses current)"
+    },
+    {
+      "key": "editor.ViewInspector.Raycast.43ee9bc0cf",
+      "text": "Native raycast inspection (explicit action)"
+    },
+    {
+      "key": "editor.ViewInspector.Raycast.484d556139",
+      "text": "None"
+    },
+    {
+      "key": "editor.ViewInspector.Raycast.5a9535753a",
+      "text": "Screen coordinates"
+    },
+    {
+      "key": "editor.ViewInspector.Raycast.69f0f73432",
+      "text": "First hit index for this View"
+    },
+    {
+      "key": "editor.ViewInspector.Raycast.6db8767712",
+      "text": "Top hit belongs to this View"
+    },
+    {
+      "key": "editor.ViewInspector.Raycast.7728ec29ef",
+      "text": "The target View no longer exists."
+    },
+    {
+      "key": "editor.ViewInspector.Raycast.8d553514be",
+      "text": "Results show raycast order at capture time. A handler does not guarantee a click; inspect pointer and drag state, Selectable eligibility, command gates and custom input modules. Paths retain up to 64 levels and 128 characters per name; ellipses indicate truncation."
+    },
+    {
+      "key": "editor.ViewInspector.Raycast.8e0ad2ae93",
+      "text": "Click handler"
+    },
+    {
+      "key": "editor.ViewInspector.Raycast.b6de5f51cf",
+      "text": "Sorting layer / Order / Depth / Distance"
+    },
+    {
+      "key": "editor.ViewInspector.Raycast.c2793a1eb9",
+      "text": "Only the first 64 valid hits are retained; the first hit index for this View is calculated from all results."
+    },
+    {
+      "key": "editor.ViewInspector.Raycast.ce0cb78f83",
+      "text": "Raycaster"
+    },
+    {
+      "key": "editor.ViewInspector.Raycast.dc319e6c35",
+      "text": "Valid hits / Invalid results"
+    },
+    {
+      "key": "editor.ViewInspector.ResourcePreparation.02bafe3885",
+      "text": "The preparation ledger is cleared after commit. An empty ledger does not mean every UI resource is ready; manual slots, business tasks and child Views are excluded."
+    },
+    {
+      "key": "editor.ViewInspector.ResourcePreparation.28384d7afd",
+      "text": "Failed"
+    },
+    {
+      "key": "editor.ViewInspector.ResourcePreparation.3385504be2",
+      "text": "Capture the preparation state of current default resource keys without loading resources or changing the View."
+    },
+    {
+      "key": "editor.ViewInspector.ResourcePreparation.4d8c1c5b42",
+      "text": "Unknown"
+    },
+    {
+      "key": "editor.ViewInspector.ResourcePreparation.700c1c683f",
+      "text": "Wait before first display"
+    },
+    {
+      "key": "editor.ViewInspector.ResourcePreparation.7728ec29ef",
+      "text": "The target View no longer exists."
+    },
+    {
+      "key": "editor.ViewInspector.ResourcePreparation.800ab3c05f",
+      "text": "Failed / Cancelled / Not applied"
+    },
+    {
+      "key": "editor.ViewInspector.ResourcePreparation.8032af4a59",
+      "text": "Not applied"
+    },
+    {
+      "key": "editor.ViewInspector.ResourcePreparation.8ef0bbbc4e",
+      "text": "Capture resource preparation"
+    },
+    {
+      "key": "editor.ViewInspector.ResourcePreparation.a37778f17c",
+      "text": "Cancelled"
+    },
+    {
+      "key": "editor.ViewInspector.ResourcePreparation.c8875ed413",
+      "text": "Activation active / Committed"
+    },
+    {
+      "key": "editor.ViewInspector.ResourcePreparation.cc887fc419",
+      "text": "First-frame resource preparation (read-only snapshot)"
+    },
+    {
+      "key": "editor.ViewInspector.ResourcePreparation.d04fcbda73",
+      "text": "Loading"
+    },
+    {
+      "key": "editor.ViewInspector.ResourcePreparation.e3acab17a5",
+      "text": "No active resource context: the View may be inactive, unconfigured or already cleaned up."
+    },
+    {
+      "key": "editor.ViewInspector.ResourcePreparation.f1ad7e1a84",
+      "text": "Total / Pending"
+    },
+    {
+      "key": "editor.ViewInspector.ResourcePreparation.f2ccc0a120",
+      "text": "Showing the first {0} entries; counts include all {1} entries."
+    },
+    {
+      "key": "editor.ViewInspector.ResourcePreparation.f585743460",
+      "text": "Applied"
+    },
+    {
+      "key": "editor.ViewInspector.ResourcePreparation.fbfb60e549",
+      "text": "Captured at"
+    },
+    {
+      "key": "editor.ViewInspector.Resources.15980a3c2d",
+      "text": "Initial load failures prevent display; explicitly configured individual controls do not join automatically. "
+    },
+    {
+      "key": "editor.ViewInspector.Resources.16ef1cfe27",
+      "text": "Parent loader inheritance is disabled. Configure a loader for this View or its resource controls explicitly."
+    },
+    {
+      "key": "editor.ViewInspector.Resources.2473966443",
+      "text": "Runtime writes to Source properties using the default loader can still participate in preparation."
+    },
+    {
+      "key": "editor.ViewInspector.Resources.2b59743c8d",
+      "text": "Control: {0}; resource: {1}; binding direction: {2}"
+    },
+    {
+      "key": "editor.ViewInspector.Resources.41d0c03c8d",
+      "text": "Controls may also be configured individually. Use the Prefab provider's configureView or the host catalog's configureDefaultView for common setup. "
+    },
+    {
+      "key": "editor.ViewInspector.Resources.4e3e33fde6",
+      "text": "Without explicit configuration, only this parent View's active loader is borrowed; ancestors beyond it are not searched. "
+    },
+    {
+      "key": "editor.ViewInspector.Resources.537a6e78ff",
+      "text": "Child Views need their own settings; resource changes after display remain progressive. Local loads may complete immediately. "
+    },
+    {
+      "key": "editor.ViewInspector.Resources.5887219e26",
+      "text": "This option does not automatically wait for directly assigned resources, manual slots or arbitrary business tasks. "
+    },
+    {
+      "key": "editor.ViewInspector.Resources.7825ca1133",
+      "text": "This list does not verify runtime loaders, resource key existence or asynchronous loading completion."
+    },
+    {
+      "key": "editor.ViewInspector.Resources.80333987cf",
+      "text": "Configure the loader with View.ConfigureResources before activation. "
+    },
+    {
+      "key": "editor.ViewInspector.Resources.9bd119ee27",
+      "text": "Waiting before first display is enabled, but the selected contract has no built-in resource key bindings. "
+    },
+    {
+      "key": "editor.ViewInspector.Resources.9de0d10b5a",
+      "text": "These built-in resource key bindings come from the selected contract; they have not necessarily matched this View."
+    },
+    {
+      "key": "editor.ViewInspector.Resources.a2ed0370b9",
+      "text": "Resource key bindings ({0})"
+    },
+    {
+      "key": "editor.ViewInspector.Resources.ac5c1bb62a",
+      "text": "Waiting before first display is enabled. Initial bindings below using this View's default loader participate in hidden preparation. "
+    },
+    {
+      "key": "editor.ViewInspector.Resources.c678584105",
+      "text": "Each child View activation releases its own resources."
+    },
+    {
+      "key": "editor.ViewInspector.Resources.d822773387",
+      "text": "Parent View in current hierarchy"
+    },
+    {
+      "key": "editor.ViewInspector.Resources.e21b9e988b",
+      "text": "This shows configuration, not verified resource readiness."
+    },
+    {
+      "key": "editor.ViewInspector.Resources.e82b69fca1",
+      "text": "Validate the binding contract to check control matching, one-way bindings and multiple writers."
+    },
+    {
+      "key": "editor.ViewInspector.Resources.f116785f60",
+      "text": "No parent View in this hierarchy. Configure a loader explicitly or parent this View before runtime activation; the framework looks up the parent again at activation."
+    },
+    {
+      "key": "editor.ViewInspector.Sources.05f954565f",
+      "text": "Highlight"
+    },
+    {
+      "key": "editor.ViewInspector.Sources.1b2ff64e53",
+      "text": "Could not open the binding declaration: "
+    },
+    {
+      "key": "editor.ViewInspector.Sources.2a6d9ccfea",
+      "text": "No matching control inside this View binding boundary. Check names and component types."
+    },
+    {
+      "key": "editor.ViewInspector.Sources.679ca80186",
+      "text": "Could not open the declaration. Check Unity's external code editor settings."
+    },
+    {
+      "key": "editor.ViewInspector.Sources.67bb7dc1f7",
+      "text": "Could not locate the control: "
+    },
+    {
+      "key": "editor.ViewInspector.Sources.7ae12e0993",
+      "text": "The declaration file moved or is inaccessible. Recompile bindings: "
+    },
+    {
+      "key": "editor.ViewInspector.Sources.7ea0036985",
+      "text": "The current contract has no binding declarations."
+    },
+    {
+      "key": "editor.ViewInspector.Sources.8efab5e68f",
+      "text": "Multiple matching controls make this binding ambiguous. Locate and fix duplicate names; the framework will not select one automatically."
+    },
+    {
+      "key": "editor.ViewInspector.Sources.a7f7f7a203",
+      "text": "Open declaration"
+    },
+    {
+      "key": "editor.ViewInspector.Sources.ba7542980d",
+      "text": "This manifest has no source locations. Recompile with a newer generator."
+    },
+    {
+      "key": "editor.ViewInspector.Sources.d90e1d2f55",
+      "text": "Locate control"
+    },
+    {
+      "key": "editor.ViewInspector.Sources.fa24d326cc",
+      "text": "Binding declarations and source"
+    },
+    {
+      "key": "editor.ViewInspector.ad9d661681",
+      "text": "Select the ViewModel contract used by this View before validating bindings. Structure validation does not require a contract."
+    },
+    {
+      "key": "editor.ViewInspector.b104369e08",
+      "text": "Validate Accessibility Semantics"
+    },
+    {
+      "key": "editor.ViewInspector.b741b9457b",
+      "text": "ViewModel"
+    },
+    {
+      "key": "editor.ViewInspector.dceaeea259",
+      "text": "MUI Binding Contract"
+    },
+    {
+      "key": "editor.ViewInspector.e32a3bfa20",
+      "text": "No generated manifests found. Compile a partial ViewModel with ViewContract or Bind attributes."
+    },
+    {
+      "key": "editor.ViewInspector.f9d933d15c",
+      "text": "No basic semantic issues found. Keyboard reachability and platform screen readers were not validated."
+    },
+    {
+      "key": "editor.ViewValidationMenu.890cc9480b",
+      "text": "MUI structure validation {0}: {1}/{2} Views inspected, {3} Views with issues, {4} issues. Binding contracts were not checked."
+    },
+    {
+      "key": "editor.ViewValidationMenu.b15d9cec82",
+      "text": "MUI View Structure Validation"
+    },
+    {
+      "key": "editor.ViewValidationMenu.b66582a936",
+      "text": "MUI [{0}]: {1}"
+    },
+    {
+      "key": "enum.MUI.AccessibilityRole.Button",
+      "text": "Button"
+    },
+    {
+      "key": "enum.MUI.AccessibilityRole.Dropdown",
+      "text": "Dropdown"
+    },
+    {
+      "key": "enum.MUI.AccessibilityRole.Generic",
+      "text": "Generic"
+    },
+    {
+      "key": "enum.MUI.AccessibilityRole.Image",
+      "text": "Image"
+    },
+    {
+      "key": "enum.MUI.AccessibilityRole.List",
+      "text": "List"
+    },
+    {
+      "key": "enum.MUI.AccessibilityRole.ProgressBar",
+      "text": "Progress Bar"
+    },
+    {
+      "key": "enum.MUI.AccessibilityRole.Slider",
+      "text": "Slider"
+    },
+    {
+      "key": "enum.MUI.AccessibilityRole.Tab",
+      "text": "Tab"
+    },
+    {
+      "key": "enum.MUI.AccessibilityRole.TabList",
+      "text": "Tab List"
+    },
+    {
+      "key": "enum.MUI.AccessibilityRole.Text",
+      "text": "Text"
+    },
+    {
+      "key": "enum.MUI.AccessibilityRole.TextInput",
+      "text": "Text Input"
+    },
+    {
+      "key": "enum.MUI.AccessibilityRole.Toggle",
+      "text": "Toggle"
+    },
+    {
+      "key": "enum.MUI.AccessibilityRole.Unspecified",
+      "text": "Unspecified"
+    },
+    {
+      "key": "enum.MUI.AccessibilityState.Busy",
+      "text": "Busy"
+    },
+    {
+      "key": "enum.MUI.AccessibilityState.Checked",
+      "text": "Checked"
+    },
+    {
+      "key": "enum.MUI.AccessibilityState.Disabled",
+      "text": "Disabled"
+    },
+    {
+      "key": "enum.MUI.AccessibilityState.Expanded",
+      "text": "Expanded"
+    },
+    {
+      "key": "enum.MUI.AccessibilityState.Invalid",
+      "text": "Invalid"
+    },
+    {
+      "key": "enum.MUI.AccessibilityState.None",
+      "text": "None"
+    },
+    {
+      "key": "enum.MUI.AccessibilityState.ReadOnly",
+      "text": "Read Only"
+    },
+    {
+      "key": "enum.MUI.AccessibilityState.Selected",
+      "text": "Selected"
+    },
+    {
+      "key": "enum.MUI.ArgsUpdateCleanup.Complete",
+      "text": "Complete"
+    },
+    {
+      "key": "enum.MUI.ArgsUpdateCleanup.Failed",
+      "text": "Failed"
+    },
+    {
+      "key": "enum.MUI.ArgsUpdateCleanup.NotRequired",
+      "text": "Not Required"
+    },
+    {
+      "key": "enum.MUI.ArgsUpdateRejection.Busy",
+      "text": "Busy"
+    },
+    {
+      "key": "enum.MUI.ArgsUpdateRejection.DependencyChangeRequired",
+      "text": "Dependency Change Required"
+    },
+    {
+      "key": "enum.MUI.ArgsUpdateRejection.HostClosed",
+      "text": "Host Closed"
+    },
+    {
+      "key": "enum.MUI.ArgsUpdateRejection.InUse",
+      "text": "In Use"
+    },
+    {
+      "key": "enum.MUI.ArgsUpdateRejection.InputControlUnsupported",
+      "text": "Input Control Unsupported"
+    },
+    {
+      "key": "enum.MUI.ArgsUpdateRejection.None",
+      "text": "None"
+    },
+    {
+      "key": "enum.MUI.ArgsUpdateRejection.Reentrant",
+      "text": "Reentrant"
+    },
+    {
+      "key": "enum.MUI.ArgsUpdateRejection.RouteMismatch",
+      "text": "Route Mismatch"
+    },
+    {
+      "key": "enum.MUI.ArgsUpdateRejection.SourceUnavailable",
+      "text": "Source Unavailable"
+    },
+    {
+      "key": "enum.MUI.ArgsUpdateRejection.Unsupported",
+      "text": "Unsupported"
+    },
+    {
+      "key": "enum.MUI.ArgsUpdateStatus.Applied",
+      "text": "Applied"
+    },
+    {
+      "key": "enum.MUI.ArgsUpdateStatus.CancelledBeforeCommit",
+      "text": "Cancelled Before Commit"
+    },
+    {
+      "key": "enum.MUI.ArgsUpdateStatus.CommitFailed",
+      "text": "Commit Failed"
+    },
+    {
+      "key": "enum.MUI.ArgsUpdateStatus.PreparationFailed",
+      "text": "Preparation Failed"
+    },
+    {
+      "key": "enum.MUI.ArgsUpdateStatus.Rejected",
+      "text": "Rejected"
+    },
+    {
+      "key": "enum.MUI.BindingEntryKind.Command",
+      "text": "Command"
+    },
+    {
+      "key": "enum.MUI.BindingEntryKind.Property",
+      "text": "Property"
+    },
+    {
+      "key": "enum.MUI.BindingMode.OneTime",
+      "text": "One Time"
+    },
+    {
+      "key": "enum.MUI.BindingMode.OneWay",
+      "text": "One Way"
+    },
+    {
+      "key": "enum.MUI.BindingMode.OneWayToSource",
+      "text": "One Way To Source"
+    },
+    {
+      "key": "enum.MUI.BindingMode.TwoWay",
+      "text": "Two Way"
+    },
+    {
+      "key": "enum.MUI.BindingState.Binding",
+      "text": "Binding"
+    },
+    {
+      "key": "enum.MUI.BindingState.Bound",
+      "text": "Bound"
+    },
+    {
+      "key": "enum.MUI.BindingState.Faulted",
+      "text": "Faulted"
+    },
+    {
+      "key": "enum.MUI.BindingState.Frozen",
+      "text": "Frozen"
+    },
+    {
+      "key": "enum.MUI.BindingState.Unbinding",
+      "text": "Unbinding"
+    },
+    {
+      "key": "enum.MUI.BindingState.Unbound",
+      "text": "Unbound"
+    },
+    {
+      "key": "enum.MUI.ChildViews.ChildViewChangeStatus.Cancelled",
+      "text": "Cancelled"
+    },
+    {
+      "key": "enum.MUI.ChildViews.ChildViewChangeStatus.Empty",
+      "text": "Empty"
+    },
+    {
+      "key": "enum.MUI.ChildViews.ChildViewChangeStatus.Failed",
+      "text": "Failed"
+    },
+    {
+      "key": "enum.MUI.ChildViews.ChildViewChangeStatus.ParentInactive",
+      "text": "Parent Inactive"
+    },
+    {
+      "key": "enum.MUI.ChildViews.ChildViewChangeStatus.Ready",
+      "text": "Ready"
+    },
+    {
+      "key": "enum.MUI.ChildViews.ChildViewChangeStatus.Superseded",
+      "text": "Superseded"
+    },
+    {
+      "key": "enum.MUI.ChildViews.ChildViewState.Active",
+      "text": "Active"
+    },
+    {
+      "key": "enum.MUI.ChildViews.ChildViewState.Closed",
+      "text": "Closed"
+    },
+    {
+      "key": "enum.MUI.ChildViews.ChildViewState.Closing",
+      "text": "Closing"
+    },
+    {
+      "key": "enum.MUI.ChildViews.ChildViewState.Deactivating",
+      "text": "Deactivating"
+    },
+    {
+      "key": "enum.MUI.ChildViews.ChildViewState.Failed",
+      "text": "Failed"
+    },
+    {
+      "key": "enum.MUI.ChildViews.ChildViewState.Inactive",
+      "text": "Inactive"
+    },
+    {
+      "key": "enum.MUI.ChildViews.ChildViewState.Prepared",
+      "text": "Prepared"
+    },
+    {
+      "key": "enum.MUI.ChildViews.ChildViewState.Preparing",
+      "text": "Preparing"
+    },
+    {
+      "key": "enum.MUI.ChildViews.ChildViewState.Retained",
+      "text": "Retained"
+    },
+    {
+      "key": "enum.MUI.CleanupResponsibilityState.Completed",
+      "text": "Completed"
+    },
+    {
+      "key": "enum.MUI.CleanupResponsibilityState.Failed",
+      "text": "Failed"
+    },
+    {
+      "key": "enum.MUI.CleanupResponsibilityState.Pending",
+      "text": "Pending"
+    },
+    {
+      "key": "enum.MUI.CleanupResponsibilityState.Retained",
+      "text": "Retained"
+    },
+    {
+      "key": "enum.MUI.CommandConcurrency.Parallel",
+      "text": "Parallel"
+    },
+    {
+      "key": "enum.MUI.CommandConcurrency.Queue",
+      "text": "Queue"
+    },
+    {
+      "key": "enum.MUI.CommandConcurrency.RejectWhileRunning",
+      "text": "Reject While Running"
+    },
+    {
+      "key": "enum.MUI.CommandConcurrency.RestartLatest",
+      "text": "Restart Latest"
+    },
+    {
+      "key": "enum.MUI.CommandRejection.None",
+      "text": "None"
+    },
+    {
+      "key": "enum.MUI.CommandRejection.Reentrant",
+      "text": "Reentrant"
+    },
+    {
+      "key": "enum.MUI.CommandRejection.Unavailable",
+      "text": "Unavailable"
+    },
+    {
+      "key": "enum.MUI.CommandStatus.Cancelled",
+      "text": "Cancelled"
+    },
+    {
+      "key": "enum.MUI.CommandStatus.Failed",
+      "text": "Failed"
+    },
+    {
+      "key": "enum.MUI.CommandStatus.Rejected",
+      "text": "Rejected"
+    },
+    {
+      "key": "enum.MUI.CommandStatus.Succeeded",
+      "text": "Succeeded"
+    },
+    {
+      "key": "enum.MUI.DragDrop.DragPhase.Completed",
+      "text": "Completed"
+    },
+    {
+      "key": "enum.MUI.DragDrop.DragPhase.Dragging",
+      "text": "Dragging"
+    },
+    {
+      "key": "enum.MUI.DragDrop.DragPhase.Dropping",
+      "text": "Dropping"
+    },
+    {
+      "key": "enum.MUI.DragDrop.DropStatus.Cancelled",
+      "text": "Cancelled"
+    },
+    {
+      "key": "enum.MUI.DragDrop.DropStatus.Committed",
+      "text": "Committed"
+    },
+    {
+      "key": "enum.MUI.DragDrop.DropStatus.Failed",
+      "text": "Failed"
+    },
+    {
+      "key": "enum.MUI.DragDrop.DropStatus.Rejected",
+      "text": "Rejected"
+    },
+    {
+      "key": "enum.MUI.Editor.PagePreset.FullScreen",
+      "text": "Full Screen"
+    },
+    {
+      "key": "enum.MUI.Editor.PagePreset.Notice",
+      "text": "Notice"
+    },
+    {
+      "key": "enum.MUI.Editor.PagePreset.Popup",
+      "text": "Popup"
+    },
+    {
+      "key": "enum.MUI.ListChangeKind.Add",
+      "text": "Add"
+    },
+    {
+      "key": "enum.MUI.ListChangeKind.Move",
+      "text": "Move"
+    },
+    {
+      "key": "enum.MUI.ListChangeKind.Remove",
+      "text": "Remove"
+    },
+    {
+      "key": "enum.MUI.ListChangeKind.Replace",
+      "text": "Replace"
+    },
+    {
+      "key": "enum.MUI.ListChangeKind.Reset",
+      "text": "Reset"
+    },
+    {
+      "key": "enum.MUI.ListChangeKind.Update",
+      "text": "Update"
+    },
+    {
+      "key": "enum.MUI.Navigation.BackBehavior.Block",
+      "text": "Block"
+    },
+    {
+      "key": "enum.MUI.Navigation.BackBehavior.Close",
+      "text": "Close"
+    },
+    {
+      "key": "enum.MUI.Navigation.BackBehavior.HandleByPresenter",
+      "text": "Handle By Presenter"
+    },
+    {
+      "key": "enum.MUI.Navigation.BackBehavior.Ignore",
+      "text": "Ignore"
+    },
+    {
+      "key": "enum.MUI.Navigation.BackResponse.Close",
+      "text": "Close"
+    },
+    {
+      "key": "enum.MUI.Navigation.BackResponse.Handled",
+      "text": "Handled"
+    },
+    {
+      "key": "enum.MUI.Navigation.BackResponse.Ignore",
+      "text": "Ignore"
+    },
+    {
+      "key": "enum.MUI.Navigation.BatchCloseStatus.Busy",
+      "text": "Busy"
+    },
+    {
+      "key": "enum.MUI.Navigation.BatchCloseStatus.Completed",
+      "text": "Completed"
+    },
+    {
+      "key": "enum.MUI.Navigation.BatchCloseStatus.Reentrant",
+      "text": "Reentrant"
+    },
+    {
+      "key": "enum.MUI.Navigation.BatchCloseStatus.WaitCancelled",
+      "text": "Wait Cancelled"
+    },
+    {
+      "key": "enum.MUI.Navigation.CleanupStatus.Complete",
+      "text": "Complete"
+    },
+    {
+      "key": "enum.MUI.Navigation.CleanupStatus.Failed",
+      "text": "Failed"
+    },
+    {
+      "key": "enum.MUI.Navigation.CleanupStatus.NotRequired",
+      "text": "Not Required"
+    },
+    {
+      "key": "enum.MUI.Navigation.CleanupStatus.Pending",
+      "text": "Pending"
+    },
+    {
+      "key": "enum.MUI.Navigation.CloseDecisionKind.Allow",
+      "text": "Allow"
+    },
+    {
+      "key": "enum.MUI.Navigation.CloseDecisionKind.Deny",
+      "text": "Deny"
+    },
+    {
+      "key": "enum.MUI.Navigation.CloseDecisionKind.NeedsConfirmation",
+      "text": "Needs Confirmation"
+    },
+    {
+      "key": "enum.MUI.Navigation.CloseRequestIntent.Complete",
+      "text": "Complete"
+    },
+    {
+      "key": "enum.MUI.Navigation.CloseRequestIntent.Dismiss",
+      "text": "Dismiss"
+    },
+    {
+      "key": "enum.MUI.Navigation.CloseRequestIntent.Replace",
+      "text": "Replace"
+    },
+    {
+      "key": "enum.MUI.Navigation.CloseStatus.AlreadyClosed",
+      "text": "Already Closed"
+    },
+    {
+      "key": "enum.MUI.Navigation.CloseStatus.AlreadyClosing",
+      "text": "Already Closing"
+    },
+    {
+      "key": "enum.MUI.Navigation.CloseStatus.Blocked",
+      "text": "Blocked"
+    },
+    {
+      "key": "enum.MUI.Navigation.CloseStatus.Busy",
+      "text": "Busy"
+    },
+    {
+      "key": "enum.MUI.Navigation.CloseStatus.Closed",
+      "text": "Closed"
+    },
+    {
+      "key": "enum.MUI.Navigation.CloseStatus.ClosedWithCleanupPending",
+      "text": "Closed With Cleanup Pending"
+    },
+    {
+      "key": "enum.MUI.Navigation.CloseStatus.ConfirmationUnavailable",
+      "text": "Confirmation Unavailable"
+    },
+    {
+      "key": "enum.MUI.Navigation.CloseStatus.Denied",
+      "text": "Denied"
+    },
+    {
+      "key": "enum.MUI.Navigation.CloseStatus.Failed",
+      "text": "Failed"
+    },
+    {
+      "key": "enum.MUI.Navigation.CloseStatus.Handled",
+      "text": "Handled"
+    },
+    {
+      "key": "enum.MUI.Navigation.CloseStatus.InUse",
+      "text": "In Use"
+    },
+    {
+      "key": "enum.MUI.Navigation.CloseStatus.NotFound",
+      "text": "Not Found"
+    },
+    {
+      "key": "enum.MUI.Navigation.CloseStatus.Reentrant",
+      "text": "Reentrant"
+    },
+    {
+      "key": "enum.MUI.Navigation.CloseStatus.Superseded",
+      "text": "Superseded"
+    },
+    {
+      "key": "enum.MUI.Navigation.CloseStatus.UnknownOrExpired",
+      "text": "Unknown Or Expired"
+    },
+    {
+      "key": "enum.MUI.Navigation.CloseStatus.WaitCancelled",
+      "text": "Wait Cancelled"
+    },
+    {
+      "key": "enum.MUI.Navigation.CoveragePolicy.BlockInput",
+      "text": "Block Input"
+    },
+    {
+      "key": "enum.MUI.Navigation.CoveragePolicy.Hide",
+      "text": "Hide"
+    },
+    {
+      "key": "enum.MUI.Navigation.CoveragePolicy.None",
+      "text": "None"
+    },
+    {
+      "key": "enum.MUI.Navigation.DependencyFailureStage.Preparation",
+      "text": "Preparation"
+    },
+    {
+      "key": "enum.MUI.Navigation.DependencyFailureStage.RuntimeExit",
+      "text": "Runtime Exit"
+    },
+    {
+      "key": "enum.MUI.Navigation.DependencyPlacement.AttachedAfter",
+      "text": "Attached After"
+    },
+    {
+      "key": "enum.MUI.Navigation.DependencyPlacement.RequiredBefore",
+      "text": "Required Before"
+    },
+    {
+      "key": "enum.MUI.Navigation.DismissReason.ArgsUpdateFailed",
+      "text": "Args Update Failed"
+    },
+    {
+      "key": "enum.MUI.Navigation.DismissReason.Back",
+      "text": "Back"
+    },
+    {
+      "key": "enum.MUI.Navigation.DismissReason.Closed",
+      "text": "Closed"
+    },
+    {
+      "key": "enum.MUI.Navigation.DismissReason.Forced",
+      "text": "Forced"
+    },
+    {
+      "key": "enum.MUI.Navigation.DismissReason.HostShutdown",
+      "text": "Host Shutdown"
+    },
+    {
+      "key": "enum.MUI.Navigation.DismissReason.OpenCancelled",
+      "text": "Open Cancelled"
+    },
+    {
+      "key": "enum.MUI.Navigation.DismissReason.OpenFailed",
+      "text": "Open Failed"
+    },
+    {
+      "key": "enum.MUI.Navigation.DismissReason.RebindFailed",
+      "text": "Rebind Failed"
+    },
+    {
+      "key": "enum.MUI.Navigation.DismissReason.Replaced",
+      "text": "Replaced"
+    },
+    {
+      "key": "enum.MUI.Navigation.ExistingInstancePolicy.Reject",
+      "text": "Reject"
+    },
+    {
+      "key": "enum.MUI.Navigation.ExistingInstancePolicy.ReturnReady",
+      "text": "Return Ready"
+    },
+    {
+      "key": "enum.MUI.Navigation.ExplicitOwnershipReleaseStatus.AlreadyReleased",
+      "text": "Already Released"
+    },
+    {
+      "key": "enum.MUI.Navigation.ExplicitOwnershipReleaseStatus.Pending",
+      "text": "Pending"
+    },
+    {
+      "key": "enum.MUI.Navigation.ExplicitOwnershipReleaseStatus.Rejected",
+      "text": "Rejected"
+    },
+    {
+      "key": "enum.MUI.Navigation.ExplicitOwnershipReleaseStatus.Released",
+      "text": "Released"
+    },
+    {
+      "key": "enum.MUI.Navigation.FocusPolicy.None",
+      "text": "None"
+    },
+    {
+      "key": "enum.MUI.Navigation.NavigationEventKind.ArgsUpdateFinished",
+      "text": "Args Update Finished"
+    },
+    {
+      "key": "enum.MUI.Navigation.NavigationEventKind.CloseCleanupPending",
+      "text": "Close Cleanup Pending"
+    },
+    {
+      "key": "enum.MUI.Navigation.NavigationEventKind.CloseCommitted",
+      "text": "Close Committed"
+    },
+    {
+      "key": "enum.MUI.Navigation.NavigationEventKind.Closed",
+      "text": "Closed"
+    },
+    {
+      "key": "enum.MUI.Navigation.NavigationEventKind.DependencyDegraded",
+      "text": "Dependency Degraded"
+    },
+    {
+      "key": "enum.MUI.Navigation.NavigationEventKind.ExplicitOwnershipReleased",
+      "text": "Explicit Ownership Released"
+    },
+    {
+      "key": "enum.MUI.Navigation.NavigationEventKind.OpenCommitted",
+      "text": "Open Committed"
+    },
+    {
+      "key": "enum.MUI.Navigation.NavigationEventKind.ViewModelRebindFinished",
+      "text": "View Model Rebind Finished"
+    },
+    {
+      "key": "enum.MUI.Navigation.NavigationOperationStage.EnterTransition",
+      "text": "Enter Transition"
+    },
+    {
+      "key": "enum.MUI.Navigation.NavigationOperationStage.ExitTransition",
+      "text": "Exit Transition"
+    },
+    {
+      "key": "enum.MUI.Navigation.NavigationOperationStage.InstanceCleanup",
+      "text": "Instance Cleanup"
+    },
+    {
+      "key": "enum.MUI.Navigation.NavigationOperationStage.ViewResourceRelease",
+      "text": "View Resource Release"
+    },
+    {
+      "key": "enum.MUI.Navigation.NavigationPreparationStage.ActivationPreparation",
+      "text": "Activation Preparation"
+    },
+    {
+      "key": "enum.MUI.Navigation.NavigationPreparationStage.AttachedDependencies",
+      "text": "Attached Dependencies"
+    },
+    {
+      "key": "enum.MUI.Navigation.NavigationPreparationStage.Binding",
+      "text": "Binding"
+    },
+    {
+      "key": "enum.MUI.Navigation.NavigationPreparationStage.ModelCreation",
+      "text": "Model Creation"
+    },
+    {
+      "key": "enum.MUI.Navigation.NavigationPreparationStage.PresenterCreate",
+      "text": "Presenter Create"
+    },
+    {
+      "key": "enum.MUI.Navigation.NavigationPreparationStage.PresenterOpen",
+      "text": "Presenter Open"
+    },
+    {
+      "key": "enum.MUI.Navigation.NavigationPreparationStage.PresenterOpenAsync",
+      "text": "Presenter Open Async"
+    },
+    {
+      "key": "enum.MUI.Navigation.NavigationPreparationStage.RequiredDependencies",
+      "text": "Required Dependencies"
+    },
+    {
+      "key": "enum.MUI.Navigation.NavigationPreparationStage.ResourceCreation",
+      "text": "Resource Creation"
+    },
+    {
+      "key": "enum.MUI.Navigation.NavigationTraceKind.BatchCloseItem",
+      "text": "Batch Close Item"
+    },
+    {
+      "key": "enum.MUI.Navigation.NavigationTraceKind.Lifecycle",
+      "text": "Lifecycle"
+    },
+    {
+      "key": "enum.MUI.Navigation.NavigationTraceKind.OperationFinished",
+      "text": "Operation Finished"
+    },
+    {
+      "key": "enum.MUI.Navigation.NavigationTraceKind.OperationStageFinished",
+      "text": "Operation Stage Finished"
+    },
+    {
+      "key": "enum.MUI.Navigation.NavigationTraceKind.OperationStageStarted",
+      "text": "Operation Stage Started"
+    },
+    {
+      "key": "enum.MUI.Navigation.NavigationTraceKind.OperationStarted",
+      "text": "Operation Started"
+    },
+    {
+      "key": "enum.MUI.Navigation.NavigationTraceKind.PreparationFinished",
+      "text": "Preparation Finished"
+    },
+    {
+      "key": "enum.MUI.Navigation.NavigationTraceKind.PreparationStarted",
+      "text": "Preparation Started"
+    },
+    {
+      "key": "enum.MUI.Navigation.OpenRejection.Busy",
+      "text": "Busy"
+    },
+    {
+      "key": "enum.MUI.Navigation.OpenRejection.CleanupCapacity",
+      "text": "Cleanup Capacity"
+    },
+    {
+      "key": "enum.MUI.Navigation.OpenRejection.CloseDecisionTimedOut",
+      "text": "Close Decision Timed Out"
+    },
+    {
+      "key": "enum.MUI.Navigation.OpenRejection.CloseDenied",
+      "text": "Close Denied"
+    },
+    {
+      "key": "enum.MUI.Navigation.OpenRejection.ConfirmationUnavailable",
+      "text": "Confirmation Unavailable"
+    },
+    {
+      "key": "enum.MUI.Navigation.OpenRejection.ConflictingData",
+      "text": "Conflicting Data"
+    },
+    {
+      "key": "enum.MUI.Navigation.OpenRejection.DependencyCycle",
+      "text": "Dependency Cycle"
+    },
+    {
+      "key": "enum.MUI.Navigation.OpenRejection.DependencyLimit",
+      "text": "Dependency Limit"
+    },
+    {
+      "key": "enum.MUI.Navigation.OpenRejection.DependencyOrderConflict",
+      "text": "Dependency Order Conflict"
+    },
+    {
+      "key": "enum.MUI.Navigation.OpenRejection.InstanceLimit",
+      "text": "Instance Limit"
+    },
+    {
+      "key": "enum.MUI.Navigation.OpenRejection.None",
+      "text": "None"
+    },
+    {
+      "key": "enum.MUI.Navigation.OpenRejection.Reentrant",
+      "text": "Reentrant"
+    },
+    {
+      "key": "enum.MUI.Navigation.OpenRejection.Superseded",
+      "text": "Superseded"
+    },
+    {
+      "key": "enum.MUI.Navigation.OpenStatus.ActivationFailed",
+      "text": "Activation Failed"
+    },
+    {
+      "key": "enum.MUI.Navigation.OpenStatus.CancelledBeforeCommit",
+      "text": "Cancelled Before Commit"
+    },
+    {
+      "key": "enum.MUI.Navigation.OpenStatus.ClosedBeforeReady",
+      "text": "Closed Before Ready"
+    },
+    {
+      "key": "enum.MUI.Navigation.OpenStatus.HostClosed",
+      "text": "Host Closed"
+    },
+    {
+      "key": "enum.MUI.Navigation.OpenStatus.PreparationFailed",
+      "text": "Preparation Failed"
+    },
+    {
+      "key": "enum.MUI.Navigation.OpenStatus.Rejected",
+      "text": "Rejected"
+    },
+    {
+      "key": "enum.MUI.Navigation.OpenStatus.Succeeded",
+      "text": "Succeeded"
+    },
+    {
+      "key": "enum.MUI.Navigation.OverflowPolicy.CloseOldest",
+      "text": "Close Oldest"
+    },
+    {
+      "key": "enum.MUI.Navigation.OverflowPolicy.Reject",
+      "text": "Reject"
+    },
+    {
+      "key": "enum.MUI.Navigation.PostOpenStatus.Accepted",
+      "text": "Accepted"
+    },
+    {
+      "key": "enum.MUI.Navigation.PostOpenStatus.Busy",
+      "text": "Busy"
+    },
+    {
+      "key": "enum.MUI.Navigation.PostOpenStatus.HostClosed",
+      "text": "Host Closed"
+    },
+    {
+      "key": "enum.MUI.Navigation.PreloadStatus.Cancelled",
+      "text": "Cancelled"
+    },
+    {
+      "key": "enum.MUI.Navigation.PreloadStatus.CapacityExceeded",
+      "text": "Capacity Exceeded"
+    },
+    {
+      "key": "enum.MUI.Navigation.PreloadStatus.Failed",
+      "text": "Failed"
+    },
+    {
+      "key": "enum.MUI.Navigation.PreloadStatus.HostClosed",
+      "text": "Host Closed"
+    },
+    {
+      "key": "enum.MUI.Navigation.PreloadStatus.InactiveContentClearing",
+      "text": "Inactive Content Clearing"
+    },
+    {
+      "key": "enum.MUI.Navigation.PreloadStatus.Ready",
+      "text": "Ready"
+    },
+    {
+      "key": "enum.MUI.Navigation.PreloadStatus.Reentrant",
+      "text": "Reentrant"
+    },
+    {
+      "key": "enum.MUI.Navigation.PreloadStatus.Superseded",
+      "text": "Superseded"
+    },
+    {
+      "key": "enum.MUI.Navigation.PreloadStatus.Unsupported",
+      "text": "Unsupported"
+    },
+    {
+      "key": "enum.MUI.Navigation.PreloadStatus.WaitCancelled",
+      "text": "Wait Cancelled"
+    },
+    {
+      "key": "enum.MUI.Navigation.ReplaceRejection.Busy",
+      "text": "Busy"
+    },
+    {
+      "key": "enum.MUI.Navigation.ReplaceRejection.CleanupCapacity",
+      "text": "Cleanup Capacity"
+    },
+    {
+      "key": "enum.MUI.Navigation.ReplaceRejection.CloseDecisionTimedOut",
+      "text": "Close Decision Timed Out"
+    },
+    {
+      "key": "enum.MUI.Navigation.ReplaceRejection.CloseDenied",
+      "text": "Close Denied"
+    },
+    {
+      "key": "enum.MUI.Navigation.ReplaceRejection.ConfirmationUnavailable",
+      "text": "Confirmation Unavailable"
+    },
+    {
+      "key": "enum.MUI.Navigation.ReplaceRejection.ConflictingData",
+      "text": "Conflicting Data"
+    },
+    {
+      "key": "enum.MUI.Navigation.ReplaceRejection.DependencyCycle",
+      "text": "Dependency Cycle"
+    },
+    {
+      "key": "enum.MUI.Navigation.ReplaceRejection.DependencyLimit",
+      "text": "Dependency Limit"
+    },
+    {
+      "key": "enum.MUI.Navigation.ReplaceRejection.DependencyOrderConflict",
+      "text": "Dependency Order Conflict"
+    },
+    {
+      "key": "enum.MUI.Navigation.ReplaceRejection.InstanceLimit",
+      "text": "Instance Limit"
+    },
+    {
+      "key": "enum.MUI.Navigation.ReplaceRejection.None",
+      "text": "None"
+    },
+    {
+      "key": "enum.MUI.Navigation.ReplaceRejection.Reentrant",
+      "text": "Reentrant"
+    },
+    {
+      "key": "enum.MUI.Navigation.ReplaceRejection.SourceUnavailable",
+      "text": "Source Unavailable"
+    },
+    {
+      "key": "enum.MUI.Navigation.ReplaceRejection.Superseded",
+      "text": "Superseded"
+    },
+    {
+      "key": "enum.MUI.Navigation.ReplaceStatus.CancelledBeforeCommit",
+      "text": "Cancelled Before Commit"
+    },
+    {
+      "key": "enum.MUI.Navigation.ReplaceStatus.Committed",
+      "text": "Committed"
+    },
+    {
+      "key": "enum.MUI.Navigation.ReplaceStatus.PreparationFailed",
+      "text": "Preparation Failed"
+    },
+    {
+      "key": "enum.MUI.Navigation.ReplaceStatus.Rejected",
+      "text": "Rejected"
+    },
+    {
+      "key": "enum.MUI.Navigation.TickPausePolicy.Covered",
+      "text": "Covered"
+    },
+    {
+      "key": "enum.MUI.Navigation.TickPausePolicy.Hidden",
+      "text": "Hidden"
+    },
+    {
+      "key": "enum.MUI.Navigation.TickPausePolicy.None",
+      "text": "None"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewCacheMode.KeepAlive",
+      "text": "Long-term cache (evictable at capacity)"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewCacheMode.None",
+      "text": "None"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewCacheMode.Timed",
+      "text": "Timed"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewOperationFlags.CleanupTimedOut",
+      "text": "Cleanup Timed Out"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewOperationFlags.CloseRequested",
+      "text": "Close Requested"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewOperationFlags.Closing",
+      "text": "Closing"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewOperationFlags.DependencyExit",
+      "text": "Dependency Exit"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewOperationFlags.Entering",
+      "text": "Entering"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewOperationFlags.ExecutingCommand",
+      "text": "Executing Command"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewOperationFlags.Exiting",
+      "text": "Exiting"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewOperationFlags.None",
+      "text": "None"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewOperationFlags.Preparing",
+      "text": "Preparing"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewOperationFlags.Rebinding",
+      "text": "Rebinding"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewOperationFlags.UpdatingArgs",
+      "text": "Updating Args"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewReadinessStatus.ActivationFailed",
+      "text": "Activation Failed"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewReadinessStatus.ClosedBeforeReady",
+      "text": "Closed Before Ready"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewReadinessStatus.Pending",
+      "text": "Pending"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewReadinessStatus.Ready",
+      "text": "Ready"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewReadinessStatus.Transitioning",
+      "text": "Transitioning"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewReadinessStatus.WaitCancelled",
+      "text": "Wait Cancelled"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewResultStatus.Completed",
+      "text": "Completed"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewResultStatus.Dismissed",
+      "text": "Dismissed"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewResultStatus.Faulted",
+      "text": "Faulted"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewResultStatus.Pending",
+      "text": "Pending"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewState.Closing",
+      "text": "Closing"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewState.Destroyed",
+      "text": "Destroyed"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewState.Failed",
+      "text": "Failed"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewState.Open",
+      "text": "Open"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewState.Opening",
+      "text": "Opening"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewState.Unknown",
+      "text": "Unknown"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewState.UnknownOrExpired",
+      "text": "Unknown Or Expired"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewTransitionStatus.Completed",
+      "text": "Completed"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewTransitionStatus.Failed",
+      "text": "Failed"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewTransitionStatus.Interrupted",
+      "text": "Interrupted"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewTransitionStatus.Pending",
+      "text": "Pending"
+    },
+    {
+      "key": "enum.MUI.Notifications.NotificationPostStatus.Accepted",
+      "text": "Accepted"
+    },
+    {
+      "key": "enum.MUI.Notifications.NotificationPostStatus.CapacityExceeded",
+      "text": "Capacity Exceeded"
+    },
+    {
+      "key": "enum.MUI.Notifications.NotificationPostStatus.Disposed",
+      "text": "Disposed"
+    },
+    {
+      "key": "enum.MUI.Notifications.NotificationPostStatus.Duplicate",
+      "text": "Duplicate"
+    },
+    {
+      "key": "enum.MUI.RebindCleanup.Complete",
+      "text": "Complete"
+    },
+    {
+      "key": "enum.MUI.RebindCleanup.Failed",
+      "text": "Failed"
+    },
+    {
+      "key": "enum.MUI.RebindCleanup.NotRequired",
+      "text": "Not Required"
+    },
+    {
+      "key": "enum.MUI.RebindRejection.BindingDetachUnsupported",
+      "text": "Binding Detach Unsupported"
+    },
+    {
+      "key": "enum.MUI.RebindRejection.Busy",
+      "text": "Busy"
+    },
+    {
+      "key": "enum.MUI.RebindRejection.HostClosed",
+      "text": "Host Closed"
+    },
+    {
+      "key": "enum.MUI.RebindRejection.InUse",
+      "text": "In Use"
+    },
+    {
+      "key": "enum.MUI.RebindRejection.InputControlUnsupported",
+      "text": "Input Control Unsupported"
+    },
+    {
+      "key": "enum.MUI.RebindRejection.None",
+      "text": "None"
+    },
+    {
+      "key": "enum.MUI.RebindRejection.Reentrant",
+      "text": "Reentrant"
+    },
+    {
+      "key": "enum.MUI.RebindRejection.RouteMismatch",
+      "text": "Route Mismatch"
+    },
+    {
+      "key": "enum.MUI.RebindRejection.SourceUnavailable",
+      "text": "Source Unavailable"
+    },
+    {
+      "key": "enum.MUI.RebindStatus.Applied",
+      "text": "Applied"
+    },
+    {
+      "key": "enum.MUI.RebindStatus.Cancelled",
+      "text": "Cancelled"
+    },
+    {
+      "key": "enum.MUI.RebindStatus.Failed",
+      "text": "Failed"
+    },
+    {
+      "key": "enum.MUI.RebindStatus.Rejected",
+      "text": "Rejected"
+    },
+    {
+      "key": "enum.MUI.Tabs.TabContentRetention.CacheRecent",
+      "text": "Cache Recent"
+    },
+    {
+      "key": "enum.MUI.Tabs.TabContentRetention.KeepSelectedTabs",
+      "text": "Keep Selected Tabs"
+    },
+    {
+      "key": "enum.MUI.Tabs.TabContentRetention.ReleaseOnLeave",
+      "text": "Release On Leave"
+    },
+    {
+      "key": "enum.MUI.Tabs.TabFailureDisplay.ErrorPlaceholder",
+      "text": "Error Placeholder"
+    },
+    {
+      "key": "enum.MUI.Tabs.TabFailureDisplay.RestorePrevious",
+      "text": "Restore Previous"
+    },
+    {
+      "key": "enum.MUI.Tabs.TabPendingDisplay.Blank",
+      "text": "Blank"
+    },
+    {
+      "key": "enum.MUI.Tabs.TabPendingDisplay.KeepPrevious",
+      "text": "Keep Previous"
+    },
+    {
+      "key": "enum.MUI.Tabs.TabPendingDisplay.LoadingPlaceholder",
+      "text": "Loading Placeholder"
+    },
+    {
+      "key": "enum.MUI.Tabs.TabPhase.Empty",
+      "text": "Empty"
+    },
+    {
+      "key": "enum.MUI.Tabs.TabPhase.Error",
+      "text": "Error"
+    },
+    {
+      "key": "enum.MUI.Tabs.TabPhase.Inactive",
+      "text": "Inactive"
+    },
+    {
+      "key": "enum.MUI.Tabs.TabPhase.Loading",
+      "text": "Loading"
+    },
+    {
+      "key": "enum.MUI.Tabs.TabPhase.Ready",
+      "text": "Ready"
+    },
+    {
+      "key": "enum.MUI.Tabs.TabRejection.Denied",
+      "text": "Denied"
+    },
+    {
+      "key": "enum.MUI.Tabs.TabRejection.Disabled",
+      "text": "Disabled"
+    },
+    {
+      "key": "enum.MUI.Tabs.TabRejection.None",
+      "text": "None"
+    },
+    {
+      "key": "enum.MUI.Tabs.TabRejection.Reentrant",
+      "text": "Reentrant"
+    },
+    {
+      "key": "enum.MUI.Tabs.TabRejection.UnknownTab",
+      "text": "Unknown Tab"
+    },
+    {
+      "key": "enum.MUI.Tabs.TabSelectionStatus.Cancelled",
+      "text": "Cancelled"
+    },
+    {
+      "key": "enum.MUI.Tabs.TabSelectionStatus.Empty",
+      "text": "Empty"
+    },
+    {
+      "key": "enum.MUI.Tabs.TabSelectionStatus.Failed",
+      "text": "Failed"
+    },
+    {
+      "key": "enum.MUI.Tabs.TabSelectionStatus.ParentInactive",
+      "text": "Parent Inactive"
+    },
+    {
+      "key": "enum.MUI.Tabs.TabSelectionStatus.Ready",
+      "text": "Ready"
+    },
+    {
+      "key": "enum.MUI.Tabs.TabSelectionStatus.Rejected",
+      "text": "Rejected"
+    },
+    {
+      "key": "enum.MUI.Tabs.TabSelectionStatus.Superseded",
+      "text": "Superseded"
+    },
+    {
+      "key": "enum.MUI.Tabs.TabSelectionStatus.WaitCancelled",
+      "text": "Wait Cancelled"
+    },
+    {
+      "key": "enum.MUI.TextInputCommitMode.OnChange",
+      "text": "On Change"
+    },
+    {
+      "key": "enum.MUI.TextInputCommitMode.OnEndEdit",
+      "text": "On End Edit"
+    },
+    {
+      "key": "enum.MUI.UGUI.MUIPagePolicyFields.All",
+      "text": "All"
+    },
+    {
+      "key": "enum.MUI.UGUI.MUIPagePolicyFields.Back",
+      "text": "Back"
+    },
+    {
+      "key": "enum.MUI.UGUI.MUIPagePolicyFields.Cache",
+      "text": "Cache"
+    },
+    {
+      "key": "enum.MUI.UGUI.MUIPagePolicyFields.Coverage",
+      "text": "Coverage"
+    },
+    {
+      "key": "enum.MUI.UGUI.MUIPagePolicyFields.Focus",
+      "text": "Focus"
+    },
+    {
+      "key": "enum.MUI.UGUI.MUIPagePolicyFields.Instances",
+      "text": "Instances"
+    },
+    {
+      "key": "enum.MUI.UGUI.MUIPagePolicyFields.Layer",
+      "text": "Layer"
+    },
+    {
+      "key": "enum.MUI.UGUI.MUIPagePolicyFields.Modal",
+      "text": "Modal"
+    },
+    {
+      "key": "enum.MUI.UGUI.MUIPagePolicyFields.None",
+      "text": "None"
+    },
+    {
+      "key": "enum.MUI.UGUI.MUIPagePolicyFields.Tick",
+      "text": "Tick"
+    },
+    {
+      "key": "enum.MUI.UGUI.MUIPagePolicyFields.Timeouts",
+      "text": "Timeouts"
+    },
+    {
+      "key": "enum.MUI.UGUI.OverlayDismissReason.Back",
+      "text": "Back"
+    },
+    {
+      "key": "enum.MUI.UGUI.OverlayDismissReason.OutsidePointer",
+      "text": "Outside Pointer"
+    },
+    {
+      "key": "enum.MUI.UGUI.OverlayDismissReason.TargetUnavailable",
+      "text": "Target Unavailable"
+    },
+    {
+      "key": "enum.MUI.UGUI.OverlayPlacement.Above",
+      "text": "Above"
+    },
+    {
+      "key": "enum.MUI.UGUI.OverlayPlacement.Below",
+      "text": "Below"
+    },
+    {
+      "key": "enum.MUI.UGUI.OverlayPlacement.Left",
+      "text": "Left"
+    },
+    {
+      "key": "enum.MUI.UGUI.OverlayPlacement.Right",
+      "text": "Right"
+    },
+    {
+      "key": "enum.MUI.UGUI.ResourcePreparationState.Applied",
+      "text": "Applied"
+    },
+    {
+      "key": "enum.MUI.UGUI.ResourcePreparationState.Cancelled",
+      "text": "Cancelled"
+    },
+    {
+      "key": "enum.MUI.UGUI.ResourcePreparationState.Failed",
+      "text": "Failed"
+    },
+    {
+      "key": "enum.MUI.UGUI.ResourcePreparationState.Loading",
+      "text": "Loading"
+    },
+    {
+      "key": "enum.MUI.UGUI.ResourcePreparationState.NotApplied",
+      "text": "Not Applied"
+    },
+    {
+      "key": "enum.MUI.UGUI.ResourceSourceState.Cancelled",
+      "text": "Cancelled"
+    },
+    {
+      "key": "enum.MUI.UGUI.ResourceSourceState.Displayed",
+      "text": "Displayed"
+    },
+    {
+      "key": "enum.MUI.UGUI.ResourceSourceState.Empty",
+      "text": "Empty"
+    },
+    {
+      "key": "enum.MUI.UGUI.ResourceSourceState.Failed",
+      "text": "Failed"
+    },
+    {
+      "key": "enum.MUI.UGUI.ResourceSourceState.Loading",
+      "text": "Loading"
+    },
+    {
+      "key": "enum.MUI.UGUI.UIAutomationConditionStatus.Cancelled",
+      "text": "Cancelled"
+    },
+    {
+      "key": "enum.MUI.UGUI.UIAutomationConditionStatus.Failed",
+      "text": "Failed"
+    },
+    {
+      "key": "enum.MUI.UGUI.UIAutomationConditionStatus.Pending",
+      "text": "Pending"
+    },
+    {
+      "key": "enum.MUI.UGUI.UIAutomationConditionStatus.Satisfied",
+      "text": "Satisfied"
+    },
+    {
+      "key": "enum.MUI.UGUI.UIAutomationConditionStatus.TimedOut",
+      "text": "Timed Out"
+    },
+    {
+      "key": "enum.MUI.UGUI.UIAutomationStatus.Accepted",
+      "text": "Accepted"
+    },
+    {
+      "key": "enum.MUI.UGUI.UIAutomationStatus.InputBlocked",
+      "text": "Input Blocked"
+    },
+    {
+      "key": "enum.MUI.UGUI.UIAutomationStatus.NotReady",
+      "text": "Not Ready"
+    },
+    {
+      "key": "enum.MUI.UGUI.UIAutomationStatus.Reentrant",
+      "text": "Reentrant"
+    },
+    {
+      "key": "enum.MUI.UGUI.ViewInputRestriction.CanvasGroupInputDisabled",
+      "text": "Canvas Group Input Disabled"
+    },
+    {
+      "key": "enum.MUI.UGUI.ViewInputRestriction.CanvasGroupRaycastsDisabled",
+      "text": "Canvas Group Raycasts Disabled"
+    },
+    {
+      "key": "enum.MUI.UGUI.ViewInputRestriction.Disposed",
+      "text": "Disposed"
+    },
+    {
+      "key": "enum.MUI.UGUI.ViewInputRestriction.HiddenByHost",
+      "text": "Hidden By Host"
+    },
+    {
+      "key": "enum.MUI.UGUI.ViewInputRestriction.HiddenLocally",
+      "text": "Hidden Locally"
+    },
+    {
+      "key": "enum.MUI.UGUI.ViewInputRestriction.HostInputDisabled",
+      "text": "Host Input Disabled"
+    },
+    {
+      "key": "enum.MUI.UGUI.ViewInputRestriction.InactiveHierarchy",
+      "text": "Inactive Hierarchy"
+    },
+    {
+      "key": "enum.MUI.UGUI.ViewInputRestriction.LocalGateBlocked",
+      "text": "Local Gate Blocked"
+    },
+    {
+      "key": "enum.MUI.UGUI.ViewInputRestriction.LocalGateDisposed",
+      "text": "Local Gate Disposed"
+    },
+    {
+      "key": "enum.MUI.UGUI.ViewInputRestriction.LocalInputDisabled",
+      "text": "Local Input Disabled"
+    },
+    {
+      "key": "enum.MUI.UGUI.ViewInputRestriction.MissingCanvasGroup",
+      "text": "Missing Canvas Group"
+    },
+    {
+      "key": "enum.MUI.UGUI.ViewInputRestriction.None",
+      "text": "None"
+    },
+    {
+      "key": "enum.MUI.UGUI.ViewInputRestriction.NotInitialized",
+      "text": "Not Initialized"
+    },
+    {
+      "key": "enum.MUI.UGUI.ViewInputRestriction.RetainingVisuals",
+      "text": "Retaining Visuals"
+    },
+    {
+      "key": "enum.MUI.UGUI.ViewInputRestriction.ViewUnavailable",
+      "text": "View Unavailable"
+    },
+    {
+      "key": "enum.MUI.UGUI.VirtualListAlignment.Center",
+      "text": "Center"
+    },
+    {
+      "key": "enum.MUI.UGUI.VirtualListAlignment.End",
+      "text": "End"
+    },
+    {
+      "key": "enum.MUI.UGUI.VirtualListAlignment.Nearest",
+      "text": "Nearest"
+    },
+    {
+      "key": "enum.MUI.UGUI.VirtualListAlignment.Start",
+      "text": "Start"
+    },
+    {
+      "key": "enum.MUI.UGUI.VirtualListRevealStatus.Cancelled",
+      "text": "Cancelled"
+    },
+    {
+      "key": "enum.MUI.UGUI.VirtualListRevealStatus.Failed",
+      "text": "Failed"
+    },
+    {
+      "key": "enum.MUI.UGUI.VirtualListRevealStatus.Inactive",
+      "text": "Inactive"
+    },
+    {
+      "key": "enum.MUI.UGUI.VirtualListRevealStatus.IncompatibleSource",
+      "text": "Incompatible Source"
+    },
+    {
+      "key": "enum.MUI.UGUI.VirtualListRevealStatus.InputBlocked",
+      "text": "Input Blocked"
+    },
+    {
+      "key": "enum.MUI.UGUI.VirtualListRevealStatus.NoSelectable",
+      "text": "No Selectable"
+    },
+    {
+      "key": "enum.MUI.UGUI.VirtualListRevealStatus.NotFound",
+      "text": "Not Found"
+    },
+    {
+      "key": "enum.MUI.UGUI.VirtualListRevealStatus.Ready",
+      "text": "Ready"
+    },
+    {
+      "key": "enum.MUI.UGUI.VirtualListRevealStatus.Superseded",
+      "text": "Superseded"
+    },
+    {
+      "key": "enum.MUI.UGUI.VirtualListStatus.Empty",
+      "text": "Empty"
+    },
+    {
+      "key": "enum.MUI.UGUI.VirtualListStatus.Error",
+      "text": "Error"
+    },
+    {
+      "key": "enum.MUI.UGUI.VirtualListStatus.Inactive",
+      "text": "Inactive"
+    },
+    {
+      "key": "enum.MUI.UGUI.VirtualListStatus.Loading",
+      "text": "Loading"
+    },
+    {
+      "key": "enum.MUI.UGUI.VirtualListStatus.Ready",
+      "text": "Ready"
+    },
+    {
+      "key": "enum.MUI.ViewPreparationStep.Binding",
+      "text": "Binding"
+    },
+    {
+      "key": "enum.MUI.ViewPreparationStep.PresenterCreate",
+      "text": "Presenter Create"
+    },
+    {
+      "key": "enum.MUI.ViewPreparationStep.PresenterOpen",
+      "text": "Presenter Open"
+    },
+    {
+      "key": "enum.MUI.ViewPreparationStep.PresenterOpenAsync",
+      "text": "Presenter Open Async"
+    },
+    {
+      "key": "language.help",
+      "text": "Global editor preference for MUI windows and Inspectors. Add *.mui-language.json resources to extend languages; untranslated entries use the configured fallback language."
+    },
+    {
+      "key": "language.label",
+      "text": "Editor Language"
+    },
+    {
+      "key": "language.reload",
+      "text": "Reload Languages"
+    },
+    {
+      "key": "property.AllowMultiple",
+      "text": "Allow Multiple"
+    },
+    {
+      "key": "property.BackBehavior",
+      "text": "Back Behavior"
+    },
+    {
+      "key": "property.Button",
+      "text": "Button"
+    },
+    {
+      "key": "property.CacheDurationSeconds",
+      "text": "Cache Duration (seconds)"
+    },
+    {
+      "key": "property.CacheMode",
+      "text": "View cache after closing"
+    },
+    {
+      "key": "property.CloseDecisionTimeoutSeconds",
+      "text": "Close Decision Timeout (seconds)"
+    },
+    {
+      "key": "property.CloseTimeoutSeconds",
+      "text": "Close Timeout (seconds)"
+    },
+    {
+      "key": "property.Coverage",
+      "text": "Effect on lower pages"
+    },
+    {
+      "key": "property.EnterTimeout",
+      "text": "Enter Timeout (seconds)"
+    },
+    {
+      "key": "property.ExistingInstance",
+      "text": "Existing Instance"
+    },
+    {
+      "key": "property.ExitTimeout",
+      "text": "Exit Timeout (seconds)"
+    },
+    {
+      "key": "property.Key",
+      "text": "Key"
+    },
+    {
+      "key": "property.Layer",
+      "text": "Layer"
+    },
+    {
+      "key": "property.MaxInstances",
+      "text": "Max Instances"
+    },
+    {
+      "key": "property.Modal",
+      "text": "Modal"
+    },
+    {
+      "key": "property.Name",
+      "text": "Name"
+    },
+    {
+      "key": "property.Order",
+      "text": "Logical order"
+    },
+    {
+      "key": "property.Overflow",
+      "text": "Overflow"
+    },
+    {
+      "key": "property.Overrides",
+      "text": "Overridden Rule Groups"
+    },
+    {
+      "key": "property.PrepareTimeoutSeconds",
+      "text": "Prepare Timeout (seconds)"
+    },
+    {
+      "key": "property.SelectionMark",
+      "text": "Selection Mark"
+    },
+    {
+      "key": "property.TakesFocus",
+      "text": "Takes Focus"
+    },
+    {
+      "key": "property.TickPause",
+      "text": "Pause own business Tick when"
+    },
+    {
+      "key": "property.Values",
+      "text": "Values"
+    },
+    {
+      "key": "property.accessibilityDescription",
+      "text": "Accessibility Description"
+    },
+    {
+      "key": "property.accessibilityHidden",
+      "text": "Accessibility Hidden"
+    },
+    {
+      "key": "property.accessibilityLabel",
+      "text": "Accessibility Label"
+    },
+    {
+      "key": "property.accessibilityOrder",
+      "text": "Accessibility Order"
+    },
+    {
+      "key": "property.accessibilityValue",
+      "text": "Accessibility Value"
+    },
+    {
+      "key": "property.allowedHighlight",
+      "text": "Allowed Highlight"
+    },
+    {
+      "key": "property.arrayElement",
+      "text": "Element {0}"
+    },
+    {
+      "key": "property.automaticClock",
+      "text": "Automatic Clock"
+    },
+    {
+      "key": "property.automaticColumns",
+      "text": "Automatic Columns"
+    },
+    {
+      "key": "property.automaticFramePump",
+      "text": "Automatically Update UI"
+    },
+    {
+      "key": "property.avoidKeyboard",
+      "text": "Avoid Keyboard"
+    },
+    {
+      "key": "property.backNavigationView",
+      "text": "Back Navigation View"
+    },
+    {
+      "key": "property.bottom",
+      "text": "Bottom"
+    },
+    {
+      "key": "property.buttonTemplate",
+      "text": "Button Template"
+    },
+    {
+      "key": "property.cacheCapacity",
+      "text": "Cache Capacity"
+    },
+    {
+      "key": "property.cancelButton",
+      "text": "Cancel Button"
+    },
+    {
+      "key": "property.capacity",
+      "text": "Capacity"
+    },
+    {
+      "key": "property.childView",
+      "text": "Child View"
+    },
+    {
+      "key": "property.cleanupCapacity",
+      "text": "Cleanup Capacity"
+    },
+    {
+      "key": "property.columns",
+      "text": "Columns"
+    },
+    {
+      "key": "property.commitMode",
+      "text": "Commit Mode"
+    },
+    {
+      "key": "property.content",
+      "text": "Content"
+    },
+    {
+      "key": "property.contentRoot",
+      "text": "Content Root"
+    },
+    {
+      "key": "property.defaultPreset",
+      "text": "When Unspecified"
+    },
+    {
+      "key": "property.defaultRules",
+      "text": "Page Defaults"
+    },
+    {
+      "key": "property.defaultSelection",
+      "text": "Default Selection"
+    },
+    {
+      "key": "property.dismissButton",
+      "text": "Dismiss Button"
+    },
+    {
+      "key": "property.dismissOnBack",
+      "text": "Dismiss On Back"
+    },
+    {
+      "key": "property.dismissOutside",
+      "text": "Dismiss Outside"
+    },
+    {
+      "key": "property.displayDelay",
+      "text": "Display Delay"
+    },
+    {
+      "key": "property.dragIcon",
+      "text": "Drag Icon"
+    },
+    {
+      "key": "property.edgePadding",
+      "text": "Edge Padding"
+    },
+    {
+      "key": "property.emptyState",
+      "text": "Empty State"
+    },
+    {
+      "key": "property.endFollowTolerance",
+      "text": "End Follow Tolerance"
+    },
+    {
+      "key": "property.enterFadeDuration",
+      "text": "Enter Fade Duration"
+    },
+    {
+      "key": "property.entries",
+      "text": "Entries"
+    },
+    {
+      "key": "property.errorLabel",
+      "text": "Error Label"
+    },
+    {
+      "key": "property.errorState",
+      "text": "Error State"
+    },
+    {
+      "key": "property.estimatedItemExtent",
+      "text": "Estimated Item Extent"
+    },
+    {
+      "key": "property.exitFadeDuration",
+      "text": "Exit Fade Duration"
+    },
+    {
+      "key": "property.failureMessage",
+      "text": "Failure Message"
+    },
+    {
+      "key": "property.fitHorizontal",
+      "text": "Fit Horizontal"
+    },
+    {
+      "key": "property.fitVertical",
+      "text": "Fit Vertical"
+    },
+    {
+      "key": "property.followEnd",
+      "text": "Follow End"
+    },
+    {
+      "key": "property.gap",
+      "text": "Gap"
+    },
+    {
+      "key": "property.ghostRoot",
+      "text": "Ghost Root"
+    },
+    {
+      "key": "property.host",
+      "text": "Host"
+    },
+    {
+      "key": "property.indeterminate",
+      "text": "Indeterminate"
+    },
+    {
+      "key": "property.indicator",
+      "text": "Indicator"
+    },
+    {
+      "key": "property.inheritParentResources",
+      "text": "Inherit Parent Resources"
+    },
+    {
+      "key": "property.inputEventSystem",
+      "text": "Input Event System"
+    },
+    {
+      "key": "property.itemFailureTemplate",
+      "text": "Item Failure Template"
+    },
+    {
+      "key": "property.itemTemplate",
+      "text": "Item Template"
+    },
+    {
+      "key": "property.itemTemplates",
+      "text": "Item Templates"
+    },
+    {
+      "key": "property.key",
+      "text": "Key"
+    },
+    {
+      "key": "property.layers",
+      "text": "Layers"
+    },
+    {
+      "key": "property.left",
+      "text": "Left"
+    },
+    {
+      "key": "property.loadingOverlay",
+      "text": "Loading Overlay"
+    },
+    {
+      "key": "property.loadingState",
+      "text": "Loading State"
+    },
+    {
+      "key": "property.m_Script",
+      "text": "Script"
+    },
+    {
+      "key": "property.maxCells",
+      "text": "Max Cells"
+    },
+    {
+      "key": "property.maxItems",
+      "text": "Max Items"
+    },
+    {
+      "key": "property.maxPendingDrops",
+      "text": "Max Pending Drops"
+    },
+    {
+      "key": "property.maxRevealCorrections",
+      "text": "Max Reveal Corrections"
+    },
+    {
+      "key": "property.measureItemExtents",
+      "text": "Measure Item Extents"
+    },
+    {
+      "key": "property.measurementsPerFrame",
+      "text": "Measurements Per Frame"
+    },
+    {
+      "key": "property.message",
+      "text": "Message"
+    },
+    {
+      "key": "property.minimumColumnWidth",
+      "text": "Minimum Column Width"
+    },
+    {
+      "key": "property.modalBarrierColor",
+      "text": "Modal Barrier Color"
+    },
+    {
+      "key": "property.mounts",
+      "text": "Mounts"
+    },
+    {
+      "key": "property.overlay",
+      "text": "Overlay"
+    },
+    {
+      "key": "property.overscan",
+      "text": "Overscan"
+    },
+    {
+      "key": "property.padding",
+      "text": "Padding"
+    },
+    {
+      "key": "property.placement",
+      "text": "Placement"
+    },
+    {
+      "key": "property.prefabs",
+      "text": "Prefabs"
+    },
+    {
+      "key": "property.preloadCapacity",
+      "text": "Preload Capacity"
+    },
+    {
+      "key": "property.presets",
+      "text": "Page Behavior Presets"
+    },
+    {
+      "key": "property.progress",
+      "text": "Progress"
+    },
+    {
+      "key": "property.queueCapacity",
+      "text": "Queue Capacity"
+    },
+    {
+      "key": "property.retryButton",
+      "text": "Retry Button"
+    },
+    {
+      "key": "property.right",
+      "text": "Right"
+    },
+    {
+      "key": "property.scrollAxis",
+      "text": "Scroll Axis"
+    },
+    {
+      "key": "property.scrollRect",
+      "text": "Scroll Rect"
+    },
+    {
+      "key": "property.selectOnItemClick",
+      "text": "Select On Item Click"
+    },
+    {
+      "key": "property.selectedVisual",
+      "text": "Selected Visual"
+    },
+    {
+      "key": "property.semanticRole",
+      "text": "Semantic Role"
+    },
+    {
+      "key": "property.semanticState",
+      "text": "Semantic State"
+    },
+    {
+      "key": "property.settings",
+      "text": "Settings"
+    },
+    {
+      "key": "property.size",
+      "text": "Size"
+    },
+    {
+      "key": "property.slots",
+      "text": "Slots"
+    },
+    {
+      "key": "property.spacing",
+      "text": "Spacing"
+    },
+    {
+      "key": "property.template",
+      "text": "Template"
+    },
+    {
+      "key": "property.terminalCapacity",
+      "text": "Terminal Capacity"
+    },
+    {
+      "key": "property.top",
+      "text": "Top"
+    },
+    {
+      "key": "property.view",
+      "text": "View"
+    },
+    {
+      "key": "property.viewRoot",
+      "text": "View Root"
+    },
+    {
+      "key": "property.waitForResourceSources",
+      "text": "Wait For Resource Sources"
+    },
+    {
+      "key": "property.wrapNavigation",
+      "text": "Wrap Navigation"
+    },
+    {
+      "key": "uxml.MUIDashboard.01da0634c3",
+      "text": "Show host settings"
+    },
+    {
+      "key": "uxml.MUIDashboard.0870c517d4",
+      "text": "Capture runtime state"
+    },
+    {
+      "key": "uxml.MUIDashboard.0dc47fcbfc",
+      "text": "Pages and host"
+    },
+    {
+      "key": "uxml.MUIDashboard.152f0fe07c",
+      "text": "Copy state report"
+    },
+    {
+      "key": "uxml.MUIDashboard.17a020ace5",
+      "text": "Capture timeline"
+    },
+    {
+      "key": "uxml.MUIDashboard.283a5893e4",
+      "text": "Stop recording"
+    },
+    {
+      "key": "uxml.MUIDashboard.36155a4b2f",
+      "text": "Settings asset"
+    },
+    {
+      "key": "uxml.MUIDashboard.3b5f994fce",
+      "text": "Create settings"
+    },
+    {
+      "key": "uxml.MUIDashboard.5ce55b4e35",
+      "text": "Refresh hosts"
+    },
+    {
+      "key": "uxml.MUIDashboard.68289cbdb5",
+      "text": "Snapshot limit (1–4096)"
+    },
+    {
+      "key": "uxml.MUIDashboard.7aa1cfebb5",
+      "text": "Show host, focus and open history"
+    },
+    {
+      "key": "uxml.MUIDashboard.82f2cb5e0f",
+      "text": "Configuration and validation"
+    },
+    {
+      "key": "uxml.MUIDashboard.8637525747",
+      "text": "Select a UIHost, enter Play Mode and initialize it before capturing state."
+    },
+    {
+      "key": "uxml.MUIDashboard.8abe30fad6",
+      "text": "Display order: top to bottom"
+    },
+    {
+      "key": "uxml.MUIDashboard.9da1918cdc",
+      "text": "Copy report"
+    },
+    {
+      "key": "uxml.MUIDashboard.9ebe1ab0d1",
+      "text": "Lifecycle"
+    },
+    {
+      "key": "uxml.MUIDashboard.b26286234b",
+      "text": "Validate settings"
+    },
+    {
+      "key": "uxml.MUIDashboard.b9056c8305",
+      "text": "Auto refresh (0.5 seconds)"
+    },
+    {
+      "key": "uxml.MUIDashboard.b98b16effe",
+      "text": "Validate page catalogs"
+    },
+    {
+      "key": "uxml.MUIDashboard.c799f9a388",
+      "text": "Start a new recording"
+    },
+    {
+      "key": "uxml.MUIDashboard.d8456739a2",
+      "text": "Host"
+    },
+    {
+      "key": "uxml.MUIDashboard.eac2271fe7",
+      "text": "Locate host"
+    },
+    {
+      "key": "uxml.MUIDashboard.ebb7e27d3b",
+      "text": "Assign to host"
+    },
+    {
+      "key": "uxml.MUIDashboard.ee29a6789d",
+      "text": "Recording capacity"
+    },
+    {
+      "key": "uxml.MUIDashboard.f9f6480c10",
+      "text": "Stop and clear"
+    },
+    {
+      "key": "uxml.RouteGraphWindow.0821a708a2",
+      "text": "Go to root"
+    },
+    {
+      "key": "uxml.RouteGraphWindow.292e56a328",
+      "text": "Only static declarations are validated. Runtime argument conflicts, resource availability and sharing across roots require runtime verification. Snapshots do not refresh automatically; capture again from the project entry point."
+    },
+    {
+      "key": "uxml.RouteGraphWindow.3ed65533d7",
+      "text": "No routes supplied. Project editor code can call MUI.Navigation.Editor.RouteGraphWindow.Show(rootRoute). The shared dependency sample also offers a context menu to inspect the graph."
+    },
+    {
+      "key": "uxml.RouteGraphWindow.76cf5fe77a",
+      "text": "Clear snapshot"
+    },
+    {
+      "key": "uxml.RouteGraphWindow.9da1918cdc",
+      "text": "Copy report"
+    },
+    {
+      "key": "uxml.RouteGraphWindow.f3f451ef88",
+      "text": "Validation root"
+    },
+    {
+      "key": "value.all",
+      "text": "All"
+    },
+    {
+      "key": "value.false",
+      "text": "False"
+    },
+    {
+      "key": "value.listSeparator",
+      "text": ", "
+    },
+    {
+      "key": "value.none",
+      "text": "None"
+    },
+    {
+      "key": "value.true",
+      "text": "True"
+    },
+    {
+      "key": "property.Version",
+      "text": "Version"
+    },
+    {
+      "key": "property.Prefab",
+      "text": "Prefab"
+    },
+    {
+      "key": "value.cancelled",
+      "text": "cancelled"
+    },
+    {
+      "key": "value.finished",
+      "text": "finished"
+    },
+    {
+      "key": "trace.header",
+      "text": "Navigation lifecycle trace: recording={0}; capacity={1}; overwritten={2}; dropped notifications={3}"
+    },
+    {
+      "key": "trace.hint",
+      "text": "Times are milliseconds since the first retained event, not operation durations. Route keys and exception type names are limited to 256 characters."
+    },
+    {
+      "key": "trace.version",
+      "text": "Version"
+    },
+    {
+      "key": "trace.route",
+      "text": "Route"
+    },
+    {
+      "key": "trace.reason",
+      "text": "Reason"
+    },
+    {
+      "key": "trace.outcome",
+      "text": "Outcome"
+    },
+    {
+      "key": "trace.diagnosticId",
+      "text": "Diagnostic ID"
+    },
+    {
+      "key": "trace.errorType",
+      "text": "Exception type"
+    },
+    {
+      "key": "trace.request",
+      "text": "Request"
+    },
+    {
+      "key": "trace.batchIndex",
+      "text": "Batch item index"
+    },
+    {
+      "key": "trace.batchHint",
+      "text": " (time of batch result capture)"
+    },
+    {
+      "key": "trace.relatedHandle",
+      "text": "Related instance"
+    },
+    {
+      "key": "trace.preparationStage",
+      "text": "Preparation stage"
+    },
+    {
+      "key": "trace.operationStage",
+      "text": "Operation stage"
+    },
+    {
+      "key": "trace.stageElapsed",
+      "text": "Stage duration (ms)"
+    },
+    {
+      "key": "trace.requestElapsed",
+      "text": "Total request duration (ms)"
+    },
+    {
+      "key": "trace.dependency",
+      "text": "Dependency"
+    },
+    {
+      "key": "diagnostic.settings.layerRequired",
+      "text": "At least one named layer is required.",
+      "source": "至少需要一个命名层级。"
+    },
+    {
+      "key": "diagnostic.settings.layerName",
+      "text": "Layer names must be nonempty and unique.",
+      "source": "层级名称不能为空或重复。"
+    },
+    {
+      "key": "diagnostic.settings.layerOrder",
+      "text": "Layer orders must be unique: {0}",
+      "source": "层级排序值不能重复：{0}"
+    },
+    {
+      "key": "diagnostic.settings.presetRequired",
+      "text": "At least one policy preset is required.",
+      "source": "至少需要一个策略预设。"
+    },
+    {
+      "key": "diagnostic.settings.presetName",
+      "text": "Preset names must be nonempty and unique.",
+      "source": "预设名称不能为空或重复。"
+    },
+    {
+      "key": "diagnostic.settings.unknownOverrides",
+      "text": "{0} contains unknown override fields.",
+      "source": "{0} 包含未知的覆盖选项。"
+    },
+    {
+      "key": "diagnostic.settings.defaultPreset",
+      "text": "The default policy must reference a declared preset.",
+      "source": "默认策略必须指向已声明的预设。"
+    },
+    {
+      "key": "diagnostic.settings.capacity",
+      "text": "Cache capacity must be nonnegative; queue, preload, cleanup and terminal record capacities must be positive.",
+      "source": "缓存容量必须非负；队列、预加载、清理及终态记录容量必须大于零。"
+    },
+    {
+      "key": "diagnostic.settings.defaultRulesError",
+      "text": "Default rules: {0}",
+      "source": "默认规则：{0}"
+    },
+    {
+      "key": "diagnostic.settings.presetError",
+      "text": "{0}: {1}",
+      "source": "{0}：{1}"
+    },
+    {
+      "key": "diagnostic.settings.layerConflict",
+      "text": "A page cannot override both a named layer and a numeric layer.",
+      "source": "页面不能同时覆盖命名层级和数值层级。"
+    },
+    {
+      "key": "diagnostic.settings.undeclaredPreset",
+      "text": "Policy preset is undeclared or has no rules: {0}",
+      "source": "未声明策略预设或预设缺少规则：{0}"
+    },
+    {
+      "key": "diagnostic.settings.rulesRequired",
+      "text": "Default rules cannot be null.",
+      "source": "默认规则不能为空。"
+    },
+    {
+      "key": "diagnostic.settings.undeclaredLayer",
+      "text": "Undeclared layer: {0}",
+      "source": "未声明层级：{0}"
+    },
+    {
+      "key": "diagnostic.settings.invalid",
+      "text": "Invalid MUI settings:\n{0}",
+      "source": "MUI 配置无效：\n{0}"
+    },
+    {
+      "key": "diagnostic.settings.builtIn",
+      "text": "Built-in defaults",
+      "source": "内置默认"
+    },
+    {
+      "key": "diagnostic.graph.conflictingKey",
+      "text": "Route key {0} refers to multiple different definitions.",
+      "source": "路由键 {0} 对应多个不同定义。"
+    },
+    {
+      "key": "diagnostic.graph.directLimit",
+      "text": "The route has more than 64 direct dependencies.",
+      "source": "路由直接依赖数量超过 64。"
+    },
+    {
+      "key": "diagnostic.graph.metadata",
+      "text": "Dependency metadata has no target or has an invalid placement.",
+      "source": "依赖元数据缺少目标或使用无效位置。"
+    },
+    {
+      "key": "diagnostic.graph.placement",
+      "text": "The same parent route declares different placements for dependency {0}.",
+      "source": "同一父路由对依赖 {0} 声明了不同位置。"
+    },
+    {
+      "key": "diagnostic.graph.required",
+      "text": "The same parent declares dependency {0} as both required and optional; fallback behavior is ambiguous.",
+      "source": "同一父路由对依赖 {0} 同时声明必需与可选，降级语义不明确。"
+    },
+    {
+      "key": "diagnostic.graph.duplicate",
+      "text": "The same parent route declares dependency {0} more than once.",
+      "source": "同一父路由重复声明了依赖 {0}。"
+    },
+    {
+      "key": "diagnostic.graph.shared",
+      "text": "Shared dependency {0} is not a singleton route.",
+      "source": "共享依赖 {0} 不是单实例路由。"
+    },
+    {
+      "key": "diagnostic.graph.cycle",
+      "text": "Dependency declarations form an ownership cycle.",
+      "source": "依赖声明形成所有权循环。"
+    },
+    {
+      "key": "diagnostic.graph.depth",
+      "text": "The longest path from the root route to this dependency exceeds 64 levels.",
+      "source": "从根路由到此依赖的最长路径超过 64 层。"
+    },
+    {
+      "key": "diagnostic.graph.order",
+      "text": "Display constraints for dependencies in the same layer form a cycle.",
+      "source": "同层依赖显示约束形成循环。"
+    },
+    {
+      "key": "diagnostic.view.borrowLoader",
+      "text": "If no loader is configured, borrow the nearest parent View's active loader. Resources are released with this View's activation. No ancestor lookup occurs after close.",
+      "source": "未显式配置加载器时，借用最近父 View 的活动加载器；资源仍随自身激活释放。关闭后不会继续向祖先查找。"
+    },
+    {
+      "key": "diagnostic.view.waitBindings",
+      "text": "Wait for asynchronous resource-key bindings from this View's default loader before committing presentation; later updates still load progressively.",
+      "source": "等待本 View 默认加载器的异步资源键绑定完成后再提交显示；后续更新仍渐进加载。"
+    },
+    {
+      "key": "trace.token.Busy",
+      "text": "Busy"
+    },
+    {
+      "key": "trace.token.DependencyChangeRequired",
+      "text": "Dependency Change Required"
+    },
+    {
+      "key": "trace.token.HostClosed",
+      "text": "Host Closed"
+    },
+    {
+      "key": "trace.token.InUse",
+      "text": "In Use"
+    },
+    {
+      "key": "trace.token.InputControlUnsupported",
+      "text": "Input Control Unsupported"
+    },
+    {
+      "key": "trace.token.None",
+      "text": "None"
+    },
+    {
+      "key": "trace.token.Reentrant",
+      "text": "Reentrant"
+    },
+    {
+      "key": "trace.token.RouteMismatch",
+      "text": "Route Mismatch"
+    },
+    {
+      "key": "trace.token.SourceUnavailable",
+      "text": "Source Unavailable"
+    },
+    {
+      "key": "trace.token.Unsupported",
+      "text": "Unsupported"
+    },
+    {
+      "key": "trace.token.Applied",
+      "text": "Applied"
+    },
+    {
+      "key": "trace.token.CancelledBeforeCommit",
+      "text": "Cancelled Before Commit"
+    },
+    {
+      "key": "trace.token.CommitFailed",
+      "text": "Commit Failed"
+    },
+    {
+      "key": "trace.token.PreparationFailed",
+      "text": "Preparation Failed"
+    },
+    {
+      "key": "trace.token.Rejected",
+      "text": "Rejected"
+    },
+    {
+      "key": "trace.token.Complete",
+      "text": "Complete"
+    },
+    {
+      "key": "trace.token.Failed",
+      "text": "Failed"
+    },
+    {
+      "key": "trace.token.NotRequired",
+      "text": "Not Required"
+    },
+    {
+      "key": "trace.token.Pending",
+      "text": "Pending"
+    },
+    {
+      "key": "trace.token.AlreadyClosed",
+      "text": "Already Closed"
+    },
+    {
+      "key": "trace.token.AlreadyClosing",
+      "text": "Already Closing"
+    },
+    {
+      "key": "trace.token.Blocked",
+      "text": "Blocked"
+    },
+    {
+      "key": "trace.token.Closed",
+      "text": "Closed"
+    },
+    {
+      "key": "trace.token.ClosedWithCleanupPending",
+      "text": "Closed With Cleanup Pending"
+    },
+    {
+      "key": "trace.token.ConfirmationUnavailable",
+      "text": "Confirmation Unavailable"
+    },
+    {
+      "key": "trace.token.Denied",
+      "text": "Denied"
+    },
+    {
+      "key": "trace.token.Handled",
+      "text": "Handled"
+    },
+    {
+      "key": "trace.token.NotFound",
+      "text": "Not Found"
+    },
+    {
+      "key": "trace.token.Superseded",
+      "text": "Superseded"
+    },
+    {
+      "key": "trace.token.UnknownOrExpired",
+      "text": "Unknown Or Expired"
+    },
+    {
+      "key": "trace.token.WaitCancelled",
+      "text": "Wait Cancelled"
+    },
+    {
+      "key": "trace.token.CleanupCapacity",
+      "text": "Cleanup Capacity"
+    },
+    {
+      "key": "trace.token.CloseDecisionTimedOut",
+      "text": "Close Decision Timed Out"
+    },
+    {
+      "key": "trace.token.CloseDenied",
+      "text": "Close Denied"
+    },
+    {
+      "key": "trace.token.ConflictingData",
+      "text": "Conflicting Data"
+    },
+    {
+      "key": "trace.token.DependencyCycle",
+      "text": "Dependency Cycle"
+    },
+    {
+      "key": "trace.token.DependencyLimit",
+      "text": "Dependency Limit"
+    },
+    {
+      "key": "trace.token.DependencyOrderConflict",
+      "text": "Dependency Order Conflict"
+    },
+    {
+      "key": "trace.token.InstanceLimit",
+      "text": "Instance Limit"
+    },
+    {
+      "key": "trace.token.ActivationFailed",
+      "text": "Activation Failed"
+    },
+    {
+      "key": "trace.token.ClosedBeforeReady",
+      "text": "Closed Before Ready"
+    },
+    {
+      "key": "trace.token.Succeeded",
+      "text": "Succeeded"
+    },
+    {
+      "key": "trace.token.Cancelled",
+      "text": "Cancelled"
+    },
+    {
+      "key": "trace.token.CapacityExceeded",
+      "text": "Capacity Exceeded"
+    },
+    {
+      "key": "trace.token.InactiveContentClearing",
+      "text": "Inactive Content Clearing"
+    },
+    {
+      "key": "trace.token.Ready",
+      "text": "Ready"
+    },
+    {
+      "key": "trace.token.Committed",
+      "text": "Committed"
+    },
+    {
+      "key": "trace.token.BindingDetachUnsupported",
+      "text": "Binding Detach Unsupported"
+    },
+    {
+      "key": "trace.token.完成",
+      "text": "Completed"
+    },
+    {
+      "key": "trace.token.未完成",
+      "text": "Incomplete"
+    },
+    {
+      "key": "trace.token.未完成（异常、取消或同步能力不足）",
+      "text": "Incomplete (error, cancellation or unsupported synchronous preparation)"
+    },
+    {
+      "key": "trace.token.未请求",
+      "text": "Not requested"
+    },
+    {
+      "key": "trace.token.抛出异常",
+      "text": "Exception thrown"
+    },
+    {
+      "key": "trace.token.扫描异常",
+      "text": "Scan failed"
+    },
+    {
+      "key": "trace.token.缓存清理完成",
+      "text": "Cache cleanup completed"
+    },
+    {
+      "key": "trace.token.缓存清理异常",
+      "text": "Cache cleanup failed"
+    },
+    {
+      "key": "trace.token.缓存代际失效并清理完成",
+      "text": "Cache invalidated and cleaned up"
+    },
+    {
+      "key": "trace.token.缓存失效异常",
+      "text": "Cache invalidation failed"
+    },
+    {
+      "key": "trace.token.闲置内容清理完成",
+      "text": "Inactive content cleanup completed"
+    },
+    {
+      "key": "trace.token.闲置内容清理异常",
+      "text": "Inactive content cleanup failed"
+    },
+    {
+      "key": "trace.token.清理异常",
+      "text": "Cleanup failed"
+    },
+    {
+      "key": "trace.token.退出异常",
+      "text": "Shutdown failed"
+    },
+    {
+      "key": "trace.token.导航器退出完成",
+      "text": "Navigator shutdown completed"
+    },
+    {
+      "key": "trace.token.目标",
+      "text": "Destination"
+    },
+    {
+      "key": "trace.token.源",
+      "text": "Source"
+    },
+    {
+      "key": "trace.token.源清理",
+      "text": "Source cleanup"
+    },
+    {
+      "key": "trace.token.未采集（不额外等待）",
+      "text": "Not captured (no additional wait)"
+    },
+    {
+      "key": "trace.token.视图故障",
+      "text": "View faulted"
+    },
+    {
+      "key": "trace.token.复用预加载占位",
+      "text": "Preload reservation reused"
+    },
+    {
+      "key": "trace.token.True",
+      "text": "True"
+    },
+    {
+      "key": "trace.token.False",
+      "text": "False"
+    },
+    {
+      "key": "sample.basic.sceneMissing",
+      "text": "The Basic Example scene is missing. Import the sample from Package Manager."
+    },
+    {
+      "key": "sample.basic.settingsMissing",
+      "text": "The Basic Example settings asset is missing. Reimport the sample."
+    },
+    {
+      "key": "sample.previewHint",
+      "text": "Use the sample's Open Scene menu for interactive preview."
+    },
+    {
+      "key": "sample.previewTimeout",
+      "text": "MUI {0} preview timed out without a cleanup completion marker."
+    },
+    {
+      "key": "sample.previewFinished",
+      "text": "MUI {0} Play Mode preview finished."
+    },
+    {
+      "key": "sample.navigation.graphNotReady",
+      "text": "Run and initialize the shared-dependency sample before capturing its route definitions."
+    },
+    {
+      "key": "sample.navigation.sceneSaveFailed",
+      "text": "Failed to save sample scene: {0}"
+    },
+    {
+      "key": "settings.title",
+      "text": "UI Configuration"
+    },
+    {
+      "key": "settings.description",
+      "text": "Define layers and defaults, then override selected behaviors in presets."
+    },
+    {
+      "key": "settings.valid",
+      "text": "Valid"
+    },
+    {
+      "key": "settings.invalid",
+      "text": "{0} issues"
+    },
+    {
+      "key": "settings.remove",
+      "text": "Remove item"
+    },
+    {
+      "key": "settings.layers.help",
+      "text": "Larger values place pages above others. This is logical order, not Canvas order; layers do not reserve fixed ranges. Names and logical order values must be unique."
+    },
+    {
+      "key": "settings.layers.add",
+      "text": "+ Add Layer"
+    },
+    {
+      "key": "settings.layers.empty",
+      "text": "No layers. Add one using the button below."
+    },
+    {
+      "key": "settings.defaults.help",
+      "text": "These values apply unless a preset or page overrides them."
+    },
+    {
+      "key": "settings.presets.help",
+      "text": "Resolution order: page defaults → preset → page overrides. Configure page overrides using the overrides argument of CreateRoute or ResolvePolicy. Pages with an explicit preset do not use the fallback selection."
+    },
+    {
+      "key": "settings.presets.add",
+      "text": "+ Add Preset"
+    },
+    {
+      "key": "settings.presets.empty",
+      "text": "No presets. Define at least one."
+    },
+    {
+      "key": "settings.preset.unnamed",
+      "text": "Unnamed Preset"
+    },
+    {
+      "key": "settings.preset.inherit",
+      "text": "Inherits all project defaults."
+    },
+    {
+      "key": "settings.capacities",
+      "text": "Capacities and Limits"
+    },
+    {
+      "key": "settings.rules.presentation",
+      "text": "Layers and Interaction"
+    },
+    {
+      "key": "settings.rules.instances",
+      "text": "Instances"
+    },
+    {
+      "key": "settings.rules.tick",
+      "text": "Frame Updates"
+    },
+    {
+      "key": "settings.rules.cache",
+      "text": "Page Cache"
+    },
+    {
+      "key": "settings.rules.timeouts",
+      "text": "Stage Timeouts"
+    },
+    {
+      "key": "settings.choice.missing",
+      "text": "{0} (not declared)"
+    },
+    {
+      "key": "host.title",
+      "text": "UI Host"
+    },
+    {
+      "key": "host.catalog.help",
+      "text": "The default provider loads pages from this catalog. External providers can manage their own assets."
+    },
+    {
+      "key": "host.editSettings",
+      "text": "Edit Configuration"
+    },
+    {
+      "key": "dashboard.title",
+      "text": "MUI Dashboard"
+    },
+    {
+      "key": "dashboard.hosts.refresh",
+      "text": "Refresh"
+    },
+    {
+      "key": "dashboard.summary",
+      "text": "{0} · Pages {1} · Focus #{2} · Pending {3} · Cached {4}"
+    },
+    {
+      "key": "dashboard.page.meta",
+      "text": "Layer {0} · {1} · Focus {2}"
+    },
+    {
+      "key": "dashboard.trace.title",
+      "text": "Lifecycle Trace"
+    },
+    {
+      "key": "dashboard.trace.empty",
+      "text": "Enter Play Mode, initialize the host, and start recording. Open or close pages to inspect events."
+    },
+    {
+      "key": "dashboard.configuration.title",
+      "text": "Configuration Asset"
+    },
+    {
+      "key": "dashboard.configuration.locate",
+      "text": "Locate Asset"
+    },
+    {
+      "key": "dashboard.configuration.help",
+      "text": "Select an asset to edit it. Assign to Host updates the host reference."
+    },
+    {
+      "key": "dashboard.configuration.empty",
+      "text": "Select or Create a Configuration"
+    },
+    {
+      "key": "dashboard.validation.title",
+      "text": "Configuration and Page Validation"
+    },
+    {
+      "key": "dashboard.validation.help",
+      "text": "Configuration issues appear above. Page validation covers catalogs registered by the project."
+    },
+    {
+      "key": "dashboard.capture.ready",
+      "text": "The host is ready. Capture runtime state to inspect pages."
+    },
+    {
+      "key": "dashboard.capture.help",
+      "text": "Capture manually or enable automatic refresh."
+    },
+    {
+      "key": "dashboard.pages.waiting",
+      "text": "No Runtime Snapshot"
+    },
+    {
+      "key": "dashboard.pages.waiting.help",
+      "text": "Initialize the host and capture runtime state."
+    },
+    {
+      "key": "dashboard.pages.empty",
+      "text": "No Pages"
+    },
+    {
+      "key": "dashboard.pages.empty.help",
+      "text": "Open a page and capture again, or enable automatic refresh."
+    },
+    {
+      "key": "dashboard.pages.noMatches",
+      "text": "No Matching Pages"
+    },
+    {
+      "key": "dashboard.pages.noMatches.help",
+      "text": "Try another route name or clear the search."
+    },
+    {
+      "key": "dashboard.noHost",
+      "text": "No UI Host in the Current Scene"
+    },
+    {
+      "key": "dashboard.noHost.help",
+      "text": "Add a UIHost or open a sample scene containing one. Configuration editing is available without a running host."
+    },
+    {
+      "key": "dashboard.editMode",
+      "text": "Edit Mode"
+    },
+    {
+      "key": "dashboard.editMode.help",
+      "text": "Edit and validate configuration here. Runtime data requires Play Mode and explicit host initialization by your project."
+    },
+    {
+      "key": "dashboard.notInitialized",
+      "text": "Waiting for Host Initialization"
+    },
+    {
+      "key": "dashboard.notInitialized.help",
+      "text": "Capture is available after your project calls UIHost.Initialize. The dashboard does not initialize hosts."
+    },
+    {
+      "key": "dashboard.openConfiguration",
+      "text": "Open Configuration and Validation"
+    },
+    {
+      "key": "dashboard.snapshot.limit",
+      "text": "Snapshot Limit"
+    },
+    {
+      "key": "dashboard.trace.capacity",
+      "text": "Capacity"
+    },
+    {
+      "key": "settings.runtime",
+      "text": "Runtime Settings"
+    },
+    {
+      "key": "settings.update.help",
+      "text": "Automatically process UI requests and update UI logic each frame. When disabled, call UIHost.AdvanceFrame from code."
+    },
+    {
+      "key": "settings.update.automatic",
+      "text": "Automatic"
+    },
+    {
+      "key": "settings.update.manual",
+      "text": "Manual"
+    },
+    {
+      "key": "property.hiddenMode",
+      "text": "Hidden implementation"
+    },
+    {
+      "key": "property.hiddenContentRoot",
+      "text": "Content child to deactivate"
+    },
+    {
+      "key": "policy.layer.help",
+      "text": "Select the logical layer. Higher layer order values render above lower ones. The framework assigns actual Canvas orders automatically; these are separate from logical layer order."
+    },
+    {
+      "key": "policy.focus.help",
+      "text": "Allows this page to become the framework focus owner. The topmost eligible, interactable page takes priority and receives focus notifications. Disabling this does not disable clicks or block input to lower pages."
+    },
+    {
+      "key": "policy.modal.help",
+      "text": "Enables the modal barrier. None coverage automatically becomes Block Input. Disabling modal removes only automatic blocking; explicitly configured coverage remains in effect."
+    },
+    {
+      "key": "policy.back.help",
+      "text": "On back: Close requests closing this page through normal close checks; Ignore continues to lower pages; Block stops the request; Handle by presenter delegates the decision to Presenter. Local back handling inside the page runs first."
+    },
+    {
+      "key": "policy.coverage.help",
+      "text": "None leaves lower pages unchanged. Block input keeps them visible but non-interactable. Hide makes them invisible and non-interactable. This creates no barrier. Lower pages use their own Tick policy to decide whether to pause business updates."
+    },
+    {
+      "key": "policy.tick.help",
+      "text": "Pause this page’s business Tick when any selected condition is met. Selecting neither disables pausing due to coverage or visibility. This only controls framework business Tick, not Unity Update, animations or coroutines."
+    },
+    {
+      "key": "policy.cache.help",
+      "text": "Caches only reset Views and their resources after closing, not ViewModels or Presenters. Long-term entries have no time expiry but can still be evicted by capacity or budget limits, or explicit clearing. Reopening reuses a cached View if available; otherwise it creates one. Save and restore business state explicitly."
+    },
+    {
+      "key": "policy.instances.help",
+      "text": "A full route returns InstanceLimit. Closing the oldest still respects close decisions; returning an existing instance does not update arguments or bring it to front."
+    },
+    {
+      "key": "policy.hidden.help",
+      "text": "Deactivates the selected content subtree when hidden, restoring only content disabled by the framework. Triggers OnDisable/OnEnable and stops subtree coroutines (without resuming them); the View root stays active."
+    },
+    {
+      "key": "policy.hidden.invalid",
+      "text": "Invalid hidden mode or missing content child. The View root and external objects cannot be deactivated."
+    },
+    {
+      "key": "policy.hidden.status",
+      "text": "Hidden implementation: {0}"
+    },
+    {
+      "key": "policy.runtime.status",
+      "text": "Occupied instances: {0}/{1}; last business Tick gate: {2}"
+    },
+    {
+      "key": "policy.dependency.entry",
+      "text": "Dependency {0}: required={1}, missing={2}, resolution={3} {4}"
+    },
+    {
+      "key": "policy.cache.history",
+      "text": "Recent cache decisions (up to 128; oldest records are discarded)"
+    },
+    {
+      "key": "policy.cache.entry",
+      "text": "{0} · {1} · {2}"
+    },
+    {
+      "key": "enum.MUI.Navigation.DependencyMissingPolicy.AutoOpen",
+      "text": "Auto open"
+    },
+    {
+      "key": "enum.MUI.Navigation.DependencyMissingPolicy.RequireOpen",
+      "text": "Require open"
+    },
+    {
+      "key": "enum.MUI.Navigation.DependencyMissingPolicy.Skip",
+      "text": "Skip if missing"
+    },
+    {
+      "key": "enum.MUI.Navigation.DependencyResolutionKind.Pending",
+      "text": "Pending"
+    },
+    {
+      "key": "enum.MUI.Navigation.DependencyResolutionKind.AutoOpened",
+      "text": "Auto opened"
+    },
+    {
+      "key": "enum.MUI.Navigation.DependencyResolutionKind.Reused",
+      "text": "Reused"
+    },
+    {
+      "key": "enum.MUI.Navigation.DependencyResolutionKind.Skipped",
+      "text": "Skipped"
+    },
+    {
+      "key": "enum.MUI.Navigation.DependencyResolutionKind.Degraded",
+      "text": "Degraded"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewTickStatus.NotEvaluated",
+      "text": "Not evaluated"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewTickStatus.Eligible",
+      "text": "Eligible"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewTickStatus.Inactive",
+      "text": "Inactive"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewTickStatus.Rebinding",
+      "text": "Rebinding"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewTickStatus.Entering",
+      "text": "Entering"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewTickStatus.Covered",
+      "text": "Paused: covered"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewTickStatus.Hidden",
+      "text": "Paused: hidden"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewTickStatus.HostShutdown",
+      "text": "Host shut down"
+    },
+    {
+      "key": "enum.MUI.UGUI.ViewHiddenMode.CanvasGroupOnly",
+      "text": "CanvasGroup only (default)"
+    },
+    {
+      "key": "enum.MUI.UGUI.ViewHiddenMode.DeactivateContent",
+      "text": "Deactivate content subtree"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewCacheDecision.Retained",
+      "text": "Retained"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewCacheDecision.Reused",
+      "text": "Reused"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewCacheDecision.Disabled",
+      "text": "Caching disabled"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewCacheDecision.Unsupported",
+      "text": "Unsupported View or acquisition"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewCacheDecision.AbnormalClose",
+      "text": "Abnormal close"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewCacheDecision.CleanupIncomplete",
+      "text": "Cleanup incomplete"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewCacheDecision.ResetFailed",
+      "text": "Reset or release failed"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewCacheDecision.CapacityDisabled",
+      "text": "Zero cache capacity"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewCacheDecision.HostUnavailable",
+      "text": "Host unavailable"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewCacheDecision.Incompatible",
+      "text": "Incompatible generation or state"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewCacheDecision.EstimateRequired",
+      "text": "Size estimate required"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewCacheDecision.BudgetExceeded",
+      "text": "Budget exceeded"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewCacheDecision.RetirementPending",
+      "text": "Retirement pending"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewCacheDecision.EvictedForCapacity",
+      "text": "Capacity or budget eviction"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewCacheDecision.Expired",
+      "text": "Expired"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewCacheDecision.Destroyed",
+      "text": "View destroyed"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewCacheDecision.Cleared",
+      "text": "Explicit clearing"
+    },
+    {
+      "key": "enum.MUI.Navigation.OpenRejection.DependencyMissing",
+      "text": "Dependency not open"
+    },
+    {
+      "key": "enum.MUI.Navigation.ReplaceRejection.DependencyMissing",
+      "text": "Dependency not open"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewCacheDecision.ReuseFailed",
+      "text": "Reuse preparation failed"
+    },
+    {
+      "key": "settings.layers.gap",
+      "text": "Gap after layer"
+    },
+    {
+      "key": "settings.layers.gap.help",
+      "text": "Overrides the gap from this layer’s last page to the next populated layer. -1 uses Default layer gap above; 0 requests no gap; positive values override the default. Empty layers reserve no space. Gaps within a layer are unaffected."
+    },
+    {
+      "key": "sorting.title",
+      "text": "Page rendering order"
+    },
+    {
+      "key": "sorting.help",
+      "text": "Page order ranges are always enabled. Layers define logical order, not fixed ranges. Root Canvas orders are allocated automatically by page span; compact locally only when space runs out. Maximum + 1 is reserved for closing gesture barriers."
+    },
+    {
+      "key": "sorting.gap.help",
+      "text": "Page gaps apply within a layer; layer gaps apply between layers. They are not added together. Both are measured in orders and shrink when space is tight. Layers do not own fixed ranges."
+    },
+    {
+      "key": "sorting.page",
+      "text": "Page order span"
+    },
+    {
+      "key": "sorting.span.help",
+      "text": "0 inherits the host default; otherwise at least 2. Offset 0 is the barrier, 1 is the root Canvas; internal Canvas/effects use 2 and above."
+    },
+    {
+      "key": "sorting.allocated",
+      "text": "Allocated range: {0}–{1}; root Canvas order: {2}"
+    },
+    {
+      "key": "sorting.pool",
+      "text": "Order pool: {0}–{1}; reserved: {2}; page gap: {3}; default layer gap: {4}"
+    },
+    {
+      "key": "sorting.target.invalid",
+      "text": "Order targets must be unique Canvas/Renderer child references with offsets of at least 2."
+    },
+    {
+      "key": "sorting.targets.help",
+      "text": "Register independent Canvases and all Renderers below. Offsets must be smaller than the page span. Ordinary particles require a camera Canvas and compatible materials; order does not provide UI clipping."
+    },
+    {
+      "key": "property.renderSortingLayer",
+      "text": "Rendering Sorting Layer"
+    },
+    {
+      "key": "property.renderOrderMinimum",
+      "text": "Host minimum order"
+    },
+    {
+      "key": "property.renderOrderMaximum",
+      "text": "Host maximum order"
+    },
+    {
+      "key": "property.defaultPageOrderSpan",
+      "text": "Default page span"
+    },
+    {
+      "key": "property.preferredLayerGap",
+      "text": "Default layer gap"
+    },
+    {
+      "key": "property.preferredOrderGap",
+      "text": "Page gap within a layer"
+    },
+    {
+      "key": "property.RenderOrderSpan",
+      "text": "Page order span (0 inherits)"
+    },
+    {
+      "key": "property.renderOrderTargets",
+      "text": "Internal rendering order targets"
+    },
+    {
+      "key": "property.Offset",
+      "text": "Relative order offset"
+    },
+    {
+      "key": "enum.MUI.UGUI.MUIPagePolicyFields.RenderOrder",
+      "text": "Page order span"
+    },
+    {
+      "key": "enum.MUI.Navigation.OpenRejection.RenderOrderCapacity",
+      "text": "Host order capacity exceeded"
+    },
+    {
+      "key": "enum.MUI.Navigation.ReplaceRejection.RenderOrderCapacity",
+      "text": "Host order capacity exceeded"
+    },
+    {
+      "key": "property.PageRole",
+      "text": "Page role"
+    },
+    {
+      "key": "property.OwnerDeparture",
+      "text": "When owner leaves"
+    },
+    {
+      "key": "enum.MUI.Navigation.PageRole.Independent",
+      "text": "Independent"
+    },
+    {
+      "key": "enum.MUI.Navigation.PageRole.Main",
+      "text": "Main page"
+    },
+    {
+      "key": "enum.MUI.Navigation.PageRole.Overlay",
+      "text": "Owned overlay"
+    },
+    {
+      "key": "enum.MUI.Navigation.OwnerDeparture.Close",
+      "text": "Close"
+    },
+    {
+      "key": "enum.MUI.Navigation.OwnerDeparture.Hide",
+      "text": "Hide and retain"
+    },
+    {
+      "key": "enum.MUI.UGUI.MUIPagePolicyFields.PageScope",
+      "text": "Page ownership"
+    },
+    {
+      "key": "policy.pageRole.help",
+      "text": "Main pages become current and retire the previous group from presentation. Overlays capture the current main page when requested, or use an explicitly specified page or host owner. Independent views do not participate in main-page navigation."
+    },
+    {
+      "key": "policy.ownerDeparture.help",
+      "text": "When the owner leaves the foreground, Close checks permission before closing; Hide and retain restores the overlay on return. Closing the owner closes all its descendants. Closing an overlay does not close its owner."
+    },
+    {
+      "key": "scope.summary",
+      "text": "Page role: {0}; owner departure: {1}"
+    },
+    {
+      "key": "scope.parent",
+      "text": "Parent page (empty means host)"
+    },
+    {
+      "key": "property.modalBackdropStyle",
+      "text": "Modal backdrop style"
+    },
+    {
+      "key": "property.visualPrefab",
+      "text": "Backdrop visual prefab"
+    },
+    {
+      "key": "property.tint",
+      "text": "Tint"
+    },
+    {
+      "key": "modal.backdrop.tint.help",
+      "text": "Backdrop color and opacity. A fully transparent barrier still blocks input. Use transparent tint if a custom blur visual needs no solid color underneath."
+    },
+    {
+      "key": "modal.backdrop.prefab.help",
+      "text": "Optional visual-only prefab using Image/RawImage and project materials. The project render pipeline supplies blur background textures. Canvas, Renderer, Selectable and View are forbidden. The visual is disabled when hidden; project scripts must release temporary textures."
+    },
+    {
+      "key": "settings.layerName.help",
+      "text": "Unique logical layer name used by page rules. Update references when renaming."
+    },
+    {
+      "key": "settings.layerOrder.help",
+      "text": "Logical layer priority; larger values appear above smaller ones. Must be unique. This is not a Canvas Order or a fixed range."
+    },
+    {
+      "key": "settings.preferredOrderGap.help",
+      "text": "Preferred unused Orders between pages in the same logical layer; minimum 0. Reduces reordering and may shrink when space is limited. Cross-layer boundaries use the layer gap instead."
+    },
+    {
+      "key": "settings.preferredLayerGap.help",
+      "text": "Default unused Orders between populated logical layers; minimum 0. The preceding layer can override this gap. Empty layers reserve nothing; gaps may shrink when space is limited."
+    },
+    {
+      "key": "settings.renderSortingLayer.help",
+      "text": "Existing Unity Sorting Layer shared by page canvases and registered rendering targets. Separate from logical layers; Orders determine ordering within the host."
+    },
+    {
+      "key": "settings.renderOrderMinimum.help",
+      "text": "Inclusive lower bound of the host Order pool. Must be at least -32768 and below the maximum. Page spans and gaps share this pool."
+    },
+    {
+      "key": "settings.renderOrderMaximum.help",
+      "text": "Inclusive upper bound of the host Order pool; at most 32766. Maximum + 1 is reserved for the release shield. Opening is rejected if reflow cannot provide enough space."
+    },
+    {
+      "key": "settings.defaultPageOrderSpan.help",
+      "text": "Default number of consecutive Orders per page; minimum 2. Offset 0 is the modal barrier, 1 is the root Canvas, and 2 through span - 1 are for internal canvases/effects. Used when the page span is 0. Gaps are separate."
+    },
+    {
+      "key": "settings.defaultPreset.help",
+      "text": "Used only when ResolvePolicy does not specify a preset. Wizard-generated page entry points explicitly select the preset chosen at creation."
+    },
+    {
+      "key": "settings.presetName.help",
+      "text": "Unique preset name referenced by the default preset and page registrations. Update references when renaming."
+    },
+    {
+      "key": "settings.overrides.help",
+      "text": "Selected groups use this preset’s values; unselected groups inherit page defaults. Instance, cache and timeout settings are overridden as groups. Code-based page overrides can replace individual fields."
+    },
+    {
+      "key": "settings.cacheCapacity.help",
+      "text": "Maximum closed Views cached by the host; minimum 0. Zero disables caching. Older entries may be evicted, including KeepAlive entries. Presenters and ViewModels are not cached."
+    },
+    {
+      "key": "settings.queueCapacity.help",
+      "text": "Capacity for pending navigation operations, shared by opens, replacements and argument updates; minimum 1. New requests are rejected at capacity. Not a page instance limit."
+    },
+    {
+      "key": "settings.preloadCapacity.help",
+      "text": "Host preload reservation capacity; minimum 1. New preload requests are rejected when reservations reach this limit."
+    },
+    {
+      "key": "settings.cleanupCapacity.help",
+      "text": "Capacity for instances still exiting or awaiting resource cleanup, including timed-out operations retaining resources; minimum 1. New work is limited at capacity."
+    },
+    {
+      "key": "settings.terminalCapacity.help",
+      "text": "Number of completed handle results retained by the host; minimum 1. Older records are removed at capacity. This is neither a View cache nor navigation history."
+    },
+    {
+      "key": "policy.allowMultiple.help",
+      "text": "Allow multiple simultaneous instances of the same route. Otherwise duplicate opens use the existing-instance policy. Multiple instances use the limit and overflow policy."
+    },
+    {
+      "key": "policy.maxInstances.help",
+      "text": "Maximum instances of the same route; minimum 1. Applies when multiple instances are allowed. The overflow policy handles further opens."
+    },
+    {
+      "key": "policy.existingInstance.help",
+      "text": "Duplicate single-instance opens either reject or return a ready instance with matching ownership. Reuse does not update arguments or bring the page to the front."
+    },
+    {
+      "key": "policy.overflow.help",
+      "text": "Policy when the route instance limit is reached: reject the request or try to evict an existing instance according to the selected policy. Close guards still apply."
+    },
+    {
+      "key": "policy.cacheDuration.help",
+      "text": "Cache lifetime in seconds; must be positive. Applies only to Timed caching. Expired entries are not reused; capacity pressure may evict them sooner."
+    },
+    {
+      "key": "policy.EnterTimeout.help",
+      "text": "Enter transition timeout in seconds; must be positive. Prevents an unfinished enter transition from blocking opening indefinitely."
+    },
+    {
+      "key": "policy.ExitTimeout.help",
+      "text": "Exit transition timeout in seconds; must be positive. Prevents an unfinished exit transition from blocking closing indefinitely."
+    },
+    {
+      "key": "policy.PrepareTimeoutSeconds.help",
+      "text": "Page preparation timeout in seconds; must be positive. Ends the open wait on timeout; ongoing resource operations remain tracked for cleanup."
+    },
+    {
+      "key": "policy.CloseTimeoutSeconds.help",
+      "text": "Close cleanup timeout in seconds; must be positive. Timeout does not mean resources have been released; unfinished cleanup remains tracked."
+    },
+    {
+      "key": "policy.CloseDecisionTimeoutSeconds.help",
+      "text": "Timeout for close guards or user confirmation in seconds; must be positive. Timeout is not treated as approval to close."
+    },
+    {
+      "key": "policy.tick.covered",
+      "text": "Pause when covered"
+    },
+    {
+      "key": "policy.tick.hidden",
+      "text": "Pause when hidden"
+    },
+    {
+      "key": "policy.input.help",
+      "text": "When disabled, the page receives no input, does not block UI raycasts, and cannot take focus. Coverage still controls its effect on lower pages."
+    },
+    {
+      "key": "property.ReceivesInput",
+      "text": "Receive Input"
+    },
+    {
+      "key": "enum.MUI.UGUI.MUIPagePolicyFields.Input",
+      "text": "Input"
+    },
+    {
+      "key": "settings.preset.Default",
+      "text": "Inherit Defaults"
+    },
+    {
+      "key": "settings.preset.FullScreen",
+      "text": "Full-Screen Main Page"
+    },
+    {
+      "key": "settings.preset.Popup",
+      "text": "Modal Dialog"
+    },
+    {
+      "key": "settings.preset.Notice",
+      "text": "Notice Layer"
+    },
+    {
+      "key": "settings.preset.Background",
+      "text": "Background Layer"
+    },
+    {
+      "key": "settings.preset.effective",
+      "text": "Effective Values (Before Page Overrides)"
+    },
+    {
+      "key": "settings.preset.value",
+      "text": "{0}: {1} ({2})"
+    },
+    {
+      "key": "settings.preset.source.default",
+      "text": "Page defaults"
+    },
+    {
+      "key": "settings.preset.source.override",
+      "text": "This preset"
+    },
+    {
+      "key": "settings.preset.source.modal",
+      "text": "Automatic modal blocking"
+    },
+    {
+      "key": "settings.preset.invalid",
+      "text": "Fix the configuration errors below to preview effective values."
+    }
+  ]
+}

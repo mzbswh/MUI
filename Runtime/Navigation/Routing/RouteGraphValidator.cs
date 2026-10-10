@@ -69,6 +69,11 @@ namespace MUI.Navigation
                         Issue(OpenRejection.ConflictingData, route, "依赖元数据缺少目标或使用无效位置。");
                         continue;
                     }
+                    if (!Enum.IsDefined(typeof(DependencyMissingPolicy), descriptor.MissingPolicy) ||
+                        (descriptor.IsRequired && descriptor.MissingPolicy == DependencyMissingPolicy.Skip))
+                    {
+                        Issue(OpenRejection.ConflictingData, route, "依赖缺失策略无效，必需依赖不能跳过。");
+                    }
                     if (placements.TryGetValue(target, out var placement))
                     {
                         if (placement != descriptor.Placement)

@@ -6,11 +6,13 @@
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
   <ItemGroup>
+    <ProjectReference Include="MUI.Editor.Localization.csproj" />
     <Compile Include="../../Editor/Navigation/**/*.cs" />
     <ProjectReference Include="MUI.Core.csproj" />
     <ProjectReference Include="MUI.Resources.csproj" />
     <ProjectReference Include="MUI.Navigation.csproj" />
     <Reference Include="UnityEngine.CoreModule"><HintPath>$(UnityManagedPath)/UnityEngine.CoreModule.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="UnityEngine.IMGUIModule"><HintPath>$(UnityManagedPath)/UnityEngine.IMGUIModule.dll</HintPath><Private>false</Private></Reference>
     <Reference Include="UnityEngine.UIElementsModule"><HintPath>$(UnityManagedPath)/UnityEngine.UIElementsModule.dll</HintPath><Private>false</Private></Reference>
     <Reference Include="UnityEditor.CoreModule"><HintPath>$(UnityManagedPath)/UnityEditor.CoreModule.dll</HintPath><Private>false</Private></Reference>
     <Reference Include="UnityEditor.UIElementsModule"><HintPath>$(UnityManagedPath)/UnityEditor.UIElementsModule.dll</HintPath><Private>false</Private></Reference>

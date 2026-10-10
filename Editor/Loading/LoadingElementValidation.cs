@@ -4,6 +4,7 @@ using MUI.UGUI;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
+using L = MUI.Editor.Localization.MUIEditorLocalization;
 
 namespace MUI.Editor.Extensions
 {
@@ -22,7 +23,7 @@ namespace MUI.Editor.Extensions
             var indicator = OverlayReference<GameObject>(data, "indicator");
             if (indicator == null || indicator.transform == element.transform || !indicator.transform.IsChildOf(element.transform))
             {
-                errors.Add($"Indicator must be a strict child of the adapter: {path}.");
+                errors.Add(L.Format("editor.LoadingElementValidation.c6205dce35", path));
                 return;
             }
 
@@ -39,7 +40,7 @@ namespace MUI.Editor.Extensions
                 ValidateOverlayChild(progress.transform, indicator.transform, true, "Progress", path, errors);
                 if (progress.type != Image.Type.Filled)
                 {
-                    errors.Add($"Loading progress requires a Filled Image: {path}.");
+                    errors.Add(L.Format("editor.LoadingElementValidation.368fcebb32", path));
                 }
             }
 
@@ -50,12 +51,12 @@ namespace MUI.Editor.Extensions
 
             if (progress != null && indeterminate != null && (progress.transform.IsChildOf(indeterminate.transform) || indeterminate.transform.IsChildOf(progress.transform)))
             {
-                errors.Add($"Loading progress and indeterminate nodes must be independent branches: {path}.");
+                errors.Add(L.Format("editor.LoadingElementValidation.c3d13aadc0", path));
             }
 
             if (message != null && ((progress != null && message.transform.IsChildOf(progress.transform)) || (indeterminate != null && message.transform.IsChildOf(indeterminate.transform))))
             {
-                errors.Add($"Loading message cannot be inside a conditionally hidden progress branch: {path}.");
+                errors.Add(L.Format("editor.LoadingElementValidation.e6eaf729ea", path));
             }
         }
 
@@ -71,7 +72,7 @@ namespace MUI.Editor.Extensions
         {
             if ((strict && node == parent) || !node.IsChildOf(parent))
             {
-                errors.Add($"{label} must be {(strict ? "a strict child of" : "inside")} its indicator: {path}.");
+                errors.Add(L.Format("editor.LoadingElementValidation.71eae1a677", label, (strict ? L.Get("editor.LoadingElementValidation.ee5ca91704") : "inside"), path));
             }
         }
     }

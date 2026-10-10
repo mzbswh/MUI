@@ -71,11 +71,11 @@ namespace MUI.Samples.Navigation
             navigator.LifecycleChanged += OnLifecycleChanged;
         }
 
-        private static Route<NavigationPageViewModel, string, int> CreatePage(string key, ViewResource page,
+        private Route<NavigationPageViewModel, string, int> CreatePage(string key, ViewResource page,
                     IReadOnlyList<RouteDependency<string>> dependencies) =>
                     new Route<NavigationPageViewModel, string, int>(key, page,
                         () => new NavigationPageViewModel(), presenterFactory: _ => new PagePresenter(),
-                        bindingFactory: NavigationPageViewModelBindingFactory.Create, dependencies: dependencies);
+                        bindingFactory: NavigationPageViewModelBindingFactory.Create, policy: host.ResolvePolicy(), dependencies: dependencies);
 
         [ContextMenu("异步打开两个依赖父页面")]
         public void OpenParents()

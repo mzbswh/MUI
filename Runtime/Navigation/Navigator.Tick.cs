@@ -42,7 +42,7 @@ namespace MUI.Navigation
 
                         if (instance.HasTick)
                         {
-                            var count = ViewTickTiming.Due(ref instance.TickRemainder, unscaledDeltaTime, instance.TickInterval, instance.Route.Policy.MaxTickCatchUp);
+                            var count = ViewTickTiming.Due(ref instance.TickRemainder, unscaledDeltaTime, instance.TickInterval, instance.MaxTickCatchUp);
                             for (var i = 0; i < count && CanTick(instance); i++)
                             {
                                 InvokeTick(instance, instance.TickInterval == 0 ? unscaledDeltaTime : instance.TickInterval);
@@ -96,23 +96,40 @@ namespace MUI.Navigation
 
         private bool CanTick(ViewInstance instance)
         {
-            if (IsShutdown || instance.IsRebinding || !instance.IsActive || !instance.ActivationCommitted || instance.EnterPending || !entries.TryGetValue(instance.Handle, out var current) || !ReferenceEquals(current, instance))
-            {
-                return false;
-            }
+            instance.LastTickStatus = EvaluateTick(instance);
+            return instance.LastTickStatus == ViewTickStatus.Eligible;
+        }
 
+        private ViewTickStatus EvaluateTick(ViewInstance instance)
+        {
+            if (IsShutdown)
+            {
+                return ViewTickStatus.HostShutdown;
+            }
+            if (!instance.IsActive || !instance.ActivationCommitted ||
+                !entries.TryGetValue(instance.Handle, out var current) || !ReferenceEquals(current, instance))
+            {
+                return ViewTickStatus.Inactive;
+            }
+            if (instance.IsRebinding)
+            {
+                return ViewTickStatus.Rebinding;
+            }
+            if (instance.EnterPending)
+            {
+                return ViewTickStatus.Entering;
+            }
             var pause = instance.Route.Policy.TickPause;
             if ((pause & TickPausePolicy.Covered) != 0 && instance.Covered)
             {
-                return false;
+                return ViewTickStatus.Covered;
             }
-
-            if ((pause & TickPausePolicy.Hidden) == 0)
+            if ((pause & TickPausePolicy.Hidden) != 0 &&
+                (!instance.HostVisible || (instance.View is IVisibilityView visibility && !visibility.IsVisible)))
             {
-                return true;
+                return ViewTickStatus.Hidden;
             }
-
-            return instance.HostVisible && (!(instance.View is IVisibilityView visibility) || visibility.IsVisible);
+            return ViewTickStatus.Eligible;
         }
 
         private void InvokeTick(ViewInstance instance, float delta)

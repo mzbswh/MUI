@@ -4,6 +4,7 @@ using System.IO;
 using MUI.UGUI;
 using UnityEditor;
 using UnityEngine;
+using L = MUI.Editor.Localization.MUIEditorLocalization;
 
 namespace MUI.Editor
 {
@@ -36,7 +37,7 @@ namespace MUI.Editor
         /// <summary>沿用选中的契约展示原始绑定声明，不实例化模型或执行绑定。</summary>
         private void DrawBindingSources(BindingManifest manifest)
         {
-            showBindingSources = EditorGUILayout.Foldout(showBindingSources, "绑定声明与源码", true);
+            showBindingSources = EditorGUILayout.Foldout(showBindingSources, L.Get("editor.ViewInspector.Sources.fa24d326cc"), true);
             if (!showBindingSources)
             {
                 return;
@@ -51,12 +52,12 @@ namespace MUI.Editor
                     var hasLocation = !string.IsNullOrEmpty(entry.SourcePath) && entry.SourceLine > 0;
                     if (!hasLocation)
                     {
-                        EditorGUILayout.LabelField("此清单未提供源码位置，请使用新版生成器重新编译。");
+                        EditorGUILayout.LabelField(L.Get("editor.ViewInspector.Sources.ba7542980d"));
                         continue;
                     }
 
                     EditorGUILayout.LabelField(new GUIContent(Path.GetFileName(entry.SourcePath) + ":" + entry.SourceLine, entry.SourcePath));
-                    if (GUILayout.Button("打开声明"))
+                    if (GUILayout.Button(L.Get("editor.ViewInspector.Sources.a7f7f7a203")))
                     {
                         OpenBindingSource(entry);
                     }
@@ -65,18 +66,18 @@ namespace MUI.Editor
 
             if (manifest.Entries.Count == 0)
             {
-                EditorGUILayout.HelpBox("当前契约没有绑定声明。", MessageType.Info);
+                EditorGUILayout.HelpBox(L.Get("editor.ViewInspector.Sources.7ea0036985"), MessageType.Info);
             }
 
             if (!string.IsNullOrEmpty(sourceOpenError))
             {
-                EditorGUILayout.HelpBox(sourceOpenError, MessageType.Warning);
+                EditorGUILayout.HelpBox(L.Diagnostic(sourceOpenError), MessageType.Warning);
             }
         }
 
         private void DrawBindingTargets(BindingEntry entry)
         {
-            if (GUILayout.Button("定位控件"))
+            if (GUILayout.Button(L.Get("editor.ViewInspector.Sources.d90e1d2f55")))
             {
                 ClearBindingTargets();
                 locatedBinding = entry;
@@ -91,7 +92,7 @@ namespace MUI.Editor
                 }
                 catch (Exception error)
                 {
-                    targetLookupError = "定位控件失败：" + error.Message;
+                    targetLookupError = L.Get("editor.ViewInspector.Sources.67bb7dc1f7") + error.Message;
                 }
             }
 
@@ -102,19 +103,19 @@ namespace MUI.Editor
 
             if (targetLookupError != null)
             {
-                EditorGUILayout.HelpBox(targetLookupError, MessageType.Error);
+                EditorGUILayout.HelpBox(L.Diagnostic(targetLookupError), MessageType.Error);
                 return;
             }
 
             if (locatedElements == null || locatedElements.Count == 0)
             {
-                EditorGUILayout.HelpBox("当前 View 绑定边界内没有匹配的控件，请检查名称与组件类型。", MessageType.Error);
+                EditorGUILayout.HelpBox(L.Get("editor.ViewInspector.Sources.2a6d9ccfea"), MessageType.Error);
                 return;
             }
 
             if (locatedElements.Count > 1)
             {
-                EditorGUILayout.HelpBox("找到多个匹配控件，绑定存在歧义。请定位并修正重名，框架不会自动选择其中一个。", MessageType.Error);
+                EditorGUILayout.HelpBox(L.Get("editor.ViewInspector.Sources.8efab5e68f"), MessageType.Error);
             }
 
             foreach (var element in locatedElements)
@@ -128,7 +129,7 @@ namespace MUI.Editor
 
                     using (new EditorGUI.DisabledScope(element == null))
                     {
-                        if (GUILayout.Button("高亮", GUILayout.Width(48)))
+                        if (GUILayout.Button(L.Get("editor.ViewInspector.Sources.05f954565f"), GUILayout.Width(48)))
                         {
                             EditorGUIUtility.PingObject(element.gameObject);
                         }
@@ -151,7 +152,7 @@ namespace MUI.Editor
                 {
                     if (!AssetDatabase.OpenAsset(script, entry.SourceLine))
                     {
-                        sourceOpenError = "无法打开声明，请检查 Unity 的外部代码编辑器设置。";
+                        sourceOpenError = L.Get("editor.ViewInspector.Sources.679ca80186");
                     }
 
                     return;
@@ -159,7 +160,7 @@ namespace MUI.Editor
 
                 if (!File.Exists(path))
                 {
-                    sourceOpenError = "声明文件已移动或无法访问，请重新编译生成绑定：" + path;
+                    sourceOpenError = L.Get("editor.ViewInspector.Sources.7ae12e0993") + path;
                     return;
                 }
 
@@ -167,7 +168,7 @@ namespace MUI.Editor
             }
             catch (Exception error)
             {
-                sourceOpenError = "打开绑定声明失败：" + error.Message;
+                sourceOpenError = L.Get("editor.ViewInspector.Sources.1b2ff64e53") + error.Message;
             }
         }
     }

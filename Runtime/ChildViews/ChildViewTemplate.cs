@@ -11,16 +11,9 @@ namespace MUI.ChildViews
                     Func<TViewModel> modelFactory,
                     Func<IView, TViewModel, BindingContext> bindingFactory,
                     Func<TViewModel, Presenter<TViewModel, TArgs, Unit>> presenterFactory = null,
-                    bool pauseTickWhenHidden = false,
-                    int maxTickCatchUp = 4)
+                    bool pauseTickWhenHidden = false)
         {
-            if (maxTickCatchUp < 1 || maxTickCatchUp > 32)
-            {
-                throw new ArgumentOutOfRangeException(nameof(maxTickCatchUp));
-            }
-
             PauseTickWhenHidden = pauseTickWhenHidden;
-            MaxTickCatchUp = maxTickCatchUp;
             Resource = resource ?? throw new ArgumentNullException(nameof(resource));
             ModelFactory = modelFactory ?? throw new ArgumentNullException(nameof(modelFactory));
             BindingFactory = bindingFactory ?? throw new ArgumentNullException(nameof(bindingFactory));
@@ -29,12 +22,6 @@ namespace MUI.ChildViews
 
         /// <summary>有效不可见时是否暂停 Tick；不结束激活或释放资源。</summary>
         public bool PauseTickWhenHidden
-        {
-            get;
-        }
-
-        /// <summary>单帧最多补偿的定时 Tick 次数，限制积压工作。</summary>
-        public int MaxTickCatchUp
         {
             get;
         }

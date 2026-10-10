@@ -6,6 +6,7 @@
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
   <ItemGroup>
+    <ProjectReference Include="MUI.Editor.Localization.csproj" />
     <Compile Include="../../Editor/DragDrop/**/*.cs" />
     <ProjectReference Include="MUI.Core.csproj" />
     <ProjectReference Include="MUI.UGUI.csproj" />

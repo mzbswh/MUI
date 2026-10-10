@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using MUI.Navigation;
 using UnityEngine;
+using L = MUI.Editor.Localization.MUIEditorLocalization;
 
 namespace MUI.Editor
 {
@@ -20,23 +21,23 @@ namespace MUI.Editor
         {
             if (sealedCatalog)
             {
-                throw new InvalidOperationException("构建目录采集已经结束。");
+                throw new InvalidOperationException(L.Get("editor.UIBuildCatalog.90e3c22510"));
             }
             if (route == null || prefab == null || manifest == null)
             {
-                throw new ArgumentException("构建页面必须提供路由、Prefab 和绑定 Manifest。");
+                throw new ArgumentException(L.Get("editor.UIBuildCatalog.92487267c4"));
             }
             if (manifest.ViewModelType != typeof(TViewModel))
             {
-                throw new ArgumentException("绑定 Manifest 的模型类型与路由不一致。", nameof(manifest));
+                throw new ArgumentException(L.Get("editor.UIBuildCatalog.c378f5ca0a"), nameof(manifest));
             }
             if (pages.Count >= 2048)
             {
-                throw new InvalidOperationException("单个 UI 构建目录最多登记 2048 个页面。");
+                throw new InvalidOperationException(L.Get("editor.UIBuildCatalog.3b1f870adc"));
             }
             if (!routes.Add(route))
             {
-                throw new InvalidOperationException("同一路由不能重复登记到构建目录：" + route.Key);
+                throw new InvalidOperationException(L.Get("editor.UIBuildCatalog.b403f3aa8b") + route.Key);
             }
             pages.Add(new Page { Route = route, Prefab = prefab, Manifest = manifest });
         }

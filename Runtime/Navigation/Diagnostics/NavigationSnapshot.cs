@@ -3,6 +3,54 @@ using System.Collections.Generic;
 
 namespace MUI.Navigation
 {
+    public enum ViewCacheDecision
+    {
+        Retained,
+        Reused,
+        Disabled,
+        Unsupported,
+        AbnormalClose,
+        CleanupIncomplete,
+        ResetFailed,
+        CapacityDisabled,
+        HostUnavailable,
+        Incompatible,
+        EstimateRequired,
+        BudgetExceeded,
+        RetirementPending,
+        EvictedForCapacity,
+        Expired,
+        Destroyed,
+        Cleared,
+        ReuseFailed
+    }
+
+    /// <summary>有界缓存诊断，不保留 View、路由或异常引用。</summary>
+    public readonly struct ViewCacheDiagnostic
+    {
+        internal ViewCacheDiagnostic(string routeKey, ViewCacheDecision decision)
+        {
+            RouteKey = routeKey;
+            Decision = decision;
+            TimestampUtc = DateTime.UtcNow;
+        }
+
+        public string RouteKey
+        {
+            get;
+        }
+
+        public ViewCacheDecision Decision
+        {
+            get;
+        }
+
+        public DateTime TimestampUtc
+        {
+            get;
+        }
+    }
+
     /// <summary>所属 UI 线程上的导航状态快照；只包含已复制的元数据，不执行项目或渲染器回调。</summary>
     public sealed class NavigationSnapshot
     {
@@ -11,8 +59,11 @@ namespace MUI.Navigation
                     ViewHandle[] history, int pendingRequests, int postedRequests, int cachedViews,
                     int retiringCachedViews, int preloadReservations, int pendingCleanup,
                     bool hasCleanupFailure, long droppedEvents, Guid hostId, int unconfirmedCleanupCount,
-                    IReadOnlyList<CleanupResponsibilitySnapshot> cleanupResponsibilities)
+                    IReadOnlyList<CleanupResponsibilitySnapshot> cleanupResponsibilities, ViewCacheDiagnostic[] cacheDiagnostics, RenderOrderOptions renderOrder, int reservedRenderOrders)
         {
+            RenderOrder = renderOrder;
+            ReservedRenderOrders = reservedRenderOrders;
+            CacheDiagnostics = Array.AsReadOnly(cacheDiagnostics);
             IsShutdown = shutdown;
             CommitVersion = version;
             IsPresentationSettled = presentationSettled;
@@ -32,6 +83,22 @@ namespace MUI.Navigation
             UnconfirmedCleanupCount = unconfirmedCleanupCount;
             CleanupResponsibilities = cleanupResponsibilities;
             DroppedLifecycleEventCount = droppedEvents;
+        }
+
+        /// <summary>最近 128 条缓存决策，按发生顺序排列，旧记录自动淘汰。</summary>
+        public RenderOrderOptions RenderOrder
+        {
+            get;
+        }
+
+        public int ReservedRenderOrders
+        {
+            get;
+        }
+
+        public IReadOnlyList<ViewCacheDiagnostic> CacheDiagnostics
+        {
+            get;
         }
 
         public bool IsShutdown

@@ -2,6 +2,7 @@ using System;
 using MUI.UGUI;
 using UnityEditor;
 using UnityEngine;
+using L = MUI.Editor.Localization.MUIEditorLocalization;
 
 namespace MUI.Editor
 {
@@ -14,13 +15,13 @@ namespace MUI.Editor
 
         private void DrawResourcePreparationDiagnostics()
         {
-            showResourcePreparation = EditorGUILayout.Foldout(showResourcePreparation, "首帧资源准备（只读快照）", true);
+            showResourcePreparation = EditorGUILayout.Foldout(showResourcePreparation, L.Get("editor.ViewInspector.ResourcePreparation.cc887fc419"), true);
             if (!showResourcePreparation)
             {
                 return;
             }
 
-            if (GUILayout.Button("采集资源准备快照"))
+            if (GUILayout.Button(L.Get("editor.ViewInspector.ResourcePreparation.8ef0bbbc4e")))
             {
                 resourcePreparationSnapshot = null;
                 resourcePreparationError = null;
@@ -29,7 +30,7 @@ namespace MUI.Editor
                     var view = target as View;
                     if (view == null)
                     {
-                        throw new InvalidOperationException("目标 View 已不存在。");
+                        throw new InvalidOperationException(L.Get("editor.ViewInspector.ResourcePreparation.7728ec29ef"));
                     }
 
                     resourcePreparationSnapshot = view.CaptureResourcePreparationSnapshot(64);
@@ -43,27 +44,27 @@ namespace MUI.Editor
 
             if (resourcePreparationError != null)
             {
-                EditorGUILayout.HelpBox(resourcePreparationError, MessageType.Error);
+                EditorGUILayout.HelpBox(L.Diagnostic(resourcePreparationError), MessageType.Error);
             }
 
             var snapshot = resourcePreparationSnapshot;
             if (snapshot == null)
             {
-                EditorGUILayout.HelpBox("手动采集当前默认资源键的准备状态，不会加载资源或改变界面。", MessageType.Info);
+                EditorGUILayout.HelpBox(L.Get("editor.ViewInspector.ResourcePreparation.3385504be2"), MessageType.Info);
                 return;
             }
 
-            EditorGUILayout.LabelField("采集时间", resourcePreparationTime);
-            EditorGUILayout.LabelField("已启用首帧等待", snapshot.Enabled.ToString());
+            EditorGUILayout.LabelField(L.Get("editor.ViewInspector.ResourcePreparation.fbfb60e549"), resourcePreparationTime);
+            EditorGUILayout.LabelField(L.Get("editor.ViewInspector.ResourcePreparation.700c1c683f"), L.Value(snapshot.Enabled));
             if (!snapshot.HasContext)
             {
-                EditorGUILayout.HelpBox("没有活动资源上下文：可能尚未激活、没有配置加载器或已经清理。", MessageType.Info);
+                EditorGUILayout.HelpBox(L.Get("editor.ViewInspector.ResourcePreparation.e3acab17a5"), MessageType.Info);
                 return;
             }
 
-            EditorGUILayout.LabelField("激活有效 / 已提交", $"{snapshot.ActivationActive} / {snapshot.Committed}");
-            EditorGUILayout.LabelField("准备项 / 等待项", $"{snapshot.TotalCount} / {snapshot.PendingCount}");
-            EditorGUILayout.LabelField("失败 / 取消 / 未提交", $"{snapshot.FailedCount} / {snapshot.CancelledCount} / {snapshot.NotAppliedCount}");
+            EditorGUILayout.LabelField(L.Get("editor.ViewInspector.ResourcePreparation.c8875ed413"), $"{L.Value(snapshot.ActivationActive)} / {L.Value(snapshot.Committed)}");
+            EditorGUILayout.LabelField(L.Get("editor.ViewInspector.ResourcePreparation.f1ad7e1a84"), $"{snapshot.TotalCount} / {snapshot.PendingCount}");
+            EditorGUILayout.LabelField(L.Get("editor.ViewInspector.ResourcePreparation.800ab3c05f"), $"{snapshot.FailedCount} / {snapshot.CancelledCount} / {snapshot.NotAppliedCount}");
             foreach (var entry in snapshot.Entries)
             {
                 EditorGUILayout.LabelField(entry.Target, StateLabel(entry.State));
@@ -71,10 +72,10 @@ namespace MUI.Editor
 
             if (snapshot.IsTruncated)
             {
-                EditorGUILayout.HelpBox($"只显示前 {snapshot.Entries.Count} 项，计数包含全部 {snapshot.TotalCount} 项。", MessageType.Info);
+                EditorGUILayout.HelpBox(L.Format("editor.ViewInspector.ResourcePreparation.f2ccc0a120", snapshot.Entries.Count, snapshot.TotalCount), MessageType.Info);
             }
 
-            EditorGUILayout.HelpBox("提交后准备账本清空。空账本不代表全部 UI 资源已就绪；手动资源槽、业务任务和子 View 不在此快照内。", MessageType.Info);
+            EditorGUILayout.HelpBox(L.Get("editor.ViewInspector.ResourcePreparation.02bafe3885"), MessageType.Info);
         }
 
         private static string StateLabel(ResourcePreparationState state)
@@ -82,17 +83,17 @@ namespace MUI.Editor
             switch (state)
             {
                 case ResourcePreparationState.Loading:
-                    return "加载中";
+                    return L.Get("editor.ViewInspector.ResourcePreparation.d04fcbda73");
                 case ResourcePreparationState.Applied:
-                    return "已应用";
+                    return L.Get("editor.ViewInspector.ResourcePreparation.f585743460");
                 case ResourcePreparationState.NotApplied:
-                    return "未提交";
+                    return L.Get("editor.ViewInspector.ResourcePreparation.8032af4a59");
                 case ResourcePreparationState.Cancelled:
-                    return "已取消";
+                    return L.Get("editor.ViewInspector.ResourcePreparation.a37778f17c");
                 case ResourcePreparationState.Failed:
-                    return "失败";
+                    return L.Get("editor.ViewInspector.ResourcePreparation.28384d7afd");
                 default:
-                    return "未知";
+                    return L.Get("editor.ViewInspector.ResourcePreparation.4d8c1c5b42");
             }
         }
     }

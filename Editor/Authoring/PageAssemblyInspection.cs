@@ -4,6 +4,7 @@ using System.IO;
 using UnityEditor;
 using UnityEditor.Compilation;
 using UnityEngine;
+using L = MUI.Editor.Localization.MUIEditorLocalization;
 
 namespace MUI.Editor
 {
@@ -44,7 +45,7 @@ namespace MUI.Editor
             }
             catch (Exception error)
             {
-                result.Error = "无法检查目标程序集：" + error.Message;
+                result.Error = L.Get("editor.PageAssemblyInspection.11f11aca60") + error.Message;
             }
             return result;
         }
@@ -61,7 +62,7 @@ namespace MUI.Editor
                     var references = Directory.GetFiles(directory, "*.asmref", SearchOption.TopDirectoryOnly);
                     if (definitions.Length + references.Length > 1)
                     {
-                        throw new InvalidOperationException("目标祖先目录存在多个程序集定义或引用：" + directory);
+                        throw new InvalidOperationException(L.Get("editor.PageAssemblyInspection.0015a79466") + directory);
                     }
                     if (definitions.Length == 1)
                     {
@@ -73,12 +74,12 @@ namespace MUI.Editor
                         var reference = JsonUtility.FromJson<Definition>(File.ReadAllText(references[0]));
                         if (reference == null || string.IsNullOrEmpty(reference.reference))
                         {
-                            throw new InvalidOperationException("程序集引用文件没有有效 reference。");
+                            throw new InvalidOperationException(L.Get("editor.PageAssemblyInspection.c754dd93d7"));
                         }
                         DefinitionPath = CompilationPipeline.GetAssemblyDefinitionFilePathFromAssemblyReference(reference.reference);
                         if (string.IsNullOrEmpty(DefinitionPath))
                         {
-                            throw new InvalidOperationException("无法解析程序集引用：" + references[0]);
+                            throw new InvalidOperationException(L.Get("editor.PageAssemblyInspection.840967a1d8") + references[0]);
                         }
                         break;
                     }
@@ -98,18 +99,18 @@ namespace MUI.Editor
                 var definition = JsonUtility.FromJson<Definition>(json);
                 if (definition == null || string.IsNullOrWhiteSpace(definition.name))
                 {
-                    throw new InvalidOperationException("程序集定义没有有效 name。");
+                    throw new InvalidOperationException(L.Get("editor.PageAssemblyInspection.e80c02e5ee"));
                 }
                 AssemblyName = definition.name;
                 if (definition.noEngineReferences)
                 {
-                    Error = "目标程序集禁用了引擎引用，不能生成依赖 Unity 控件的页面绑定。";
+                    Error = L.Get("editor.PageAssemblyInspection.c7e47c0af2");
                     return;
                 }
                 if (definition.includePlatforms != null && definition.includePlatforms.Length == 1 &&
                     definition.includePlatforms[0] == "Editor")
                 {
-                    Error = "目标程序集只包含 Editor 平台，请选择运行时程序集目录。";
+                    Error = L.Get("editor.PageAssemblyInspection.38e6e62259");
                     return;
                 }
             }
@@ -126,12 +127,12 @@ namespace MUI.Editor
             var assembly = Array.Find(assemblies, item => item.name == AssemblyName);
             if (assembly == null)
             {
-                Warning = "目标尚无可用编译快照，可能是空程序集或当前平台/宏未启用。引用和生成器未验证；创建后必须检查 Unity 编译结果。";
+                Warning = L.Get("editor.PageAssemblyInspection.e652119992");
                 return;
             }
             if ((assembly.flags & AssemblyFlags.EditorAssembly) != 0)
             {
-                Error = "目标属于仅编辑器程序集，游戏页面应创建在运行时程序集目录。";
+                Error = L.Get("editor.PageAssemblyInspection.5d3a39daa3");
                 return;
             }
 
@@ -149,7 +150,7 @@ namespace MUI.Editor
             {
                 if (!available.Contains(name))
                 {
-                    errors.Add("缺少程序集引用：" + name);
+                    errors.Add(L.Get("editor.PageAssemblyInspection.210d456125") + name);
                 }
             }
 
@@ -168,7 +169,7 @@ namespace MUI.Editor
             }
             if (!generatorFound)
             {
-                errors.Add("当前编译选项未包含 MUI.Generators.dll，请检查 RoslynAnalyzer 标签及其作用范围。");
+                errors.Add(L.Get("editor.PageAssemblyInspection.2737b0424d"));
             }
             errors.Sort(StringComparer.Ordinal);
             Error = errors.Count == 0 ? null : string.Join("\n", errors);

@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using MUI.UGUI;
 using UnityEditor;
 using UnityEngine;
+using L = MUI.Editor.Localization.MUIEditorLocalization;
 
 namespace MUI.Editor
 {
@@ -14,19 +15,19 @@ namespace MUI.Editor
             var duration = serialized.FindProperty("enterFadeDuration").floatValue;
             if (float.IsNaN(duration) || float.IsInfinity(duration) || duration < 0)
             {
-                errors.Add("View Enter Fade Duration must be finite and nonnegative.");
+                errors.Add(L.Get("editor.ViewContractValidator.Transitions.453712be0b"));
             }
 
             var exitDuration = serialized.FindProperty("exitFadeDuration").floatValue;
             if (float.IsNaN(exitDuration) || float.IsInfinity(exitDuration) || exitDuration < 0)
             {
-                errors.Add("View Exit Fade Duration must be finite and nonnegative.");
+                errors.Add(L.Get("editor.ViewContractValidator.Transitions.a533a7eab7"));
             }
 
             var group = view.GetComponent<CanvasGroup>();
             if (group == null)
             {
-                errors.Add("View requires a CanvasGroup for visibility and transition fading.");
+                errors.Add(L.Get("editor.ViewContractValidator.Transitions.f07ffe69c5"));
             }
         }
     }

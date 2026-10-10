@@ -406,7 +406,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   host: {fileID: 1614527429}
-  pagePrefab: {fileID: 5585269923075176462, guid: e2bfbc679d5ad4db984d56f676928255, type: 3}
   reopenButton: {fileID: 1726000005}
   reopenLabel: {fileID: 1726000009}
 --- !u!4 &609657566
@@ -456,9 +455,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 752a3181571a49d8956f6ccc129efb52, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  viewRoot: {fileID: 0}
-  prefabs: []
-  automaticFramePump: 1
+  settings: {fileID: 11400000, guid: 90d9552856a54619a6d3bcd6c087c754, type: 2}
+  viewRoot: {fileID: 1614527433}
+  prefabs:
+  - Key: BasicView
+    Version: "1"
+    Prefab: {fileID: 5585269923075176462, guid: e2bfbc679d5ad4db984d56f676928255, type: 3}
 --- !u!114 &1614527430
 MonoBehaviour:
   m_ObjectHideFlags: 0

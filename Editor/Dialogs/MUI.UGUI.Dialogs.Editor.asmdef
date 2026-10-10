@@ -7,7 +7,8 @@
     "MUI.Editor",
     "MUI.UGUI.Dialogs",
     "Unity.ugui",
-    "MUI.Dialogs"
+    "MUI.Dialogs",
+    "MUI.Editor.Localization"
   ],
   "includePlatforms": [
     "Editor"

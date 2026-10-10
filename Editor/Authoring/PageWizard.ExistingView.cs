@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using MUI.UGUI;
 using UnityEditor;
 using UnityEngine;
+using L = MUI.Editor.Localization.MUIEditorLocalization;
 
 namespace MUI.Editor
 {
@@ -19,15 +20,15 @@ namespace MUI.Editor
 
         private void DrawExistingView()
         {
-            existingPrefab = (GameObject)EditorGUILayout.ObjectField("关联已有 View（可选）", existingPrefab, typeof(GameObject), false);
+            existingPrefab = (GameObject)EditorGUILayout.ObjectField(L.Get("editor.PageWizard.ExistingView.593ff81861"), existingPrefab, typeof(GameObject), false);
             if (existingPrefab != null)
             {
-                titleElementName = EditorGUILayout.TextField("标题 Element 名称", titleElementName);
+                titleElementName = EditorGUILayout.TextField(L.Get("editor.PageWizard.ExistingView.f7f2eaad00"), titleElementName);
                 if (preset != PagePreset.Notice)
                 {
-                    closeElementName = EditorGUILayout.TextField("关闭按钮 Element 名称", closeElementName);
+                    closeElementName = EditorGUILayout.TextField(L.Get("editor.PageWizard.ExistingView.9267775c67"), closeElementName);
                 }
-                EditorGUILayout.HelpBox("复用原 Prefab，仅在新页面目录生成源码。请按原控件选择文本组件；原资产不修改。创建后仍需将页面资源键映射到该 Prefab。", MessageType.Info);
+                EditorGUILayout.HelpBox(L.Get("editor.PageWizard.ExistingView.358fc7efeb"), MessageType.Info);
             }
         }
 
@@ -56,7 +57,7 @@ namespace MUI.Editor
             }
             catch (Exception error)
             {
-                existingValidationError = "已有 View 校验失败：" + error.Message;
+                existingValidationError = L.Get("editor.PageWizard.ExistingView.b0b19dece0") + error.Message;
             }
             return existingValidationError;
         }
@@ -67,17 +68,17 @@ namespace MUI.Editor
                 PrefabUtility.GetPrefabAssetType(existingPrefab) == PrefabAssetType.Model ||
                 AssetDatabase.LoadAssetAtPath<GameObject>(path) != existingPrefab)
             {
-                return "请选择项目中的普通 Prefab 或 Variant 根资产，不接受场景对象、模型或 Prefab 子节点。";
+                return L.Get("editor.PageWizard.ExistingView.d95a7db4f5");
             }
             var view = existingPrefab.GetComponent<View>();
             if (view == null || existingPrefab.GetComponent<RectTransform>() == null)
             {
-                return "已有 Prefab 根节点必须包含 View 和 RectTransform。";
+                return L.Get("editor.PageWizard.ExistingView.b5f1d7bd40");
             }
             if (string.IsNullOrWhiteSpace(titleElementName) ||
                 preset != PagePreset.Notice && string.IsNullOrWhiteSpace(closeElementName))
             {
-                return "请填写原 Prefab 中的标题和关闭按钮 Element 名称。";
+                return L.Get("editor.PageWizard.ExistingView.36ea1f9e66");
             }
             var entries = new List<BindingEntry>
             {
@@ -87,13 +88,13 @@ namespace MUI.Editor
             {
                 if (existingPrefab.GetComponentsInChildren<UnityEngine.UI.Selectable>(true).Length != 0)
                 {
-                    return "非交互提示不能包含 Selectable 控件；已有 Prefab 不会被自动修改。";
+                    return L.Get("editor.PageWizard.ExistingView.885a18c4c8");
                 }
                 foreach (var graphic in existingPrefab.GetComponentsInChildren<UnityEngine.UI.Graphic>(true))
                 {
                     if (graphic.raycastTarget)
                     {
-                        return "非交互提示的 Graphic 必须关闭 Raycast Target；已有 Prefab 不会被自动修改。";
+                        return L.Get("editor.PageWizard.ExistingView.2585437490");
                     }
                 }
             }
@@ -104,7 +105,7 @@ namespace MUI.Editor
             }
             var manifest = new BindingManifest(typeof(ViewModel), entries);
             var errors = ViewContractValidator.Validate(view, manifest);
-            return errors.Count == 0 ? null : "已有 Prefab 不符合页面骨架契约：\n" + string.Join("\n", errors);
+            return errors.Count == 0 ? null : L.Get("editor.PageWizard.ExistingView.e7310d8579") + string.Join("\n", errors);
         }
     }
 }

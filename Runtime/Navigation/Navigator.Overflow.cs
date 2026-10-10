@@ -40,6 +40,12 @@ namespace MUI.Navigation
             OpenRejection rejection;
             switch (replacement.Rejection)
             {
+                case ReplaceRejection.RenderOrderCapacity:
+                    rejection = OpenRejection.RenderOrderCapacity;
+                    break;
+                case ReplaceRejection.DependencyMissing:
+                    rejection = OpenRejection.DependencyMissing;
+                    break;
                 case ReplaceRejection.Busy:
                     rejection = OpenRejection.Busy;
                     break;

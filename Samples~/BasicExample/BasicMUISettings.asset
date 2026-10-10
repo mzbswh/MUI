@@ -1,0 +1,155 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ab501788d74f24246a88b6fa038f5080, type: 3}
+  m_Name: BasicMUISettings
+  m_EditorClassIdentifier:
+  layers:
+  - Name: Background
+    Order: -100
+  - Name: Default
+    Order: 0
+  - Name: Popup
+    Order: 100
+  - Name: Notice
+    Order: 200
+  defaultRules:
+    Layer: Default
+    EnterHistory: 1
+    Coverage: 0
+    TakesFocus: 1
+    Modal: 0
+    BackBehavior: 0
+    AllowMultiple: 0
+    MaxInstances: 1
+    Overflow: 0
+    ExistingInstance: 0
+    TickPause: 2
+    CacheMode: 0
+    CacheDurationSeconds: 60
+    EnterTimeout: 5
+    ExitTimeout: 5
+    PrepareTimeoutSeconds: 30
+    CloseTimeoutSeconds: 30
+    CloseDecisionTimeoutSeconds: 120
+  presets:
+  - Name: Default
+    Overrides: 0
+    Values:
+      Layer: Default
+      EnterHistory: 1
+      Coverage: 0
+      TakesFocus: 1
+      Modal: 0
+      BackBehavior: 0
+      AllowMultiple: 0
+      MaxInstances: 1
+      Overflow: 0
+      ExistingInstance: 0
+      TickPause: 2
+      CacheMode: 0
+      CacheDurationSeconds: 60
+      EnterTimeout: 5
+      ExitTimeout: 5
+      PrepareTimeoutSeconds: 30
+      CloseTimeoutSeconds: 30
+      CloseDecisionTimeoutSeconds: 120
+  - Name: FullScreen
+    Overrides: 4
+    Values:
+      Layer: Default
+      EnterHistory: 1
+      Coverage: 2
+      TakesFocus: 1
+      Modal: 0
+      BackBehavior: 0
+      AllowMultiple: 0
+      MaxInstances: 1
+      Overflow: 0
+      ExistingInstance: 0
+      TickPause: 2
+      CacheMode: 0
+      CacheDurationSeconds: 60
+      EnterTimeout: 5
+      ExitTimeout: 5
+      PrepareTimeoutSeconds: 30
+      CloseTimeoutSeconds: 30
+      CloseDecisionTimeoutSeconds: 120
+  - Name: Popup
+    Overrides: 21
+    Values:
+      Layer: Popup
+      EnterHistory: 1
+      Coverage: 1
+      TakesFocus: 1
+      Modal: 1
+      BackBehavior: 0
+      AllowMultiple: 0
+      MaxInstances: 1
+      Overflow: 0
+      ExistingInstance: 0
+      TickPause: 2
+      CacheMode: 0
+      CacheDurationSeconds: 60
+      EnterTimeout: 5
+      ExitTimeout: 5
+      PrepareTimeoutSeconds: 30
+      CloseTimeoutSeconds: 30
+      CloseDecisionTimeoutSeconds: 120
+  - Name: Notice
+    Overrides: 63
+    Values:
+      Layer: Notice
+      EnterHistory: 0
+      Coverage: 0
+      TakesFocus: 0
+      Modal: 0
+      BackBehavior: 1
+      AllowMultiple: 0
+      MaxInstances: 1
+      Overflow: 0
+      ExistingInstance: 0
+      TickPause: 2
+      CacheMode: 0
+      CacheDurationSeconds: 60
+      EnterTimeout: 5
+      ExitTimeout: 5
+      PrepareTimeoutSeconds: 30
+      CloseTimeoutSeconds: 30
+      CloseDecisionTimeoutSeconds: 120
+  - Name: Background
+    Overrides: 63
+    Values:
+      Layer: Background
+      EnterHistory: 0
+      Coverage: 0
+      TakesFocus: 0
+      Modal: 0
+      BackBehavior: 1
+      AllowMultiple: 0
+      MaxInstances: 1
+      Overflow: 0
+      ExistingInstance: 0
+      TickPause: 2
+      CacheMode: 0
+      CacheDurationSeconds: 60
+      EnterTimeout: 5
+      ExitTimeout: 5
+      PrepareTimeoutSeconds: 30
+      CloseTimeoutSeconds: 30
+      CloseDecisionTimeoutSeconds: 120
+  automaticFramePump: 1
+  defaultPreset: Default
+  cacheCapacity: 16
+  queueCapacity: 64
+  preloadCapacity: 32
+  cleanupCapacity: 16
+  terminalCapacity: 256

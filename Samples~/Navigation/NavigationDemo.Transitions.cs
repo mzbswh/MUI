@@ -23,7 +23,7 @@ namespace MUI.Samples.Navigation
                     native.EnterDuration = 0.8f;
                     native.ExitDuration = 0.4f;
                     return binding(view, model);
-                }, policy: new RoutePolicy(layer: 100, modal: true));
+                }, policy: host.ResolvePolicy("Popup"));
             var opened = await navigator.OpenAsync(route, new PageArgs("Entering — controls unlock when fading finishes", 10), cancellation.Token);
             if (!opened.Handle.IsValid)
             {

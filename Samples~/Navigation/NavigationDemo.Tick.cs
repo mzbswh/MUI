@@ -20,8 +20,8 @@ namespace MUI.Samples.Navigation
             Route<PageViewModel, PageArgs, int> Route(string key, PagePresenter presenter, RoutePolicy policy)
                 => new Route<PageViewModel, PageArgs, int>(key, resource, () => new PageViewModel(),
                     _ => presenter, binding, policy);
-            var framePage = await navigator.OpenAsync(Route("tick.frame", frame, new RoutePolicy(tickPause: TickPausePolicy.Covered)), new PageArgs("Frame tick", 0));
-            var slowPage = await navigator.OpenAsync(Route("tick.slow", slow, new RoutePolicy(maxTickCatchUp: 2)), new PageArgs("Low frequency", 0));
+            var framePage = await navigator.OpenAsync(Route("tick.frame", frame, host.ResolvePolicy(overrides: new RoutePolicyOverrides { TickPause = TickPausePolicy.Covered })), new PageArgs("Frame tick", 0));
+            var slowPage = await navigator.OpenAsync(Route("tick.slow", slow, host.ResolvePolicy()), new PageArgs("Low frequency", 0));
             try
             {
                 if (!framePage.IsSuccess || !slowPage.IsSuccess)
@@ -31,7 +31,7 @@ namespace MUI.Samples.Navigation
 
                 navigator.Tick(0.6f);
                 Debug.Log($"MUI Tick initial: frame={frame.Calls}; low={slow.Calls}");
-                var cover = await navigator.OpenAsync(Route("tick.cover", new PagePresenter(), new RoutePolicy(layer: 100, coverage: CoveragePolicy.BlockInput)), new PageArgs("Tick cover", 0));
+                var cover = await navigator.OpenAsync(Route("tick.cover", new PagePresenter(), host.ResolvePolicy(layer: "Popup", overrides: new RoutePolicyOverrides { Coverage = CoveragePolicy.BlockInput, Modal = false })), new PageArgs("Tick cover", 0));
                 if (!cover.IsSuccess)
                 {
                     throw new InvalidOperationException("Tick cover failed.", cover.Error);
@@ -149,9 +149,11 @@ namespace MUI.Samples.Navigation
             }
         }
 
-        private sealed class SlowDemoPresenter : PagePresenter, ILowFrequencyViewTick
+        private sealed class SlowDemoPresenter : PagePresenter, ILowFrequencyViewTickCatchUp
         {
             public float TickInterval => 0.25f;
+
+            public int MaxTickCatchUp => 2;
 
             public int Calls
             {

@@ -7,6 +7,12 @@ namespace MUI.Navigation
         {
             switch (rejection)
             {
+                case OpenRejection.CloseDenied:
+                    return ReplaceRejection.CloseDenied;
+                case OpenRejection.ConfirmationUnavailable:
+                    return ReplaceRejection.ConfirmationUnavailable;
+                case OpenRejection.CloseDecisionTimedOut:
+                    return ReplaceRejection.CloseDecisionTimedOut;
                 case OpenRejection.ConflictingData:
                     return ReplaceRejection.ConflictingData;
                 case OpenRejection.CleanupCapacity:
@@ -17,6 +23,10 @@ namespace MUI.Navigation
                     return ReplaceRejection.DependencyOrderConflict;
                 case OpenRejection.DependencyLimit:
                     return ReplaceRejection.DependencyLimit;
+                case OpenRejection.RenderOrderCapacity:
+                    return ReplaceRejection.RenderOrderCapacity;
+                case OpenRejection.DependencyMissing:
+                    return ReplaceRejection.DependencyMissing;
                 case OpenRejection.Busy:
                     return ReplaceRejection.Busy;
                 default:

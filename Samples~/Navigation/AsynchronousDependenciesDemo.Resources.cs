@@ -10,12 +10,17 @@ namespace MUI.Samples.Navigation
 {
     public sealed partial class AsynchronousDependenciesDemo
     {
-        private static Route<ThingItemViewModel, Unit, Unit> CreateDependency(string key, ViewResource resource,
+        private Route<ThingItemViewModel, Unit, Unit> CreateDependency(string key, ViewResource resource,
                     bool fail, int prepareDelay, int cleanupDelay) =>
                     new Route<ThingItemViewModel, Unit, Unit>(key, resource, () => new ThingItemViewModel(),
                         presenterFactory: _ => new DependencyPresenter(fail, prepareDelay, cleanupDelay),
                         bindingFactory: ThingItemViewModelBindingFactory.Create,
-                        policy: new RoutePolicy(enterHistory: false, takesFocus: false, backBehavior: BackBehavior.Ignore));
+                        policy: host.ResolvePolicy("Background", overrides: new RoutePolicyOverrides
+                        {
+                            Layer = host.ResolvePolicy().Layer,
+                            AllowMultiple = false,
+                            ExistingInstance = ExistingInstancePolicy.Reject
+                        }));
 
         /// <summary>仅用于演示延迟与取消；项目中应替换为实际资源后端。</summary>
         private sealed class DelayedProvider : IViewProvider, IDisposable

@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using MUI.UGUI;
 using UnityEditor;
 using UnityEngine;
+using L = MUI.Editor.Localization.MUIEditorLocalization;
 
 namespace MUI.Editor
 {
     internal static class ViewValidationMenu
     {
-        private const string MenuPath = "Tools/MUI/Validate Selected View Structures";
+        private const string MenuPath = "Tools/MUI/校验所选视图结构 (Validate Selected View Structures)";
 
         [MenuItem(MenuPath, true)]
         private static bool CanValidate() => !EditorApplication.isPlayingOrWillChangePlaymode && Selection.gameObjects.Length != 0;
@@ -49,7 +50,7 @@ namespace MUI.Editor
             {
                 foreach (var view in views)
                 {
-                    if (EditorUtility.DisplayCancelableProgressBar("MUI View Structure Validation", view.name, inspected / (float)views.Count))
+                    if (EditorUtility.DisplayCancelableProgressBar(L.Get("editor.ViewValidationMenu.b15d9cec82"), view.name, inspected / (float)views.Count))
                     {
                         cancelled = true;
                         break;
@@ -67,7 +68,7 @@ namespace MUI.Editor
                         issues += results.Count;
                         foreach (var result in results)
                         {
-                            Debug.LogError($"MUI [{view.name}]: {result}", view);
+                            Debug.LogError(L.Format("editor.ViewValidationMenu.b66582a936", view.name, result), view);
                         }
                     }
                     catch (Exception error)
@@ -83,7 +84,7 @@ namespace MUI.Editor
                 EditorUtility.ClearProgressBar();
             }
 
-            Debug.Log($"MUI structure validation {(cancelled ? "cancelled" : "finished")}: {inspected}/{views.Count} Views inspected, {failed} Views with issues, {issues} issues. Binding contracts were not checked.");
+            Debug.Log(L.Format("editor.ViewValidationMenu.890cc9480b", L.Get(cancelled ? "value.cancelled" : "value.finished"), inspected, views.Count, failed, issues));
         }
     }
 }

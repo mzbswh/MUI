@@ -1,0 +1,90 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements">
+    <ui:Style src="MUIDashboard.uss" />
+    <ui:VisualElement class="mui-dashboard">
+        <ui:VisualElement class="mui-dashboard-header mui-card">
+            <ui:VisualElement class="mui-dashboard-toolbar mui-dashboard-titlebar">
+                <ui:Label text="@dashboard.title" class="mui-title mui-grow" />
+                <ui:DropdownField name="editorLanguage" label="@language.label" class="mui-dashboard-language" />
+                <ui:Button name="reloadLanguages" text="↻" class="mui-icon-button" />
+            </ui:VisualElement>
+            <ui:VisualElement class="mui-dashboard-toolbar">
+                <ui:DropdownField name="hosts" label="@uxml.MUIDashboard.d8456739a2" class="mui-dashboard-hosts" />
+                <ui:Button name="refreshHosts" text="@dashboard.hosts.refresh" />
+                <ui:Button name="locateHost" text="@uxml.MUIDashboard.eac2271fe7" />
+            </ui:VisualElement>
+            <ui:VisualElement class="mui-dashboard-toolbar">
+                <ui:Button name="capture" text="@uxml.MUIDashboard.0870c517d4" class="mui-primary-button" />
+                <ui:Button name="copySnapshot" text="@uxml.MUIDashboard.152f0fe07c" />
+                <ui:Toggle name="autoRefresh" label="@uxml.MUIDashboard.b9056c8305" />
+            </ui:VisualElement>
+            <ui:Label name="summary" class="mui-dashboard-summary" />
+            <ui:Label name="statusNote" class="mui-note mui-dashboard-status-note" />
+            <ui:HelpBox name="message" message-type="Warning" class="mui-dashboard-hidden" />
+        </ui:VisualElement>
+        <ui:VisualElement class="mui-dashboard-tabs">
+            <ui:Button name="pagesTab" text="@uxml.MUIDashboard.0dc47fcbfc" />
+            <ui:Button name="traceTab" text="@uxml.MUIDashboard.9ebe1ab0d1" />
+            <ui:Button name="settingsTab" text="@uxml.MUIDashboard.82f2cb5e0f" />
+        </ui:VisualElement>
+        <ui:TwoPaneSplitView name="pagesPanel" fixed-pane-index="0" fixed-pane-initial-dimension="290" orientation="Horizontal" class="mui-dashboard-panel">
+            <ui:VisualElement class="mui-dashboard-sidebar">
+                <uie:ToolbarSearchField name="search" />
+                <ui:VisualElement class="mui-dashboard-toolbar">
+                    <ui:IntegerField name="snapshotLimit" label="@dashboard.snapshot.limit" value="256" class="mui-dashboard-limit" />
+                    <ui:Button name="overview" text="@uxml.MUIDashboard.7aa1cfebb5" />
+                </ui:VisualElement>
+                <ui:Label text="@uxml.MUIDashboard.8abe30fad6" class="mui-note" />
+                <ui:ListView name="pages" selection-type="Single" fixed-item-height="56" class="mui-dashboard-list" />
+                <ui:VisualElement name="pagesEmpty" class="mui-empty">
+                    <ui:Label name="pagesEmptyTitle" class="mui-empty-title" />
+                    <ui:Label name="pagesEmptyHint" class="mui-note" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:ScrollView horizontal-scroller-visibility="Hidden" name="details" class="mui-dashboard-details" />
+        </ui:TwoPaneSplitView>
+        <ui:VisualElement name="tracePanel" class="mui-dashboard-panel mui-dashboard-hidden">
+            <ui:VisualElement class="mui-card">
+                <ui:Label text="@dashboard.trace.title" class="mui-heading" />
+                <ui:VisualElement class="mui-dashboard-toolbar">
+                    <ui:IntegerField name="traceCapacity" label="@dashboard.trace.capacity" value="512" class="mui-dashboard-limit" />
+                    <ui:Button name="startTrace" text="@uxml.MUIDashboard.c799f9a388" class="mui-primary-button" />
+                    <ui:Button name="stopTrace" text="@uxml.MUIDashboard.283a5893e4" />
+                    <ui:Button name="clearTrace" text="@uxml.MUIDashboard.f9f6480c10" />
+                </ui:VisualElement>
+                <ui:VisualElement class="mui-dashboard-toolbar">
+                    <uie:ToolbarSearchField name="traceSearch" class="mui-grow" />
+                    <ui:Button name="captureTrace" text="@uxml.MUIDashboard.17a020ace5" />
+                    <ui:Button name="copyTrace" text="@uxml.MUIDashboard.9da1918cdc" />
+                </ui:VisualElement>
+                <ui:Label name="traceSummary" class="mui-dashboard-summary" />
+            </ui:VisualElement>
+            <ui:ScrollView horizontal-scroller-visibility="Hidden" class="mui-dashboard-panel mui-card">
+                <ui:Label name="traceReport" class="mui-dashboard-text" />
+            </ui:ScrollView>
+        </ui:VisualElement>
+        <ui:ScrollView horizontal-scroller-visibility="Hidden" name="settingsPanel" class="mui-dashboard-panel mui-dashboard-hidden">
+            <ui:VisualElement class="mui-dashboard-settings-body">
+                <ui:VisualElement class="mui-card">
+                    <ui:Label text="@dashboard.configuration.title" class="mui-heading" />
+                    <uie:ObjectField name="settings" label="@uxml.MUIDashboard.36155a4b2f" />
+                    <ui:VisualElement class="mui-actions">
+                        <ui:Button name="createSettings" text="@uxml.MUIDashboard.3b5f994fce" />
+                        <ui:Button name="locateSettings" text="@dashboard.configuration.locate" />
+                        <ui:Button name="hostSettings" text="@uxml.MUIDashboard.01da0634c3" />
+                        <ui:Button name="assignSettings" text="@uxml.MUIDashboard.ebb7e27d3b" class="mui-primary-button" />
+                    </ui:VisualElement>
+                    <ui:Label text="@dashboard.configuration.help" class="mui-note" />
+                </ui:VisualElement>
+                <ui:VisualElement name="settingsInspector" />
+                <ui:VisualElement class="mui-card">
+                    <ui:Label text="@dashboard.validation.title" class="mui-heading" />
+                    <ui:VisualElement class="mui-actions">
+                        <ui:Button name="validateSettings" text="@uxml.MUIDashboard.b26286234b" />
+                        <ui:Button name="validateCatalogs" text="@uxml.MUIDashboard.b98b16effe" />
+                    </ui:VisualElement>
+                    <ui:Label name="validationReport" class="mui-dashboard-text" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:ScrollView>
+    </ui:VisualElement>
+</ui:UXML>

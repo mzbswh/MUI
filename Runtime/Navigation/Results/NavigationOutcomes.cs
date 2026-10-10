@@ -28,7 +28,9 @@ namespace MUI.Navigation
         DependencyCycle,
         DependencyLimit,
         DependencyOrderConflict,
-        CloseDecisionTimedOut
+        CloseDecisionTimedOut,
+        DependencyMissing,
+        RenderOrderCapacity
     }
 
     public readonly struct OpenOutcome<TResult>

@@ -1,11 +1,27 @@
 {
   "name": "MUI.TMP.Editor",
   "rootNamespace": "MUI.TMP.Editor",
-  "references": ["MUI.Core", "MUI.UGUI", "MUI.TMP", "MUI.Editor", "Unity.TextMeshPro", "Unity.ugui"],
-  "includePlatforms": ["Editor"],
-  "defineConstraints": ["MUI_TEXTMESHPRO"],
+  "references": [
+    "MUI.Core",
+    "MUI.UGUI",
+    "MUI.TMP",
+    "MUI.Editor",
+    "Unity.TextMeshPro",
+    "Unity.ugui",
+    "MUI.Editor.Localization"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "defineConstraints": [
+    "MUI_TEXTMESHPRO"
+  ],
   "versionDefines": [
-    { "name": "com.unity.textmeshpro", "expression": "3.0.0", "define": "MUI_TEXTMESHPRO" }
+    {
+      "name": "com.unity.textmeshpro",
+      "expression": "3.0.0",
+      "define": "MUI_TEXTMESHPRO"
+    }
   ],
   "autoReferenced": true
 }

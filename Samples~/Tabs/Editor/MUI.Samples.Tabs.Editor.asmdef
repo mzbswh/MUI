@@ -1,7 +1,12 @@
 {
   "name": "MUI.Samples.Tabs.Editor",
   "rootNamespace": "MUI.Samples.Tabs.Editor",
-  "references": ["MUI.Samples.Tabs"],
-  "includePlatforms": ["Editor"],
+  "references": [
+    "MUI.Samples.Tabs",
+    "MUI.Editor.Localization"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
   "autoReferenced": true
 }

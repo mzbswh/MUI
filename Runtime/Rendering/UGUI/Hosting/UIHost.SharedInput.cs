@@ -36,6 +36,11 @@ namespace MUI.UGUI
                 throw new InvalidOperationException("共享输入须在 UIHost 初始化后、退出前登记。");
             }
 
+            if (navigator.RenderOrder != null)
+            {
+                throw new InvalidOperationException("共享输入宿主目前要求单一根 Canvas 排序，不能与页面排序区间同时启用。");
+            }
+
             if (eventSystem == null || !eventSystem.isActiveAndEnabled)
             {
                 throw new ArgumentException("共享输入需要启用的 EventSystem。", nameof(eventSystem));

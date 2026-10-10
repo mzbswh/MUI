@@ -13,7 +13,7 @@ namespace MUI.Samples.Navigation
             Func<IView, PageViewModel, BindingContext<PageViewModel>> binding)
         {
             var route = new Route<PageViewModel, PageArgs, int>("demo.args-cleanup", resource,
-                () => new PageViewModel(), _ => new ArgsUpdatePagePresenter(), binding);
+                () => new PageViewModel(), _ => new ArgsUpdatePagePresenter(), binding, host.ResolvePolicy());
             var opened = await navigator.OpenAsync(route, new PageArgs("清理错误演示", 1), cancellation.Token);
             if (!opened.IsSuccess)
             {

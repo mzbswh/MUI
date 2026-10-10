@@ -94,6 +94,11 @@ namespace MUI.Navigation
                 return Task.FromResult(new CloseOutcome(CloseStatus.InUse, cleanup: CleanupStatus.NotRequired));
             }
 
+            if (instance.State == ViewState.Open && !IsShutdown && HasPageDescendants(instance.Handle))
+            {
+                return ClosePageGroupAsync(instance, reason, acceptResult);
+            }
+
             // 准备回滚、错误处理和宿主关闭不向业务守卫请求许可。
             if (instance.State != ViewState.Open || IsShutdown || !instance.HasCloseGuard)
             {

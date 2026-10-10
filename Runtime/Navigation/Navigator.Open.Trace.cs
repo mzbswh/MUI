@@ -7,7 +7,7 @@ namespace MUI.Navigation
     public sealed partial class Navigator
     {
         public ValueTask<OpenOutcome<TResult>> OpenAsync<TViewModel, TArgs, TResult>(Route<TViewModel, TArgs, TResult> route,
-                    TArgs args, CancellationToken cancellationToken = default, TViewModel assignedViewModel = null)
+                    TArgs args, CancellationToken cancellationToken = default, TViewModel assignedViewModel = null, PageOwner owner = default)
                     where TViewModel : ViewModel
         {
             AssertThread();
@@ -20,7 +20,7 @@ namespace MUI.Navigation
             {
                 using (EnterOperationTrace(trace))
                 {
-                    var operation = OpenAsyncUntraced(route, args, cancellationToken, assignedViewModel, trace);
+                    var operation = OpenAsyncUntraced(route, args, cancellationToken, assignedViewModel, trace, owner);
                     // 未启用追踪时直接归还原操作，不增加异步状态机或重复消费 ValueTask。
                     return trace.Id == 0 ? operation : ObserveTracedOpenAsync(operation, trace);
                 }

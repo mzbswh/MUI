@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using MUI.UGUI;
 using UnityEditor;
 using UnityEngine;
+using L = MUI.Editor.Localization.MUIEditorLocalization;
 
 namespace MUI.Editor
 {
@@ -23,7 +24,7 @@ namespace MUI.Editor
                     (node.IsChildOf(scroll.content) || scroll.content.IsChildOf(node))) ||
                 (template != null && (node.IsChildOf(template.transform) || template.transform.IsChildOf(node))))
             {
-                errors.Add($"虚拟列表失败模板须为非激活 RectTransform，位于边界内、Content 和条目模板外：{path}。");
+                errors.Add(L.Format("editor.ViewContractValidator.VirtualFailures.167f053c4d", path));
             }
 
             var templates = serialized.FindProperty("itemTemplates");
@@ -32,20 +33,20 @@ namespace MUI.Editor
                 var view = templates.GetArrayElementAtIndex(index).FindPropertyRelative("view").objectReferenceValue as View;
                 if (view != null && (node.IsChildOf(view.transform) || view.transform.IsChildOf(node)))
                 {
-                    errors.Add($"失败模板不能与命名条目模板互相包含：{path}。");
+                    errors.Add(L.Format("editor.ViewContractValidator.VirtualFailures.2c461a7488", path));
                 }
             }
 
             if (visual.GetComponentInChildren<View>(true) != null || visual.GetComponentInChildren<Element>(true) != null)
             {
-                errors.Add($"失败模板只负责视觉表现，不能包含 View 或 Element 所有权：{path}。");
+                errors.Add(L.Format("editor.ViewContractValidator.VirtualFailures.ef171c0ca4", path));
             }
 
             foreach (var group in visual.GetComponentsInChildren<CanvasGroup>(true))
             {
                 if (group.ignoreParentGroups)
                 {
-                    errors.Add($"失败模板不能跳过父级 CanvasGroup 输入门控：{path}。");
+                    errors.Add(L.Format("editor.ViewContractValidator.VirtualFailures.1ae15331b1", path));
                 }
             }
         }

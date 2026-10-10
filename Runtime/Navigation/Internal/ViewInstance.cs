@@ -16,6 +16,8 @@ namespace MUI.Navigation
     internal abstract partial class ViewInstance : ICommandTarget
     {
         private readonly ViewCompletion<ViewReadiness> readiness = new ViewCompletion<ViewReadiness>();
+        internal ViewTickStatus LastTickStatus;
+        internal readonly Dictionary<Route, DependencyResolutionKind> DependencyResolutions = new Dictionary<Route, DependencyResolutionKind>();
         internal readonly ViewCompletion<CloseOutcome> CloseCommit = new ViewCompletion<CloseOutcome>();
         internal readonly ViewCompletion<ViewTransition> EnterTransition = new ViewCompletion<ViewTransition>();
         internal readonly ViewCompletion<ViewTransition> ExitTransition = new ViewCompletion<ViewTransition>();
@@ -27,6 +29,7 @@ namespace MUI.Navigation
         internal float EnterDuration;
         internal double EnterElapsed;
         internal Exception EnterDegradation;
+        internal ViewHandle ParentPage;
         internal ViewHandle HiddenBy;
         internal ViewHandle BlockedBy;
         internal ViewHandle ReplacementSource;
@@ -66,6 +69,12 @@ namespace MUI.Navigation
             get; set;
         }
 
+        /// <summary>是否曾提交打开；导航顺序预留不代表候选已成为活动页面。</summary>
+        public bool HasOpenCommitted
+        {
+            get; set;
+        }
+
         public bool Focused
         {
             get; set;
@@ -96,7 +105,14 @@ namespace MUI.Navigation
             get; set;
         }
 
+        /// <summary>请求接纳时确定的同层导航顺序，只能由显式置前改变。</summary>
         public long Order
+        {
+            get; set;
+        }
+
+        /// <summary>打开历史的位置；置前不修改，替换可继承源记录。</summary>
+        public long HistoryOrder
         {
             get; set;
         }
@@ -194,6 +210,11 @@ namespace MUI.Navigation
         {
             get;
         }
+
+        internal int MaxTickCatchUp
+        {
+            get; set;
+        } = 1;
 
         public float TickInterval
         {
@@ -417,6 +438,7 @@ namespace MUI.Navigation
 
             RequirePreparationCurrent();
             TickInterval = lifecycle.TickInterval;
+            MaxTickCatchUp = lifecycle.MaxTickCatchUp;
         }
 
         public override void AdoptViewResource(IAcquiredView acquired)
@@ -671,6 +693,15 @@ namespace MUI.Navigation
             {
                 DetachHost(errors);
                 var retained = false;
+                var cacheDecision = route.Policy.CacheMode == ViewCacheMode.None ? ViewCacheDecision.Disabled :
+                    !wasCommitted || (reason != DismissReason.Closed && reason != DismissReason.Back && reason != DismissReason.Replaced)
+                        ? ViewCacheDecision.AbnormalClose :
+                    CleanupTimedOut || errors.Count != 0 || lifecycleFailure != null ? ViewCacheDecision.CleanupIncomplete :
+                    !content.CanCache ? ViewCacheDecision.Unsupported : ViewCacheDecision.Retained;
+                if (cacheDecision != ViewCacheDecision.Retained)
+                {
+                    Owner.RecordCacheDecision(route, cacheDecision);
+                }
                 if (wasCommitted && !CleanupTimedOut && errors.Count == 0 && lifecycleFailure == null &&
                     route.Policy.CacheMode != ViewCacheMode.None &&
                     (reason == DismissReason.Closed || reason == DismissReason.Back || reason == DismissReason.Replaced))
@@ -678,10 +709,18 @@ namespace MUI.Navigation
                     try
                     {
                         var cached = await content.DetachForCacheAsync(errors, activationLifetime);
+                        if (cached == null && cacheDecision == ViewCacheDecision.Retained)
+                        {
+                            Owner.RecordCacheDecision(route, ViewCacheDecision.CleanupIncomplete);
+                        }
                         if (cached != null)
                         {
                             try
                             {
+                                if (CleanupTimedOut)
+                                {
+                                    Owner.RecordCacheDecision(route, ViewCacheDecision.CleanupIncomplete);
+                                }
                                 retained = !CleanupTimedOut && Owner.RetainContent(route, cached);
                             }
                             finally
@@ -695,6 +734,7 @@ namespace MUI.Navigation
                     }
                     catch (Exception error)
                     {
+                        Owner.RecordCacheDecision(route, ViewCacheDecision.ResetFailed);
                         errors.Add(error);
                     }
                 }

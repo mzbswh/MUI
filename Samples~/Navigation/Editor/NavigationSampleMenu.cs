@@ -1,4 +1,6 @@
+using L = MUI.Editor.Localization.MUIEditorLocalization;
 using System;
+using MUI.UGUI;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -13,19 +15,19 @@ namespace MUI.Samples.Navigation.Editor
         private static bool failed;
         private static bool completed;
 
-        [MenuItem("Tools/MUI/Samples/Open Recycling List Scene")]
+        [MenuItem("Tools/MUI/示例 (Samples)/打开回收列表场景 (Open Recycling List Scene)")]
         public static void OpenRecyclingList()
         {
             OpenStandaloneSample<LocalRecyclingListDemo>("RecyclingList");
         }
 
-        [MenuItem("Tools/MUI/Samples/Open Fixed Slot List Scene")]
+        [MenuItem("Tools/MUI/示例 (Samples)/打开固定槽位列表场景 (Open Fixed Slot List Scene)")]
         public static void OpenFixedSlots()
         {
             OpenStandaloneSample<LocalRecyclingListDemo>("FixedSlots", sample => sample.ConfigureFixedSlots());
         }
 
-        [MenuItem("Tools/MUI/Samples/Open Resource Binding Scene")]
+        [MenuItem("Tools/MUI/示例 (Samples)/打开资源绑定场景 (Open Resource Binding Scene)")]
         public static void OpenResourceBinding()
         {
             OpenStandaloneSample<ResourceImageDemo>("ResourceBinding");
@@ -52,16 +54,16 @@ namespace MUI.Samples.Navigation.Editor
             var path = AssetDatabase.GenerateUniqueAssetPath("Assets/MUI Samples/" + sceneName + ".unity");
             if (!EditorSceneManager.SaveScene(scene, path))
             {
-                throw new InvalidOperationException("示例场景保存失败：" + sceneName);
+                throw new InvalidOperationException(L.Format("sample.navigation.sceneSaveFailed", sceneName));
             }
 
             Selection.activeGameObject = sample;
         }
 
-        [MenuItem("Tools/MUI/Samples/Open Navigation Scene")]
+        [MenuItem("Tools/MUI/示例 (Samples)/打开导航场景 (Open Navigation Scene)")]
         public static void Open() => OpenNavigationScene(false);
 
-        [MenuItem("Tools/MUI/Samples/Open Navigation Lifecycle Trace Scene")]
+        [MenuItem("Tools/MUI/示例 (Samples)/打开导航生命周期追踪场景 (Open Navigation Lifecycle Trace Scene)")]
         public static void OpenLifecycleTrace() => OpenNavigationScene(true);
 
         private static void OpenNavigationScene(bool lifecycleTrace)
@@ -84,7 +86,25 @@ namespace MUI.Samples.Navigation.Editor
             }
 
             var path = AssetDatabase.GenerateUniqueAssetPath("Assets/MUI Samples/Navigation.unity");
-            EditorSceneManager.SaveScene(scene, path);
+            var configuration = ScriptableObject.CreateInstance<MUISettings>();
+            var settingsPath = AssetDatabase.GenerateUniqueAssetPath("Assets/MUI Samples/NavigationSettings.asset");
+            try
+            {
+                AssetDatabase.CreateAsset(configuration, settingsPath);
+                sample.Settings = configuration;
+                if (!EditorSceneManager.SaveScene(scene, path))
+                {
+                    throw new InvalidOperationException(L.Format("sample.navigation.sceneSaveFailed", path));
+                }
+            }
+            finally
+            {
+                if (configuration != null && !EditorUtility.IsPersistent(configuration))
+                {
+                    UnityEngine.Object.DestroyImmediate(configuration);
+                }
+            }
+            Selection.activeGameObject = sample.gameObject;
         }
 
         public static void RunPreviewBatch() => RunPreviewBatch(false);
@@ -95,7 +115,7 @@ namespace MUI.Samples.Navigation.Editor
         {
             if (!Application.isBatchMode)
             {
-                throw new InvalidOperationException("Use Open Navigation Scene for interactive preview.");
+                throw new InvalidOperationException(L.Get("sample.previewHint"));
             }
 
             OpenNavigationScene(lifecycleTrace);
@@ -152,7 +172,7 @@ namespace MUI.Samples.Navigation.Editor
             EditorApplication.update -= UpdatePreview;
             Application.logMessageReceived -= OnLog;
             var timedOut = !completed;
-            Debug.Log(timedOut ? "MUI Navigation 演示超时，未收到清理完成标记。" : "MUI Navigation Play-mode preview finished.");
+            Debug.Log(timedOut ? L.Format("sample.previewTimeout", "Navigation") : L.Format("sample.previewFinished", "Navigation"));
             EditorApplication.Exit(failed || timedOut ? 1 : 0);
         }
     }

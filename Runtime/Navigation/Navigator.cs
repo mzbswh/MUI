@@ -30,6 +30,7 @@ namespace MUI.Navigation
         private readonly int terminalCapacity;
         private readonly TimeSpan terminalDuration;
         private long nextHandle;
+        // 只由导航请求和显式置前递增，不由加载、激活或显示完成分配。
         private long order;
         private int pending;
         private Task shutdownTask;
@@ -44,13 +45,15 @@ namespace MUI.Navigation
                     int cacheCapacity = 16,
                     long? maxCachedEstimatedBytes = null,
                     int cleanupCapacity = 16,
-                    TimeSpan? terminalDuration = null)
+                    TimeSpan? terminalDuration = null,
+                    RenderOrderOptions renderOrder = null)
         {
             if (cleanupCapacity < 1)
             {
                 throw new ArgumentOutOfRangeException(nameof(cleanupCapacity));
             }
 
+            this.renderOrder = renderOrder;
             this.cleanupCapacity = cleanupCapacity;
             if (provider == null)
             {
@@ -112,6 +115,7 @@ namespace MUI.Navigation
 
         public bool IsShutdown => shutdown.IsCancellationRequested;
 
+        /// <summary>当前显式打开页面的请求顺序记录；关闭后移除，不参与返回目标选择。</summary>
         public IReadOnlyList<ViewHandle> History
         {
             get
@@ -233,7 +237,7 @@ namespace MUI.Navigation
         /// <summary>返回已有实例或拒绝原因；null 表示可以登记新候选并预留额度。</summary>
         private OpenOutcome<TResult>? ResolveOpenAdmission<TViewModel, TArgs, TResult>(Route<TViewModel, TArgs, TResult> route,
                     TArgs args,
-                    TViewModel assigned)
+                    TViewModel assigned, ViewHandle parentPage)
                     where TViewModel : ViewModel
         {
             var count = 0;
@@ -283,6 +287,14 @@ namespace MUI.Navigation
                     return Reject<TResult>(OpenRejection.ConflictingData);
                 }
 
+                if (entry.ParentPage != parentPage)
+                {
+                    return Reject<TResult>(OpenRejection.ConflictingData);
+                }
+                if (entry.PendingCloseIntent.HasValue || pageDepartures.Contains(entry.Handle))
+                {
+                    return Reject<TResult>(OpenRejection.Busy);
+                }
                 // 显式取得已存在实例的持有关系，不重新打开、置顶或修改历史。
                 ownership.AcquireExplicit(entry.Handle);
                 return CompletedOpen(instance);
@@ -293,10 +305,9 @@ namespace MUI.Navigation
                 return Reject<TResult>(OpenRejection.CleanupCapacity);
             }
 
-            // InstanceLimit 仅作为显式溢出替换的内部接纳信号；普通满额请求统一返回 Busy。
+            // 满额与暂时忙碌使用不同结果；CloseOldest 仍由外层替换流程处理。
             return count >= route.Policy.MaxInstances
-                ? Reject<TResult>(route.Policy.Overflow == OverflowPolicy.CloseOldest
-                    ? OpenRejection.InstanceLimit : OpenRejection.Busy)
+                ? Reject<TResult>(OpenRejection.InstanceLimit)
                 : (OpenOutcome<TResult>?)null;
         }
 
@@ -320,11 +331,16 @@ namespace MUI.Navigation
 
         internal ViewInstance<TViewModel, TArgs, TResult> NewInstance<TViewModel, TArgs, TResult>(Route<TViewModel, TArgs, TResult> route,
                     TArgs args,
-                    TViewModel assigned, bool explicitOwner = true)
+                    TViewModel assigned, long navigationOrder, bool explicitOwner = true)
                     where TViewModel : ViewModel
         {
             var handle = new ViewHandle(host, ++nextHandle);
-            var instance = new ViewInstance<TViewModel, TArgs, TResult>(this, route, handle, args, assigned);
+            var instance = new ViewInstance<TViewModel, TArgs, TResult>(this, route, handle, args, assigned)
+            {
+                Order = navigationOrder,
+                HistoryOrder = navigationOrder
+            };
+            ReserveRenderOrder(instance);
             ownership.Register(handle, explicitOwner, route.Policy.Layer);
             entries.Add(handle, instance);
             return instance;

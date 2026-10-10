@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using MUI.UGUI;
 using UnityEngine.UI;
+using L = MUI.Editor.Localization.MUIEditorLocalization;
 
 namespace MUI.Editor
 {
@@ -13,27 +14,27 @@ namespace MUI.Editor
             var input = element.GetComponent<InputField>();
             if (input == null)
             {
-                errors.Add($"输入控件缺少同节点的 InputField：{path}。");
+                errors.Add(L.Format("editor.ViewContractValidator.Input.6f265ce9c2", path));
                 return;
             }
 
             var text = input.textComponent;
             if (text == null)
             {
-                errors.Add($"输入框缺少文字组件：{path}。");
+                errors.Add(L.Format("editor.ViewContractValidator.Input.9efb123a24", path));
             }
             else
             {
-                ValidateInputGraphic(text, input, view, path, "文字", errors);
+                ValidateInputGraphic(text, input, view, path, L.Get("editor.ViewContractValidator.Input.14b69bd6ee"), errors);
             }
 
             var placeholder = input.placeholder;
             if (placeholder != null)
             {
-                ValidateInputGraphic(placeholder, input, view, path, "占位", errors);
+                ValidateInputGraphic(placeholder, input, view, path, L.Get("editor.ViewContractValidator.Input.064eb4483e"), errors);
                 if (text != null && placeholder == text)
                 {
-                    errors.Add($"输入框的占位组件不能与可编辑文字共用同一组件：{path}。");
+                    errors.Add(L.Format("editor.ViewContractValidator.Input.233424aeac", path));
                 }
             }
         }
@@ -43,12 +44,12 @@ namespace MUI.Editor
         {
             if (!graphic.transform.IsChildOf(input.transform))
             {
-                errors.Add($"输入框{role}组件必须属于输入框层级：{path}。");
+                errors.Add(L.Format("editor.ViewContractValidator.Input.bf1a049371", role, path));
             }
 
             if (graphic.GetComponentInParent<View>(true) != view)
             {
-                errors.Add($"输入框{role}引用不能跨越 View 边界：{path}。");
+                errors.Add(L.Format("editor.ViewContractValidator.Input.47c241b87f", role, path));
             }
         }
     }

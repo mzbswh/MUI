@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using MUI.UGUI;
 using UnityEngine;
 using UnityEngine.UI;
+using L = MUI.Editor.Localization.MUIEditorLocalization;
 
 namespace MUI.Editor
 {
@@ -72,11 +73,11 @@ namespace MUI.Editor
 
                 if (count == 0)
                 {
-                    errors.Add($"Missing Element for {entry.Source}: {entry.ElementName} ({entry.ElementType.Name}).");
+                    errors.Add(L.Format("editor.ViewContractValidator.a2c70aba3a", entry.Source, entry.ElementName, entry.ElementType.Name));
                 }
                 else if (count > 1)
                 {
-                    errors.Add($"Ambiguous Element for {entry.Source}: {entry.ElementName} ({entry.ElementType.Name}): {string.Join(", ", matches)}.");
+                    errors.Add(L.Format("editor.ViewContractValidator.7d3464be21", entry.Source, entry.ElementName, entry.ElementType.Name, string.Join(", ", matches)));
                 }
 
                 if (count == 1 && matched is ImageElement && entry.Kind == BindingEntryKind.Property && entry.TargetProperty == nameof(ImageElement.FillAmount) && entry.Mode != BindingMode.OneWayToSource)
@@ -84,7 +85,7 @@ namespace MUI.Editor
                     var image = matched.GetComponent<Image>();
                     if (image == null || (image.type != Image.Type.Filled && !HasImageTypeWriter(matched, manifest)))
                     {
-                        errors.Add($"FillAmount binding requires a Filled Image: {Path(matched.transform, view.transform)}.");
+                        errors.Add(L.Format("editor.ViewContractValidator.654d03c722", Path(matched.transform, view.transform)));
                     }
                 }
 
@@ -95,11 +96,11 @@ namespace MUI.Editor
                         var commandTarget = (matched, entry.InteractableProperty);
                         if (targetWriters.TryGetValue(commandTarget, out var previous))
                         {
-                            errors.Add($"Multiple writers for {Path(matched.transform, view.transform)}.{entry.InteractableProperty}: {previous}, command {entry.Source}.");
+                            errors.Add(L.Format("editor.ViewContractValidator.adc3272193", Path(matched.transform, view.transform), entry.InteractableProperty, previous, entry.Source));
                         }
                         else
                         {
-                            targetWriters.Add(commandTarget, "command " + entry.Source);
+                            targetWriters.Add(commandTarget, L.Get("editor.ViewContractValidator.9e0b272fe8") + entry.Source);
                         }
                     }
 
@@ -119,7 +120,7 @@ namespace MUI.Editor
                         targetProperty = policy.GetBindingWriteTarget(entry.TargetProperty, entry.Mode);
                         if (string.IsNullOrEmpty(targetProperty))
                         {
-                            throw new InvalidOperationException("控件绑定策略返回了空写入目标。");
+                            throw new InvalidOperationException(L.Get("editor.ViewContractValidator.6853150e20"));
                         }
                     }
                     catch (Exception error)
@@ -134,7 +135,7 @@ namespace MUI.Editor
                     var writer = Path(matched.transform, view.transform) + "." + entry.TargetProperty;
                     if (sourceWriters.TryGetValue(entry.Source, out var previous))
                     {
-                        errors.Add($"Multiple reverse writers for {entry.Source}: {previous}, {writer}. Use one input binding or explicit business coordination.");
+                        errors.Add(L.Format("editor.ViewContractValidator.36fab33a6d", entry.Source, previous, writer));
                     }
                     else
                     {
@@ -148,7 +149,7 @@ namespace MUI.Editor
                     var target = (matched, targetProperty);
                     if (targetWriters.TryGetValue(target, out var previous))
                     {
-                        errors.Add($"Multiple writers for {Path(matched.transform, view.transform)}.{entry.TargetProperty}: {previous}, {entry.Source}.");
+                        errors.Add(L.Format("editor.ViewContractValidator.81efe73d85", Path(matched.transform, view.transform), entry.TargetProperty, previous, entry.Source));
                     }
                     else
                     {
@@ -193,6 +194,27 @@ namespace MUI.Editor
 
         private static void ValidateStructure(View view, List<Element> elements, List<string> errors)
         {
+            if (!Enum.IsDefined(typeof(ViewHiddenMode), view.HiddenMode) ||
+                (view.HiddenMode == ViewHiddenMode.DeactivateContent && (view.HiddenContentRoot == null ||
+                    view.HiddenContentRoot == view.gameObject || !view.HiddenContentRoot.transform.IsChildOf(view.transform))))
+            {
+                errors.Add(L.Get("policy.hidden.invalid"));
+            }
+
+            var sortingTargets = new HashSet<Component>();
+            if (view.RenderOrderTargets != null)
+            {
+                foreach (var binding in view.RenderOrderTargets)
+                {
+                    if (binding == null || binding.Target == null ||
+                        (!(binding.Target is Canvas) && !(binding.Target is Renderer)) ||
+                        binding.Target.gameObject == view.gameObject || !binding.Target.transform.IsChildOf(view.transform) ||
+                        binding.Offset < 2 || !sortingTargets.Add(binding.Target))
+                    {
+                        errors.Add(L.Get("sorting.target.invalid"));
+                    }
+                }
+            }
             ValidateTransitions(view, errors);
             var keys = new Dictionary<string, Element>(StringComparer.Ordinal);
             var validators = SnapshotElementValidators();
@@ -200,13 +222,13 @@ namespace MUI.Editor
             {
                 if (string.IsNullOrWhiteSpace(element.Name))
                 {
-                    errors.Add($"Element name is empty: {Path(element.transform, view.transform)}.");
+                    errors.Add(L.Format("editor.ViewContractValidator.db2b82af20", Path(element.transform, view.transform)));
                 }
 
                 var key = element.Name + "\n" + element.GetType().AssemblyQualifiedName;
                 if (keys.TryGetValue(key, out var previousElement))
                 {
-                    errors.Add($"Duplicate Element ({element.GetType().Name}): {Path(previousElement.transform, view.transform)}, {Path(element.transform, view.transform)}.");
+                    errors.Add(L.Format("editor.ViewContractValidator.e901f2c3ba", element.GetType().Name, Path(previousElement.transform, view.transform), Path(element.transform, view.transform)));
                 }
                 else
                 {
@@ -225,7 +247,7 @@ namespace MUI.Editor
 
                 if (element is IInputFieldElement input && !Enum.IsDefined(typeof(TextInputCommitMode), input.CommitMode))
                 {
-                    errors.Add($"Invalid text input commit mode: {Path(element.transform, view.transform)}.");
+                    errors.Add(L.Format("editor.ViewContractValidator.70a6c57f8d", Path(element.transform, view.transform)));
                 }
 
                 if (element is ScrollRectElement)
@@ -262,24 +284,24 @@ namespace MUI.Editor
             var path = Path(element, root);
             if (scroll == null)
             {
-                errors.Add($"ScrollRect reference is missing: {path}.");
+                errors.Add(L.Format("editor.ViewContractValidator.eb31327ed9", path));
                 return;
             }
 
             if (scroll.content == null)
             {
-                errors.Add($"ScrollRect content is missing: {path}.");
+                errors.Add(L.Format("editor.ViewContractValidator.fd6da981ad", path));
                 return;
             }
 
             var viewport = scroll.viewport == null ? scroll.transform as RectTransform : scroll.viewport;
             if (viewport == null || !viewport.IsChildOf(scroll.transform))
             {
-                errors.Add($"ScrollRect viewport must belong to its hierarchy: {path}.");
+                errors.Add(L.Format("editor.ViewContractValidator.71f7f7caaa", path));
             }
             else if (scroll.content == viewport || !scroll.content.IsChildOf(viewport))
             {
-                errors.Add($"ScrollRect content must be a descendant of its viewport: {path}.");
+                errors.Add(L.Format("editor.ViewContractValidator.cb101437c2", path));
             }
         }
 
@@ -288,7 +310,7 @@ namespace MUI.Editor
             var dropdown = element.GetComponent<Dropdown>();
             if (dropdown == null)
             {
-                errors.Add($"DropdownElement requires a native Dropdown: {Path(element.transform, root)}.");
+                errors.Add(L.Format("editor.ViewContractValidator.1c85e45608", Path(element.transform, root)));
                 return;
             }
 
@@ -325,7 +347,7 @@ namespace MUI.Editor
             {
                 if (component == null)
                 {
-                    errors.Add($"Missing script on {Path(node, viewRoot)}.");
+                    errors.Add(L.Format("editor.ViewContractValidator.8fb811d725", Path(node, viewRoot)));
                     continue;
                 }
 
@@ -359,7 +381,7 @@ namespace MUI.Editor
             {
                 if (group.ignoreParentGroups)
                 {
-                    errors.Add($"CanvasGroup.ignoreParentGroups can bypass host input gates: {Path(node, viewRoot)}.");
+                    errors.Add(L.Format("editor.ViewContractValidator.0961434628", Path(node, viewRoot)));
                 }
             }
 

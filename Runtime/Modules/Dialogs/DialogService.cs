@@ -133,7 +133,7 @@ namespace MUI.Dialogs
             {
                 token.ThrowIfCancellationRequested();
                 navigator = resolveNavigator() ?? throw new InvalidOperationException("Dialog Navigator is unavailable.");
-                var opened = await navigator.OpenAsync(route, confirmation, token);
+                var opened = await navigator.OpenAsync(route, confirmation, token, owner: PageOwner.Host);
                 handle = opened.Handle;
                 activeDialog = handle.Identity;
                 token.ThrowIfCancellationRequested();

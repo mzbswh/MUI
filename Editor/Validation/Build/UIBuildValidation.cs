@@ -5,6 +5,7 @@ using MUI.Resources;
 using MUI.UGUI;
 using UnityEditor;
 using UnityEngine;
+using L = MUI.Editor.Localization.MUIEditorLocalization;
 
 namespace MUI.Editor
 {
@@ -19,15 +20,15 @@ namespace MUI.Editor
         {
             if (validating)
             {
-                throw new InvalidOperationException("校验期间不能修改 UI 构建目录登记。");
+                throw new InvalidOperationException(L.Get("editor.UIBuildValidation.4a2b85f80b"));
             }
             if (string.IsNullOrWhiteSpace(id) || id.Length > 128 || collect == null)
             {
-                throw new ArgumentException("目录需要不超过 128 字符的标识和采集回调。");
+                throw new ArgumentException(L.Get("editor.UIBuildValidation.90508dc602"));
             }
             if (catalogs.Count >= 32)
             {
-                throw new InvalidOperationException("UI 构建目录数量超过 32。");
+                throw new InvalidOperationException(L.Get("editor.UIBuildValidation.fcab6aa44c"));
             }
             catalogs.Add(id, collect);
             UIIncrementalValidation.RequestAll();
@@ -37,7 +38,7 @@ namespace MUI.Editor
         {
             if (validating)
             {
-                throw new InvalidOperationException("校验期间不能修改 UI 构建目录登记。");
+                throw new InvalidOperationException(L.Get("editor.UIBuildValidation.4a2b85f80b"));
             }
             var removed = catalogs.Remove(id);
             if (removed)
@@ -55,7 +56,7 @@ namespace MUI.Editor
         {
             if (validating)
             {
-                throw new InvalidOperationException("UI 构建校验不能重入。");
+                throw new InvalidOperationException(L.Get("editor.UIBuildValidation.20787e9cdf"));
             }
             validating = true;
             var report = new UIBuildValidationReport { CatalogCount = catalogs.Count };
@@ -75,7 +76,7 @@ namespace MUI.Editor
                     }
                     catch (Exception error)
                     {
-                        report.Issue(registration.Key + "：目录采集或校验失败：" + error.Message);
+                        report.Issue(registration.Key + L.Get("editor.UIBuildValidation.a776bc1b72") + error.Message);
                     }
                     finally
                     {
@@ -119,7 +120,7 @@ namespace MUI.Editor
             report.PageCount += catalog.Pages.Count;
             if (catalog.Pages.Count == 0)
             {
-                report.Issue(id + "：已登记目录未提供任何页面。");
+                report.Issue(id + L.Get("editor.UIBuildValidation.81196b916d"));
                 return;
             }
             var registeredRoutes = new HashSet<Route>();
@@ -136,12 +137,12 @@ namespace MUI.Editor
                     if (!registeredRoutes.Contains(dependency.Target))
                     {
                         completeGraph = false;
-                        report.Issue(id + "/" + page.Route.Key + "：依赖路由尚未登记 Prefab/Manifest：" + dependency.Target.Key);
+                        report.Issue(id + "/" + page.Route.Key + L.Get("editor.UIBuildValidation.061c7b88d2") + dependency.Target.Key);
                     }
                 }
                 if (resources.TryGetValue(page.Route.Resource, out var prefab) && prefab != page.Prefab)
                 {
-                    report.Issue(id + "：同一资源键和版本关联到不同 Prefab：" + page.Route.Resource);
+                    report.Issue(id + L.Get("editor.UIBuildValidation.99a69df3cd") + page.Route.Resource);
                 }
                 else
                 {
@@ -163,7 +164,7 @@ namespace MUI.Editor
                     }
                     if (graph.IsTruncated)
                     {
-                        report.Issue(id + "：路由图问题已截断，请先修复现有问题后重新校验。");
+                        report.Issue(id + L.Get("editor.UIBuildValidation.83ee63aae8"));
                     }
                     foreach (var route in graph.Routes)
                     {
@@ -173,7 +174,7 @@ namespace MUI.Editor
                         }
                         if (keys.TryGetValue(route.Key, out var previous) && !ReferenceEquals(previous, route))
                         {
-                            report.Issue(id + "：多个不同路由使用同一键：" + route.Key);
+                            report.Issue(id + L.Get("editor.UIBuildValidation.e213655721") + route.Key);
                         }
                         else
                         {
@@ -194,13 +195,13 @@ namespace MUI.Editor
                 PrefabUtility.GetPrefabAssetType(page.Prefab) == PrefabAssetType.Model ||
                 AssetDatabase.LoadAssetAtPath<GameObject>(path) != page.Prefab)
             {
-                report.Issue(prefix + "页面必须关联普通或 Variant Prefab 根资产。");
+                report.Issue(prefix + L.Get("editor.UIBuildValidation.c935d0e33a"));
                 return;
             }
             var view = page.Prefab.GetComponent<View>();
             if (view == null || page.Prefab.GetComponent<RectTransform>() == null)
             {
-                report.Issue(prefix + "Prefab 根缺少 View 或 RectTransform。");
+                report.Issue(prefix + L.Get("editor.UIBuildValidation.06e2bd7c7c"));
                 return;
             }
             foreach (var error in ViewContractValidator.Validate(view, page.Manifest))
@@ -209,7 +210,7 @@ namespace MUI.Editor
             }
         }
 
-        [MenuItem("Tools/MUI/Validate Build Catalogs")]
+        [MenuItem("Tools/MUI/校验构建目录 (Validate Build Catalogs)")]
         private static void ValidateFromMenu()
         {
             var result = Validate();

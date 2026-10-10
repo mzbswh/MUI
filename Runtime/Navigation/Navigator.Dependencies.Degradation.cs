@@ -64,7 +64,8 @@ namespace MUI.Navigation
         }
 
         private static bool IsRecoverableDependencyRejection(OpenRejection rejection) =>
-            rejection == OpenRejection.ConflictingData || rejection == OpenRejection.Busy;
+            rejection == OpenRejection.ConflictingData || rejection == OpenRejection.Busy ||
+            rejection == OpenRejection.DependencyMissing || rejection == OpenRejection.RenderOrderCapacity;
 
         private static bool ContainsNonDegradableError(Exception error, bool allowCancellation = false)
         {

@@ -12,7 +12,7 @@ namespace MUI.Navigation
         private ValueTask<OpenOutcome<TResult>> OpenAsyncUntraced<TViewModel, TArgs, TResult>(Route<TViewModel, TArgs, TResult> route,
                     TArgs args,
                     CancellationToken cancellationToken,
-                    TViewModel assignedViewModel, NavigationTraceOperation trace)
+                    TViewModel assignedViewModel, NavigationTraceOperation trace, PageOwner owner)
                     where TViewModel : ViewModel
         {
             AssertThread();
@@ -36,8 +36,19 @@ namespace MUI.Navigation
                 return new ValueTask<OpenOutcome<TResult>>(Reject<TResult>(OpenRejection.Busy));
             }
 
+            ViewHandle parent;
+            try
+            {
+                parent = ResolvePageOwner(route.Policy, owner);
+            }
+            catch (NavigationPreparationRejectedException error)
+            {
+                return new ValueTask<OpenOutcome<TResult>>(Reject<TResult>(error.Rejection));
+            }
+            var previousMain = CurrentMainPage;
             BeginNavigationRequest();
-            return new ValueTask<OpenOutcome<TResult>>(OpenCoreAsync(route, args, cancellationToken, assignedViewModel, null, trace: trace));
+            var requestOrder = ++order;
+            return new ValueTask<OpenOutcome<TResult>>(OpenCoreAsync(route, args, cancellationToken, assignedViewModel, null, requestOrder, trace: trace, parentPage: parent, previousMain: previousMain));
         }
 
         private async Task<OpenOutcome<TResult>> OpenCoreAsync<TViewModel, TArgs, TResult>(Route<TViewModel, TArgs, TResult> route,
@@ -45,11 +56,13 @@ namespace MUI.Navigation
                     CancellationToken token,
                     TViewModel assigned,
                     ViewInstance deferredSource,
-                    Task<bool> startSignal = null, NavigationTraceOperation trace = default)
+                    long requestOrder,
+                    Task<bool> startSignal = null, NavigationTraceOperation trace = default, ViewHandle parentPage = default, ViewHandle previousMain = default)
                     where TViewModel : ViewModel
         {
             var acquired = false;
             var committed = false;
+            PageDepartureTransaction departure = null;
             ViewInstance<TViewModel, TArgs, TResult> instance = null;
             using (var cancellation = CancellationTokenSource.CreateLinkedTokenSource(token, shutdown.Token))
             {
@@ -69,14 +82,19 @@ namespace MUI.Navigation
                         return new OpenOutcome<TResult>(OpenStatus.CancelledBeforeCommit);
                     }
 
+                    RequirePageOwner(parentPage);
                     Register(route);
-                    var existing = ResolveOpenAdmission(route, args, assigned);
+                    var existing = ResolveOpenAdmission(route, args, assigned, parentPage);
                     if (existing.HasValue)
                     {
                         if (!RequiresOverflowReplacement(route, existing.Value))
                         {
                             if (existing.Value.IsSuccess && entries.TryGetValue(existing.Value.Handle.Identity, out var reused))
                             {
+                                if (reused.ParentPage != parentPage)
+                                {
+                                    return Reject<TResult>(OpenRejection.ConflictingData);
+                                }
                                 await WaitForReadinessAsync(reused, cancellation.Token);
                                 return CompletedOpen((ViewInstance<TViewModel, TArgs, TResult>)reused);
                             }
@@ -96,6 +114,10 @@ namespace MUI.Navigation
                             return Reject<TResult>(OpenRejection.Reentrant);
                         }
 
+                        if (source.ParentPage != parentPage)
+                        {
+                            return Reject<TResult>(OpenRejection.ConflictingData);
+                        }
                         if (!CanReplace(source) || !replacing.Add(source.Handle))
                         {
                             return Reject<TResult>(OpenRejection.Busy);
@@ -104,11 +126,12 @@ namespace MUI.Navigation
                         // 转交已持有的队列许可，但保留当前请求的外层计数。
                         // 不需要第二个队列名额或额外请求容量。
                         acquired = false;
-                        var replacement = await ReplaceCoreAsync(source, route, args, cancellation.Token, assigned, queueAcquired: true, ownsRequest: false, trace: trace);
+                        var replacement = await ReplaceCoreAsync(source, route, args, cancellation.Token, assigned, requestOrder, queueAcquired: true, ownsRequest: false, trace: trace);
                         return FromOverflowReplacement(source.Handle, replacement);
                     }
 
-                    instance = NewInstance(route, args, assigned);
+                    instance = NewInstance(route, args, assigned, requestOrder);
+                    instance.ParentPage = parentPage;
                     AssignPreparationTrace(instance, trace);
                     // 候选登记即占用实例额度；外部准备期间不占串行提交许可。
                     requests.Release();
@@ -122,14 +145,37 @@ namespace MUI.Navigation
                         return new OpenOutcome<TResult>(status, error: preparationFailure, cleanup: CleanupState(closing));
                     }
 
+                    if (route.Policy.PageRole == PageRole.Main)
+                    {
+                        if (CurrentMainPage != previousMain)
+                        {
+                            throw PageScopeRejected(OpenRejection.Superseded);
+                        }
+                        if (previousMain.IsValid && entries.TryGetValue(previousMain, out var prior))
+                        {
+                            departure = await PreparePageDepartureAsync(prior, false, cancellation.Token);
+                        }
+                    }
                     await requests.WaitAsync(cancellation.Token);
                     acquired = true;
                     AssertThread();
                     cancellation.Token.ThrowIfCancellationRequested();
                     instance.RequirePreparationCurrent();
                     RequireDependenciesCurrent(instance);
-                    CommitOpen(instance);
-                    committed = true;
+                    RequirePageOwner(parentPage);
+                    if (route.Policy.PageRole == PageRole.Main && CurrentMainPage != previousMain)
+                    {
+                        throw PageScopeRejected(OpenRejection.Superseded);
+                    }
+                    departure?.Validate();
+                    presentationDeferrals++;
+                    try
+                    {
+                        CommitOpen(instance);
+                        committed = true;
+                        departure?.Commit();
+                    }
+                    finally { presentationDeferrals--; }
                     Activate(instance);
                     ReleaseNavigationQueue(ref acquired);
                     await WaitForReadinessAsync(instance, cancellation.Token);
@@ -179,6 +225,7 @@ namespace MUI.Navigation
                         requests.Release();
                     }
 
+                    departure?.Dispose();
                     EndNavigationRequest();
                 }
             }
@@ -228,12 +275,14 @@ namespace MUI.Navigation
             // 这里只修改内部状态，不调用生命周期、绑定设置器或渲染器。
             CommitDependencies(instance, DependencyPlacement.RequiredBefore);
             instance.State = ViewState.Open;
+            instance.HasOpenCommitted = true;
             instance.CommitVersion = ++commitVersion;
-            instance.Order = ++order;
             activeOrder.Add(instance);
-            if (instance.Route.Policy.EnterHistory && ownership.HasExplicitOwner(instance.Handle))
+            if (ownership.HasExplicitOwner(instance.Handle))
             {
-                history.Add(instance.Handle);
+                // 迟到页面插回请求时确定的位置；置前操作不改写打开历史。
+                var index = history.FindIndex(handle => entries[handle].HistoryOrder > instance.HistoryOrder);
+                history.Insert(index < 0 ? history.Count : index, instance.Handle);
             }
 
             QueueLifecycleEvent(instance, NavigationEventKind.OpenCommitted);
@@ -281,7 +330,7 @@ namespace MUI.Navigation
             }
         }
 
-        public PostOpenStatus PostOpen<TViewModel, TArgs, TResult>(Route<TViewModel, TArgs, TResult> route, TArgs args)
+        public PostOpenStatus PostOpen<TViewModel, TArgs, TResult>(Route<TViewModel, TArgs, TResult> route, TArgs args, PageOwner owner = default)
                     where TViewModel : ViewModel
         {
             AssertThread();
@@ -302,14 +351,25 @@ namespace MUI.Navigation
 
             var current = CurrentCallback;
             var source = current != null ? current.Source : null;
+            ViewHandle parent;
+            try
+            {
+                parent = ResolvePageOwner(route.Policy, owner);
+            }
+            catch (NavigationPreparationRejectedException)
+            {
+                return PostOpenStatus.Busy;
+            }
+            var previousMain = CurrentMainPage;
             BeginNavigationRequest();
+            var requestOrder = ++order;
             var start = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
             posted.Enqueue(() => start.TrySetResult(true));
             // 立即预留队列位置；Pump 只在回调返回后允许排队工作开始。
             var trace = BeginOperationTrace(route.Key, "PostOpen");
             using (EnterOperationTrace(trace))
             {
-                var operation = OpenCoreAsync(route, args, default, null, source, start.Task, trace);
+                var operation = OpenCoreAsync(route, args, default, null, source, requestOrder, start.Task, trace, parent, previousMain);
                 _ = ObserveOpen(trace.Id == 0 ? operation :
                     ObserveTracedOpenAsync(new ValueTask<OpenOutcome<TResult>>(operation), trace).AsTask());
             }

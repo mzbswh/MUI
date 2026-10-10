@@ -1,4 +1,5 @@
 using UnityEngine.UIElements;
+using L = MUI.Editor.Localization.MUIEditorLocalization;
 
 namespace MUI.Navigation.Editor
 {
@@ -17,20 +18,20 @@ namespace MUI.Navigation.Editor
             selectedNode = id;
             var node = graph.Nodes[id];
             AddText($"#{id + 1} {node.Key}", "route-graph-heading");
-            AddText($"资源：{node.Resource}");
-            AddText($"层级：{node.Layer}");
-            AddText(node.Policy);
-            AddText("父拥有者 → 当前路由 → 直接依赖。点击关系可跳转；同键不同定义以编号区分。");
+            AddText(L.Format("editor.RouteGraphWindow.Details.655f0f0b1a", node.Resource));
+            AddText(L.Format("editor.RouteGraphWindow.Details.5e80d84deb", node.Layer));
+            AddText(node.DescribePolicy());
+            AddText(L.Get("editor.RouteGraphWindow.Details.840cc3e250"));
             if (graph.Truncated)
             {
-                details.Add(new HelpBox("当前快照已截断，关系列表可能不完整。复制报告会保留已采集的关系与截断标记。", HelpBoxMessageType.Warning));
+                details.Add(new HelpBox(L.Get("editor.RouteGraphWindow.Details.936ac0c9d9"), HelpBoxMessageType.Warning));
             }
             ShowRelations(id, incoming: true);
             ShowRelations(id, incoming: false);
-            AddText("本图静态问题", "route-graph-heading");
+            AddText(L.Get("editor.RouteGraphWindow.Details.76f5a111c9"), "route-graph-heading");
             if (graph.Issues.Count == 0)
             {
-                AddText("未发现静态声明错误；这不证明运行时参数或资源一定可用。");
+                AddText(L.Get("editor.RouteGraphWindow.Details.efbcfd92f1"));
             }
             foreach (var issue in graph.Issues)
             {
@@ -38,7 +39,7 @@ namespace MUI.Navigation.Editor
                 var destination = target;
                 var button = new Button(() => NavigateTo(destination))
                 {
-                    text = $"{issue.Key} · {issue.Code}\n{issue.Message}"
+                    text = $"{issue.Key} · {L.Value(issue.Code)}\n{L.Diagnostic(issue.Message)}"
                 };
                 button.AddToClassList("route-graph-edge");
                 button.SetEnabled(target >= 0);
@@ -49,7 +50,7 @@ namespace MUI.Navigation.Editor
         private void ShowRelations(int id, bool incoming)
         {
             var graph = Current;
-            AddText(incoming ? "父拥有者（指向当前路由）" : "直接依赖（当前路由指向）", "route-graph-heading");
+            AddText(incoming ? L.Get("editor.RouteGraphWindow.Details.2d40633e66") : L.Get("editor.RouteGraphWindow.Details.695a39529f"), "route-graph-heading");
             var count = 0;
             foreach (var edge in graph.Edges)
             {
@@ -64,14 +65,14 @@ namespace MUI.Navigation.Editor
                 }
                 var target = incoming ? edge.Owner : edge.Target;
                 var targetKey = incoming ? graph.Nodes[edge.Owner].Key : edge.TargetKey;
-                var placement = edge.Placement == nameof(DependencyPlacement.RequiredBefore) ? "父前" :
-                    edge.Placement == nameof(DependencyPlacement.AttachedAfter) ? "父后" : "无效顺序：" + edge.Placement;
+                var placement = edge.Placement == nameof(DependencyPlacement.RequiredBefore) ? L.Get("editor.RouteGraphWindow.Details.a4c1e252ea") :
+                    edge.Placement == nameof(DependencyPlacement.AttachedAfter) ? L.Get("editor.RouteGraphWindow.Details.7cbe752ca7") : L.Get("editor.RouteGraphWindow.Details.273b96485f") + edge.Placement;
                 var layerNote = edge.Target >= 0 && graph.Nodes[edge.Owner].Layer != graph.Nodes[edge.Target].Layer
-                    ? "跨层显示仍按 Layer 排序" : "同层按依赖顺序约束";
-                var title = $"{(incoming ? "←" : "→")} {(target < 0 ? "未收录" : "#" + (target + 1))} {targetKey}";
+                    ? L.Get("editor.RouteGraphWindow.Details.40e06e6a94") : L.Get("editor.RouteGraphWindow.Details.d3fc914f82");
+                var title = $"{(incoming ? "←" : "→")} {(target < 0 ? L.Get("editor.RouteGraphWindow.Details.01c47b74d0") : "#" + (target + 1))} {targetKey}";
                 var button = new Button(() => NavigateTo(target))
                 {
-                    text = $"{title}\n{(edge.Required ? "必需，失败关闭父链" : "可选，允许缺席降级")} · {placement} · {layerNote}"
+                    text = $"{title}\n{(edge.Required ? L.Get("editor.RouteGraphWindow.Details.5853629b17") : L.Get("editor.RouteGraphWindow.Details.d5adb4d085"))} · {placement} · {L.Value(edge.MissingPolicy)} · {layerNote}"
                 };
                 button.AddToClassList("route-graph-edge");
                 button.SetEnabled(target >= 0);
@@ -79,11 +80,11 @@ namespace MUI.Navigation.Editor
             }
             if (count == 0)
             {
-                AddText(incoming ? "此校验根的可达图中没有父拥有者。" : "没有直接依赖。");
+                AddText(incoming ? L.Get("editor.RouteGraphWindow.Details.404b2b7b9c") : L.Get("editor.RouteGraphWindow.Details.4804324f1f"));
             }
             else if (count > MaxVisibleRelations)
             {
-                AddText($"共 {count} 条关系，此处展示前 {MaxVisibleRelations} 条；其余已采集关系可从复制报告查看。");
+                AddText(L.Format("editor.RouteGraphWindow.Details.9b73c23f45", count, MaxVisibleRelations));
             }
         }
 

@@ -277,6 +277,7 @@ namespace MUI.ChildViews
             presenter = lifecycle.Presenter;
             hasPresenterTick = lifecycle.HasTick;
             tickInterval = lifecycle.TickInterval;
+            maxTickCatchUp = lifecycle.MaxTickCatchUp;
         }
 
         internal void Adopt(IAcquiredView acquired)

@@ -4,6 +4,7 @@ using System.Reflection;
 using MUI.UGUI;
 using UnityEditor;
 using UnityEngine;
+using L = MUI.Editor.Localization.MUIEditorLocalization;
 
 namespace MUI.Editor
 {
@@ -13,6 +14,7 @@ namespace MUI.Editor
         private readonly List<BindingManifest> manifests = new List<BindingManifest>();
         private string[] labels = Array.Empty<string>();
         private int selected;
+        private string displayedLanguage;
         private IReadOnlyList<string> results;
         private ValidationKind validationKind;
 
@@ -63,7 +65,7 @@ namespace MUI.Editor
 
             manifests.Sort((left, right) => string.Compare(left.ViewModelType.FullName, right.ViewModelType.FullName, StringComparison.Ordinal));
             labels = new string[manifests.Count + 1];
-            labels[0] = "请选择 ViewModel 契约";
+            labels[0] = L.Get("editor.ViewInspector.6541599e58");
             for (var i = 0; i < manifests.Count; ++i)
             {
                 labels[i + 1] = manifests[i].ViewModelType.FullName;
@@ -78,13 +80,29 @@ namespace MUI.Editor
 
         public override void OnInspectorGUI()
         {
-            DrawDefaultInspector();
+            if (displayedLanguage != L.LanguageId)
+            {
+                displayedLanguage = L.LanguageId;
+                labels[0] = L.Get("editor.ViewInspector.6541599e58");
+                resourceManifest = null;
+                results = null;
+            }
+            Localization.MUIEditorInspector.Draw(serializedObject);
+            var inspectedView = (View)target;
+            EditorGUILayout.HelpBox(L.Get("sorting.targets.help"), MessageType.Info);
+            if (inspectedView.HiddenMode == ViewHiddenMode.DeactivateContent)
+            {
+                var root = inspectedView.HiddenContentRoot;
+                var valid = root != null && root != inspectedView.gameObject && root.transform.IsChildOf(inspectedView.transform);
+                EditorGUILayout.HelpBox(L.Get(valid ? "policy.hidden.help" : "policy.hidden.invalid"),
+                    valid ? MessageType.Info : MessageType.Error);
+            }
             DrawInputDiagnostics();
             DrawResourcePreparationDiagnostics();
             DrawRaycastDiagnostics();
             EditorGUILayout.Space();
-            EditorGUILayout.LabelField("MUI Binding Contract", EditorStyles.boldLabel);
-            if (GUILayout.Button("Validate View Structure"))
+            EditorGUILayout.LabelField(L.Get("editor.ViewInspector.dceaeea259"), EditorStyles.boldLabel);
+            if (GUILayout.Button(L.Get("editor.ViewInspector.52e088acdc")))
             {
                 validationKind = ValidationKind.Structure;
                 results = ViewContractValidator.ValidateStructure((View)target);
@@ -92,11 +110,11 @@ namespace MUI.Editor
 
             if (manifests.Count == 0)
             {
-                EditorGUILayout.HelpBox("No generated manifests found. Compile a partial ViewModel with ViewContract or Bind attributes.", MessageType.Info);
+                EditorGUILayout.HelpBox(L.Get("editor.ViewInspector.e32a3bfa20"), MessageType.Info);
             }
             else
             {
-                var next = EditorGUILayout.Popup("ViewModel", selected + 1, labels) - 1;
+                var next = EditorGUILayout.Popup(L.Get("editor.ViewInspector.b741b9457b"), selected + 1, labels) - 1;
                 if (next != selected)
                 {
                     selected = next;
@@ -115,12 +133,12 @@ namespace MUI.Editor
                 }
                 else
                 {
-                    EditorGUILayout.HelpBox("选择此 View 使用的 ViewModel 契约后再校验绑定。结构校验不需要选择契约。", MessageType.Info);
+                    EditorGUILayout.HelpBox(L.Get("editor.ViewInspector.ad9d661681"), MessageType.Info);
                 }
 
                 using (new EditorGUI.DisabledScope(selected < 0))
                 {
-                    if (GUILayout.Button("Validate Binding Contract"))
+                    if (GUILayout.Button(L.Get("editor.ViewInspector.5f472e2647")))
                     {
                         validationKind = ValidationKind.Contract;
                         results = ViewContractValidator.Validate((View)target, manifests[selected]);
@@ -128,7 +146,7 @@ namespace MUI.Editor
                 }
             }
 
-            if (GUILayout.Button("Validate Accessibility Semantics"))
+            if (GUILayout.Button(L.Get("editor.ViewInspector.b104369e08")))
             {
                 validationKind = ValidationKind.Accessibility;
                 results = ViewContractValidator.ValidateAccessibility((View)target, selected < 0 ? null : manifests[selected]);
@@ -141,12 +159,12 @@ namespace MUI.Editor
 
             if (results.Count == 0)
             {
-                EditorGUILayout.HelpBox(validationKind == ValidationKind.Accessibility ? "No basic semantic issues found. Keyboard reachability and platform screen readers were not validated." : validationKind == ValidationKind.Structure ? "No structural issues found. Binding contract was not checked." : "The selected binding contract matches this View.", MessageType.Info);
+                EditorGUILayout.HelpBox(validationKind == ValidationKind.Accessibility ? L.Get("editor.ViewInspector.f9d933d15c") : validationKind == ValidationKind.Structure ? L.Get("editor.ViewInspector.48bcffa0d4") : L.Get("editor.ViewInspector.3f95319fe9"), MessageType.Info);
             }
 
             foreach (var result in results)
             {
-                EditorGUILayout.HelpBox(result, MessageType.Error);
+                EditorGUILayout.HelpBox(L.Diagnostic(result), MessageType.Error);
             }
         }
 

@@ -141,7 +141,11 @@ namespace MUI.Navigation
                     }
                 }
             }
-            result.Sort((left, right) => right.Order.CompareTo(left.Order));
+            result.Sort((left, right) =>
+            {
+                var navigation = right.Order.CompareTo(left.Order);
+                return navigation != 0 ? navigation : right.Handle.Id.CompareTo(left.Handle.Id);
+            });
             return ownership.OrderCloseBatch(result.ToArray());
         }
     }

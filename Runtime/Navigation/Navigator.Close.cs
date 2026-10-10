@@ -99,6 +99,7 @@ namespace MUI.Navigation
                 (reason == DismissReason.Closed || reason == DismissReason.Back || reason == DismissReason.Replaced);
 
             var errors = new List<Exception>();
+            var pageClosures = ClosePageDescendants(instance);
             var visualExit = StartExit(instance, canAnimate, errors);
             try
             {
@@ -157,7 +158,7 @@ namespace MUI.Navigation
             }
             // RequestClose/Complete 可从绑定命令内同步提交；清理由导航器持有，不能继承该命令的自等待标记。
             _ = LifetimeScope.StartIndependentCleanup(() => FinishCloseAsync(instance, reason, wasCommitted, errors,
-                completion, cleanupCompletion, visualExit, trace));
+                completion, cleanupCompletion, visualExit, trace, pageClosures));
             return completion.Task;
         }
 
@@ -184,12 +185,12 @@ namespace MUI.Navigation
             // 调用任何外部代码前，先提交双方的逻辑状态。
             if (replacement != null)
             {
-                CommitOpen(replacement);
-                // 替换继承旧记录的位置；新页未参与历史时只移除旧记录。
-                if (historyIndex >= 0 && history.Remove(replacement.Handle))
+                // 替换继承旧记录的位置，打开记录不决定返回顺序。
+                if (historyIndex >= 0)
                 {
-                    history.Insert(Math.Min(historyIndex, history.Count), replacement.Handle);
+                    replacement.HistoryOrder = instance.HistoryOrder;
                 }
+                CommitOpen(replacement);
             }
 
             return wasCommitted;
@@ -202,9 +203,25 @@ namespace MUI.Navigation
                     TaskCompletionSource<CloseOutcome> completion,
                     TaskCompletionSource<CloseOutcome> cleanupCompletion,
                     Task visualExit,
-                    NavigationTraceOperation trace)
+                    NavigationTraceOperation trace, Task<CloseOutcome>[] pageClosures)
         {
             await visualExit;
+            foreach (var childClosing in pageClosures)
+            {
+                try
+                {
+                    var child = await childClosing;
+                    if (child.Error != null)
+                    {
+                        errors.Add(child.Error);
+                    }
+                    else if (child.Cleanup != CleanupStatus.Complete)
+                    {
+                        errors.Add(new InvalidOperationException("所属界面的清理未完整结束：" + child.Cleanup));
+                    }
+                }
+                catch (Exception error) { errors.Add(error); }
+            }
             CloseOutcome result;
             using (var phase = BeginOperationPhaseTrace(instance, NavigationOperationStage.InstanceCleanup, trace))
             {
@@ -275,6 +292,7 @@ namespace MUI.Navigation
             {
                 hasCleanupFailure = true;
             }
+            ReleaseRenderOrder(instance);
             ownership.Remove(instance.Handle);
             entries.Remove(instance.Handle);
             quarantinedPreparations.Remove(instance.Handle);

@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using MUI.UGUI;
 using UnityEditor;
+using L = MUI.Editor.Localization.MUIEditorLocalization;
 
 namespace MUI.Editor
 {
@@ -25,11 +26,11 @@ namespace MUI.Editor
                     {
                         resourceBindingRows.Add(
                             $"{entry.Source} → {entry.ElementName}.{entry.TargetProperty}\n" +
-                            $"控件：{entry.ElementType.Name}；资源：{assetType}；绑定方向：{entry.Mode}");
+                            L.Format("editor.ViewInspector.Resources.2b59743c8d", entry.ElementType.Name, assetType, entry.Mode));
                     }
                 }
 
-                resourceBindingsTitle = $"资源键绑定（{resourceBindingRows.Count}）";
+                resourceBindingsTitle = L.Format("editor.ViewInspector.Resources.a2ed0370b9", resourceBindingRows.Count);
             }
 
             DrawResourcePreparationPolicy();
@@ -45,8 +46,8 @@ namespace MUI.Editor
             }
 
             EditorGUILayout.HelpBox(
-                "以下是所选契约声明的内置资源键绑定，不代表已经匹配此 View。" +
-                "请运行绑定契约校验检查控件匹配、单向绑定和重复写入。",
+                L.Get("editor.ViewInspector.Resources.9de0d10b5a") +
+                L.Get("editor.ViewInspector.Resources.e82b69fca1"),
                 MessageType.Info);
             foreach (var row in resourceBindingRows)
             {
@@ -55,9 +56,9 @@ namespace MUI.Editor
             }
 
             EditorGUILayout.HelpBox(
-                "在激活前通过 View.ConfigureResources 配置加载器，" +
-                "也可单独配置控件。内置 Prefab 提供方的 configureView 或 UIHost 默认目录的 configureDefaultView 可统一接线。" +
-                "此清单不验证运行时加载器、资源键是否存在或异步加载是否完成。",
+                L.Get("editor.ViewInspector.Resources.80333987cf") +
+                L.Get("editor.ViewInspector.Resources.41d0c03c8d") +
+                L.Get("editor.ViewInspector.Resources.7825ca1133"),
                 MessageType.Info);
 
             DrawResourceInheritance();
@@ -75,18 +76,18 @@ namespace MUI.Editor
             if (resourceBindingRows.Count == 0)
             {
                 EditorGUILayout.HelpBox(
-                    "已启用首次显示前等待资源，但所选契约没有内置资源键绑定。" +
-                    "此开关不会自动等待直接赋值的资源、手动资源槽或任意业务后台任务；" +
-                    "运行时代码写入默认加载器的 Source 属性仍可参与准备。",
+                    L.Get("editor.ViewInspector.Resources.9bd119ee27") +
+                    L.Get("editor.ViewInspector.Resources.5887219e26") +
+                    L.Get("editor.ViewInspector.Resources.2473966443"),
                     MessageType.Info);
                 return;
             }
 
             EditorGUILayout.HelpBox(
-                "已启用首次显示前等待资源。下方资源键绑定使用本 View 的默认加载器时，" +
-                "初始加载会参与隐藏准备，失败将阻止此次显示；单控件显式配置不自动参与。" +
-                "子 View 需单独设置，显示后的换图仍渐进加载。本地加载可立即完成。" +
-                "此处只展示配置，不代表资源已经就绪。",
+                L.Get("editor.ViewInspector.Resources.ac5c1bb62a") +
+                L.Get("editor.ViewInspector.Resources.15980a3c2d") +
+                L.Get("editor.ViewInspector.Resources.537a6e78ff") +
+                L.Get("editor.ViewInspector.Resources.e21b9e988b"),
                 MessageType.Info);
         }
 
@@ -102,7 +103,7 @@ namespace MUI.Editor
             if (!view.InheritParentResources)
             {
                 EditorGUILayout.HelpBox(
-                    "已关闭父加载器继承。请为此 View 或资源控件显式配置加载器。",
+                    L.Get("editor.ViewInspector.Resources.16ef1cfe27"),
                     MessageType.Info);
                 return;
             }
@@ -111,14 +112,14 @@ namespace MUI.Editor
             var parentView = parent == null ? null : parent.GetComponentInParent<View>(true);
             using (new EditorGUI.DisabledScope(true))
             {
-                EditorGUILayout.ObjectField("当前层级的父 View", parentView, typeof(View), true);
+                EditorGUILayout.ObjectField(L.Get("editor.ViewInspector.Resources.d822773387"), parentView, typeof(View), true);
             }
 
             EditorGUILayout.HelpBox(
                 parentView == null
-                    ? "当前层级没有父 View。显式配置加载器，或在运行时挂载到父 View 下后再激活；框架会在激活时重新查找。"
-                    : "未显式配置时，仅尝试借用此父 View 的活动加载器，不越过它查找祖先。" +
-                      "子 View 的资源由自身激活负责归还。",
+                    ? L.Get("editor.ViewInspector.Resources.f116785f60")
+                    : L.Get("editor.ViewInspector.Resources.4e3e33fde6") +
+                      L.Get("editor.ViewInspector.Resources.c678584105"),
                 MessageType.Info);
         }
 

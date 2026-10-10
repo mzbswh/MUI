@@ -245,6 +245,10 @@ namespace MUI.Navigation
                     modal.SetModalBarrier(false);
                 }
             });
+            if (errors.Count == initialErrorCount)
+            {
+                ReleaseRenderOrder(instance);
+            }
             Attempt(RecomputePresentation);
             var visualFailure = errors.Count > initialErrorCount
                 ? new AggregateException("Visual exit could not finish safely.", errors.GetRange(initialErrorCount, errors.Count - initialErrorCount))

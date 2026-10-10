@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using MUI.UGUI;
 using UnityEditor;
 using UnityEngine;
+using L = MUI.Editor.Localization.MUIEditorLocalization;
 
 namespace MUI.Editor
 {
@@ -20,7 +21,7 @@ namespace MUI.Editor
             {
                 if (slots.arraySize == 0 || mounts.arraySize != 0)
                 {
-                    errors.Add($"固定槽位必须配置已有节点，或配置模板与空挂点：{path}。");
+                    errors.Add(L.Format("editor.ViewContractValidator.SlotList.57b1711cb8", path));
                 }
 
                 for (var index = 0; index < slots.arraySize; ++index)
@@ -28,7 +29,7 @@ namespace MUI.Editor
                     var slot = slots.GetArrayElementAtIndex(index).objectReferenceValue as NestedViewElement;
                     if (slot == null || !IsInsideListBoundary(element.transform, slot.transform, true))
                     {
-                        errors.Add($"固定槽位必须是当前容器边界内的 NestedViewElement：{path}/{index}。");
+                        errors.Add(L.Format("editor.ViewContractValidator.SlotList.8f516c4dbd", path, index));
                         continue;
                     }
 
@@ -41,7 +42,7 @@ namespace MUI.Editor
                 if (slots.arraySize != 0 || mounts.arraySize == 0 || template.gameObject.activeSelf ||
                     !IsInsideListBoundary(element.transform, template.transform, true))
                 {
-                    errors.Add($"动态固定槽位需要非激活模板和空挂点，不能同时配置已有节点：{path}。");
+                    errors.Add(L.Format("editor.ViewContractValidator.SlotList.8befb07d44", path));
                 }
 
                 ValidateNestedListChild(template, path, errors);
@@ -51,7 +52,7 @@ namespace MUI.Editor
                     if (mount == null || mount.childCount != 0 || !IsInsideListBoundary(element.transform, mount, false) ||
                         mount.IsChildOf(template.transform) || template.transform.IsChildOf(mount))
                     {
-                        errors.Add($"固定挂点必须是容器边界内的空节点，并与模板分离：{path}/{index}。");
+                        errors.Add(L.Format("editor.ViewContractValidator.SlotList.001b23e3b7", path, index));
                         continue;
                     }
 
@@ -66,7 +67,7 @@ namespace MUI.Editor
                     if (nodes[index] == nodes[previous] || nodes[index].IsChildOf(nodes[previous]) ||
                         nodes[previous].IsChildOf(nodes[index]))
                     {
-                        errors.Add($"固定槽位不能重复引用或互相包含：{path}。");
+                        errors.Add(L.Format("editor.ViewContractValidator.SlotList.34a7a64966", path));
                     }
                 }
             }

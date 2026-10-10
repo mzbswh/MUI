@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using MUI.UGUI;
 using UnityEngine;
 using UnityEngine.UI;
+using L = MUI.Editor.Localization.MUIEditorLocalization;
 
 namespace MUI.Editor
 {
@@ -15,7 +16,7 @@ namespace MUI.Editor
 
         static PageTextBackend()
         {
-            Register("ugui", "uGUI Text", typeof(TextElement), () => null,
+            Register("ugui", L.Get("editor.PageTextBackend.19baaca2f4"), typeof(TextElement), () => null,
                 (name, parent, content) => PrefabAuthoring.CreateText(name, parent, content));
         }
 
@@ -50,7 +51,7 @@ namespace MUI.Editor
         {
             if (string.IsNullOrWhiteSpace(id) || string.IsNullOrWhiteSpace(label))
             {
-                throw new ArgumentException("文本模板需要稳定标识和显示名称。");
+                throw new ArgumentException(L.Get("editor.PageTextBackend.cff54d9fa2"));
             }
             if (validate == null || create == null)
             {
@@ -59,7 +60,7 @@ namespace MUI.Editor
             RequireElementType(elementType);
             if (Find(id) != null)
             {
-                throw new InvalidOperationException("文本模板标识已注册：" + id);
+                throw new InvalidOperationException(L.Get("editor.PageTextBackend.ce0434eb31") + id);
             }
             registered.Add(new PageTextBackend(id, label, elementType, validate, create));
         }
@@ -72,7 +73,7 @@ namespace MUI.Editor
                 content.GetGetMethod() == null || content.GetSetMethod() == null ||
                 content.GetGetMethod().IsStatic || content.GetSetMethod().IsStatic || content.GetIndexParameters().Length != 0)
             {
-                throw new ArgumentException("文本 Element 必须是公开、非嵌套、非泛型的具体类型，并有可读写的 string Content 属性。");
+                throw new ArgumentException(L.Get("editor.PageTextBackend.36e1635db2"));
             }
         }
 
@@ -87,7 +88,7 @@ namespace MUI.Editor
             var graphic = create(name, parent, content);
             if (graphic == null || graphic.transform.parent != parent || graphic.name != name)
             {
-                throw new InvalidOperationException("文本模板没有返回正确挂载和命名的控件。");
+                throw new InvalidOperationException(L.Get("editor.PageTextBackend.865c6e02de"));
             }
             return graphic;
         }

@@ -3,6 +3,7 @@ using TMPro;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
+using L = MUI.Editor.Localization.MUIEditorLocalization;
 
 namespace MUI.TMP.Editor
 {
@@ -20,7 +21,7 @@ namespace MUI.TMP.Editor
             // 默认字体属性会直接访问配置；缺少基础资源时只返回提示，不触发导入窗口。
             var font = TMP_Settings.LoadDefaultSettings() == null ? null : TMP_Settings.defaultFontAsset;
             return font == null || !AssetDatabase.Contains(font)
-                ? "请先导入 TMP 基础资源，并在 TMP Settings 中配置已保存的默认字体资产。"
+                ? L.Get("editor.TMPPageTextBackend.539eed99df")
                 : null;
         }
 

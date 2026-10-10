@@ -14,7 +14,7 @@ namespace MUI.Samples.Navigation
         {
             var presenter = new ImmediateGuardPresenter();
             var route = new Route<PageViewModel, PageArgs, int>("demo.immediate-guard", resource,
-                () => new PageViewModel(), _ => presenter, bindings);
+                () => new PageViewModel(), _ => presenter, bindings, host.ResolvePolicy());
             var opened = await navigator.OpenAsync(route, new PageArgs("立即完成的关闭守卫", 10), cancellation.Token);
             if (!opened.IsSuccess)
             {

@@ -79,7 +79,7 @@ namespace MUI.Navigation
             var descriptors = new RouteDependencyDescriptor[copiedDependencies.Length];
             for (var i = 0; i < descriptors.Length; ++i)
             {
-                descriptors[i] = new RouteDependencyDescriptor(copiedDependencies[i].Target, copiedDependencies[i].Placement, copiedDependencies[i].IsRequired);
+                descriptors[i] = new RouteDependencyDescriptor(copiedDependencies[i].Target, copiedDependencies[i].Placement, copiedDependencies[i].IsRequired, copiedDependencies[i].MissingPolicy);
             }
             DependencyDescriptors = Array.AsReadOnly(descriptors);
             ModelFactory = viewModelFactory ?? throw new ArgumentNullException(nameof(viewModelFactory));

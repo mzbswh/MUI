@@ -8,9 +8,78 @@ Core 不引用 Unity；Resources、Navigation 与 ChildViews 分别定义资源�
 
 ## 从 Basic 开始
 
-导入 Basic Example 并打开 Basic.unity。BasicPageViewModel 声明标题绑定与 Confirm 命令，BasicView.prefab 包含名为 Title 和 Confirm 的 Element。BasicExampleModule 声明生成注册入口，BasicDemo 负责注册、配置 PrefabViewProvider、初始化 UIHost 并调用 OpenAsync。
+导入 Basic Example 并打开 Basic.unity。BasicPageViewModel 声明标题绑定与 Confirm 命令，BasicView.prefab 包含名为 Title 和 Confirm 的 Element。场景已绑定 BasicMUISettings 资产并在 UIHost 的本地目录登记 BasicView。BasicExampleModule 声明生成注册入口，BasicDemo 负责注册、解析配置策略、初始化 UIHost 的默认提供方并调用 OpenAsync。
 
 普通页面不要求 Presenter；需要跨服务协调时再引入。不要手写或编辑生成的绑定订阅、命令属性和 Route 接线。若看不到生成类型，先检查 Console 中的声明诊断，以及包内 Analyzers 的 RoslynAnalyzer 导入标签。
+
+## 项目 UI 配置
+
+通过 `Assets/Create/MUI/配置 (Settings)` 创建 `MUISettings` 资产，在 UIHost 的 Settings 字段绑定；也可以在初始化前给 `host.Settings` 赋值。宿主仍由项目显式调用 `Initialize()`，配置资产不会启动导航或注册页面。未绑定资产时使用内置默认值。
+
+Layers 为命名层级。排序值越大越靠上，同层按导航顺序排列；拥有者与依赖约束仍参与最终显示顺序。命名层映射为 `RoutePolicy.Layer`，页面仍挂在同一宿主根节点，不会自动创建独立 Canvas。内置层级与预设如下：
+
+| 预设 | 层级 | 默认行为 |
+| --- | --- | --- |
+| Background（背景层） | Background / -100 | 独立页面，不接收输入、不阻挡射线、不处理返回 |
+| Default（继承默认规则） | Default / 0 | 继承页面默认规则；初始为主页面，获取焦点，返回时关闭 |
+| FullScreen（全屏主页面） | Default / 0 | 主页面，隐藏下层页面；不自动调整 Prefab 尺寸 |
+| Popup（模态弹窗） | Popup / 100 | 默认依附当前主页面；下层可见但不接纳输入；无主页面时需显式传入 PageOwner.Host |
+| Notice（提示层） | Notice / 200 | 独立页面，不接收输入、不阻挡射线、不处理返回；由业务关闭 |
+
+同层顺序在打开请求接纳时确定，与预制体加载、准备和转场完成顺序无关。例如先请求 A、再请求 B，B 先准备完成时可先显示；A 完成后仍在 B 下方。新依赖沿用父请求的顺序，并按 RequiredBefore / AttachedAfter 确定与父页面的相对位置。只有显式 BringToFront 才更新既有页面的同层导航顺序；ReturnReady 复用保持原位置。打开历史按请求顺序插入已提交页面，置前不改写历史，替换继续继承源页面的历史位置；取消或失败的准备不会留下历史记录。
+
+“页面默认规则”提供公共值；“页面行为预设”中勾选的规则组覆盖公共值，未勾选组继承。“未指定时使用”仅作用于未明确传入预设名称的解析调用。预设展开后显示关键生效值及来源，不包含代码中的页面专属设置。可配置页面角色、输入、遮挡、焦点、模态、返回、多实例、Tick、缓存与各阶段超时；Cache、Instances、Tick、Timeouts 在资产中按组覆盖。命名层、预设名区分大小写。配置校验会检查名称、引用、层级排序值、容量及解析后的策略，不验证项目业务回调或原生点击效果。
+
+ReceivesInput=false 会禁用页面输入及自身射线阻挡，也不获取焦点；Coverage 单独控制对下层页面的影响。旧资产的 Notice / Background 在加载时补齐输入关闭设置，已有显式输入覆盖保留。模态在 Coverage=None 时自动阻挡下层输入；取消模态会撤销自动阻挡，但不会撤销显式配置的 BlockInput。
+
+创建路由时显式解析策略：
+
+```csharp
+var popupPolicy = host.ResolvePolicy("Popup", overrides: new RoutePolicyOverrides
+{
+    CacheMode = ViewCacheMode.KeepAlive
+});
+var route = InventoryViewModelRoute.Create(
+    () => new InventoryViewModel(), policy: popupPolicy);
+```
+
+代码中的 `RoutePolicyOverrides` 每个字段分别覆盖，`null` 表示继承，`false` 和 `0` 是显式值。优先级为页面覆盖 → 所选预设 → 项目默认 → 内置默认。也可传入 `layer: "Popup"` 选择命名层；不能同时传入命名层和 `overrides.Layer` 数值层。
+
+策略在创建 Route 时复制为不可变对象。编辑资产后，新建路由使用新规则；既有路由及其活动页面保持原策略。直接使用 `new RoutePolicy(...)` 或生成的 Route.Create 而未传入解析策略的旧代码，不会自动套用资产；其默认角色与内置配置统一为 Main。需要独立叠加的页面应显式指定 PageRole.Independent。UIHost.Initialize 的缓存、清理、终态记录、排队请求与预加载容量参数省略时继承资产，显式参数优先；初始化后修改资产不会调整导航器容量。这些可选容量参数现为 `int?`，普通调用仍可传入 `int`，已有方法组委托需对应调整并重新编译。
+
+## MUI 调试窗口
+
+打开 `Tools/MUI/控制台 (Dashboard)`，或点击 UIHost Inspector 的“打开控制台”。窗口顶部可切换编辑器语言。选择当前场景的宿主，进入 Play Mode 并完成初始化后点击“采集运行状态”。默认手动采集，可启用每 0.5 秒自动刷新；未初始化时提供引导并禁用运行操作。
+
+UIHost Inspector 只提供 Settings、View Root、简短状态及 Dashboard 快捷入口；本地 Prefab 目录默认折叠，自动更新界面统一在 MUISettings 的“运行设置”中配置，初始化后配置引用及默认目录不可编辑。完整导航快照与生命周期追踪统一在 Dashboard 操作，快照上限为 1—4096。
+
+- 页面与宿主：按最终显示顺序查看状态、层级、解析后的策略及配置来源、焦点、隐藏和输入阻挡来源、返回历史、依赖及清理责任。支持定位原生 View、单独采集页面输入与资源准备、复制状态报告。绑定和射线检查继续通过 View Inspector 操作。
+- 生命周期：开始新一轮记录、停止、清除、筛选和复制已有时间线；记录容量为 1—8192，满时覆盖最旧事件。关闭窗口不会停止导航器记录，需要显式停止。
+- 配置与校验：创建或编辑配置资产，在编辑模式绑定到宿主，校验配置和已登记的页面目录。层级以名称与排序值表格编辑，实际顺序由排序值决定。预设分别折叠，只显示启用的覆盖项；默认规则按类别分组，名称引用通过选择器填写，缺失引用保留原值并报告错误。列表增删及字段修改支持撤销，配置自动校验。配置资产选择用于查看与编辑，点击“绑定到宿主”才修改宿主引用。
+
+状态采集不启动宿主，也不打开、关闭页面。导航门控反映策略账本，控件实际点击资格需结合原生页面输入与射线检查；快照截断时会标明。页面目录校验仍只覆盖项目通过 `UIBuildValidation.RegisterCatalog` 登记的页面，不会把所有 Prefab 自动视为已验证。
+
+### 编辑器语言
+
+在 Dashboard 的“配置与校验”页选择“编辑器语言”。默认简体中文，内置英文；选择保存在当前用户的 EditorPrefs 中，已打开的 MUI 窗口和 Inspector 随之刷新，不改变 MUISettings 或游戏运行时语言。菜单入口使用固定中英双语，因为 Unity 的 MenuItem 和 CreateAssetMenu 路径必须是编译期常量。Unity 自身的原生控件、对象选择器等继续遵循 Unity 的语言设置。
+
+语言由 `Editor/Localization/Languages/*.mui-language.json` 提供，不使用语言枚举。新增语言可以复制英文资源到项目 Assets 目录，修改 `id`、`displayName` 和词条的 `text`，也可以先提供部分翻译并声明回退语言：
+
+```json
+{
+  "id": "fr-FR",
+  "displayName": "Français",
+  "fallbackLanguageId": "en-US",
+  "entries": [
+    { "key": "language.label", "text": "Langue de l’éditeur" },
+    { "key": "language.reload", "text": "Recharger les langues" }
+  ]
+}
+```
+
+文件名须以 `.mui-language.json` 结尾，导入后自动加入语言下拉框；也可点击“刷新语言资源”。每种语言的 `id`、同一资源内的词条 `key` 必须唯一。保留原词条键及 `{0}`、`{1}` 等格式占位符，参数顺序可调整。缺少的词条沿 `fallbackLanguageId` 查找，最后回退到内置中文；回退循环不会导致无限递归，格式错误的词条也会继续尝试回退。未知字段或枚举使用原名称，路由键、资源名、序列化字段名和真实枚举值不翻译。
+
+自定义编辑器程序集引用 `MUI.Editor.Localization`，通过 `MUIEditorLocalization.Get(key)` 或 `Format(key, args)` 取词；UITK 的 `@key` 文本可用 `BindTree(root)` 绑定，动态内容用 `Track(root, refresh)` 跟踪语言切换。诊断词条可额外声明 `source`，将已有框架消息映射到稳定键；未知项目诊断保持原文。新增语言无需修改 C# 语言列表，也无需安装 Unity Localization 包。
 
 ## 异步完成点
 
@@ -154,7 +223,7 @@ ImageElement.Sprite、RawImageElement.Texture、TextElement.Font 和 GraphicElem
 
 `CleanupResponsibility` 记录归还责任的稳定 Id、拥有者标签、状态、错误、诊断上下文与尝试次数。状态区分未启动的 Retained、在途 Pending、失败或归还状态不明的 Failed，以及已确认的 Completed。`CleanupRegistry.CaptureSnapshot(maxEntries)` 按上限读取在途或失败记录，`UnconfirmedCount` 返回总数；完成记录立即移出全局账本，不长期保存成功历史。账本独立于 UIHost 组件，场景或作用域结束后仍持有未确认责任及回调。
 
-`Navigator.CaptureSnapshot()` 提供稳定 `HostId`、`UnconfirmedCleanupCount` 和有界 `CleanupResponsibilities`；使用双参数重载可分别限制实例与责任采集数量，截断由 `CleanupResponsibilitiesTruncated` 标明。`HasCleanupFailure` 表示页面或缓存清理曾失败，旧属性 `HasUnconfirmedCleanup` 沿用此历史语义；显式重试成功后当前责任数量减少，历史失败及已交付的关闭结果保持原值。UIHost Inspector 分别显示这两类信息，不从快照启动重试。
+`Navigator.CaptureSnapshot()` 提供稳定 `HostId`、`UnconfirmedCleanupCount` 和有界 `CleanupResponsibilities`；使用双参数重载可分别限制实例与责任采集数量，截断由 `CleanupResponsibilitiesTruncated` 标明。`HasCleanupFailure` 表示页面或缓存清理曾失败，旧属性 `HasUnconfirmedCleanup` 沿用此历史语义；显式重试成功后当前责任数量减少，历史失败及已交付的关闭结果保持原值。MUI Dashboard 分别显示这两类信息，不从快照启动重试。
 
 组件销毁后可用保存的 HostId 调用 `CleanupRegistry.GetUnconfirmedCount(hostId)` 或 `CaptureSnapshot(hostId, maxEntries)` 查询当前责任；`Guid.Empty` 只查询没有宿主身份的责任，不是全部宿主的通配符。账本选择和每项状态读取不冻结异步完成，采集期间完成的项可能显示 Completed，下一次采集消失。责任登记保存值身份作备用；合法移交后首次归还采用实际所有者的上下文，公布到账本后不随重试改变归属。
 
@@ -218,10 +287,12 @@ Unity 2022.3.62f3 的真实窗口 IL2CPP 观察已覆盖上述两种 Canvas 模�
 
 ## 页面向导与 Editor 校验
 
-`Tools/MUI/Page Wizard` 提供 FullScreen、Popup、Notice 三类预设。FullScreen 隐藏下层页；Popup 在层级 100 创建模态页；Notice 在层级 200 显示纯文本提示，不抢焦点、不进入历史、不接纳返回，也不影响下层覆盖和输入。提示 Prefab 没有关闭按钮或射线目标，由业务保存打开句柄并显式关闭。预设展开为现有 RoutePolicy 和 Prefab 结构，不引入运行时页面类型；默认只生成 ViewModel 与 Page 源码，不要求 Presenter。新目录已有任何内容时拒绝覆盖。
+`Tools/MUI/页面向导 (Page Wizard)` 提供 FullScreen、Popup、Notice 三类预设，内置行为见“项目 UI 配置”。向导可选择 MUISettings 预览解析后的策略；生成代码通过 `Page.CreateRoute(host.Settings)` 使用项目配置，`Page.CreateRoute()` 使用内置预设，也可传入 `Page.CreateRoute(host.Settings, overrides)`。向导不会把所选资产引用写入静态 Page。Notice 的提示 Prefab 没有关闭按钮或射线目标，由业务保存打开句柄并显式关闭。预设解析为现有 RoutePolicy，不引入运行时页面类型；默认只生成 ViewModel 与 Page 源码，不要求 Presenter。新目录已有任何内容时拒绝覆盖。
 
 复用已有 Notice Prefab 时必须移除 Selectable 并关闭所有 Graphic 的 Raycast Target；向导只生成业务源码，不修改原资产。类型化参数/结果和可选 Presenter 沿用同一生成绑定及导航入口。
 
 项目通过 `UIBuildValidation.RegisterCatalog(id, collect)` 登记每个导航配置，用 `UIBuildCatalog.AddPage(route, prefab, manifest)` 提供页面及依赖闭合。手动 `Validate()` 和构建前检查每次重新采集全部目录，不依赖增量结果缓存。未登记目录仅提示没有覆盖；已登记目录的错误阻断构建，并在报告中包含路由及 Prefab 路径。
 
 Prefab 保存、导入及其依赖资产变化按路径合并，在 Editor 空闲后校验受影响目录，复用相同规则。脚本或程序集变化、资产删除/移动及域重载重新采集全部登记目录。编译、导入或 Play Mode 期间保留待检查标记，结束后补跑；队列最多保存 2,048 个路径，达到上限改为完整检查。检查不初始化业务模型、不写资产，也不触发递归导入；未变化的增量报告不重复输出。
+
+打开记录由框架自动维护：显式打开的页面加入 `Navigator.History`，关闭后移除，仅随父页面打开的依赖不单独记录。此列表用于查询和诊断，不保存页面状态，也不参与返回目标选择。原 `EnterHistory` / `enterHistory` 配置已移除，调用方无需再设置。

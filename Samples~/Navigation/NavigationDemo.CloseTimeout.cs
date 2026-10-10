@@ -14,7 +14,7 @@ namespace MUI.Samples.Navigation
             var presenter = new CloseTimeoutPagePresenter();
             var route = new Route<PageViewModel, PageArgs, int>("demo.close-timeout", resource,
                 () => new PageViewModel(), _ => presenter, binding,
-                policy: new RoutePolicy(closeTimeout: TimeSpan.FromMilliseconds(50)));
+                policy: host.ResolvePolicy(overrides: new RoutePolicyOverrides { CloseTimeout = TimeSpan.FromMilliseconds(50) }));
             var opened = await navigator.OpenAsync(route, new PageArgs("关闭超时演示", 1), cancellation.Token);
             if (!opened.IsSuccess)
             {
@@ -30,7 +30,7 @@ namespace MUI.Samples.Navigation
                     $"隔离数={navigator.PendingCleanupCount}，物理清理完成={physical.IsCompleted}，关闭回调完成={presenter.Closed}");
 
                 var blockedRoute = new Route<PageViewModel, PageArgs, int>("demo.close-timeout.capacity", resource,
-                    () => new PageViewModel(), _ => new PagePresenter(), binding);
+                    () => new PageViewModel(), _ => new PagePresenter(), binding, host.ResolvePolicy());
                 var blocked = await navigator.OpenAsync(blockedRoute, new PageArgs("隔离容量已满", 2), cancellation.Token);
                 Debug.Log($"MUI 关闭隔离容量：新页面={blocked.Status}/{blocked.Rejection}");
                 if (blocked.IsSuccess)

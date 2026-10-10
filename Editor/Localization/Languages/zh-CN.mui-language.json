@@ -1,0 +1,5771 @@
+{
+  "id": "zh-CN",
+  "displayName": "简体中文",
+  "fallbackLanguageId": "en-US",
+  "entries": [
+    {
+      "key": "editor.ConfirmationDialogWizard.355c93a223",
+      "text": "请选择新的 Prefab 路径。"
+    },
+    {
+      "key": "editor.ConfirmationDialogWizard.43e83309d7",
+      "text": "MUI 不会覆盖已有预制体，请选择新的路径。"
+    },
+    {
+      "key": "editor.ConfirmationDialogWizard.93c9370677",
+      "text": "创建 MUI 对话框"
+    },
+    {
+      "key": "editor.ConfirmationDialogWizard.ad6d4c241d",
+      "text": "无法保存对话框 Prefab。"
+    },
+    {
+      "key": "editor.ConfirmationDialogWizard.b736b1be54",
+      "text": "确认信息"
+    },
+    {
+      "key": "editor.ConfirmationDialogWizard.df3021fd73",
+      "text": "提示正文"
+    },
+    {
+      "key": "editor.ConfirmationDialogWizard.f56c6c8220",
+      "text": "提示"
+    },
+    {
+      "key": "editor.ConfirmationDialogWizard.fac2a67ad8",
+      "text": "确定"
+    },
+    {
+      "key": "editor.DragDropElementValidation.07c3e3a8ea",
+      "text": "拖拽预览与源节点使用了不同的根画布：{0}。"
+    },
+    {
+      "key": "editor.DragDropElementValidation.097ff70a04",
+      "text": "放置高亮必须是目标的严格子节点：{0}。"
+    },
+    {
+      "key": "editor.DragDropElementValidation.165a5f71ed",
+      "text": "拖拽预览需要同时配置图标与预览根节点：{0}。"
+    },
+    {
+      "key": "editor.DragDropElementValidation.332ea75fe2",
+      "text": "拖拽图标必须位于源节点层级内：{0}。"
+    },
+    {
+      "key": "editor.DragDropElementValidation.856ef4d269",
+      "text": "放置高亮只用于展示，不能包含可交互控件：{0}。"
+    },
+    {
+      "key": "editor.DragDropElementValidation.a8a32fbe33",
+      "text": "相机或世界空间的拖拽预览必须显式配置根画布相机：{0}。"
+    },
+    {
+      "key": "editor.DragDropElementValidation.dfa4574438",
+      "text": "拖拽预览根节点必须位于源节点层级外：{0}。"
+    },
+    {
+      "key": "editor.DragDropElementValidation.edec36e0d3",
+      "text": "放置高亮不能拦截指针射线：{0}。"
+    },
+    {
+      "key": "editor.DragDropElementValidation.ee19296263",
+      "text": "放置目标容量必须大于零：{0}。"
+    },
+    {
+      "key": "editor.DropdownTemplateValidation.05ffe01799",
+      "text": "下拉框缺少模板：{0}。"
+    },
+    {
+      "key": "editor.DropdownTemplateValidation.2323fb4b98",
+      "text": "下拉框模板必须未激活：{0}。"
+    },
+    {
+      "key": "editor.DropdownTemplateValidation.5d2cad0d1c",
+      "text": "下拉框模板需要已激活的 Toggle 子条目：{0}。"
+    },
+    {
+      "key": "editor.DropdownTemplateValidation.aa11691f69",
+      "text": "下拉框 Toggle 条目的父节点需要 RectTransform：{0}。"
+    },
+    {
+      "key": "editor.DropdownTemplateValidation.c4d2ef65fd",
+      "text": "下拉框条目文字必须位于对应 Toggle 条目内：{0}。"
+    },
+    {
+      "key": "editor.DropdownTemplateValidation.d98d996fa4",
+      "text": "下拉框条目图像必须位于对应 Toggle 条目内：{0}。"
+    },
+    {
+      "key": "editor.ElementAuthoringWindow.0ae06aecdf",
+      "text": "TMP 文本：MUI.TMP 适配器程序集不可用。"
+    },
+    {
+      "key": "editor.ElementAuthoringWindow.26e0256cd8",
+      "text": "添加 MUI 控件适配器"
+    },
+    {
+      "key": "editor.ElementAuthoringWindow.29e3c4643d",
+      "text": "已添加 {0} 个适配器。请保存场景或预制体；撤销可恢复本批修改。"
+    },
+    {
+      "key": "editor.ElementAuthoringWindow.38399863b6",
+      "text": "添加所选适配器（支持撤销）"
+    },
+    {
+      "key": "editor.ElementAuthoringWindow.44cb005ee2",
+      "text": "根节点"
+    },
+    {
+      "key": "editor.ElementAuthoringWindow.49f6375235",
+      "text": "存在多个布局组件，请手动选择所需适配器。"
+    },
+    {
+      "key": "editor.ElementAuthoringWindow.4c72361bea",
+      "text": "添加适配器前预览原生 uGUI 控件。会排除嵌套视图、容器边界和嵌套预制体实例；编辑预制体请进入预制体模式。"
+    },
+    {
+      "key": "editor.ElementAuthoringWindow.57ec66460c",
+      "text": "存在多个控件，请手动选择适配器。"
+    },
+    {
+      "key": "editor.ElementAuthoringWindow.742f9c0260",
+      "text": "无法添加控件适配器："
+    },
+    {
+      "key": "editor.ElementAuthoringWindow.beb38a6ce0",
+      "text": "请在预制体模式打开预制体，再选择根节点。"
+    },
+    {
+      "key": "editor.ElementAuthoringWindow.cf61a83125",
+      "text": "挂载失败，已撤销本批组件，请查看控制台。"
+    },
+    {
+      "key": "editor.ElementAuthoringWindow.dd39801df2",
+      "text": "不支持此 TMP 控件，请手动选择适配器。"
+    },
+    {
+      "key": "editor.ElementAuthoringWindow.e52e414963",
+      "text": "TMP 控件：MUI.TMP 适配器程序集不可用。"
+    },
+    {
+      "key": "editor.ElementAuthoringWindow.e623e26a68",
+      "text": "存在丢失脚本，请先修复再添加适配器。"
+    },
+    {
+      "key": "editor.ElementAuthoringWindow.ea1c510d1d",
+      "text": "扫描"
+    },
+    {
+      "key": "editor.ElementAuthoringWindow.f27fa1ad5c",
+      "text": "MUI 控件适配"
+    },
+    {
+      "key": "editor.ElementNaming.0bbaa92a18",
+      "text": "命名规则必须返回非空、无首尾空白且不带 (Clone) 后缀的名字。"
+    },
+    {
+      "key": "editor.ElementNaming.621399f171",
+      "text": "命名类型必须继承 Element。"
+    },
+    {
+      "key": "editor.ElementNaming.75c2c05b0b",
+      "text": "命名规则在计算过程中被替换，请重新生成建议。"
+    },
+    {
+      "key": "editor.ElementNamingWindow.046d5fd2e9",
+      "text": "建议尚未应用。请审核名字和勾选项后再执行重命名。"
+    },
+    {
+      "key": "editor.ElementNamingWindow.20ca39694d",
+      "text": "扫描名称"
+    },
+    {
+      "key": "editor.ElementNamingWindow.25f9c635ef",
+      "text": "命名期间层级、组件或名字发生变化，请重新扫描。"
+    },
+    {
+      "key": "editor.ElementNamingWindow.281ad19dde",
+      "text": "此窗口只预览重命名。绑定声明引用这些名字，请同步修改相关源码。前缀仅作建议；排除嵌套视图内部，嵌套预制体名称保留但不编辑。请在预制体模式打开资产。"
+    },
+    {
+      "key": "editor.ElementNamingWindow.2c1f2dca62",
+      "text": "没有选择需要修改的名称。"
+    },
+    {
+      "key": "editor.ElementNamingWindow.358bb9962f",
+      "text": "MUI 控件命名"
+    },
+    {
+      "key": "editor.ElementNamingWindow.3ac473e9b6",
+      "text": "应用所选名称（支持撤销）"
+    },
+    {
+      "key": "editor.ElementNamingWindow.553f3cc103",
+      "text": "已重命名 {0} 个对象。请保存场景或预制体，并更新相关绑定声明；撤销可恢复本批修改。"
+    },
+    {
+      "key": "editor.ElementNamingWindow.5fb53e10b3",
+      "text": "建议名称 '{0}' 与其他控件对象冲突，未执行重命名。"
+    },
+    {
+      "key": "editor.ElementNamingWindow.668fbf85fb",
+      "text": "名称不能为空，不能有首尾空白，也不能以 (Clone) 结尾。"
+    },
+    {
+      "key": "editor.ElementNamingWindow.66a01cf520",
+      "text": "层级、组件或名称已变化，请重新扫描后再应用。"
+    },
+    {
+      "key": "editor.ElementNamingWindow.8f31895d55",
+      "text": "命名规则执行失败，保留原预览："
+    },
+    {
+      "key": "editor.ElementNamingWindow.98e9dc4d39",
+      "text": "层级、组件或名字已变化，请先重新扫描。"
+    },
+    {
+      "key": "editor.ElementNamingWindow.a5e3077f3f",
+      "text": "请进入预制体模式后再扫描。"
+    },
+    {
+      "key": "editor.ElementNamingWindow.ae93df9c64",
+      "text": "保留节点：视图根、嵌套预制体，或同一对象上存在多个适配器。"
+    },
+    {
+      "key": "editor.ElementNamingWindow.bae8c2d3dc",
+      "text": "重命名失败，已撤销本批修改，请查看控制台。"
+    },
+    {
+      "key": "editor.ElementNamingWindow.c3d72457bf",
+      "text": "生成唯一名称建议"
+    },
+    {
+      "key": "editor.ElementNamingWindow.d985880acf",
+      "text": "重命名 MUI 控件"
+    },
+    {
+      "key": "editor.ElementNamingWindow.dcc839a401",
+      "text": "视图"
+    },
+    {
+      "key": "editor.ElementNamingWindow.ef6c4a64c8",
+      "text": "共 {0} 个控件对象；{1} 个空名称；{2} 个重名。不同具体类型可同名，请通过视图契约校验检查实际歧义。"
+    },
+    {
+      "key": "editor.ElementNamingWindow.f1eab560bb",
+      "text": "重命名 MUI 控件"
+    },
+    {
+      "key": "editor.LoadingElementValidation.368fcebb32",
+      "text": "加载进度需要填充模式的 Image：{0}。"
+    },
+    {
+      "key": "editor.LoadingElementValidation.71eae1a677",
+      "text": "{0}必须位于其指示节点的{1}：{2}。"
+    },
+    {
+      "key": "editor.LoadingElementValidation.c3d13aadc0",
+      "text": "进度与不定进度节点必须位于独立分支：{0}。"
+    },
+    {
+      "key": "editor.LoadingElementValidation.c6205dce35",
+      "text": "指示节点必须是适配器的严格子节点：{0}。"
+    },
+    {
+      "key": "editor.LoadingElementValidation.e6eaf729ea",
+      "text": "加载文本不能位于会被条件隐藏的进度分支内：{0}。"
+    },
+    {
+      "key": "editor.LoadingElementValidation.ee5ca91704",
+      "text": "严格子层级"
+    },
+    {
+      "key": "editor.MUIDashboard.13d2975890",
+      "text": "找不到 MUI Dashboard 模板。"
+    },
+    {
+      "key": "editor.MUIDashboard.1797c05538",
+      "text": "{0}：{1}；界面更新：{2}"
+    },
+    {
+      "key": "editor.MUIDashboard.1cf88f53d4",
+      "text": " 页面门控与控件实际点击资格分别查看。"
+    },
+    {
+      "key": "editor.MUIDashboard.1e5827d7eb",
+      "text": "尚未初始化"
+    },
+    {
+      "key": "editor.MUIDashboard.329dce8f48",
+      "text": "当前场景没有 UIHost。"
+    },
+    {
+      "key": "editor.MUIDashboard.6015cd5b5f",
+      "text": "采集于 {0} · 宿主退出 {1} · 版本 {2}\n"
+    },
+    {
+      "key": "editor.MUIDashboard.788f44b794",
+      "text": "MUI 控制台"
+    },
+    {
+      "key": "editor.MUIDashboard.7d7704c517",
+      "text": "配置可直接编辑；运行快照需要运行模式与宿主初始化。"
+    },
+    {
+      "key": "editor.MUIDashboard.8c72555563",
+      "text": " 快照已截断。"
+    },
+    {
+      "key": "editor.MUIDashboard.Configuration.02c27b7054",
+      "text": "未选择配置资产。"
+    },
+    {
+      "key": "editor.MUIDashboard.Configuration.08f8a4af53",
+      "text": "创建 MUI 配置"
+    },
+    {
+      "key": "editor.MUIDashboard.Configuration.29a1fe691e",
+      "text": "请先选择场景中的 UIHost。"
+    },
+    {
+      "key": "editor.MUIDashboard.Configuration.4b62703008",
+      "text": "记录中 {0} · 保留 {1}/{2} · 旧事件覆盖 {3} · 通知丢弃 {4}"
+    },
+    {
+      "key": "editor.MUIDashboard.Configuration.735d2beebb",
+      "text": "选择配置资产保存位置"
+    },
+    {
+      "key": "editor.MUIDashboard.Configuration.a4664c33b1",
+      "text": "已绑定宿主配置。页面创建路由时使用 host.ResolvePolicy(...) 或传入 host.Settings。"
+    },
+    {
+      "key": "editor.MUIDashboard.Configuration.baf3aacd5d",
+      "text": "可使用上方资产选择器或“创建配置”。宿主未绑定资产时使用内置默认规则。"
+    },
+    {
+      "key": "editor.MUIDashboard.Configuration.d4116b321f",
+      "text": "需要进入 Play Mode 并初始化宿主后才能采集时间线。"
+    },
+    {
+      "key": "editor.MUIDashboard.Configuration.d81da0cfb4",
+      "text": "请停止运行后绑定宿主配置。"
+    },
+    {
+      "key": "editor.MUIDashboard.Configuration.dd9a6ee5a2",
+      "text": "配置校验通过。"
+    },
+    {
+      "key": "editor.MUIDashboard.Configuration.f5a41d1927",
+      "text": "尚无追踪快照 · 关闭窗口不会停止记录"
+    },
+    {
+      "key": "editor.MUIDashboard.Pages.0d996b74d4",
+      "text": "诊断 {0:N} · {1}"
+    },
+    {
+      "key": "editor.MUIDashboard.Pages.179b91a07b",
+      "text": "多实例 {0} · 上限 {1} · 溢出 {2} · 已有实例 {3}\n"
+    },
+    {
+      "key": "editor.MUIDashboard.Pages.1a7b45484e",
+      "text": "定位页面并打开 View Inspector"
+    },
+    {
+      "key": "editor.MUIDashboard.Pages.1d9b547915",
+      "text": "依赖与拥有者"
+    },
+    {
+      "key": "editor.MUIDashboard.Pages.24c1f7ab67",
+      "text": "返回历史（从旧到新）"
+    },
+    {
+      "key": "editor.MUIDashboard.Pages.32fa308cb7",
+      "text": "显式拥有者 {0} · 父拥有者 {1} · 直接依赖 {2}"
+    },
+    {
+      "key": "editor.MUIDashboard.Pages.364909905c",
+      "text": "首次就绪 {0} · 降级 {1} · 失败 {2}"
+    },
+    {
+      "key": "editor.MUIDashboard.Pages.36ecf025c0",
+      "text": "输入阻挡原因已截断。"
+    },
+    {
+      "key": "editor.MUIDashboard.Pages.3a3912b23e",
+      "text": "拥有者"
+    },
+    {
+      "key": "editor.MUIDashboard.Pages.3b0f2c1681",
+      "text": "显示位置 {0} · 层级 {1} ({2}) · 顺序 {3}\n"
+    },
+    {
+      "key": "editor.MUIDashboard.Pages.452c7b10d5",
+      "text": "页面"
+    },
+    {
+      "key": "editor.MUIDashboard.Pages.498b52a901",
+      "text": "未确认清理责任"
+    },
+    {
+      "key": "editor.MUIDashboard.Pages.7409a60806",
+      "text": "未指定"
+    },
+    {
+      "key": "editor.MUIDashboard.Pages.74ae6efb2d",
+      "text": "绑定校验、资源键槽与实际射线查询可在定位后的 View Inspector 中操作。"
+    },
+    {
+      "key": "editor.MUIDashboard.Pages.7767404865",
+      "text": "依赖"
+    },
+    {
+      "key": "editor.MUIDashboard.Pages.7cdf69142a",
+      "text": "有效 {0} · 层级激活 {1} · 可见 {2} · 输入资格 {3}"
+    },
+    {
+      "key": "editor.MUIDashboard.Pages.81145b2e23",
+      "text": "责任 {0:N} · {1} · {2} · 尝试 {3} · 可重试 {4}\n{5}"
+    },
+    {
+      "key": "editor.MUIDashboard.Pages.81dfa1082d",
+      "text": "隐藏来源"
+    },
+    {
+      "key": "editor.MUIDashboard.Pages.843ed771bf",
+      "text": "代码配置"
+    },
+    {
+      "key": "editor.MUIDashboard.Pages.92d0953bb6",
+      "text": "父拥有者已截断，当前详情只保留前 128 条。"
+    },
+    {
+      "key": "editor.MUIDashboard.Pages.9436cba475",
+      "text": "资源准备：总数 {0} · 等待 {1} · 失败 {2} · 已提交 {3}"
+    },
+    {
+      "key": "editor.MUIDashboard.Pages.98d5200f51",
+      "text": "尚未发布"
+    },
+    {
+      "key": "editor.MUIDashboard.Pages.a69ef9d4c5",
+      "text": "采集页面输入与资源准备"
+    },
+    {
+      "key": "editor.MUIDashboard.Pages.a800e96c6e",
+      "text": "宿主 "
+    },
+    {
+      "key": "editor.MUIDashboard.Pages.b4929391ad",
+      "text": "焦点"
+    },
+    {
+      "key": "editor.MUIDashboard.Pages.b69ebb0273",
+      "text": "局部输入阻挡 {0} · 已释放 {1}"
+    },
+    {
+      "key": "editor.MUIDashboard.Pages.ba126df79f",
+      "text": "缓存 {0} · Tick 暂停 {1} · 准备超时 {2}s · 清理超时 {3}s"
+    },
+    {
+      "key": "editor.MUIDashboard.Pages.bba38edb8b",
+      "text": "页面尚未取得原生 View，或已关闭；请重新采集。"
+    },
+    {
+      "key": "editor.MUIDashboard.Pages.c67c6dbd0d",
+      "text": "输入阻挡来源"
+    },
+    {
+      "key": "editor.MUIDashboard.Pages.cc6eee6c18",
+      "text": "资源准备条目已截断。"
+    },
+    {
+      "key": "editor.MUIDashboard.Pages.cef9cad2de",
+      "text": "最终策略"
+    },
+    {
+      "key": "editor.MUIDashboard.Pages.d2d0fcf76e",
+      "text": "状态 {0} · 清理 {1} · 操作 {2}\n资源 {3} / {4}"
+    },
+    {
+      "key": "editor.MUIDashboard.Pages.d7d27662cb",
+      "text": "数值层级"
+    },
+    {
+      "key": "editor.MUIDashboard.Pages.d9ccaad9e7",
+      "text": "局部可见 {0} · 局部允许输入 {1} · 限制 {2}"
+    },
+    {
+      "key": "editor.MUIDashboard.Pages.dac2379812",
+      "text": "配置 {0} · 预设 {1}\n"
+    },
+    {
+      "key": "editor.MUIDashboard.Pages.dbc43ed047",
+      "text": "此页面不在快照中，请重新采集。"
+    },
+    {
+      "key": "editor.MUIDashboard.Pages.e0d917c75f",
+      "text": "宿主可见 {0} · 宿主允许输入 {1} · 焦点 {2}"
+    },
+    {
+      "key": "editor.MUIDashboard.Pages.eb0abcb297",
+      "text": "原生页面采集于 {0:HH:mm:ss}\n"
+    },
+    {
+      "key": "editor.MUIDashboard.Pages.ec9b640602",
+      "text": "页面 View 当前不可用，请重新采集。"
+    },
+    {
+      "key": "editor.MUIDashboard.Pages.f017a89dcd",
+      "text": "覆盖 {0} · 模态 {1} · 获取焦点 {2} · 返回 {3}\n"
+    },
+    {
+      "key": "editor.MUIDashboard.Pages.f554f1a3bf",
+      "text": "：无"
+    },
+    {
+      "key": "editor.MUIDashboard.Pages.fcab780068",
+      "text": "准备完成 {0} · 激活提交 {1} · 在途命令 {2}\n"
+    },
+    {
+      "key": "editor.MUIDashboard.Pages.ff516ae1fc",
+      "text": "句柄 {0}\n提交版本 {1} · 历史索引 {2} · 依赖降级 {3}"
+    },
+    {
+      "key": "editor.MUIDashboard.Report.090aca7127",
+      "text": "#{0} {1} · {2} · 显示位置 {3} · 层 {4}"
+    },
+    {
+      "key": "editor.MUIDashboard.Report.2aadcc0c7c",
+      "text": "可见 {0} · 交互 {1} · 焦点 {2} · 隐藏来源 #{3} · 输入阻挡 #{4}"
+    },
+    {
+      "key": "editor.MUIDashboard.Report.516bc8adb6",
+      "text": "配置 {0} · 预设 {1} · 层级 {2} · 覆盖 {3} · 模态 {4}"
+    },
+    {
+      "key": "editor.MUIDashboard.Report.7409a60806",
+      "text": "未指定"
+    },
+    {
+      "key": "editor.MUIDashboard.Report.8d5d681c62",
+      "text": "返回历史（从旧到新）："
+    },
+    {
+      "key": "editor.MUIDashboard.Report.a800e96c6e",
+      "text": "宿主 "
+    },
+    {
+      "key": "editor.MUIDashboard.Report.ae0eb0ae7a",
+      "text": "责任 {0:N} · {1} · {2} · 诊断 {3:N}"
+    },
+    {
+      "key": "editor.MUIDashboard.Report.d5bb561464",
+      "text": "页面按显示位置从顶到底排列："
+    },
+    {
+      "key": "editor.MUIDashboard.Report.dc709181e1",
+      "text": "截断：实例 {0} · 历史 {1} · 清理责任 {2}"
+    },
+    {
+      "key": "editor.MUIDashboard.bd66520cbe",
+      "text": "正在转场或提交，状态尚未收敛。"
+    },
+    {
+      "key": "editor.MUIDashboard.c3f11760c5",
+      "text": "#{0} {1}\n层 {2} · {3} · 焦点 {4}"
+    },
+    {
+      "key": "editor.MUIDashboard.c6d125d5b7",
+      "text": "已初始化"
+    },
+    {
+      "key": "editor.MUIDashboard.ced796a048",
+      "text": "页面 {0}/{1} · 历史 {2}/{3} · 焦点 #{4}\n"
+    },
+    {
+      "key": "editor.MUIDashboard.edf200a690",
+      "text": "导航状态已收敛。"
+    },
+    {
+      "key": "editor.MUIDashboard.f0f6586364",
+      "text": "超时未清理 {0} · 当前未确认责任 {1} · 历史清理失败 {2}"
+    },
+    {
+      "key": "editor.MUIDashboard.fbfc4d6291",
+      "text": "请求排队 {0} · 延后 {1} · 缓存 {2} · 缓存释放中 {3} · 预加载 {4}\n"
+    },
+    {
+      "key": "editor.MUISettingsInspector.3404498efd",
+      "text": "项目默认规则、页面预设和显式覆盖共同决定最终策略。覆盖项中启用的字段才会替换默认值；命名层级由层级列表解析为排序值。"
+    },
+    {
+      "key": "editor.MUISettingsInspector.b26286234b",
+      "text": "校验配置"
+    },
+    {
+      "key": "editor.MUISettingsInspector.dd9a6ee5a2",
+      "text": "配置校验通过。"
+    },
+    {
+      "key": "editor.NotificationsElementValidation.143a5b79bd",
+      "text": "通知信息缺少 Text：{0}。"
+    },
+    {
+      "key": "editor.NotificationsElementValidation.71eae1a677",
+      "text": "{0}必须位于其指示节点的{1}：{2}。"
+    },
+    {
+      "key": "editor.NotificationsElementValidation.7b34326d17",
+      "text": "关闭按钮"
+    },
+    {
+      "key": "editor.NotificationsElementValidation.c6205dce35",
+      "text": "指示节点必须是适配器的严格子节点：{0}。"
+    },
+    {
+      "key": "editor.NotificationsElementValidation.ee5ca91704",
+      "text": "严格子层级"
+    },
+    {
+      "key": "editor.OverlayPrefabWizard.28d14ed8ee",
+      "text": "无法保存悬浮界面预制体。"
+    },
+    {
+      "key": "editor.OverlayPrefabWizard.28ea9043a7",
+      "text": "准备预制体期间，目标路径已被创建。"
+    },
+    {
+      "key": "editor.OverlayPrefabWizard.3d439e23e6",
+      "text": "创建 MUI "
+    },
+    {
+      "key": "editor.OverlayPrefabWizard.43e83309d7",
+      "text": "MUI 不会覆盖已有预制体，请选择新的路径。"
+    },
+    {
+      "key": "editor.OverlayPrefabWizard.613a9a6df1",
+      "text": "提示文本"
+    },
+    {
+      "key": "editor.OverlayPrefabWizard.a587f03b9b",
+      "text": "请选择新的预制体保存路径。"
+    },
+    {
+      "key": "editor.OverlayPrefabWizard.da2eb576b5",
+      "text": "主要操作"
+    },
+    {
+      "key": "editor.OverlayPrefabWizard.dbdebc5676",
+      "text": "次要操作"
+    },
+    {
+      "key": "editor.PageAssemblyInspection.0015a79466",
+      "text": "目标祖先目录存在多个程序集定义或引用："
+    },
+    {
+      "key": "editor.PageAssemblyInspection.11f11aca60",
+      "text": "无法检查目标程序集："
+    },
+    {
+      "key": "editor.PageAssemblyInspection.210d456125",
+      "text": "缺少程序集引用："
+    },
+    {
+      "key": "editor.PageAssemblyInspection.2737b0424d",
+      "text": "当前编译选项未包含 MUI.Generators.dll，请检查 RoslynAnalyzer 标签及其作用范围。"
+    },
+    {
+      "key": "editor.PageAssemblyInspection.38e6e62259",
+      "text": "目标程序集只包含 Editor 平台，请选择运行时程序集目录。"
+    },
+    {
+      "key": "editor.PageAssemblyInspection.5d3a39daa3",
+      "text": "目标属于仅编辑器程序集，游戏页面应创建在运行时程序集目录。"
+    },
+    {
+      "key": "editor.PageAssemblyInspection.840967a1d8",
+      "text": "无法解析程序集引用："
+    },
+    {
+      "key": "editor.PageAssemblyInspection.c754dd93d7",
+      "text": "程序集引用文件没有有效 reference。"
+    },
+    {
+      "key": "editor.PageAssemblyInspection.c7e47c0af2",
+      "text": "目标程序集禁用了引擎引用，不能生成依赖 Unity 控件的页面绑定。"
+    },
+    {
+      "key": "editor.PageAssemblyInspection.e652119992",
+      "text": "目标尚无可用编译快照，可能是空程序集或当前平台/宏未启用。引用和生成器未验证；创建后必须检查 Unity 编译结果。"
+    },
+    {
+      "key": "editor.PageAssemblyInspection.e80c02e5ee",
+      "text": "程序集定义没有有效 name。"
+    },
+    {
+      "key": "editor.PageTextBackend.19baaca2f4",
+      "text": "uGUI 文本"
+    },
+    {
+      "key": "editor.PageTextBackend.36e1635db2",
+      "text": "文本 Element 必须是公开、非嵌套、非泛型的具体类型，并有可读写的 string Content 属性。"
+    },
+    {
+      "key": "editor.PageTextBackend.865c6e02de",
+      "text": "文本模板没有返回正确挂载和命名的控件。"
+    },
+    {
+      "key": "editor.PageTextBackend.ce0434eb31",
+      "text": "文本模板标识已注册："
+    },
+    {
+      "key": "editor.PageTextBackend.cff54d9fa2",
+      "text": "文本模板需要稳定标识和显示名称。"
+    },
+    {
+      "key": "editor.PageWizard.0156b77f5b",
+      "text": "创建失败，已移除本批新目录，请查看控制台。"
+    },
+    {
+      "key": "editor.PageWizard.02149f5808",
+      "text": "View'，并使用 "
+    },
+    {
+      "key": "editor.PageWizard.03c3f68152",
+      "text": "内置默认"
+    },
+    {
+      "key": "editor.PageWizard.0680c075b1",
+      "text": "保存 View Prefab 失败。"
+    },
+    {
+      "key": "editor.PageWizard.0706f9cb0a",
+      "text": "页面策略"
+    },
+    {
+      "key": "editor.PageWizard.19288123a4",
+      "text": "类型化参数与结果"
+    },
+    {
+      "key": "editor.PageWizard.1fa1a10b63",
+      "text": "配置来源"
+    },
+    {
+      "key": "editor.PageWizard.245afa969c",
+      "text": "页面名只能包含英文字母、数字和下划线，且不能以数字开头。"
+    },
+    {
+      "key": "editor.PageWizard.275da80635",
+      "text": "Page.CreateRoute(host.Settings)。类型化结果需由项目补充完成命令。"
+    },
+    {
+      "key": "editor.PageWizard.2ed479b29e",
+      "text": "请选择 Assets 下已存在的目录。"
+    },
+    {
+      "key": "editor.PageWizard.3715f68b64",
+      "text": "路由策略"
+    },
+    {
+      "key": "editor.PageWizard.38e702fab3",
+      "text": "关联已有资产："
+    },
+    {
+      "key": "editor.PageWizard.3fd47edce4",
+      "text": "关闭"
+    },
+    {
+      "key": "editor.PageWizard.4d0f13b4e9",
+      "text": "解析后的策略"
+    },
+    {
+      "key": "editor.PageWizard.4d698da8c0",
+      "text": "已有父目录"
+    },
+    {
+      "key": "editor.PageWizard.4f3f610097",
+      "text": "创建和清理均失败，请检查新目录："
+    },
+    {
+      "key": "editor.PageWizard.534ad4e758",
+      "text": "文本组件"
+    },
+    {
+      "key": "editor.PageWizard.576a4a3ca2",
+      "text": "已创建 "
+    },
+    {
+      "key": "editor.PageWizard.593bb3ad77",
+      "text": "创建新页面目录、Prefab 和可编辑源码。目标程序集需要 MUI.Core、MUI.Resources、MUI.Navigation、MUI.UGUI 和绑定生成器；选择 TMP 时还需引用 MUI.TMP。Prefab 应放在 UIHost Canvas 下，创建后在资源提供方或 UIHost 目录登记资源键。页面生命周期使用统一异步入口，本地准备可立即完成。"
+    },
+    {
+      "key": "editor.PageWizard.5a814a8beb",
+      "text": "MUI 页面向导"
+    },
+    {
+      "key": "editor.PageWizard.7fe8b9bce7",
+      "text": "创建路由时传入 UIHost.Settings；配置在创建时解析，活动页面保持原策略。"
+    },
+    {
+      "key": "editor.PageWizard.89b4e4e0de",
+      "text": "{0} ({1}) / {2} / 模态={3}"
+    },
+    {
+      "key": "editor.PageWizard.8a83cce53b",
+      "text": "即将创建的文件"
+    },
+    {
+      "key": "editor.PageWizard.Assembly.06a3c25a58",
+      "text": "程序集定义"
+    },
+    {
+      "key": "editor.PageWizard.Assembly.3a7158af88",
+      "text": "重新检查程序集配置"
+    },
+    {
+      "key": "editor.PageWizard.Assembly.4eaf225048",
+      "text": "尚未确定"
+    },
+    {
+      "key": "editor.PageWizard.Assembly.aeb3fe5fac",
+      "text": "目标程序集"
+    },
+    {
+      "key": "editor.PageWizard.Assembly.b3f8667ef3",
+      "text": "当前编译快照包含所需引用和绑定生成器；生成源码仍需通过实际编译。"
+    },
+    {
+      "key": "editor.PageWizard.ExistingView.2585437490",
+      "text": "非交互提示的 Graphic 必须关闭 Raycast Target；已有 Prefab 不会被自动修改。"
+    },
+    {
+      "key": "editor.PageWizard.ExistingView.358fc7efeb",
+      "text": "复用原 Prefab，仅在新页面目录生成源码。请按原控件选择文本组件；原资产不修改。创建后仍需将页面资源键映射到该 Prefab。"
+    },
+    {
+      "key": "editor.PageWizard.ExistingView.36ea1f9e66",
+      "text": "请填写原 Prefab 中的标题和关闭按钮 Element 名称。"
+    },
+    {
+      "key": "editor.PageWizard.ExistingView.593ff81861",
+      "text": "关联已有 View（可选）"
+    },
+    {
+      "key": "editor.PageWizard.ExistingView.885a18c4c8",
+      "text": "非交互提示不能包含 Selectable 控件；已有 Prefab 不会被自动修改。"
+    },
+    {
+      "key": "editor.PageWizard.ExistingView.9267775c67",
+      "text": "关闭按钮 Element 名称"
+    },
+    {
+      "key": "editor.PageWizard.ExistingView.b0b19dece0",
+      "text": "已有 View 校验失败："
+    },
+    {
+      "key": "editor.PageWizard.ExistingView.b5f1d7bd40",
+      "text": "已有 Prefab 根节点必须包含 View 和 RectTransform。"
+    },
+    {
+      "key": "editor.PageWizard.ExistingView.d95a7db4f5",
+      "text": "请选择项目中的普通 Prefab 或 Variant 根资产，不接受场景对象、模型或 Prefab 子节点。"
+    },
+    {
+      "key": "editor.PageWizard.ExistingView.e7310d8579",
+      "text": "已有 Prefab 不符合页面骨架契约：\n"
+    },
+    {
+      "key": "editor.PageWizard.ExistingView.f7f2eaad00",
+      "text": "标题 Element 名称"
+    },
+    {
+      "key": "editor.PageWizard.b93a5d933f",
+      "text": "页面目录已存在，请修改名称或父目录；不会覆盖已有内容。"
+    },
+    {
+      "key": "editor.PageWizard.b96a4455b0",
+      "text": "无法创建页面目录。"
+    },
+    {
+      "key": "editor.PageWizard.c37f7fe785",
+      "text": "MUI 配置"
+    },
+    {
+      "key": "editor.PageWizard.c8e5200b74",
+      "text": "命名空间应由合法标识符组成，以点分隔。"
+    },
+    {
+      "key": "editor.PageWizard.ca7dc34857",
+      "text": "无法创建页面子目录。"
+    },
+    {
+      "key": "editor.PageWizard.cb599b951d",
+      "text": "。请登记资源键 '"
+    },
+    {
+      "key": "editor.PageWizard.cf209c44b1",
+      "text": "创建 Presenter"
+    },
+    {
+      "key": "editor.PageWizard.db772f3ff7",
+      "text": "命名空间"
+    },
+    {
+      "key": "editor.PageWizard.dd8fd8a18e",
+      "text": "页面名称"
+    },
+    {
+      "key": "editor.PageWizard.e3acd6e42a",
+      "text": "所选文本模板不可用，请启用对应模块或重新选择。"
+    },
+    {
+      "key": "editor.PageWizard.f6f87e2c80",
+      "text": "创建页面"
+    },
+    {
+      "key": "editor.RouteGraphSnapshot.01c47b74d0",
+      "text": "未收录"
+    },
+    {
+      "key": "editor.RouteGraphSnapshot.158410a533",
+      "text": "采集时间：{0}；静态有效：{1}；总节点：{2}；截断：{3}"
+    },
+    {
+      "key": "editor.RouteGraphSnapshot.51cb866ffa",
+      "text": "无效目标"
+    },
+    {
+      "key": "editor.RouteGraphSnapshot.537352400c",
+      "text": "可选"
+    },
+    {
+      "key": "editor.RouteGraphSnapshot.726b6750c3",
+      "text": "多实例={0}，上限={1}，焦点={2}，缓存={3}"
+    },
+    {
+      "key": "editor.RouteGraphSnapshot.92707d3318",
+      "text": "必需"
+    },
+    {
+      "key": "editor.RouteGraphSnapshot.9cc9fa8b20",
+      "text": "MUI 路由依赖图：{0}"
+    },
+    {
+      "key": "editor.RouteGraphSnapshot.9d4ce01625",
+      "text": "#{0} {1} | 层级={2} | {3}"
+    },
+    {
+      "key": "editor.RouteGraphSnapshot.b375d3caee",
+      "text": "此报告不验证运行时参数、资源可用性或跨根共享组合。"
+    },
+    {
+      "key": "editor.RouteGraphSnapshot.c4d58b520a",
+      "text": "错误 {0} / {1}：{2}"
+    },
+    {
+      "key": "editor.RouteGraphWindow.0133cebb0b",
+      "text": "依赖图窗口缺少模板："
+    },
+    {
+      "key": "editor.RouteGraphWindow.Details.01c47b74d0",
+      "text": "未收录"
+    },
+    {
+      "key": "editor.RouteGraphWindow.Details.273b96485f",
+      "text": "无效顺序："
+    },
+    {
+      "key": "editor.RouteGraphWindow.Details.2d40633e66",
+      "text": "父拥有者（指向当前路由）"
+    },
+    {
+      "key": "editor.RouteGraphWindow.Details.404b2b7b9c",
+      "text": "此校验根的可达图中没有父拥有者。"
+    },
+    {
+      "key": "editor.RouteGraphWindow.Details.40e06e6a94",
+      "text": "跨层显示仍按 Layer 排序"
+    },
+    {
+      "key": "editor.RouteGraphWindow.Details.4804324f1f",
+      "text": "没有直接依赖。"
+    },
+    {
+      "key": "editor.RouteGraphWindow.Details.5853629b17",
+      "text": "必需，失败关闭父链"
+    },
+    {
+      "key": "editor.RouteGraphWindow.Details.5e80d84deb",
+      "text": "层级：{0}"
+    },
+    {
+      "key": "editor.RouteGraphWindow.Details.655f0f0b1a",
+      "text": "资源：{0}"
+    },
+    {
+      "key": "editor.RouteGraphWindow.Details.695a39529f",
+      "text": "直接依赖（当前路由指向）"
+    },
+    {
+      "key": "editor.RouteGraphWindow.Details.76f5a111c9",
+      "text": "本图静态问题"
+    },
+    {
+      "key": "editor.RouteGraphWindow.Details.7cbe752ca7",
+      "text": "父后"
+    },
+    {
+      "key": "editor.RouteGraphWindow.Details.840cc3e250",
+      "text": "父拥有者 → 当前路由 → 直接依赖。点击关系可跳转；同键不同定义以编号区分。"
+    },
+    {
+      "key": "editor.RouteGraphWindow.Details.936ac0c9d9",
+      "text": "当前快照已截断，关系列表可能不完整。复制报告会保留已采集的关系与截断标记。"
+    },
+    {
+      "key": "editor.RouteGraphWindow.Details.9b73c23f45",
+      "text": "共 {0} 条关系，此处展示前 {1} 条；其余已采集关系可从复制报告查看。"
+    },
+    {
+      "key": "editor.RouteGraphWindow.Details.a4c1e252ea",
+      "text": "父前"
+    },
+    {
+      "key": "editor.RouteGraphWindow.Details.d3fc914f82",
+      "text": "同层按依赖顺序约束"
+    },
+    {
+      "key": "editor.RouteGraphWindow.Details.d5adb4d085",
+      "text": "可选，允许缺席降级"
+    },
+    {
+      "key": "editor.RouteGraphWindow.Details.efbcfd92f1",
+      "text": "未发现静态声明错误；这不证明运行时参数或资源一定可用。"
+    },
+    {
+      "key": "editor.RouteGraphWindow.a55f3f74c9",
+      "text": " · 快照或问题列表已截断，不代表完整图"
+    },
+    {
+      "key": "editor.RouteGraphWindow.a5db00d95d",
+      "text": "静态校验通过"
+    },
+    {
+      "key": "editor.RouteGraphWindow.afa6c08140",
+      "text": "#{0} {1}\n层级 {2}"
+    },
+    {
+      "key": "editor.RouteGraphWindow.be20609b83",
+      "text": "MUI 路由依赖图"
+    },
+    {
+      "key": "editor.RouteGraphWindow.ce2152f7d4",
+      "text": "存在静态错误"
+    },
+    {
+      "key": "editor.RouteGraphWindow.dd7478c175",
+      "text": "{0} · 节点 {1}/{2} · 关系 {3} · 问题 {4} · {5}"
+    },
+    {
+      "key": "editor.RouteGraphWindow.efe8e45d2f",
+      "text": "未采集路由元数据。"
+    },
+    {
+      "key": "editor.RouteGraphWindow.fbc36492c3",
+      "text": "请提供 1 至 32 个路由根。"
+    },
+    {
+      "key": "editor.TMPElementValidation.1a3adba300",
+      "text": "TMP 输入框文字必须位于其视口子层级内"
+    },
+    {
+      "key": "editor.TMPElementValidation.1ca7e4bdba",
+      "text": "TMP 输入框占位文字不能与可编辑文字共用组件"
+    },
+    {
+      "key": "editor.TMPElementValidation.1d8c5c36f6",
+      "text": "TMP 输入框缺少文字视口"
+    },
+    {
+      "key": "editor.TMPElementValidation.1df8e0ccfc",
+      "text": "TMP 输入框文字视口必须位于其层级内"
+    },
+    {
+      "key": "editor.TMPElementValidation.1f32665973",
+      "text": "TMP 输入框占位引用不能跨越 View 边界"
+    },
+    {
+      "key": "editor.TMPElementValidation.2de1131ac8",
+      "text": "TMP 输入框视口引用不能跨越 View 边界"
+    },
+    {
+      "key": "editor.TMPElementValidation.4969873d55",
+      "text": "TMP 输入适配器需要 TMP_InputField"
+    },
+    {
+      "key": "editor.TMPElementValidation.5e17708354",
+      "text": "TMP 文本需要同节点的 TextMeshProUGUI"
+    },
+    {
+      "key": "editor.TMPElementValidation.8b054a99fa",
+      "text": "TMP 输入框占位文字必须位于其视口内"
+    },
+    {
+      "key": "editor.TMPElementValidation.e476e0fbaf",
+      "text": "TMP 输入框缺少文字组件"
+    },
+    {
+      "key": "editor.TMPElementValidation.e88edcb824",
+      "text": "TMP 下拉框适配器需要 TMP_Dropdown"
+    },
+    {
+      "key": "editor.TMPElementValidation.fbfd3003d5",
+      "text": "TMP 输入框文字引用不能跨越 View 边界"
+    },
+    {
+      "key": "editor.TMPElementValidation.fd176822a0",
+      "text": "TMP 输入框需要 uGUI 文字组件"
+    },
+    {
+      "key": "editor.TMPPageTextBackend.539eed99df",
+      "text": "请先导入 TMP 基础资源，并在 TMP Settings 中配置已保存的默认字体资产。"
+    },
+    {
+      "key": "editor.TabsElementValidation.00d63bf64b",
+      "text": "Tab 按钮必须位于 TabBar 子层级且不能兼作模板：{0}，键 '{1}'。"
+    },
+    {
+      "key": "editor.TabsElementValidation.00fb482d2d",
+      "text": "TabBar 必须排在同级内容区之后，才能显示在内容上方：{0}。"
+    },
+    {
+      "key": "editor.TabsElementValidation.33893eed55",
+      "text": "重试按钮"
+    },
+    {
+      "key": "editor.TabsElementValidation.3e961f144a",
+      "text": "Tab 按钮模板不能配置持久化点击事件：{0}。"
+    },
+    {
+      "key": "editor.TabsElementValidation.4996565283",
+      "text": "内容区 Canvas 不能启用 Override Sorting：{0}。"
+    },
+    {
+      "key": "editor.TabsElementValidation.58094f5945",
+      "text": "加载提示"
+    },
+    {
+      "key": "editor.TabsElementValidation.72d62d1409",
+      "text": "同一个 Button 不能绑定多个 Tab 条目：{0}，键 '{1}'。"
+    },
+    {
+      "key": "editor.TabsElementValidation.8c7ec59497",
+      "text": "错误提示"
+    },
+    {
+      "key": "editor.TabsElementValidation.904f504969",
+      "text": "Tab 键必须非空且唯一：{0}，键 '{1}'。"
+    },
+    {
+      "key": "editor.TabsElementValidation.a5417c403b",
+      "text": "Tab 条目缺少 Button：{0}，键 '{1}'。"
+    },
+    {
+      "key": "editor.TabsElementValidation.b0057ac28f",
+      "text": "异步内容区必须具有子级 ContentHost：{0}。"
+    },
+    {
+      "key": "editor.TabsElementValidation.c4c7744b46",
+      "text": "Tab 选择标记必须是对应按钮的严格子节点：{0}，键 '{1}'。"
+    },
+    {
+      "key": "editor.TabsElementValidation.d12c877d65",
+      "text": "Tab 按钮模板必须保持未激活：{0}。"
+    },
+    {
+      "key": "editor.TabsElementValidation.d8253c485e",
+      "text": "Tab 按钮模板不能包含 MUI View 或 Element：{0}。"
+    },
+    {
+      "key": "editor.TabsElementValidation.e307f11e2f",
+      "text": "{0}必须位于内容区内、ContentHost 外，且不能包含 ContentHost：{1}。"
+    },
+    {
+      "key": "editor.UIBuildCatalog.3b1f870adc",
+      "text": "单个 UI 构建目录最多登记 2048 个页面。"
+    },
+    {
+      "key": "editor.UIBuildCatalog.90e3c22510",
+      "text": "构建目录采集已经结束。"
+    },
+    {
+      "key": "editor.UIBuildCatalog.92487267c4",
+      "text": "构建页面必须提供路由、Prefab 和绑定 Manifest。"
+    },
+    {
+      "key": "editor.UIBuildCatalog.b403f3aa8b",
+      "text": "同一路由不能重复登记到构建目录："
+    },
+    {
+      "key": "editor.UIBuildCatalog.c378f5ca0a",
+      "text": "绑定 Manifest 的模型类型与路由不一致。"
+    },
+    {
+      "key": "editor.UIBuildValidation.061c7b88d2",
+      "text": "：依赖路由尚未登记 Prefab/Manifest："
+    },
+    {
+      "key": "editor.UIBuildValidation.06e2bd7c7c",
+      "text": "Prefab 根缺少 View 或 RectTransform。"
+    },
+    {
+      "key": "editor.UIBuildValidation.20787e9cdf",
+      "text": "UI 构建校验不能重入。"
+    },
+    {
+      "key": "editor.UIBuildValidation.4a2b85f80b",
+      "text": "校验期间不能修改 UI 构建目录登记。"
+    },
+    {
+      "key": "editor.UIBuildValidation.81196b916d",
+      "text": "：已登记目录未提供任何页面。"
+    },
+    {
+      "key": "editor.UIBuildValidation.83ee63aae8",
+      "text": "：路由图问题已截断，请先修复现有问题后重新校验。"
+    },
+    {
+      "key": "editor.UIBuildValidation.90508dc602",
+      "text": "目录需要不超过 128 字符的标识和采集回调。"
+    },
+    {
+      "key": "editor.UIBuildValidation.99a69df3cd",
+      "text": "：同一资源键和版本关联到不同 Prefab："
+    },
+    {
+      "key": "editor.UIBuildValidation.a776bc1b72",
+      "text": "：目录采集或校验失败："
+    },
+    {
+      "key": "editor.UIBuildValidation.c935d0e33a",
+      "text": "页面必须关联普通或 Variant Prefab 根资产。"
+    },
+    {
+      "key": "editor.UIBuildValidation.e213655721",
+      "text": "：多个不同路由使用同一键："
+    },
+    {
+      "key": "editor.UIBuildValidation.fcab6aa44c",
+      "text": "UI 构建目录数量超过 32。"
+    },
+    {
+      "key": "editor.UIBuildValidationReport.0dbf27f994",
+      "text": "未登记 UI 构建目录，本次未验证项目页面覆盖范围。"
+    },
+    {
+      "key": "editor.UIBuildValidationReport.0fb3e9344a",
+      "text": "，页面 "
+    },
+    {
+      "key": "editor.UIBuildValidationReport.60b24dd7ab",
+      "text": "问题超过报告上限，后续明细已省略；本次校验不通过。"
+    },
+    {
+      "key": "editor.UIBuildValidationReport.b79876b776",
+      "text": "MUI 构建校验：目录 "
+    },
+    {
+      "key": "editor.UIBuildValidationReport.c636b7b038",
+      "text": "，路由 "
+    },
+    {
+      "key": "editor.UIHostInspector.07564e6524",
+      "text": "未初始化"
+    },
+    {
+      "key": "editor.UIHostInspector.0760284bc7",
+      "text": "自动更新界面"
+    },
+    {
+      "key": "editor.UIHostInspector.15bfd7c74a",
+      "text": "默认提供方挂载页面的节点；为空时使用宿主自身的 RectTransform。"
+    },
+    {
+      "key": "editor.UIHostInspector.20fe85fc53",
+      "text": "编辑模式"
+    },
+    {
+      "key": "editor.UIHostInspector.2b9aba6e39",
+      "text": "预制体条目"
+    },
+    {
+      "key": "editor.UIHostInspector.6447c4dd81",
+      "text": "页面挂载节点"
+    },
+    {
+      "key": "editor.UIHostInspector.652ac53466",
+      "text": "打开控制台"
+    },
+    {
+      "key": "editor.UIHostInspector.6a909f3547",
+      "text": "项目默认策略与层级；请在宿主初始化前绑定。"
+    },
+    {
+      "key": "editor.UIHostInspector.74a883a037",
+      "text": "配置资产"
+    },
+    {
+      "key": "editor.UIHostInspector.899df7e244",
+      "text": "已退出"
+    },
+    {
+      "key": "editor.UIHostInspector.900d3819f9",
+      "text": "本地 Prefab 目录"
+    },
+    {
+      "key": "editor.UIHostInspector.c27f372ac4",
+      "text": "每帧自动处理界面请求并更新界面逻辑。关闭后需通过代码调用 UIHost.AdvanceFrame。"
+    },
+    {
+      "key": "editor.UIHostInspector.c6d125d5b7",
+      "text": "已初始化"
+    },
+    {
+      "key": "editor.UIHostInspector.cd9b6f27a4",
+      "text": "默认提供方从此目录加载页面；使用外部 Provider 时由项目管理资源。"
+    },
+    {
+      "key": "editor.UIHostInspector.d6e61888b0",
+      "text": "高级"
+    },
+    {
+      "key": "editor.UIHostInspector.f23309c686",
+      "text": "内置默认配置"
+    },
+    {
+      "key": "editor.UIIncrementalValidation.06bf605b8a",
+      "text": "MUI 增量校验：\n"
+    },
+    {
+      "key": "editor.ViewContractValidator.0961434628",
+      "text": "CanvasGroup.ignoreParentGroups 可能绕过宿主输入门控：{0}。"
+    },
+    {
+      "key": "editor.ViewContractValidator.1c85e45608",
+      "text": "DropdownElement 需要原生 Dropdown：{0}。"
+    },
+    {
+      "key": "editor.ViewContractValidator.36fab33a6d",
+      "text": "{0} 存在多个反向写入方：{1}、{2}。请只保留一条输入绑定，或显式协调业务写入。"
+    },
+    {
+      "key": "editor.ViewContractValidator.654d03c722",
+      "text": "FillAmount 绑定需要填充模式的 Image：{0}。"
+    },
+    {
+      "key": "editor.ViewContractValidator.6853150e20",
+      "text": "控件绑定策略返回了空写入目标。"
+    },
+    {
+      "key": "editor.ViewContractValidator.70a6c57f8d",
+      "text": "无效的文字输入提交模式：{0}。"
+    },
+    {
+      "key": "editor.ViewContractValidator.71f7f7caaa",
+      "text": "ScrollRect 视口必须位于其层级内：{0}。"
+    },
+    {
+      "key": "editor.ViewContractValidator.7d3464be21",
+      "text": "{0} 对应的控件存在歧义：{1}（{2}）：{3}。"
+    },
+    {
+      "key": "editor.ViewContractValidator.81efe73d85",
+      "text": "{0}.{1} 存在多个写入方：{2}、{3}。"
+    },
+    {
+      "key": "editor.ViewContractValidator.8fb811d725",
+      "text": "{0} 上存在丢失脚本。"
+    },
+    {
+      "key": "editor.ViewContractValidator.9e0b272fe8",
+      "text": "命令 "
+    },
+    {
+      "key": "editor.ViewContractValidator.Accessibility.27a823a589",
+      "text": "无效的无障碍状态标记：{0}。"
+    },
+    {
+      "key": "editor.ViewContractValidator.Accessibility.2998c776ae",
+      "text": "无障碍控件 {0} 需要名称或前向 AccessibilityLabel 绑定；装饰控件请显式隐藏：{1}。"
+    },
+    {
+      "key": "editor.ViewContractValidator.Accessibility.538b93e816",
+      "text": "无障碍检查在 {0} 处失败：{1}"
+    },
+    {
+      "key": "editor.ViewContractValidator.Accessibility.852c506d7d",
+      "text": "无效的无障碍角色：{0}。"
+    },
+    {
+      "key": "editor.ViewContractValidator.Extensions.4a2dda6f05",
+      "text": "已为 {0} 注册编辑器结构校验器。"
+    },
+    {
+      "key": "editor.ViewContractValidator.Extensions.803353dcf6",
+      "text": "控件校验器 {0} 在 {1} 处失败：{2}"
+    },
+    {
+      "key": "editor.ViewContractValidator.Input.064eb4483e",
+      "text": "占位"
+    },
+    {
+      "key": "editor.ViewContractValidator.Input.14b69bd6ee",
+      "text": "文字"
+    },
+    {
+      "key": "editor.ViewContractValidator.Input.233424aeac",
+      "text": "输入框的占位组件不能与可编辑文字共用同一组件：{0}。"
+    },
+    {
+      "key": "editor.ViewContractValidator.Input.47c241b87f",
+      "text": "输入框{0}引用不能跨越 View 边界：{1}。"
+    },
+    {
+      "key": "editor.ViewContractValidator.Input.6f265ce9c2",
+      "text": "输入控件缺少同节点的 InputField：{0}。"
+    },
+    {
+      "key": "editor.ViewContractValidator.Input.9efb123a24",
+      "text": "输入框缺少文字组件：{0}。"
+    },
+    {
+      "key": "editor.ViewContractValidator.Input.bf1a049371",
+      "text": "输入框{0}组件必须属于输入框层级：{1}。"
+    },
+    {
+      "key": "editor.ViewContractValidator.Overlays.1cc729e41f",
+      "text": "悬浮关闭区域需要同节点的 AnchoredOverlayElement：{0}。"
+    },
+    {
+      "key": "editor.ViewContractValidator.Overlays.1df5f4ddfd",
+      "text": "提示目标与悬浮界面使用了不同的根画布：{0}。"
+    },
+    {
+      "key": "editor.ViewContractValidator.Overlays.4e3c940dd7",
+      "text": "未知的悬浮位置：{0}。"
+    },
+    {
+      "key": "editor.ViewContractValidator.Overlays.5698adc887",
+      "text": "菜单按钮需要已启用的 ContextMenuItemInput 来处理原生取消操作：{0}。"
+    },
+    {
+      "key": "editor.ViewContractValidator.Overlays.5d06e12504",
+      "text": "菜单的返回目标必须是所属层级中的 View：{0}。"
+    },
+    {
+      "key": "editor.ViewContractValidator.Overlays.62f7957076",
+      "text": "父布局组会干扰悬浮定位，请将内容排除出布局：{0}。"
+    },
+    {
+      "key": "editor.ViewContractValidator.Overlays.6969df3471",
+      "text": "悬浮背景不能同时是交互控件：{0}。"
+    },
+    {
+      "key": "editor.ViewContractValidator.Overlays.6e7b5fd142",
+      "text": "上下文菜单超过条目容量：{0}。"
+    },
+    {
+      "key": "editor.ViewContractValidator.Overlays.7000c2e0e2",
+      "text": "提示缺少悬浮内容：{0}。"
+    },
+    {
+      "key": "editor.ViewContractValidator.Overlays.7b287a6832",
+      "text": "{0}必须是有限的非负数：{1}。"
+    },
+    {
+      "key": "editor.ViewContractValidator.Overlays.955db50acf",
+      "text": "悬浮内容必须是直属的 RectTransform 子节点：{0}。"
+    },
+    {
+      "key": "editor.ViewContractValidator.Overlays.b49956a282",
+      "text": "背景的透明度命中检测可能在输入屏障中留下空洞：{0}。"
+    },
+    {
+      "key": "editor.ViewContractValidator.Overlays.b7251ed46c",
+      "text": "提示图形可能拦截悬停，请关闭射线目标或使用禁止射线阻挡的 CanvasGroup：{0}。"
+    },
+    {
+      "key": "editor.ViewContractValidator.Overlays.b7542db637",
+      "text": "悬浮关闭区域需要同节点的 Image：{0}。"
+    },
+    {
+      "key": "editor.ViewContractValidator.Overlays.c1585ec208",
+      "text": "提示缺少悬浮界面引用：{0}。"
+    },
+    {
+      "key": "editor.ViewContractValidator.Overlays.d8ce0ad48e",
+      "text": "上下文菜单条目容量必须大于零：{0}。"
+    },
+    {
+      "key": "editor.ViewContractValidator.Overlays.e5c8bbe300",
+      "text": "提示目标不能位于其悬浮内容内：{0}。"
+    },
+    {
+      "key": "editor.ViewContractValidator.Overlays.e67dc06d2e",
+      "text": "上下文菜单需要 AnchoredOverlayElement：{0}。"
+    },
+    {
+      "key": "editor.ViewContractValidator.Overlays.f1f55a0471",
+      "text": "此控制器不支持嵌套的上下文菜单：{0}。"
+    },
+    {
+      "key": "editor.ViewContractValidator.Overlays.fedcdac7d9",
+      "text": "悬浮内容必须使用单位缩放和零旋转：{0}。"
+    },
+    {
+      "key": "editor.ViewContractValidator.RecyclingList.1b9153195e",
+      "text": "回收列表模板必须是边界内非激活的 RectTransform 子节点，引用不能穿过其他 View 或 Element 边界：{0}。"
+    },
+    {
+      "key": "editor.ViewContractValidator.RecyclingList.23a28f3e0f",
+      "text": "回收列表容量必须大于零：{0}。"
+    },
+    {
+      "key": "editor.ViewContractValidator.RecyclingList.72c81031ca",
+      "text": "回收列表模板有多个直属 View，需显式指定 childView：{0}。"
+    },
+    {
+      "key": "editor.ViewContractValidator.RecyclingList.7ece7c5b40",
+      "text": "回收列表的模板与内容节点不能互相包含：{0}。"
+    },
+    {
+      "key": "editor.ViewContractValidator.RecyclingList.80fa4d3c4b",
+      "text": "回收列表需要边界内独立的内容子节点，引用不能穿过其他 View 或 Element 边界：{0}。"
+    },
+    {
+      "key": "editor.ViewContractValidator.RecyclingList.a48fe7d434",
+      "text": "回收列表缺少 NestedViewElement 模板：{0}。"
+    },
+    {
+      "key": "editor.ViewContractValidator.RecyclingList.c30d9540d5",
+      "text": "回收列表模板必须用 NestedViewElement 包装一个有效子 View：{0}。"
+    },
+    {
+      "key": "editor.ViewContractValidator.RecyclingList.e5160942f1",
+      "text": "回收列表内容节点必须为空，条目由框架创建：{0}。"
+    },
+    {
+      "key": "editor.ViewContractValidator.Scrollbar.7bb6aa750c",
+      "text": "同时由 ScrollRect {0} 与绑定 {1} 写入。"
+    },
+    {
+      "key": "editor.ViewContractValidator.Scrollbar.7e7412f982",
+      "text": "滚动条手柄必须位于其子节点，不能驱动滚动条根节点本身：{0}。"
+    },
+    {
+      "key": "editor.ViewContractValidator.Scrollbar.8a643a780c",
+      "text": "请绑定滚动容器位置，或改为仅反向观察滚动条。"
+    },
+    {
+      "key": "editor.ViewContractValidator.Scrollbar.9ade8392e6",
+      "text": "滚动条缺少手柄引用：{0}。"
+    },
+    {
+      "key": "editor.ViewContractValidator.Scrollbar.a18e38d519",
+      "text": "滚动条 {0}.{1} "
+    },
+    {
+      "key": "editor.ViewContractValidator.Scrollbar.ca55ec7917",
+      "text": "滚动条缺少同节点的 Scrollbar：{0}。"
+    },
+    {
+      "key": "editor.ViewContractValidator.Scrollbar.f866df34eb",
+      "text": "滚动条手柄引用不能跨越 View 边界：{0}。"
+    },
+    {
+      "key": "editor.ViewContractValidator.SlotList.001b23e3b7",
+      "text": "固定挂点必须是容器边界内的空节点，并与模板分离：{0}/{1}。"
+    },
+    {
+      "key": "editor.ViewContractValidator.SlotList.34a7a64966",
+      "text": "固定槽位不能重复引用或互相包含：{0}。"
+    },
+    {
+      "key": "editor.ViewContractValidator.SlotList.57b1711cb8",
+      "text": "固定槽位必须配置已有节点，或配置模板与空挂点：{0}。"
+    },
+    {
+      "key": "editor.ViewContractValidator.SlotList.8befb07d44",
+      "text": "动态固定槽位需要非激活模板和空挂点，不能同时配置已有节点：{0}。"
+    },
+    {
+      "key": "editor.ViewContractValidator.SlotList.8f516c4dbd",
+      "text": "固定槽位必须是当前容器边界内的 NestedViewElement：{0}/{1}。"
+    },
+    {
+      "key": "editor.ViewContractValidator.Transitions.453712be0b",
+      "text": "视图进入淡入时长必须是有限的非负数。"
+    },
+    {
+      "key": "editor.ViewContractValidator.Transitions.a533a7eab7",
+      "text": "视图退出淡出时长必须是有限的非负数。"
+    },
+    {
+      "key": "editor.ViewContractValidator.Transitions.f07ffe69c5",
+      "text": "视图需要 CanvasGroup 来控制可见性和转场淡入淡出。"
+    },
+    {
+      "key": "editor.ViewContractValidator.VirtualFailures.167f053c4d",
+      "text": "虚拟列表失败模板须为非激活 RectTransform，位于边界内、Content 和条目模板外：{0}。"
+    },
+    {
+      "key": "editor.ViewContractValidator.VirtualFailures.1ae15331b1",
+      "text": "失败模板不能跳过父级 CanvasGroup 输入门控：{0}。"
+    },
+    {
+      "key": "editor.ViewContractValidator.VirtualFailures.2c461a7488",
+      "text": "失败模板不能与命名条目模板互相包含：{0}。"
+    },
+    {
+      "key": "editor.ViewContractValidator.VirtualFailures.ef171c0ca4",
+      "text": "失败模板只负责视觉表现，不能包含 View 或 Element 所有权：{0}。"
+    },
+    {
+      "key": "editor.ViewContractValidator.VirtualList.0028a0908f",
+      "text": "虚拟列表内容节点在初始化前必须为空：{0}。"
+    },
+    {
+      "key": "editor.ViewContractValidator.VirtualList.1ec8ef741e",
+      "text": "虚拟列表必须配置有效滚动轴，横向滚动只能有一列：{0}。"
+    },
+    {
+      "key": "editor.ViewContractValidator.VirtualList.413554c7ee",
+      "text": "虚拟列表末尾跟随容差必须是有限的非负数：{0}。"
+    },
+    {
+      "key": "editor.ViewContractValidator.VirtualList.544ef3258d",
+      "text": "虚拟列表命名模板的键必须非空且唯一：{0}。"
+    },
+    {
+      "key": "editor.ViewContractValidator.VirtualList.5cbde16ef0",
+      "text": "虚拟列表条目模板必须未激活：{0}。"
+    },
+    {
+      "key": "editor.ViewContractValidator.VirtualList.68fc07fd71",
+      "text": "虚拟列表必须显式引用视口：{0}。"
+    },
+    {
+      "key": "editor.ViewContractValidator.VirtualList.89039a932d",
+      "text": "虚拟列表 ScrollRect 必须位于列表边界内：{0}。"
+    },
+    {
+      "key": "editor.ViewContractValidator.VirtualList.91c54ff8f0",
+      "text": "虚拟列表容量和列数必须为正，列数不能超过容量，预加载条目数必须非负：{0}。"
+    },
+    {
+      "key": "editor.ViewContractValidator.VirtualList.922d53d064",
+      "text": "虚拟列表缺少条目模板：{0}。"
+    },
+    {
+      "key": "editor.ViewContractValidator.VirtualList.aa0d9f0ab5",
+      "text": "虚拟列表命名模板必须未激活，位于列表边界内、内容节点外：{0}/{1}。"
+    },
+    {
+      "key": "editor.ViewContractValidator.VirtualList.b08e766b89",
+      "text": "自动网格需要纵向滚动和有限的正最小宽度：{0}。"
+    },
+    {
+      "key": "editor.ViewContractValidator.VirtualList.b4082bbf93",
+      "text": "虚拟列表负责内容布局，请移除内容节点的布局组与尺寸适配器：{0}。"
+    },
+    {
+      "key": "editor.ViewContractValidator.VirtualList.bc3ba759d5",
+      "text": "虚拟列表条目模板需要 RectTransform：{0}。"
+    },
+    {
+      "key": "editor.ViewContractValidator.VirtualList.bf3ae6ec6b",
+      "text": "虚拟列表条目尺寸必须是有限的正数：{0}。"
+    },
+    {
+      "key": "editor.ViewContractValidator.VirtualList.cbd8e6c32d",
+      "text": "虚拟列表测量预算必须大于零：{0}。"
+    },
+    {
+      "key": "editor.ViewContractValidator.VirtualList.cbeb11bf2d",
+      "text": "虚拟列表条目模板必须位于内容节点外：{0}。"
+    },
+    {
+      "key": "editor.ViewContractValidator.VirtualList.cc31c4f87c",
+      "text": "虚拟列表间距必须是有限的非负数：{0}。"
+    },
+    {
+      "key": "editor.ViewContractValidator.VirtualList.cd7fadd5fc",
+      "text": "虚拟列表四边内边距必须非负：{0}。"
+    },
+    {
+      "key": "editor.ViewContractValidator.VirtualList.cfc374c27a",
+      "text": "虚拟列表定位修正预算必须大于零：{0}。"
+    },
+    {
+      "key": "editor.ViewContractValidator.VirtualList.d51750887f",
+      "text": "虚拟列表命名模板需要 RectTransform 视图：{0}/{1}。"
+    },
+    {
+      "key": "editor.ViewContractValidator.VirtualList.e5e8afe21e",
+      "text": "虚拟列表条目模板必须位于列表边界内：{0}。"
+    },
+    {
+      "key": "editor.ViewContractValidator.VirtualList.f8192fe74e",
+      "text": "虚拟列表与 ScrollRectElement 不能共同拥有同一个 ScrollRect：{0}。"
+    },
+    {
+      "key": "editor.ViewContractValidator.a2c70aba3a",
+      "text": "缺少 {0} 对应的控件：{1}（{2}）。"
+    },
+    {
+      "key": "editor.ViewContractValidator.adc3272193",
+      "text": "{0}.{1} 存在多个写入方：{2}、命令 {3}。"
+    },
+    {
+      "key": "editor.ViewContractValidator.cb101437c2",
+      "text": "ScrollRect 内容必须位于其视口子层级内：{0}。"
+    },
+    {
+      "key": "editor.ViewContractValidator.db2b82af20",
+      "text": "控件名称为空：{0}。"
+    },
+    {
+      "key": "editor.ViewContractValidator.e901f2c3ba",
+      "text": "控件重名（{0}）：{1}、{2}。"
+    },
+    {
+      "key": "editor.ViewContractValidator.eb31327ed9",
+      "text": "缺少 ScrollRect 引用：{0}。"
+    },
+    {
+      "key": "editor.ViewContractValidator.fd6da981ad",
+      "text": "ScrollRect 缺少内容节点：{0}。"
+    },
+    {
+      "key": "editor.ViewInspector.3f95319fe9",
+      "text": "所选绑定契约与此视图匹配。"
+    },
+    {
+      "key": "editor.ViewInspector.48bcffa0d4",
+      "text": "未发现结构问题；本次未校验绑定契约。"
+    },
+    {
+      "key": "editor.ViewInspector.52e088acdc",
+      "text": "校验视图结构"
+    },
+    {
+      "key": "editor.ViewInspector.5f472e2647",
+      "text": "校验绑定契约"
+    },
+    {
+      "key": "editor.ViewInspector.6541599e58",
+      "text": "请选择 ViewModel 契约"
+    },
+    {
+      "key": "editor.ViewInspector.Input.08332dda56",
+      "text": "局部输入门控已释放"
+    },
+    {
+      "key": "editor.ViewInspector.Input.1242d676fa",
+      "text": "存在尚未释放的局部输入阻挡"
+    },
+    {
+      "key": "editor.ViewInspector.Input.18cd6c3bdd",
+      "text": "根节点缺少 CanvasGroup"
+    },
+    {
+      "key": "editor.ViewInspector.Input.1fdfe0bd28",
+      "text": "对象或祖先未激活"
+    },
+    {
+      "key": "editor.ViewInspector.Input.233555df54",
+      "text": "宿主可见 / 局部可见"
+    },
+    {
+      "key": "editor.ViewInspector.Input.23f2db09ee",
+      "text": "组件启用 / 透明度"
+    },
+    {
+      "key": "editor.ViewInspector.Input.3349a0214e",
+      "text": "局部阻挡 / 已释放"
+    },
+    {
+      "key": "editor.ViewInspector.Input.364755a73e",
+      "text": "根 CanvasGroup 禁用 Selectable 交互"
+    },
+    {
+      "key": "editor.ViewInspector.Input.37cdf97b81",
+      "text": "这是手动采集的状态，不会自动刷新。透明度为 0 不等于停止射线；输入资格为 true 也不证明控件能收到点击。祖先组、Graphic、Selectable、EventSystem 及遮挡物仍需检查。"
+    },
+    {
+      "key": "editor.ViewInspector.Input.37cec66cad",
+      "text": "宿主请求隐藏"
+    },
+    {
+      "key": "editor.ViewInspector.Input.4a558371f9",
+      "text": "存在"
+    },
+    {
+      "key": "editor.ViewInspector.Input.51e0bd7434",
+      "text": "正在保留旧画面，仅显示不接收输入"
+    },
+    {
+      "key": "editor.ViewInspector.Input.608a5c4956",
+      "text": "未发现此 View 与根 CanvasGroup 的限制。"
+    },
+    {
+      "key": "editor.ViewInspector.Input.65364e6fd8",
+      "text": "缺失"
+    },
+    {
+      "key": "editor.ViewInspector.Input.7728ec29ef",
+      "text": "目标 View 已不存在。"
+    },
+    {
+      "key": "editor.ViewInspector.Input.7f70336887",
+      "text": "输入与可见性诊断（只读快照）"
+    },
+    {
+      "key": "editor.ViewInspector.Input.86ddfd16e6",
+      "text": "View 已逻辑释放"
+    },
+    {
+      "key": "editor.ViewInspector.Input.8ed1685df2",
+      "text": "允许交互 / 射线"
+    },
+    {
+      "key": "editor.ViewInspector.Input.ac57ab417f",
+      "text": "宿主交互 / 局部交互"
+    },
+    {
+      "key": "editor.ViewInspector.Input.afff7f01c3",
+      "text": "尚未创建；本次采集不会创建它。"
+    },
+    {
+      "key": "editor.ViewInspector.Input.b244abc9ee",
+      "text": "根 CanvasGroup"
+    },
+    {
+      "key": "editor.ViewInspector.Input.b52c53ec93",
+      "text": "采集输入快照"
+    },
+    {
+      "key": "editor.ViewInspector.Input.badd13f4e1",
+      "text": "View 有效 / 初始化"
+    },
+    {
+      "key": "editor.ViewInspector.Input.bebdcdf08d",
+      "text": "观察到的限制"
+    },
+    {
+      "key": "editor.ViewInspector.Input.c1335a5110",
+      "text": "宿主禁用交互"
+    },
+    {
+      "key": "editor.ViewInspector.Input.cbead0ea59",
+      "text": "点击采集读取当前状态；不会初始化、激活或修改 View。"
+    },
+    {
+      "key": "editor.ViewInspector.Input.d3cb8ab8ca",
+      "text": "显示前 {0} 个原因，实际阻挡数为 {1}。"
+    },
+    {
+      "key": "editor.ViewInspector.Input.d5269a8a96",
+      "text": "View 已失效（释放、根组件丢失等）"
+    },
+    {
+      "key": "editor.ViewInspector.Input.dbcbb1d915",
+      "text": "局部门控"
+    },
+    {
+      "key": "editor.ViewInspector.Input.df0f92ba65",
+      "text": "尚未完成 View 初始化"
+    },
+    {
+      "key": "editor.ViewInspector.Input.df734ade65",
+      "text": "局部请求隐藏"
+    },
+    {
+      "key": "editor.ViewInspector.Input.e7d20c7470",
+      "text": "忽略父组"
+    },
+    {
+      "key": "editor.ViewInspector.Input.ef99d4b265",
+      "text": "根 CanvasGroup 禁用射线"
+    },
+    {
+      "key": "editor.ViewInspector.Input.f344af45ed",
+      "text": "局部禁用交互"
+    },
+    {
+      "key": "editor.ViewInspector.Input.f3c337bf0c",
+      "text": "View 可见 / 输入资格"
+    },
+    {
+      "key": "editor.ViewInspector.Input.f62cc4c61e",
+      "text": "正在保留旧画面"
+    },
+    {
+      "key": "editor.ViewInspector.Input.fb254a3bb8",
+      "text": "层级激活"
+    },
+    {
+      "key": "editor.ViewInspector.Input.fbfb60e549",
+      "text": "采集时间"
+    },
+    {
+      "key": "editor.ViewInspector.Raycast.06404dfdd1",
+      "text": "采集时间 / 坐标"
+    },
+    {
+      "key": "editor.ViewInspector.Raycast.0bf5670e7f",
+      "text": "查询当前位置的命中对象"
+    },
+    {
+      "key": "editor.ViewInspector.Raycast.189804d838",
+      "text": "输入 Game 画面的屏幕像素坐标，左下角为原点。查询会执行 Raycaster 和项目过滤回调，不派发点击或改变焦点；不会自动刷新。"
+    },
+    {
+      "key": "editor.ViewInspector.Raycast.1fc3b8b8cd",
+      "text": "事件系统（空为当前）"
+    },
+    {
+      "key": "editor.ViewInspector.Raycast.43ee9bc0cf",
+      "text": "实际射线查询（显式执行）"
+    },
+    {
+      "key": "editor.ViewInspector.Raycast.484d556139",
+      "text": "无"
+    },
+    {
+      "key": "editor.ViewInspector.Raycast.5a9535753a",
+      "text": "屏幕坐标"
+    },
+    {
+      "key": "editor.ViewInspector.Raycast.69f0f73432",
+      "text": "当前 View 首次命中序号"
+    },
+    {
+      "key": "editor.ViewInspector.Raycast.6db8767712",
+      "text": "最前命中属于当前 View"
+    },
+    {
+      "key": "editor.ViewInspector.Raycast.7728ec29ef",
+      "text": "目标 View 已不存在。"
+    },
+    {
+      "key": "editor.ViewInspector.Raycast.8d553514be",
+      "text": "结果反映采集时的射线排序。处理目标存在不保证点击执行；按下/拖动状态、Selectable 交互资格、命令门控与自定义输入模块需另行检查。路径最多 64 层、每层名称最多 128 字符，省略号表示截断。"
+    },
+    {
+      "key": "editor.ViewInspector.Raycast.8e0ad2ae93",
+      "text": "点击处理对象"
+    },
+    {
+      "key": "editor.ViewInspector.Raycast.b6de5f51cf",
+      "text": "排序层 / 顺序 / 深度 / 距离"
+    },
+    {
+      "key": "editor.ViewInspector.Raycast.c2793a1eb9",
+      "text": "仅保留前 64 个有效命中；当前 View 首次命中序号仍按全部结果计算。"
+    },
+    {
+      "key": "editor.ViewInspector.Raycast.ce0cb78f83",
+      "text": "射线器"
+    },
+    {
+      "key": "editor.ViewInspector.Raycast.dc319e6c35",
+      "text": "有效命中 / 失效结果"
+    },
+    {
+      "key": "editor.ViewInspector.ResourcePreparation.02bafe3885",
+      "text": "提交后准备账本清空。空账本不代表全部 UI 资源已就绪；手动资源槽、业务任务和子 View 不在此快照内。"
+    },
+    {
+      "key": "editor.ViewInspector.ResourcePreparation.28384d7afd",
+      "text": "失败"
+    },
+    {
+      "key": "editor.ViewInspector.ResourcePreparation.3385504be2",
+      "text": "手动采集当前默认资源键的准备状态，不会加载资源或改变界面。"
+    },
+    {
+      "key": "editor.ViewInspector.ResourcePreparation.4d8c1c5b42",
+      "text": "未知"
+    },
+    {
+      "key": "editor.ViewInspector.ResourcePreparation.700c1c683f",
+      "text": "已启用首帧等待"
+    },
+    {
+      "key": "editor.ViewInspector.ResourcePreparation.7728ec29ef",
+      "text": "目标 View 已不存在。"
+    },
+    {
+      "key": "editor.ViewInspector.ResourcePreparation.800ab3c05f",
+      "text": "失败 / 取消 / 未提交"
+    },
+    {
+      "key": "editor.ViewInspector.ResourcePreparation.8032af4a59",
+      "text": "未提交"
+    },
+    {
+      "key": "editor.ViewInspector.ResourcePreparation.8ef0bbbc4e",
+      "text": "采集资源准备快照"
+    },
+    {
+      "key": "editor.ViewInspector.ResourcePreparation.a37778f17c",
+      "text": "已取消"
+    },
+    {
+      "key": "editor.ViewInspector.ResourcePreparation.c8875ed413",
+      "text": "激活有效 / 已提交"
+    },
+    {
+      "key": "editor.ViewInspector.ResourcePreparation.cc887fc419",
+      "text": "首帧资源准备（只读快照）"
+    },
+    {
+      "key": "editor.ViewInspector.ResourcePreparation.d04fcbda73",
+      "text": "加载中"
+    },
+    {
+      "key": "editor.ViewInspector.ResourcePreparation.e3acab17a5",
+      "text": "没有活动资源上下文：可能尚未激活、没有配置加载器或已经清理。"
+    },
+    {
+      "key": "editor.ViewInspector.ResourcePreparation.f1ad7e1a84",
+      "text": "准备项 / 等待项"
+    },
+    {
+      "key": "editor.ViewInspector.ResourcePreparation.f2ccc0a120",
+      "text": "只显示前 {0} 项，计数包含全部 {1} 项。"
+    },
+    {
+      "key": "editor.ViewInspector.ResourcePreparation.f585743460",
+      "text": "已应用"
+    },
+    {
+      "key": "editor.ViewInspector.ResourcePreparation.fbfb60e549",
+      "text": "采集时间"
+    },
+    {
+      "key": "editor.ViewInspector.Resources.15980a3c2d",
+      "text": "初始加载会参与隐藏准备，失败将阻止此次显示；单控件显式配置不自动参与。"
+    },
+    {
+      "key": "editor.ViewInspector.Resources.16ef1cfe27",
+      "text": "已关闭父加载器继承。请为此 View 或资源控件显式配置加载器。"
+    },
+    {
+      "key": "editor.ViewInspector.Resources.2473966443",
+      "text": "运行时代码写入默认加载器的 Source 属性仍可参与准备。"
+    },
+    {
+      "key": "editor.ViewInspector.Resources.2b59743c8d",
+      "text": "控件：{0}；资源：{1}；绑定方向：{2}"
+    },
+    {
+      "key": "editor.ViewInspector.Resources.41d0c03c8d",
+      "text": "也可单独配置控件。内置 Prefab 提供方的 configureView 或 UIHost 默认目录的 configureDefaultView 可统一接线。"
+    },
+    {
+      "key": "editor.ViewInspector.Resources.4e3e33fde6",
+      "text": "未显式配置时，仅尝试借用此父 View 的活动加载器，不越过它查找祖先。"
+    },
+    {
+      "key": "editor.ViewInspector.Resources.537a6e78ff",
+      "text": "子 View 需单独设置，显示后的换图仍渐进加载。本地加载可立即完成。"
+    },
+    {
+      "key": "editor.ViewInspector.Resources.5887219e26",
+      "text": "此开关不会自动等待直接赋值的资源、手动资源槽或任意业务后台任务；"
+    },
+    {
+      "key": "editor.ViewInspector.Resources.7825ca1133",
+      "text": "此清单不验证运行时加载器、资源键是否存在或异步加载是否完成。"
+    },
+    {
+      "key": "editor.ViewInspector.Resources.80333987cf",
+      "text": "在激活前通过 View.ConfigureResources 配置加载器，"
+    },
+    {
+      "key": "editor.ViewInspector.Resources.9bd119ee27",
+      "text": "已启用首次显示前等待资源，但所选契约没有内置资源键绑定。"
+    },
+    {
+      "key": "editor.ViewInspector.Resources.9de0d10b5a",
+      "text": "以下是所选契约声明的内置资源键绑定，不代表已经匹配此 View。"
+    },
+    {
+      "key": "editor.ViewInspector.Resources.a2ed0370b9",
+      "text": "资源键绑定（{0}）"
+    },
+    {
+      "key": "editor.ViewInspector.Resources.ac5c1bb62a",
+      "text": "已启用首次显示前等待资源。下方资源键绑定使用本 View 的默认加载器时，"
+    },
+    {
+      "key": "editor.ViewInspector.Resources.c678584105",
+      "text": "子 View 的资源由自身激活负责归还。"
+    },
+    {
+      "key": "editor.ViewInspector.Resources.d822773387",
+      "text": "当前层级的父 View"
+    },
+    {
+      "key": "editor.ViewInspector.Resources.e21b9e988b",
+      "text": "此处只展示配置，不代表资源已经就绪。"
+    },
+    {
+      "key": "editor.ViewInspector.Resources.e82b69fca1",
+      "text": "请运行绑定契约校验检查控件匹配、单向绑定和重复写入。"
+    },
+    {
+      "key": "editor.ViewInspector.Resources.f116785f60",
+      "text": "当前层级没有父 View。显式配置加载器，或在运行时挂载到父 View 下后再激活；框架会在激活时重新查找。"
+    },
+    {
+      "key": "editor.ViewInspector.Sources.05f954565f",
+      "text": "高亮"
+    },
+    {
+      "key": "editor.ViewInspector.Sources.1b2ff64e53",
+      "text": "打开绑定声明失败："
+    },
+    {
+      "key": "editor.ViewInspector.Sources.2a6d9ccfea",
+      "text": "当前 View 绑定边界内没有匹配的控件，请检查名称与组件类型。"
+    },
+    {
+      "key": "editor.ViewInspector.Sources.679ca80186",
+      "text": "无法打开声明，请检查 Unity 的外部代码编辑器设置。"
+    },
+    {
+      "key": "editor.ViewInspector.Sources.67bb7dc1f7",
+      "text": "定位控件失败："
+    },
+    {
+      "key": "editor.ViewInspector.Sources.7ae12e0993",
+      "text": "声明文件已移动或无法访问，请重新编译生成绑定："
+    },
+    {
+      "key": "editor.ViewInspector.Sources.7ea0036985",
+      "text": "当前契约没有绑定声明。"
+    },
+    {
+      "key": "editor.ViewInspector.Sources.8efab5e68f",
+      "text": "找到多个匹配控件，绑定存在歧义。请定位并修正重名，框架不会自动选择其中一个。"
+    },
+    {
+      "key": "editor.ViewInspector.Sources.a7f7f7a203",
+      "text": "打开声明"
+    },
+    {
+      "key": "editor.ViewInspector.Sources.ba7542980d",
+      "text": "此清单未提供源码位置，请使用新版生成器重新编译。"
+    },
+    {
+      "key": "editor.ViewInspector.Sources.d90e1d2f55",
+      "text": "定位控件"
+    },
+    {
+      "key": "editor.ViewInspector.Sources.fa24d326cc",
+      "text": "绑定声明与源码"
+    },
+    {
+      "key": "editor.ViewInspector.ad9d661681",
+      "text": "选择此 View 使用的 ViewModel 契约后再校验绑定。结构校验不需要选择契约。"
+    },
+    {
+      "key": "editor.ViewInspector.b104369e08",
+      "text": "校验无障碍语义"
+    },
+    {
+      "key": "editor.ViewInspector.b741b9457b",
+      "text": "视图模型"
+    },
+    {
+      "key": "editor.ViewInspector.dceaeea259",
+      "text": "MUI 绑定契约"
+    },
+    {
+      "key": "editor.ViewInspector.e32a3bfa20",
+      "text": "未找到生成的绑定清单。请编译声明了 ViewContract 或 Bind 特性的 partial ViewModel。"
+    },
+    {
+      "key": "editor.ViewInspector.f9d933d15c",
+      "text": "未发现基础语义问题；尚未验证键盘可达性或平台屏幕阅读器。"
+    },
+    {
+      "key": "editor.ViewValidationMenu.890cc9480b",
+      "text": "MUI 结构校验{0}：已检查 {1}/{2} 个视图，{3} 个视图有问题，共 {4} 个问题；本次未检查绑定契约。"
+    },
+    {
+      "key": "editor.ViewValidationMenu.b15d9cec82",
+      "text": "MUI 视图结构校验"
+    },
+    {
+      "key": "editor.ViewValidationMenu.b66582a936",
+      "text": "MUI [{0}]：{1}"
+    },
+    {
+      "key": "enum.MUI.AccessibilityRole.Button",
+      "text": "按钮"
+    },
+    {
+      "key": "enum.MUI.AccessibilityRole.Dropdown",
+      "text": "下拉框"
+    },
+    {
+      "key": "enum.MUI.AccessibilityRole.Generic",
+      "text": "通用"
+    },
+    {
+      "key": "enum.MUI.AccessibilityRole.Image",
+      "text": "图像"
+    },
+    {
+      "key": "enum.MUI.AccessibilityRole.List",
+      "text": "列表"
+    },
+    {
+      "key": "enum.MUI.AccessibilityRole.ProgressBar",
+      "text": "进度条"
+    },
+    {
+      "key": "enum.MUI.AccessibilityRole.Slider",
+      "text": "滑动条"
+    },
+    {
+      "key": "enum.MUI.AccessibilityRole.Tab",
+      "text": "标签"
+    },
+    {
+      "key": "enum.MUI.AccessibilityRole.TabList",
+      "text": "标签列表"
+    },
+    {
+      "key": "enum.MUI.AccessibilityRole.Text",
+      "text": "文本"
+    },
+    {
+      "key": "enum.MUI.AccessibilityRole.TextInput",
+      "text": "文本输入"
+    },
+    {
+      "key": "enum.MUI.AccessibilityRole.Toggle",
+      "text": "开关"
+    },
+    {
+      "key": "enum.MUI.AccessibilityRole.Unspecified",
+      "text": "未指定"
+    },
+    {
+      "key": "enum.MUI.AccessibilityState.Busy",
+      "text": "繁忙"
+    },
+    {
+      "key": "enum.MUI.AccessibilityState.Checked",
+      "text": "已勾选"
+    },
+    {
+      "key": "enum.MUI.AccessibilityState.Disabled",
+      "text": "禁用"
+    },
+    {
+      "key": "enum.MUI.AccessibilityState.Expanded",
+      "text": "已展开"
+    },
+    {
+      "key": "enum.MUI.AccessibilityState.Invalid",
+      "text": "无效"
+    },
+    {
+      "key": "enum.MUI.AccessibilityState.None",
+      "text": "无"
+    },
+    {
+      "key": "enum.MUI.AccessibilityState.ReadOnly",
+      "text": "只读"
+    },
+    {
+      "key": "enum.MUI.AccessibilityState.Selected",
+      "text": "已选中"
+    },
+    {
+      "key": "enum.MUI.ArgsUpdateCleanup.Complete",
+      "text": "完成"
+    },
+    {
+      "key": "enum.MUI.ArgsUpdateCleanup.Failed",
+      "text": "失败"
+    },
+    {
+      "key": "enum.MUI.ArgsUpdateCleanup.NotRequired",
+      "text": "不需要"
+    },
+    {
+      "key": "enum.MUI.ArgsUpdateRejection.Busy",
+      "text": "繁忙"
+    },
+    {
+      "key": "enum.MUI.ArgsUpdateRejection.DependencyChangeRequired",
+      "text": "需要更新依赖"
+    },
+    {
+      "key": "enum.MUI.ArgsUpdateRejection.HostClosed",
+      "text": "宿主已关闭"
+    },
+    {
+      "key": "enum.MUI.ArgsUpdateRejection.InUse",
+      "text": "使用中"
+    },
+    {
+      "key": "enum.MUI.ArgsUpdateRejection.InputControlUnsupported",
+      "text": "输入控件不支持"
+    },
+    {
+      "key": "enum.MUI.ArgsUpdateRejection.None",
+      "text": "无"
+    },
+    {
+      "key": "enum.MUI.ArgsUpdateRejection.Reentrant",
+      "text": "重入"
+    },
+    {
+      "key": "enum.MUI.ArgsUpdateRejection.RouteMismatch",
+      "text": "路由不匹配"
+    },
+    {
+      "key": "enum.MUI.ArgsUpdateRejection.SourceUnavailable",
+      "text": "源不可用"
+    },
+    {
+      "key": "enum.MUI.ArgsUpdateRejection.Unsupported",
+      "text": "不支持"
+    },
+    {
+      "key": "enum.MUI.ArgsUpdateStatus.Applied",
+      "text": "已应用"
+    },
+    {
+      "key": "enum.MUI.ArgsUpdateStatus.CancelledBeforeCommit",
+      "text": "提交前取消"
+    },
+    {
+      "key": "enum.MUI.ArgsUpdateStatus.CommitFailed",
+      "text": "提交失败"
+    },
+    {
+      "key": "enum.MUI.ArgsUpdateStatus.PreparationFailed",
+      "text": "准备失败"
+    },
+    {
+      "key": "enum.MUI.ArgsUpdateStatus.Rejected",
+      "text": "被拒绝"
+    },
+    {
+      "key": "enum.MUI.BindingEntryKind.Command",
+      "text": "命令"
+    },
+    {
+      "key": "enum.MUI.BindingEntryKind.Property",
+      "text": "属性"
+    },
+    {
+      "key": "enum.MUI.BindingMode.OneTime",
+      "text": "仅初始化一次"
+    },
+    {
+      "key": "enum.MUI.BindingMode.OneWay",
+      "text": "单向"
+    },
+    {
+      "key": "enum.MUI.BindingMode.OneWayToSource",
+      "text": "仅反向"
+    },
+    {
+      "key": "enum.MUI.BindingMode.TwoWay",
+      "text": "双向"
+    },
+    {
+      "key": "enum.MUI.BindingState.Binding",
+      "text": "绑定"
+    },
+    {
+      "key": "enum.MUI.BindingState.Bound",
+      "text": "已绑定"
+    },
+    {
+      "key": "enum.MUI.BindingState.Faulted",
+      "text": "故障"
+    },
+    {
+      "key": "enum.MUI.BindingState.Frozen",
+      "text": "冻结"
+    },
+    {
+      "key": "enum.MUI.BindingState.Unbinding",
+      "text": "解除绑定中"
+    },
+    {
+      "key": "enum.MUI.BindingState.Unbound",
+      "text": "未绑定"
+    },
+    {
+      "key": "enum.MUI.ChildViews.ChildViewChangeStatus.Cancelled",
+      "text": "已取消"
+    },
+    {
+      "key": "enum.MUI.ChildViews.ChildViewChangeStatus.Empty",
+      "text": "空"
+    },
+    {
+      "key": "enum.MUI.ChildViews.ChildViewChangeStatus.Failed",
+      "text": "失败"
+    },
+    {
+      "key": "enum.MUI.ChildViews.ChildViewChangeStatus.ParentInactive",
+      "text": "父页面未激活"
+    },
+    {
+      "key": "enum.MUI.ChildViews.ChildViewChangeStatus.Ready",
+      "text": "已就绪"
+    },
+    {
+      "key": "enum.MUI.ChildViews.ChildViewChangeStatus.Superseded",
+      "text": "已被替代"
+    },
+    {
+      "key": "enum.MUI.ChildViews.ChildViewState.Active",
+      "text": "活动"
+    },
+    {
+      "key": "enum.MUI.ChildViews.ChildViewState.Closed",
+      "text": "已关闭"
+    },
+    {
+      "key": "enum.MUI.ChildViews.ChildViewState.Closing",
+      "text": "关闭中"
+    },
+    {
+      "key": "enum.MUI.ChildViews.ChildViewState.Deactivating",
+      "text": "停用中"
+    },
+    {
+      "key": "enum.MUI.ChildViews.ChildViewState.Failed",
+      "text": "失败"
+    },
+    {
+      "key": "enum.MUI.ChildViews.ChildViewState.Inactive",
+      "text": "未激活"
+    },
+    {
+      "key": "enum.MUI.ChildViews.ChildViewState.Prepared",
+      "text": "已准备"
+    },
+    {
+      "key": "enum.MUI.ChildViews.ChildViewState.Preparing",
+      "text": "准备中"
+    },
+    {
+      "key": "enum.MUI.ChildViews.ChildViewState.Retained",
+      "text": "保留中"
+    },
+    {
+      "key": "enum.MUI.CleanupResponsibilityState.Completed",
+      "text": "已完成"
+    },
+    {
+      "key": "enum.MUI.CleanupResponsibilityState.Failed",
+      "text": "失败"
+    },
+    {
+      "key": "enum.MUI.CleanupResponsibilityState.Pending",
+      "text": "等待中"
+    },
+    {
+      "key": "enum.MUI.CleanupResponsibilityState.Retained",
+      "text": "保留中"
+    },
+    {
+      "key": "enum.MUI.CommandConcurrency.Parallel",
+      "text": "并行"
+    },
+    {
+      "key": "enum.MUI.CommandConcurrency.Queue",
+      "text": "排队"
+    },
+    {
+      "key": "enum.MUI.CommandConcurrency.RejectWhileRunning",
+      "text": "运行时拒绝"
+    },
+    {
+      "key": "enum.MUI.CommandConcurrency.RestartLatest",
+      "text": "重启最新请求"
+    },
+    {
+      "key": "enum.MUI.CommandRejection.None",
+      "text": "无"
+    },
+    {
+      "key": "enum.MUI.CommandRejection.Reentrant",
+      "text": "重入"
+    },
+    {
+      "key": "enum.MUI.CommandRejection.Unavailable",
+      "text": "不可用"
+    },
+    {
+      "key": "enum.MUI.CommandStatus.Cancelled",
+      "text": "已取消"
+    },
+    {
+      "key": "enum.MUI.CommandStatus.Failed",
+      "text": "失败"
+    },
+    {
+      "key": "enum.MUI.CommandStatus.Rejected",
+      "text": "被拒绝"
+    },
+    {
+      "key": "enum.MUI.CommandStatus.Succeeded",
+      "text": "成功"
+    },
+    {
+      "key": "enum.MUI.DragDrop.DragPhase.Completed",
+      "text": "已完成"
+    },
+    {
+      "key": "enum.MUI.DragDrop.DragPhase.Dragging",
+      "text": "拖拽中"
+    },
+    {
+      "key": "enum.MUI.DragDrop.DragPhase.Dropping",
+      "text": "放置中"
+    },
+    {
+      "key": "enum.MUI.DragDrop.DropStatus.Cancelled",
+      "text": "已取消"
+    },
+    {
+      "key": "enum.MUI.DragDrop.DropStatus.Committed",
+      "text": "已提交"
+    },
+    {
+      "key": "enum.MUI.DragDrop.DropStatus.Failed",
+      "text": "失败"
+    },
+    {
+      "key": "enum.MUI.DragDrop.DropStatus.Rejected",
+      "text": "被拒绝"
+    },
+    {
+      "key": "enum.MUI.Editor.PagePreset.FullScreen",
+      "text": "全屏"
+    },
+    {
+      "key": "enum.MUI.Editor.PagePreset.Notice",
+      "text": "提示"
+    },
+    {
+      "key": "enum.MUI.Editor.PagePreset.Popup",
+      "text": "弹窗"
+    },
+    {
+      "key": "enum.MUI.ListChangeKind.Add",
+      "text": "添加"
+    },
+    {
+      "key": "enum.MUI.ListChangeKind.Move",
+      "text": "移动"
+    },
+    {
+      "key": "enum.MUI.ListChangeKind.Remove",
+      "text": "移除"
+    },
+    {
+      "key": "enum.MUI.ListChangeKind.Replace",
+      "text": "替换"
+    },
+    {
+      "key": "enum.MUI.ListChangeKind.Reset",
+      "text": "重置"
+    },
+    {
+      "key": "enum.MUI.ListChangeKind.Update",
+      "text": "更新"
+    },
+    {
+      "key": "enum.MUI.Navigation.BackBehavior.Block",
+      "text": "阻止"
+    },
+    {
+      "key": "enum.MUI.Navigation.BackBehavior.Close",
+      "text": "关闭"
+    },
+    {
+      "key": "enum.MUI.Navigation.BackBehavior.HandleByPresenter",
+      "text": "由展示器处理"
+    },
+    {
+      "key": "enum.MUI.Navigation.BackBehavior.Ignore",
+      "text": "忽略"
+    },
+    {
+      "key": "enum.MUI.Navigation.BackResponse.Close",
+      "text": "关闭"
+    },
+    {
+      "key": "enum.MUI.Navigation.BackResponse.Handled",
+      "text": "已处理"
+    },
+    {
+      "key": "enum.MUI.Navigation.BackResponse.Ignore",
+      "text": "忽略"
+    },
+    {
+      "key": "enum.MUI.Navigation.BatchCloseStatus.Busy",
+      "text": "繁忙"
+    },
+    {
+      "key": "enum.MUI.Navigation.BatchCloseStatus.Completed",
+      "text": "已完成"
+    },
+    {
+      "key": "enum.MUI.Navigation.BatchCloseStatus.Reentrant",
+      "text": "重入"
+    },
+    {
+      "key": "enum.MUI.Navigation.BatchCloseStatus.WaitCancelled",
+      "text": "等待已取消"
+    },
+    {
+      "key": "enum.MUI.Navigation.CleanupStatus.Complete",
+      "text": "完成"
+    },
+    {
+      "key": "enum.MUI.Navigation.CleanupStatus.Failed",
+      "text": "失败"
+    },
+    {
+      "key": "enum.MUI.Navigation.CleanupStatus.NotRequired",
+      "text": "不需要"
+    },
+    {
+      "key": "enum.MUI.Navigation.CleanupStatus.Pending",
+      "text": "等待中"
+    },
+    {
+      "key": "enum.MUI.Navigation.CloseDecisionKind.Allow",
+      "text": "允许"
+    },
+    {
+      "key": "enum.MUI.Navigation.CloseDecisionKind.Deny",
+      "text": "拒绝"
+    },
+    {
+      "key": "enum.MUI.Navigation.CloseDecisionKind.NeedsConfirmation",
+      "text": "需要确认"
+    },
+    {
+      "key": "enum.MUI.Navigation.CloseRequestIntent.Complete",
+      "text": "完成"
+    },
+    {
+      "key": "enum.MUI.Navigation.CloseRequestIntent.Dismiss",
+      "text": "关闭"
+    },
+    {
+      "key": "enum.MUI.Navigation.CloseRequestIntent.Replace",
+      "text": "替换"
+    },
+    {
+      "key": "enum.MUI.Navigation.CloseStatus.AlreadyClosed",
+      "text": "已关闭"
+    },
+    {
+      "key": "enum.MUI.Navigation.CloseStatus.AlreadyClosing",
+      "text": "正在关闭"
+    },
+    {
+      "key": "enum.MUI.Navigation.CloseStatus.Blocked",
+      "text": "被阻止"
+    },
+    {
+      "key": "enum.MUI.Navigation.CloseStatus.Busy",
+      "text": "繁忙"
+    },
+    {
+      "key": "enum.MUI.Navigation.CloseStatus.Closed",
+      "text": "已关闭"
+    },
+    {
+      "key": "enum.MUI.Navigation.CloseStatus.ClosedWithCleanupPending",
+      "text": "已关闭但清理未完成"
+    },
+    {
+      "key": "enum.MUI.Navigation.CloseStatus.ConfirmationUnavailable",
+      "text": "确认服务不可用"
+    },
+    {
+      "key": "enum.MUI.Navigation.CloseStatus.Denied",
+      "text": "被拒绝"
+    },
+    {
+      "key": "enum.MUI.Navigation.CloseStatus.Failed",
+      "text": "失败"
+    },
+    {
+      "key": "enum.MUI.Navigation.CloseStatus.Handled",
+      "text": "已处理"
+    },
+    {
+      "key": "enum.MUI.Navigation.CloseStatus.InUse",
+      "text": "使用中"
+    },
+    {
+      "key": "enum.MUI.Navigation.CloseStatus.NotFound",
+      "text": "未找到"
+    },
+    {
+      "key": "enum.MUI.Navigation.CloseStatus.Reentrant",
+      "text": "重入"
+    },
+    {
+      "key": "enum.MUI.Navigation.CloseStatus.Superseded",
+      "text": "已被替代"
+    },
+    {
+      "key": "enum.MUI.Navigation.CloseStatus.UnknownOrExpired",
+      "text": "未知或已过期"
+    },
+    {
+      "key": "enum.MUI.Navigation.CloseStatus.WaitCancelled",
+      "text": "等待已取消"
+    },
+    {
+      "key": "enum.MUI.Navigation.CoveragePolicy.BlockInput",
+      "text": "阻止输入"
+    },
+    {
+      "key": "enum.MUI.Navigation.CoveragePolicy.Hide",
+      "text": "隐藏下层"
+    },
+    {
+      "key": "enum.MUI.Navigation.CoveragePolicy.None",
+      "text": "不覆盖"
+    },
+    {
+      "key": "enum.MUI.Navigation.DependencyFailureStage.Preparation",
+      "text": "准备"
+    },
+    {
+      "key": "enum.MUI.Navigation.DependencyFailureStage.RuntimeExit",
+      "text": "运行时退出"
+    },
+    {
+      "key": "enum.MUI.Navigation.DependencyPlacement.AttachedAfter",
+      "text": "父页面之后"
+    },
+    {
+      "key": "enum.MUI.Navigation.DependencyPlacement.RequiredBefore",
+      "text": "父页面之前"
+    },
+    {
+      "key": "enum.MUI.Navigation.DismissReason.ArgsUpdateFailed",
+      "text": "参数更新失败"
+    },
+    {
+      "key": "enum.MUI.Navigation.DismissReason.Back",
+      "text": "返回"
+    },
+    {
+      "key": "enum.MUI.Navigation.DismissReason.Closed",
+      "text": "已关闭"
+    },
+    {
+      "key": "enum.MUI.Navigation.DismissReason.Forced",
+      "text": "强制关闭"
+    },
+    {
+      "key": "enum.MUI.Navigation.DismissReason.HostShutdown",
+      "text": "宿主退出"
+    },
+    {
+      "key": "enum.MUI.Navigation.DismissReason.OpenCancelled",
+      "text": "打开取消"
+    },
+    {
+      "key": "enum.MUI.Navigation.DismissReason.OpenFailed",
+      "text": "打开失败"
+    },
+    {
+      "key": "enum.MUI.Navigation.DismissReason.RebindFailed",
+      "text": "换绑失败"
+    },
+    {
+      "key": "enum.MUI.Navigation.DismissReason.Replaced",
+      "text": "已替换"
+    },
+    {
+      "key": "enum.MUI.Navigation.ExistingInstancePolicy.Reject",
+      "text": "拒绝复用"
+    },
+    {
+      "key": "enum.MUI.Navigation.ExistingInstancePolicy.ReturnReady",
+      "text": "返回就绪实例"
+    },
+    {
+      "key": "enum.MUI.Navigation.ExplicitOwnershipReleaseStatus.AlreadyReleased",
+      "text": "已释放"
+    },
+    {
+      "key": "enum.MUI.Navigation.ExplicitOwnershipReleaseStatus.Pending",
+      "text": "等待中"
+    },
+    {
+      "key": "enum.MUI.Navigation.ExplicitOwnershipReleaseStatus.Rejected",
+      "text": "被拒绝"
+    },
+    {
+      "key": "enum.MUI.Navigation.ExplicitOwnershipReleaseStatus.Released",
+      "text": "已释放"
+    },
+    {
+      "key": "enum.MUI.Navigation.FocusPolicy.None",
+      "text": "不获取焦点"
+    },
+    {
+      "key": "enum.MUI.Navigation.NavigationEventKind.ArgsUpdateFinished",
+      "text": "参数更新完成"
+    },
+    {
+      "key": "enum.MUI.Navigation.NavigationEventKind.CloseCleanupPending",
+      "text": "关闭清理中"
+    },
+    {
+      "key": "enum.MUI.Navigation.NavigationEventKind.CloseCommitted",
+      "text": "关闭已提交"
+    },
+    {
+      "key": "enum.MUI.Navigation.NavigationEventKind.Closed",
+      "text": "已关闭"
+    },
+    {
+      "key": "enum.MUI.Navigation.NavigationEventKind.DependencyDegraded",
+      "text": "依赖降级"
+    },
+    {
+      "key": "enum.MUI.Navigation.NavigationEventKind.ExplicitOwnershipReleased",
+      "text": "显式持有已撤销"
+    },
+    {
+      "key": "enum.MUI.Navigation.NavigationEventKind.OpenCommitted",
+      "text": "打开已提交"
+    },
+    {
+      "key": "enum.MUI.Navigation.NavigationEventKind.ViewModelRebindFinished",
+      "text": "视图模型换绑完成"
+    },
+    {
+      "key": "enum.MUI.Navigation.NavigationOperationStage.EnterTransition",
+      "text": "进入转场"
+    },
+    {
+      "key": "enum.MUI.Navigation.NavigationOperationStage.ExitTransition",
+      "text": "退出转场"
+    },
+    {
+      "key": "enum.MUI.Navigation.NavigationOperationStage.InstanceCleanup",
+      "text": "实例清理"
+    },
+    {
+      "key": "enum.MUI.Navigation.NavigationOperationStage.ViewResourceRelease",
+      "text": "视图资源归还"
+    },
+    {
+      "key": "enum.MUI.Navigation.NavigationPreparationStage.ActivationPreparation",
+      "text": "激活准备"
+    },
+    {
+      "key": "enum.MUI.Navigation.NavigationPreparationStage.AttachedDependencies",
+      "text": "附属依赖"
+    },
+    {
+      "key": "enum.MUI.Navigation.NavigationPreparationStage.Binding",
+      "text": "绑定"
+    },
+    {
+      "key": "enum.MUI.Navigation.NavigationPreparationStage.ModelCreation",
+      "text": "创建模型"
+    },
+    {
+      "key": "enum.MUI.Navigation.NavigationPreparationStage.PresenterCreate",
+      "text": "创建展示器"
+    },
+    {
+      "key": "enum.MUI.Navigation.NavigationPreparationStage.PresenterOpen",
+      "text": "展示器打开"
+    },
+    {
+      "key": "enum.MUI.Navigation.NavigationPreparationStage.PresenterOpenAsync",
+      "text": "展示器异步打开"
+    },
+    {
+      "key": "enum.MUI.Navigation.NavigationPreparationStage.RequiredDependencies",
+      "text": "必需依赖"
+    },
+    {
+      "key": "enum.MUI.Navigation.NavigationPreparationStage.ResourceCreation",
+      "text": "创建资源"
+    },
+    {
+      "key": "enum.MUI.Navigation.NavigationTraceKind.BatchCloseItem",
+      "text": "批量关闭条目"
+    },
+    {
+      "key": "enum.MUI.Navigation.NavigationTraceKind.Lifecycle",
+      "text": "生命周期"
+    },
+    {
+      "key": "enum.MUI.Navigation.NavigationTraceKind.OperationFinished",
+      "text": "操作完成"
+    },
+    {
+      "key": "enum.MUI.Navigation.NavigationTraceKind.OperationStageFinished",
+      "text": "操作阶段完成"
+    },
+    {
+      "key": "enum.MUI.Navigation.NavigationTraceKind.OperationStageStarted",
+      "text": "操作阶段开始"
+    },
+    {
+      "key": "enum.MUI.Navigation.NavigationTraceKind.OperationStarted",
+      "text": "操作开始"
+    },
+    {
+      "key": "enum.MUI.Navigation.NavigationTraceKind.PreparationFinished",
+      "text": "准备完成"
+    },
+    {
+      "key": "enum.MUI.Navigation.NavigationTraceKind.PreparationStarted",
+      "text": "准备开始"
+    },
+    {
+      "key": "enum.MUI.Navigation.OpenRejection.Busy",
+      "text": "繁忙"
+    },
+    {
+      "key": "enum.MUI.Navigation.OpenRejection.CleanupCapacity",
+      "text": "清理容量不足"
+    },
+    {
+      "key": "enum.MUI.Navigation.OpenRejection.CloseDecisionTimedOut",
+      "text": "关闭决议超时"
+    },
+    {
+      "key": "enum.MUI.Navigation.OpenRejection.CloseDenied",
+      "text": "关闭被拒绝"
+    },
+    {
+      "key": "enum.MUI.Navigation.OpenRejection.ConfirmationUnavailable",
+      "text": "确认服务不可用"
+    },
+    {
+      "key": "enum.MUI.Navigation.OpenRejection.ConflictingData",
+      "text": "数据冲突"
+    },
+    {
+      "key": "enum.MUI.Navigation.OpenRejection.DependencyCycle",
+      "text": "依赖环"
+    },
+    {
+      "key": "enum.MUI.Navigation.OpenRejection.DependencyLimit",
+      "text": "超过依赖上限"
+    },
+    {
+      "key": "enum.MUI.Navigation.OpenRejection.DependencyOrderConflict",
+      "text": "依赖顺序冲突"
+    },
+    {
+      "key": "enum.MUI.Navigation.OpenRejection.InstanceLimit",
+      "text": "实例上限"
+    },
+    {
+      "key": "enum.MUI.Navigation.OpenRejection.None",
+      "text": "无"
+    },
+    {
+      "key": "enum.MUI.Navigation.OpenRejection.Reentrant",
+      "text": "重入"
+    },
+    {
+      "key": "enum.MUI.Navigation.OpenRejection.Superseded",
+      "text": "已被替代"
+    },
+    {
+      "key": "enum.MUI.Navigation.OpenStatus.ActivationFailed",
+      "text": "激活失败"
+    },
+    {
+      "key": "enum.MUI.Navigation.OpenStatus.CancelledBeforeCommit",
+      "text": "提交前取消"
+    },
+    {
+      "key": "enum.MUI.Navigation.OpenStatus.ClosedBeforeReady",
+      "text": "就绪前关闭"
+    },
+    {
+      "key": "enum.MUI.Navigation.OpenStatus.HostClosed",
+      "text": "宿主已关闭"
+    },
+    {
+      "key": "enum.MUI.Navigation.OpenStatus.PreparationFailed",
+      "text": "准备失败"
+    },
+    {
+      "key": "enum.MUI.Navigation.OpenStatus.Rejected",
+      "text": "被拒绝"
+    },
+    {
+      "key": "enum.MUI.Navigation.OpenStatus.Succeeded",
+      "text": "成功"
+    },
+    {
+      "key": "enum.MUI.Navigation.OverflowPolicy.CloseOldest",
+      "text": "关闭最早页面"
+    },
+    {
+      "key": "enum.MUI.Navigation.OverflowPolicy.Reject",
+      "text": "拒绝打开"
+    },
+    {
+      "key": "enum.MUI.Navigation.PostOpenStatus.Accepted",
+      "text": "已接纳"
+    },
+    {
+      "key": "enum.MUI.Navigation.PostOpenStatus.Busy",
+      "text": "繁忙"
+    },
+    {
+      "key": "enum.MUI.Navigation.PostOpenStatus.HostClosed",
+      "text": "宿主已关闭"
+    },
+    {
+      "key": "enum.MUI.Navigation.PreloadStatus.Cancelled",
+      "text": "已取消"
+    },
+    {
+      "key": "enum.MUI.Navigation.PreloadStatus.CapacityExceeded",
+      "text": "超过容量"
+    },
+    {
+      "key": "enum.MUI.Navigation.PreloadStatus.Failed",
+      "text": "失败"
+    },
+    {
+      "key": "enum.MUI.Navigation.PreloadStatus.HostClosed",
+      "text": "宿主已关闭"
+    },
+    {
+      "key": "enum.MUI.Navigation.PreloadStatus.InactiveContentClearing",
+      "text": "未激活内容清理中"
+    },
+    {
+      "key": "enum.MUI.Navigation.PreloadStatus.Ready",
+      "text": "已就绪"
+    },
+    {
+      "key": "enum.MUI.Navigation.PreloadStatus.Reentrant",
+      "text": "重入"
+    },
+    {
+      "key": "enum.MUI.Navigation.PreloadStatus.Superseded",
+      "text": "已被替代"
+    },
+    {
+      "key": "enum.MUI.Navigation.PreloadStatus.Unsupported",
+      "text": "不支持"
+    },
+    {
+      "key": "enum.MUI.Navigation.PreloadStatus.WaitCancelled",
+      "text": "等待已取消"
+    },
+    {
+      "key": "enum.MUI.Navigation.ReplaceRejection.Busy",
+      "text": "繁忙"
+    },
+    {
+      "key": "enum.MUI.Navigation.ReplaceRejection.CleanupCapacity",
+      "text": "清理容量不足"
+    },
+    {
+      "key": "enum.MUI.Navigation.ReplaceRejection.CloseDecisionTimedOut",
+      "text": "关闭决议超时"
+    },
+    {
+      "key": "enum.MUI.Navigation.ReplaceRejection.CloseDenied",
+      "text": "关闭被拒绝"
+    },
+    {
+      "key": "enum.MUI.Navigation.ReplaceRejection.ConfirmationUnavailable",
+      "text": "确认服务不可用"
+    },
+    {
+      "key": "enum.MUI.Navigation.ReplaceRejection.ConflictingData",
+      "text": "数据冲突"
+    },
+    {
+      "key": "enum.MUI.Navigation.ReplaceRejection.DependencyCycle",
+      "text": "依赖环"
+    },
+    {
+      "key": "enum.MUI.Navigation.ReplaceRejection.DependencyLimit",
+      "text": "超过依赖上限"
+    },
+    {
+      "key": "enum.MUI.Navigation.ReplaceRejection.DependencyOrderConflict",
+      "text": "依赖顺序冲突"
+    },
+    {
+      "key": "enum.MUI.Navigation.ReplaceRejection.InstanceLimit",
+      "text": "实例上限"
+    },
+    {
+      "key": "enum.MUI.Navigation.ReplaceRejection.None",
+      "text": "无"
+    },
+    {
+      "key": "enum.MUI.Navigation.ReplaceRejection.Reentrant",
+      "text": "重入"
+    },
+    {
+      "key": "enum.MUI.Navigation.ReplaceRejection.SourceUnavailable",
+      "text": "源不可用"
+    },
+    {
+      "key": "enum.MUI.Navigation.ReplaceRejection.Superseded",
+      "text": "已被替代"
+    },
+    {
+      "key": "enum.MUI.Navigation.ReplaceStatus.CancelledBeforeCommit",
+      "text": "提交前取消"
+    },
+    {
+      "key": "enum.MUI.Navigation.ReplaceStatus.Committed",
+      "text": "已提交"
+    },
+    {
+      "key": "enum.MUI.Navigation.ReplaceStatus.PreparationFailed",
+      "text": "准备失败"
+    },
+    {
+      "key": "enum.MUI.Navigation.ReplaceStatus.Rejected",
+      "text": "被拒绝"
+    },
+    {
+      "key": "enum.MUI.Navigation.TickPausePolicy.Covered",
+      "text": "被覆盖"
+    },
+    {
+      "key": "enum.MUI.Navigation.TickPausePolicy.Hidden",
+      "text": "隐藏"
+    },
+    {
+      "key": "enum.MUI.Navigation.TickPausePolicy.None",
+      "text": "不暂停"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewCacheMode.KeepAlive",
+      "text": "长期缓存（容量不足可回收）"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewCacheMode.None",
+      "text": "不缓存"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewCacheMode.Timed",
+      "text": "限时保留"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewOperationFlags.CleanupTimedOut",
+      "text": "清理超时"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewOperationFlags.CloseRequested",
+      "text": "已请求关闭"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewOperationFlags.Closing",
+      "text": "关闭中"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewOperationFlags.DependencyExit",
+      "text": "依赖退出"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewOperationFlags.Entering",
+      "text": "进入中"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewOperationFlags.ExecutingCommand",
+      "text": "命令执行中"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewOperationFlags.Exiting",
+      "text": "退出中"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewOperationFlags.None",
+      "text": "无"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewOperationFlags.Preparing",
+      "text": "准备中"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewOperationFlags.Rebinding",
+      "text": "换绑中"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewOperationFlags.UpdatingArgs",
+      "text": "参数更新中"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewReadinessStatus.ActivationFailed",
+      "text": "激活失败"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewReadinessStatus.ClosedBeforeReady",
+      "text": "就绪前关闭"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewReadinessStatus.Pending",
+      "text": "等待中"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewReadinessStatus.Ready",
+      "text": "已就绪"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewReadinessStatus.Transitioning",
+      "text": "转场中"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewReadinessStatus.WaitCancelled",
+      "text": "等待已取消"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewResultStatus.Completed",
+      "text": "已完成"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewResultStatus.Dismissed",
+      "text": "已关闭"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewResultStatus.Faulted",
+      "text": "故障"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewResultStatus.Pending",
+      "text": "等待中"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewState.Closing",
+      "text": "关闭中"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewState.Destroyed",
+      "text": "已销毁"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewState.Failed",
+      "text": "失败"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewState.Open",
+      "text": "已打开"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewState.Opening",
+      "text": "打开中"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewState.Unknown",
+      "text": "未知"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewState.UnknownOrExpired",
+      "text": "未知或已过期"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewTransitionStatus.Completed",
+      "text": "已完成"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewTransitionStatus.Failed",
+      "text": "失败"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewTransitionStatus.Interrupted",
+      "text": "被中断"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewTransitionStatus.Pending",
+      "text": "等待中"
+    },
+    {
+      "key": "enum.MUI.Notifications.NotificationPostStatus.Accepted",
+      "text": "已接纳"
+    },
+    {
+      "key": "enum.MUI.Notifications.NotificationPostStatus.CapacityExceeded",
+      "text": "超过容量"
+    },
+    {
+      "key": "enum.MUI.Notifications.NotificationPostStatus.Disposed",
+      "text": "已释放"
+    },
+    {
+      "key": "enum.MUI.Notifications.NotificationPostStatus.Duplicate",
+      "text": "重复"
+    },
+    {
+      "key": "enum.MUI.RebindCleanup.Complete",
+      "text": "完成"
+    },
+    {
+      "key": "enum.MUI.RebindCleanup.Failed",
+      "text": "失败"
+    },
+    {
+      "key": "enum.MUI.RebindCleanup.NotRequired",
+      "text": "不需要"
+    },
+    {
+      "key": "enum.MUI.RebindRejection.BindingDetachUnsupported",
+      "text": "不支持解除绑定"
+    },
+    {
+      "key": "enum.MUI.RebindRejection.Busy",
+      "text": "繁忙"
+    },
+    {
+      "key": "enum.MUI.RebindRejection.HostClosed",
+      "text": "宿主已关闭"
+    },
+    {
+      "key": "enum.MUI.RebindRejection.InUse",
+      "text": "使用中"
+    },
+    {
+      "key": "enum.MUI.RebindRejection.InputControlUnsupported",
+      "text": "输入控件不支持"
+    },
+    {
+      "key": "enum.MUI.RebindRejection.None",
+      "text": "无"
+    },
+    {
+      "key": "enum.MUI.RebindRejection.Reentrant",
+      "text": "重入"
+    },
+    {
+      "key": "enum.MUI.RebindRejection.RouteMismatch",
+      "text": "路由不匹配"
+    },
+    {
+      "key": "enum.MUI.RebindRejection.SourceUnavailable",
+      "text": "源不可用"
+    },
+    {
+      "key": "enum.MUI.RebindStatus.Applied",
+      "text": "已应用"
+    },
+    {
+      "key": "enum.MUI.RebindStatus.Cancelled",
+      "text": "已取消"
+    },
+    {
+      "key": "enum.MUI.RebindStatus.Failed",
+      "text": "失败"
+    },
+    {
+      "key": "enum.MUI.RebindStatus.Rejected",
+      "text": "被拒绝"
+    },
+    {
+      "key": "enum.MUI.Tabs.TabContentRetention.CacheRecent",
+      "text": "缓存最近页面"
+    },
+    {
+      "key": "enum.MUI.Tabs.TabContentRetention.KeepSelectedTabs",
+      "text": "保留选中标签"
+    },
+    {
+      "key": "enum.MUI.Tabs.TabContentRetention.ReleaseOnLeave",
+      "text": "离开时释放"
+    },
+    {
+      "key": "enum.MUI.Tabs.TabFailureDisplay.ErrorPlaceholder",
+      "text": "错误占位"
+    },
+    {
+      "key": "enum.MUI.Tabs.TabFailureDisplay.RestorePrevious",
+      "text": "恢复之前状态"
+    },
+    {
+      "key": "enum.MUI.Tabs.TabPendingDisplay.Blank",
+      "text": "留空"
+    },
+    {
+      "key": "enum.MUI.Tabs.TabPendingDisplay.KeepPrevious",
+      "text": "保留之前页面"
+    },
+    {
+      "key": "enum.MUI.Tabs.TabPendingDisplay.LoadingPlaceholder",
+      "text": "加载占位"
+    },
+    {
+      "key": "enum.MUI.Tabs.TabPhase.Empty",
+      "text": "空"
+    },
+    {
+      "key": "enum.MUI.Tabs.TabPhase.Error",
+      "text": "错误"
+    },
+    {
+      "key": "enum.MUI.Tabs.TabPhase.Inactive",
+      "text": "未激活"
+    },
+    {
+      "key": "enum.MUI.Tabs.TabPhase.Loading",
+      "text": "加载中"
+    },
+    {
+      "key": "enum.MUI.Tabs.TabPhase.Ready",
+      "text": "已就绪"
+    },
+    {
+      "key": "enum.MUI.Tabs.TabRejection.Denied",
+      "text": "被拒绝"
+    },
+    {
+      "key": "enum.MUI.Tabs.TabRejection.Disabled",
+      "text": "禁用"
+    },
+    {
+      "key": "enum.MUI.Tabs.TabRejection.None",
+      "text": "无"
+    },
+    {
+      "key": "enum.MUI.Tabs.TabRejection.Reentrant",
+      "text": "重入"
+    },
+    {
+      "key": "enum.MUI.Tabs.TabRejection.UnknownTab",
+      "text": "未知标签"
+    },
+    {
+      "key": "enum.MUI.Tabs.TabSelectionStatus.Cancelled",
+      "text": "已取消"
+    },
+    {
+      "key": "enum.MUI.Tabs.TabSelectionStatus.Empty",
+      "text": "空"
+    },
+    {
+      "key": "enum.MUI.Tabs.TabSelectionStatus.Failed",
+      "text": "失败"
+    },
+    {
+      "key": "enum.MUI.Tabs.TabSelectionStatus.ParentInactive",
+      "text": "父页面未激活"
+    },
+    {
+      "key": "enum.MUI.Tabs.TabSelectionStatus.Ready",
+      "text": "已就绪"
+    },
+    {
+      "key": "enum.MUI.Tabs.TabSelectionStatus.Rejected",
+      "text": "被拒绝"
+    },
+    {
+      "key": "enum.MUI.Tabs.TabSelectionStatus.Superseded",
+      "text": "已被替代"
+    },
+    {
+      "key": "enum.MUI.Tabs.TabSelectionStatus.WaitCancelled",
+      "text": "等待已取消"
+    },
+    {
+      "key": "enum.MUI.TextInputCommitMode.OnChange",
+      "text": "值变化时"
+    },
+    {
+      "key": "enum.MUI.TextInputCommitMode.OnEndEdit",
+      "text": "结束编辑时"
+    },
+    {
+      "key": "enum.MUI.UGUI.MUIPagePolicyFields.All",
+      "text": "全部"
+    },
+    {
+      "key": "enum.MUI.UGUI.MUIPagePolicyFields.Back",
+      "text": "返回"
+    },
+    {
+      "key": "enum.MUI.UGUI.MUIPagePolicyFields.Cache",
+      "text": "缓存"
+    },
+    {
+      "key": "enum.MUI.UGUI.MUIPagePolicyFields.Coverage",
+      "text": "覆盖"
+    },
+    {
+      "key": "enum.MUI.UGUI.MUIPagePolicyFields.Focus",
+      "text": "焦点"
+    },
+    {
+      "key": "enum.MUI.UGUI.MUIPagePolicyFields.Instances",
+      "text": "实例"
+    },
+    {
+      "key": "enum.MUI.UGUI.MUIPagePolicyFields.Layer",
+      "text": "层级"
+    },
+    {
+      "key": "enum.MUI.UGUI.MUIPagePolicyFields.Modal",
+      "text": "模态"
+    },
+    {
+      "key": "enum.MUI.UGUI.MUIPagePolicyFields.None",
+      "text": "无"
+    },
+    {
+      "key": "enum.MUI.UGUI.MUIPagePolicyFields.Tick",
+      "text": "帧更新"
+    },
+    {
+      "key": "enum.MUI.UGUI.MUIPagePolicyFields.Timeouts",
+      "text": "超时"
+    },
+    {
+      "key": "enum.MUI.UGUI.OverlayDismissReason.Back",
+      "text": "返回"
+    },
+    {
+      "key": "enum.MUI.UGUI.OverlayDismissReason.OutsidePointer",
+      "text": "外部指针"
+    },
+    {
+      "key": "enum.MUI.UGUI.OverlayDismissReason.TargetUnavailable",
+      "text": "目标不可用"
+    },
+    {
+      "key": "enum.MUI.UGUI.OverlayPlacement.Above",
+      "text": "上方"
+    },
+    {
+      "key": "enum.MUI.UGUI.OverlayPlacement.Below",
+      "text": "下方"
+    },
+    {
+      "key": "enum.MUI.UGUI.OverlayPlacement.Left",
+      "text": "左侧"
+    },
+    {
+      "key": "enum.MUI.UGUI.OverlayPlacement.Right",
+      "text": "右侧"
+    },
+    {
+      "key": "enum.MUI.UGUI.ResourcePreparationState.Applied",
+      "text": "已应用"
+    },
+    {
+      "key": "enum.MUI.UGUI.ResourcePreparationState.Cancelled",
+      "text": "已取消"
+    },
+    {
+      "key": "enum.MUI.UGUI.ResourcePreparationState.Failed",
+      "text": "失败"
+    },
+    {
+      "key": "enum.MUI.UGUI.ResourcePreparationState.Loading",
+      "text": "加载中"
+    },
+    {
+      "key": "enum.MUI.UGUI.ResourcePreparationState.NotApplied",
+      "text": "未应用"
+    },
+    {
+      "key": "enum.MUI.UGUI.ResourceSourceState.Cancelled",
+      "text": "已取消"
+    },
+    {
+      "key": "enum.MUI.UGUI.ResourceSourceState.Displayed",
+      "text": "已显示"
+    },
+    {
+      "key": "enum.MUI.UGUI.ResourceSourceState.Empty",
+      "text": "空"
+    },
+    {
+      "key": "enum.MUI.UGUI.ResourceSourceState.Failed",
+      "text": "失败"
+    },
+    {
+      "key": "enum.MUI.UGUI.ResourceSourceState.Loading",
+      "text": "加载中"
+    },
+    {
+      "key": "enum.MUI.UGUI.UIAutomationConditionStatus.Cancelled",
+      "text": "已取消"
+    },
+    {
+      "key": "enum.MUI.UGUI.UIAutomationConditionStatus.Failed",
+      "text": "失败"
+    },
+    {
+      "key": "enum.MUI.UGUI.UIAutomationConditionStatus.Pending",
+      "text": "等待中"
+    },
+    {
+      "key": "enum.MUI.UGUI.UIAutomationConditionStatus.Satisfied",
+      "text": "已满足"
+    },
+    {
+      "key": "enum.MUI.UGUI.UIAutomationConditionStatus.TimedOut",
+      "text": "超时"
+    },
+    {
+      "key": "enum.MUI.UGUI.UIAutomationStatus.Accepted",
+      "text": "已接纳"
+    },
+    {
+      "key": "enum.MUI.UGUI.UIAutomationStatus.InputBlocked",
+      "text": "输入被阻止"
+    },
+    {
+      "key": "enum.MUI.UGUI.UIAutomationStatus.NotReady",
+      "text": "未就绪"
+    },
+    {
+      "key": "enum.MUI.UGUI.UIAutomationStatus.Reentrant",
+      "text": "重入"
+    },
+    {
+      "key": "enum.MUI.UGUI.ViewInputRestriction.CanvasGroupInputDisabled",
+      "text": "画布组禁止交互"
+    },
+    {
+      "key": "enum.MUI.UGUI.ViewInputRestriction.CanvasGroupRaycastsDisabled",
+      "text": "画布组禁止射线"
+    },
+    {
+      "key": "enum.MUI.UGUI.ViewInputRestriction.Disposed",
+      "text": "已释放"
+    },
+    {
+      "key": "enum.MUI.UGUI.ViewInputRestriction.HiddenByHost",
+      "text": "宿主隐藏"
+    },
+    {
+      "key": "enum.MUI.UGUI.ViewInputRestriction.HiddenLocally",
+      "text": "局部隐藏"
+    },
+    {
+      "key": "enum.MUI.UGUI.ViewInputRestriction.HostInputDisabled",
+      "text": "宿主禁止输入"
+    },
+    {
+      "key": "enum.MUI.UGUI.ViewInputRestriction.InactiveHierarchy",
+      "text": "层级未激活"
+    },
+    {
+      "key": "enum.MUI.UGUI.ViewInputRestriction.LocalGateBlocked",
+      "text": "局部门控阻挡"
+    },
+    {
+      "key": "enum.MUI.UGUI.ViewInputRestriction.LocalGateDisposed",
+      "text": "局部门控已释放"
+    },
+    {
+      "key": "enum.MUI.UGUI.ViewInputRestriction.LocalInputDisabled",
+      "text": "局部禁止输入"
+    },
+    {
+      "key": "enum.MUI.UGUI.ViewInputRestriction.MissingCanvasGroup",
+      "text": "缺少画布组"
+    },
+    {
+      "key": "enum.MUI.UGUI.ViewInputRestriction.None",
+      "text": "无"
+    },
+    {
+      "key": "enum.MUI.UGUI.ViewInputRestriction.NotInitialized",
+      "text": "未初始化"
+    },
+    {
+      "key": "enum.MUI.UGUI.ViewInputRestriction.RetainingVisuals",
+      "text": "保留旧画面"
+    },
+    {
+      "key": "enum.MUI.UGUI.ViewInputRestriction.ViewUnavailable",
+      "text": "视图不可用"
+    },
+    {
+      "key": "enum.MUI.UGUI.VirtualListAlignment.Center",
+      "text": "居中"
+    },
+    {
+      "key": "enum.MUI.UGUI.VirtualListAlignment.End",
+      "text": "末尾"
+    },
+    {
+      "key": "enum.MUI.UGUI.VirtualListAlignment.Nearest",
+      "text": "最近"
+    },
+    {
+      "key": "enum.MUI.UGUI.VirtualListAlignment.Start",
+      "text": "起始"
+    },
+    {
+      "key": "enum.MUI.UGUI.VirtualListRevealStatus.Cancelled",
+      "text": "已取消"
+    },
+    {
+      "key": "enum.MUI.UGUI.VirtualListRevealStatus.Failed",
+      "text": "失败"
+    },
+    {
+      "key": "enum.MUI.UGUI.VirtualListRevealStatus.Inactive",
+      "text": "未激活"
+    },
+    {
+      "key": "enum.MUI.UGUI.VirtualListRevealStatus.IncompatibleSource",
+      "text": "来源不兼容"
+    },
+    {
+      "key": "enum.MUI.UGUI.VirtualListRevealStatus.InputBlocked",
+      "text": "输入被阻止"
+    },
+    {
+      "key": "enum.MUI.UGUI.VirtualListRevealStatus.NoSelectable",
+      "text": "无可选择对象"
+    },
+    {
+      "key": "enum.MUI.UGUI.VirtualListRevealStatus.NotFound",
+      "text": "未找到"
+    },
+    {
+      "key": "enum.MUI.UGUI.VirtualListRevealStatus.Ready",
+      "text": "已就绪"
+    },
+    {
+      "key": "enum.MUI.UGUI.VirtualListRevealStatus.Superseded",
+      "text": "已被替代"
+    },
+    {
+      "key": "enum.MUI.UGUI.VirtualListStatus.Empty",
+      "text": "空"
+    },
+    {
+      "key": "enum.MUI.UGUI.VirtualListStatus.Error",
+      "text": "错误"
+    },
+    {
+      "key": "enum.MUI.UGUI.VirtualListStatus.Inactive",
+      "text": "未激活"
+    },
+    {
+      "key": "enum.MUI.UGUI.VirtualListStatus.Loading",
+      "text": "加载中"
+    },
+    {
+      "key": "enum.MUI.UGUI.VirtualListStatus.Ready",
+      "text": "已就绪"
+    },
+    {
+      "key": "enum.MUI.ViewPreparationStep.Binding",
+      "text": "绑定"
+    },
+    {
+      "key": "enum.MUI.ViewPreparationStep.PresenterCreate",
+      "text": "创建展示器"
+    },
+    {
+      "key": "enum.MUI.ViewPreparationStep.PresenterOpen",
+      "text": "展示器打开"
+    },
+    {
+      "key": "enum.MUI.ViewPreparationStep.PresenterOpenAsync",
+      "text": "展示器异步打开"
+    },
+    {
+      "key": "language.help",
+      "text": "编辑器全局偏好，只影响 MUI 窗口与 Inspector。添加 *.mui-language.json 可扩展语言；未翻译的词条按资源中的回退语言读取。"
+    },
+    {
+      "key": "language.label",
+      "text": "编辑器语言"
+    },
+    {
+      "key": "language.reload",
+      "text": "刷新语言资源"
+    },
+    {
+      "key": "property.AllowMultiple",
+      "text": "允许多个实例"
+    },
+    {
+      "key": "property.BackBehavior",
+      "text": "返回行为"
+    },
+    {
+      "key": "property.Button",
+      "text": "按钮"
+    },
+    {
+      "key": "property.CacheDurationSeconds",
+      "text": "缓存保留时间（秒）"
+    },
+    {
+      "key": "property.CacheMode",
+      "text": "关闭后的 View 缓存"
+    },
+    {
+      "key": "property.CloseDecisionTimeoutSeconds",
+      "text": "关闭决议超时（秒）"
+    },
+    {
+      "key": "property.CloseTimeoutSeconds",
+      "text": "清理超时（秒）"
+    },
+    {
+      "key": "property.Coverage",
+      "text": "打开后对下层的影响"
+    },
+    {
+      "key": "property.EnterTimeout",
+      "text": "进入超时（秒）"
+    },
+    {
+      "key": "property.ExistingInstance",
+      "text": "已有实例策略"
+    },
+    {
+      "key": "property.ExitTimeout",
+      "text": "退出超时（秒）"
+    },
+    {
+      "key": "property.Key",
+      "text": "键"
+    },
+    {
+      "key": "property.Layer",
+      "text": "层级"
+    },
+    {
+      "key": "property.MaxInstances",
+      "text": "实例上限"
+    },
+    {
+      "key": "property.Modal",
+      "text": "模态"
+    },
+    {
+      "key": "property.Name",
+      "text": "名称"
+    },
+    {
+      "key": "property.Order",
+      "text": "逻辑排序值"
+    },
+    {
+      "key": "property.Overflow",
+      "text": "超出上限策略"
+    },
+    {
+      "key": "property.Overrides",
+      "text": "覆盖的规则组"
+    },
+    {
+      "key": "property.PrepareTimeoutSeconds",
+      "text": "准备超时（秒）"
+    },
+    {
+      "key": "property.SelectionMark",
+      "text": "选中标记"
+    },
+    {
+      "key": "property.TakesFocus",
+      "text": "获取焦点"
+    },
+    {
+      "key": "property.TickPause",
+      "text": "自身业务 Tick 暂停条件"
+    },
+    {
+      "key": "property.Values",
+      "text": "策略值"
+    },
+    {
+      "key": "property.accessibilityDescription",
+      "text": "无障碍描述"
+    },
+    {
+      "key": "property.accessibilityHidden",
+      "text": "无障碍隐藏"
+    },
+    {
+      "key": "property.accessibilityLabel",
+      "text": "无障碍名称"
+    },
+    {
+      "key": "property.accessibilityOrder",
+      "text": "无障碍顺序"
+    },
+    {
+      "key": "property.accessibilityValue",
+      "text": "无障碍值"
+    },
+    {
+      "key": "property.allowedHighlight",
+      "text": "允许放置高亮"
+    },
+    {
+      "key": "property.arrayElement",
+      "text": "条目 {0}"
+    },
+    {
+      "key": "property.automaticClock",
+      "text": "自动计时"
+    },
+    {
+      "key": "property.automaticColumns",
+      "text": "自动计算列数"
+    },
+    {
+      "key": "property.automaticFramePump",
+      "text": "自动更新界面"
+    },
+    {
+      "key": "property.avoidKeyboard",
+      "text": "避让键盘"
+    },
+    {
+      "key": "property.backNavigationView",
+      "text": "返回导航视图"
+    },
+    {
+      "key": "property.bottom",
+      "text": "下"
+    },
+    {
+      "key": "property.buttonTemplate",
+      "text": "按钮模板"
+    },
+    {
+      "key": "property.cacheCapacity",
+      "text": "缓存容量"
+    },
+    {
+      "key": "property.cancelButton",
+      "text": "取消按钮"
+    },
+    {
+      "key": "property.capacity",
+      "text": "容量"
+    },
+    {
+      "key": "property.childView",
+      "text": "子视图"
+    },
+    {
+      "key": "property.cleanupCapacity",
+      "text": "清理容量"
+    },
+    {
+      "key": "property.columns",
+      "text": "列数"
+    },
+    {
+      "key": "property.commitMode",
+      "text": "输入提交模式"
+    },
+    {
+      "key": "property.content",
+      "text": "内容节点"
+    },
+    {
+      "key": "property.contentRoot",
+      "text": "内容根节点"
+    },
+    {
+      "key": "property.defaultPreset",
+      "text": "未指定时使用"
+    },
+    {
+      "key": "property.defaultRules",
+      "text": "页面默认规则"
+    },
+    {
+      "key": "property.defaultSelection",
+      "text": "默认选择对象"
+    },
+    {
+      "key": "property.dismissButton",
+      "text": "关闭按钮"
+    },
+    {
+      "key": "property.dismissOnBack",
+      "text": "返回时关闭"
+    },
+    {
+      "key": "property.dismissOutside",
+      "text": "点击外部关闭"
+    },
+    {
+      "key": "property.displayDelay",
+      "text": "显示延迟"
+    },
+    {
+      "key": "property.dragIcon",
+      "text": "拖拽图标"
+    },
+    {
+      "key": "property.edgePadding",
+      "text": "边缘留白"
+    },
+    {
+      "key": "property.emptyState",
+      "text": "空列表状态节点"
+    },
+    {
+      "key": "property.endFollowTolerance",
+      "text": "末尾跟随容差"
+    },
+    {
+      "key": "property.enterFadeDuration",
+      "text": "进入淡入时长"
+    },
+    {
+      "key": "property.entries",
+      "text": "条目"
+    },
+    {
+      "key": "property.errorLabel",
+      "text": "错误文本"
+    },
+    {
+      "key": "property.errorState",
+      "text": "错误状态节点"
+    },
+    {
+      "key": "property.estimatedItemExtent",
+      "text": "预估条目尺寸"
+    },
+    {
+      "key": "property.exitFadeDuration",
+      "text": "退出淡出时长"
+    },
+    {
+      "key": "property.failureMessage",
+      "text": "失败信息"
+    },
+    {
+      "key": "property.fitHorizontal",
+      "text": "适配水平方向"
+    },
+    {
+      "key": "property.fitVertical",
+      "text": "适配垂直方向"
+    },
+    {
+      "key": "property.followEnd",
+      "text": "跟随末尾"
+    },
+    {
+      "key": "property.gap",
+      "text": "间隔"
+    },
+    {
+      "key": "property.ghostRoot",
+      "text": "拖拽预览根节点"
+    },
+    {
+      "key": "property.host",
+      "text": "宿主"
+    },
+    {
+      "key": "property.indeterminate",
+      "text": "不定进度节点"
+    },
+    {
+      "key": "property.indicator",
+      "text": "指示节点"
+    },
+    {
+      "key": "property.inheritParentResources",
+      "text": "继承父资源加载器"
+    },
+    {
+      "key": "property.inputEventSystem",
+      "text": "输入事件系统"
+    },
+    {
+      "key": "property.itemFailureTemplate",
+      "text": "条目失败模板"
+    },
+    {
+      "key": "property.itemTemplate",
+      "text": "条目模板"
+    },
+    {
+      "key": "property.itemTemplates",
+      "text": "命名条目模板"
+    },
+    {
+      "key": "property.key",
+      "text": "键"
+    },
+    {
+      "key": "property.layers",
+      "text": "层级配置"
+    },
+    {
+      "key": "property.left",
+      "text": "左"
+    },
+    {
+      "key": "property.loadingOverlay",
+      "text": "加载提示"
+    },
+    {
+      "key": "property.loadingState",
+      "text": "加载状态节点"
+    },
+    {
+      "key": "property.m_Script",
+      "text": "脚本"
+    },
+    {
+      "key": "property.maxCells",
+      "text": "单元格上限"
+    },
+    {
+      "key": "property.maxItems",
+      "text": "条目上限"
+    },
+    {
+      "key": "property.maxPendingDrops",
+      "text": "待处理放置上限"
+    },
+    {
+      "key": "property.maxRevealCorrections",
+      "text": "定位修正上限"
+    },
+    {
+      "key": "property.measureItemExtents",
+      "text": "测量条目尺寸"
+    },
+    {
+      "key": "property.measurementsPerFrame",
+      "text": "每帧测量数量"
+    },
+    {
+      "key": "property.message",
+      "text": "信息文本"
+    },
+    {
+      "key": "property.minimumColumnWidth",
+      "text": "最小列宽"
+    },
+    {
+      "key": "property.modalBarrierColor",
+      "text": "模态屏障颜色"
+    },
+    {
+      "key": "property.mounts",
+      "text": "挂载节点"
+    },
+    {
+      "key": "property.overlay",
+      "text": "悬浮界面"
+    },
+    {
+      "key": "property.overscan",
+      "text": "额外预加载条目"
+    },
+    {
+      "key": "property.padding",
+      "text": "内边距"
+    },
+    {
+      "key": "property.placement",
+      "text": "悬浮位置"
+    },
+    {
+      "key": "property.prefabs",
+      "text": "预制体条目"
+    },
+    {
+      "key": "property.preloadCapacity",
+      "text": "预加载容量"
+    },
+    {
+      "key": "property.presets",
+      "text": "页面行为预设"
+    },
+    {
+      "key": "property.progress",
+      "text": "进度图像"
+    },
+    {
+      "key": "property.queueCapacity",
+      "text": "导航请求容量"
+    },
+    {
+      "key": "property.retryButton",
+      "text": "重试按钮"
+    },
+    {
+      "key": "property.right",
+      "text": "右"
+    },
+    {
+      "key": "property.scrollAxis",
+      "text": "滚动方向"
+    },
+    {
+      "key": "property.scrollRect",
+      "text": "滚动容器"
+    },
+    {
+      "key": "property.selectOnItemClick",
+      "text": "点击条目时选中"
+    },
+    {
+      "key": "property.selectedVisual",
+      "text": "选中状态节点"
+    },
+    {
+      "key": "property.semanticRole",
+      "text": "语义角色"
+    },
+    {
+      "key": "property.semanticState",
+      "text": "语义状态"
+    },
+    {
+      "key": "property.settings",
+      "text": "配置资产"
+    },
+    {
+      "key": "property.size",
+      "text": "数量"
+    },
+    {
+      "key": "property.slots",
+      "text": "固定槽位"
+    },
+    {
+      "key": "property.spacing",
+      "text": "间距"
+    },
+    {
+      "key": "property.template",
+      "text": "模板"
+    },
+    {
+      "key": "property.terminalCapacity",
+      "text": "终态记录容量"
+    },
+    {
+      "key": "property.top",
+      "text": "上"
+    },
+    {
+      "key": "property.view",
+      "text": "视图"
+    },
+    {
+      "key": "property.viewRoot",
+      "text": "页面挂载节点"
+    },
+    {
+      "key": "property.waitForResourceSources",
+      "text": "首次显示前等待资源"
+    },
+    {
+      "key": "property.wrapNavigation",
+      "text": "循环导航"
+    },
+    {
+      "key": "uxml.MUIDashboard.01da0634c3",
+      "text": "查看宿主配置"
+    },
+    {
+      "key": "uxml.MUIDashboard.0870c517d4",
+      "text": "采集运行状态"
+    },
+    {
+      "key": "uxml.MUIDashboard.0dc47fcbfc",
+      "text": "页面与宿主"
+    },
+    {
+      "key": "uxml.MUIDashboard.152f0fe07c",
+      "text": "复制状态报告"
+    },
+    {
+      "key": "uxml.MUIDashboard.17a020ace5",
+      "text": "采集时间线"
+    },
+    {
+      "key": "uxml.MUIDashboard.283a5893e4",
+      "text": "停止记录"
+    },
+    {
+      "key": "uxml.MUIDashboard.36155a4b2f",
+      "text": "配置资产"
+    },
+    {
+      "key": "uxml.MUIDashboard.3b5f994fce",
+      "text": "创建配置"
+    },
+    {
+      "key": "uxml.MUIDashboard.5ce55b4e35",
+      "text": "刷新宿主"
+    },
+    {
+      "key": "uxml.MUIDashboard.68289cbdb5",
+      "text": "快照上限（1—4096）"
+    },
+    {
+      "key": "uxml.MUIDashboard.7aa1cfebb5",
+      "text": "查看宿主、焦点与返回历史"
+    },
+    {
+      "key": "uxml.MUIDashboard.82f2cb5e0f",
+      "text": "配置与校验"
+    },
+    {
+      "key": "uxml.MUIDashboard.8637525747",
+      "text": "选择 UIHost，运行并初始化后采集状态。"
+    },
+    {
+      "key": "uxml.MUIDashboard.8abe30fad6",
+      "text": "按显示顺序排列：从顶到底"
+    },
+    {
+      "key": "uxml.MUIDashboard.9da1918cdc",
+      "text": "复制报告"
+    },
+    {
+      "key": "uxml.MUIDashboard.9ebe1ab0d1",
+      "text": "生命周期"
+    },
+    {
+      "key": "uxml.MUIDashboard.b26286234b",
+      "text": "校验配置"
+    },
+    {
+      "key": "uxml.MUIDashboard.b9056c8305",
+      "text": "自动刷新（0.5 秒）"
+    },
+    {
+      "key": "uxml.MUIDashboard.b98b16effe",
+      "text": "校验页面目录"
+    },
+    {
+      "key": "uxml.MUIDashboard.c799f9a388",
+      "text": "开始新一轮记录"
+    },
+    {
+      "key": "uxml.MUIDashboard.d8456739a2",
+      "text": "宿主"
+    },
+    {
+      "key": "uxml.MUIDashboard.eac2271fe7",
+      "text": "定位宿主"
+    },
+    {
+      "key": "uxml.MUIDashboard.ebb7e27d3b",
+      "text": "绑定到宿主"
+    },
+    {
+      "key": "uxml.MUIDashboard.ee29a6789d",
+      "text": "记录容量"
+    },
+    {
+      "key": "uxml.MUIDashboard.f9f6480c10",
+      "text": "停止并清除"
+    },
+    {
+      "key": "uxml.RouteGraphWindow.0821a708a2",
+      "text": "返回根节点"
+    },
+    {
+      "key": "uxml.RouteGraphWindow.292e56a328",
+      "text": "仅校验静态声明；运行时参数冲突、资源可用性及跨根共享组合仍需运行验证。快照不会自动更新，请由项目入口重新采集。"
+    },
+    {
+      "key": "uxml.RouteGraphWindow.3ed65533d7",
+      "text": "尚未提供路由。项目编辑器入口可调用 MUI.Navigation.Editor.RouteGraphWindow.Show(rootRoute)。同步共享示例组件也提供“查看路由依赖图”右键菜单。"
+    },
+    {
+      "key": "uxml.RouteGraphWindow.76cf5fe77a",
+      "text": "清空快照"
+    },
+    {
+      "key": "uxml.RouteGraphWindow.9da1918cdc",
+      "text": "复制报告"
+    },
+    {
+      "key": "uxml.RouteGraphWindow.f3f451ef88",
+      "text": "校验根"
+    },
+    {
+      "key": "value.all",
+      "text": "全部"
+    },
+    {
+      "key": "value.false",
+      "text": "否"
+    },
+    {
+      "key": "value.listSeparator",
+      "text": "、"
+    },
+    {
+      "key": "value.none",
+      "text": "无"
+    },
+    {
+      "key": "value.true",
+      "text": "是"
+    },
+    {
+      "key": "property.Version",
+      "text": "版本"
+    },
+    {
+      "key": "property.Prefab",
+      "text": "预制体"
+    },
+    {
+      "key": "value.cancelled",
+      "text": "已取消"
+    },
+    {
+      "key": "value.finished",
+      "text": "已完成"
+    },
+    {
+      "key": "trace.header",
+      "text": "导航生命周期追踪：记录中={0}；容量={1}；旧记录覆盖={2}；通知丢弃={3}"
+    },
+    {
+      "key": "trace.hint",
+      "text": "时间为相对首条保留事件的毫秒数，不代表操作耗时。路由键与异常类型名最多保留 256 字符。"
+    },
+    {
+      "key": "trace.version",
+      "text": "版本"
+    },
+    {
+      "key": "trace.route",
+      "text": "路由"
+    },
+    {
+      "key": "trace.reason",
+      "text": "原因"
+    },
+    {
+      "key": "trace.outcome",
+      "text": "结果"
+    },
+    {
+      "key": "trace.diagnosticId",
+      "text": "诊断标识"
+    },
+    {
+      "key": "trace.errorType",
+      "text": "异常类型"
+    },
+    {
+      "key": "trace.request",
+      "text": "请求"
+    },
+    {
+      "key": "trace.batchIndex",
+      "text": "批次项序号"
+    },
+    {
+      "key": "trace.batchHint",
+      "text": "（时间为批次结果采集时刻）"
+    },
+    {
+      "key": "trace.relatedHandle",
+      "text": "关联实例"
+    },
+    {
+      "key": "trace.preparationStage",
+      "text": "准备阶段"
+    },
+    {
+      "key": "trace.operationStage",
+      "text": "操作阶段"
+    },
+    {
+      "key": "trace.stageElapsed",
+      "text": "阶段耗时毫秒"
+    },
+    {
+      "key": "trace.requestElapsed",
+      "text": "请求总耗时毫秒"
+    },
+    {
+      "key": "trace.dependency",
+      "text": "依赖"
+    },
+    {
+      "key": "diagnostic.settings.layerRequired",
+      "text": "至少需要一个命名层级。",
+      "source": "至少需要一个命名层级。"
+    },
+    {
+      "key": "diagnostic.settings.layerName",
+      "text": "层级名称不能为空或重复。",
+      "source": "层级名称不能为空或重复。"
+    },
+    {
+      "key": "diagnostic.settings.layerOrder",
+      "text": "层级排序值不能重复：{0}",
+      "source": "层级排序值不能重复：{0}"
+    },
+    {
+      "key": "diagnostic.settings.presetRequired",
+      "text": "至少需要一个策略预设。",
+      "source": "至少需要一个策略预设。"
+    },
+    {
+      "key": "diagnostic.settings.presetName",
+      "text": "预设名称不能为空或重复。",
+      "source": "预设名称不能为空或重复。"
+    },
+    {
+      "key": "diagnostic.settings.unknownOverrides",
+      "text": "{0} 包含未知的覆盖选项。",
+      "source": "{0} 包含未知的覆盖选项。"
+    },
+    {
+      "key": "diagnostic.settings.defaultPreset",
+      "text": "默认策略必须指向已声明的预设。",
+      "source": "默认策略必须指向已声明的预设。"
+    },
+    {
+      "key": "diagnostic.settings.capacity",
+      "text": "缓存容量必须非负；队列、预加载、清理及终态记录容量必须大于零。",
+      "source": "缓存容量必须非负；队列、预加载、清理及终态记录容量必须大于零。"
+    },
+    {
+      "key": "diagnostic.settings.defaultRulesError",
+      "text": "默认规则：{0}",
+      "source": "默认规则：{0}"
+    },
+    {
+      "key": "diagnostic.settings.presetError",
+      "text": "{0}：{1}",
+      "source": "{0}：{1}"
+    },
+    {
+      "key": "diagnostic.settings.layerConflict",
+      "text": "页面不能同时覆盖命名层级和数值层级。",
+      "source": "页面不能同时覆盖命名层级和数值层级。"
+    },
+    {
+      "key": "diagnostic.settings.undeclaredPreset",
+      "text": "未声明策略预设或预设缺少规则：{0}",
+      "source": "未声明策略预设或预设缺少规则：{0}"
+    },
+    {
+      "key": "diagnostic.settings.rulesRequired",
+      "text": "默认规则不能为空。",
+      "source": "默认规则不能为空。"
+    },
+    {
+      "key": "diagnostic.settings.undeclaredLayer",
+      "text": "未声明层级：{0}",
+      "source": "未声明层级：{0}"
+    },
+    {
+      "key": "diagnostic.settings.invalid",
+      "text": "MUI 配置无效：\n{0}",
+      "source": "MUI 配置无效：\n{0}"
+    },
+    {
+      "key": "diagnostic.settings.builtIn",
+      "text": "内置默认",
+      "source": "内置默认"
+    },
+    {
+      "key": "diagnostic.graph.conflictingKey",
+      "text": "路由键 {0} 对应多个不同定义。",
+      "source": "路由键 {0} 对应多个不同定义。"
+    },
+    {
+      "key": "diagnostic.graph.directLimit",
+      "text": "路由直接依赖数量超过 64。",
+      "source": "路由直接依赖数量超过 64。"
+    },
+    {
+      "key": "diagnostic.graph.metadata",
+      "text": "依赖元数据缺少目标或使用无效位置。",
+      "source": "依赖元数据缺少目标或使用无效位置。"
+    },
+    {
+      "key": "diagnostic.graph.placement",
+      "text": "同一父路由对依赖 {0} 声明了不同位置。",
+      "source": "同一父路由对依赖 {0} 声明了不同位置。"
+    },
+    {
+      "key": "diagnostic.graph.required",
+      "text": "同一父路由对依赖 {0} 同时声明必需与可选，降级语义不明确。",
+      "source": "同一父路由对依赖 {0} 同时声明必需与可选，降级语义不明确。"
+    },
+    {
+      "key": "diagnostic.graph.duplicate",
+      "text": "同一父路由重复声明了依赖 {0}。",
+      "source": "同一父路由重复声明了依赖 {0}。"
+    },
+    {
+      "key": "diagnostic.graph.shared",
+      "text": "共享依赖 {0} 不是单实例路由。",
+      "source": "共享依赖 {0} 不是单实例路由。"
+    },
+    {
+      "key": "diagnostic.graph.cycle",
+      "text": "依赖声明形成所有权循环。",
+      "source": "依赖声明形成所有权循环。"
+    },
+    {
+      "key": "diagnostic.graph.depth",
+      "text": "从根路由到此依赖的最长路径超过 64 层。",
+      "source": "从根路由到此依赖的最长路径超过 64 层。"
+    },
+    {
+      "key": "diagnostic.graph.order",
+      "text": "同层依赖显示约束形成循环。",
+      "source": "同层依赖显示约束形成循环。"
+    },
+    {
+      "key": "diagnostic.view.borrowLoader",
+      "text": "未显式配置加载器时，借用最近父 View 的活动加载器；资源仍随自身激活释放。关闭后不会继续向祖先查找。",
+      "source": "未显式配置加载器时，借用最近父 View 的活动加载器；资源仍随自身激活释放。关闭后不会继续向祖先查找。"
+    },
+    {
+      "key": "diagnostic.view.waitBindings",
+      "text": "等待本 View 默认加载器的异步资源键绑定完成后再提交显示；后续更新仍渐进加载。",
+      "source": "等待本 View 默认加载器的异步资源键绑定完成后再提交显示；后续更新仍渐进加载。"
+    },
+    {
+      "key": "trace.token.Busy",
+      "text": "繁忙"
+    },
+    {
+      "key": "trace.token.DependencyChangeRequired",
+      "text": "需要更新依赖"
+    },
+    {
+      "key": "trace.token.HostClosed",
+      "text": "宿主已关闭"
+    },
+    {
+      "key": "trace.token.InUse",
+      "text": "使用中"
+    },
+    {
+      "key": "trace.token.InputControlUnsupported",
+      "text": "输入控件不支持"
+    },
+    {
+      "key": "trace.token.None",
+      "text": "无"
+    },
+    {
+      "key": "trace.token.Reentrant",
+      "text": "重入"
+    },
+    {
+      "key": "trace.token.RouteMismatch",
+      "text": "路由不匹配"
+    },
+    {
+      "key": "trace.token.SourceUnavailable",
+      "text": "源不可用"
+    },
+    {
+      "key": "trace.token.Unsupported",
+      "text": "不支持"
+    },
+    {
+      "key": "trace.token.Applied",
+      "text": "已应用"
+    },
+    {
+      "key": "trace.token.CancelledBeforeCommit",
+      "text": "提交前取消"
+    },
+    {
+      "key": "trace.token.CommitFailed",
+      "text": "提交失败"
+    },
+    {
+      "key": "trace.token.PreparationFailed",
+      "text": "准备失败"
+    },
+    {
+      "key": "trace.token.Rejected",
+      "text": "被拒绝"
+    },
+    {
+      "key": "trace.token.Complete",
+      "text": "完成"
+    },
+    {
+      "key": "trace.token.Failed",
+      "text": "失败"
+    },
+    {
+      "key": "trace.token.NotRequired",
+      "text": "不需要"
+    },
+    {
+      "key": "trace.token.Pending",
+      "text": "等待中"
+    },
+    {
+      "key": "trace.token.AlreadyClosed",
+      "text": "已关闭"
+    },
+    {
+      "key": "trace.token.AlreadyClosing",
+      "text": "正在关闭"
+    },
+    {
+      "key": "trace.token.Blocked",
+      "text": "被阻止"
+    },
+    {
+      "key": "trace.token.Closed",
+      "text": "已关闭"
+    },
+    {
+      "key": "trace.token.ClosedWithCleanupPending",
+      "text": "已关闭但清理未完成"
+    },
+    {
+      "key": "trace.token.ConfirmationUnavailable",
+      "text": "确认服务不可用"
+    },
+    {
+      "key": "trace.token.Denied",
+      "text": "被拒绝"
+    },
+    {
+      "key": "trace.token.Handled",
+      "text": "已处理"
+    },
+    {
+      "key": "trace.token.NotFound",
+      "text": "未找到"
+    },
+    {
+      "key": "trace.token.Superseded",
+      "text": "已被替代"
+    },
+    {
+      "key": "trace.token.UnknownOrExpired",
+      "text": "未知或已过期"
+    },
+    {
+      "key": "trace.token.WaitCancelled",
+      "text": "等待已取消"
+    },
+    {
+      "key": "trace.token.CleanupCapacity",
+      "text": "清理容量不足"
+    },
+    {
+      "key": "trace.token.CloseDecisionTimedOut",
+      "text": "关闭决议超时"
+    },
+    {
+      "key": "trace.token.CloseDenied",
+      "text": "关闭被拒绝"
+    },
+    {
+      "key": "trace.token.ConflictingData",
+      "text": "数据冲突"
+    },
+    {
+      "key": "trace.token.DependencyCycle",
+      "text": "依赖环"
+    },
+    {
+      "key": "trace.token.DependencyLimit",
+      "text": "超过依赖上限"
+    },
+    {
+      "key": "trace.token.DependencyOrderConflict",
+      "text": "依赖顺序冲突"
+    },
+    {
+      "key": "trace.token.InstanceLimit",
+      "text": "实例上限"
+    },
+    {
+      "key": "trace.token.ActivationFailed",
+      "text": "激活失败"
+    },
+    {
+      "key": "trace.token.ClosedBeforeReady",
+      "text": "就绪前关闭"
+    },
+    {
+      "key": "trace.token.Succeeded",
+      "text": "成功"
+    },
+    {
+      "key": "trace.token.Cancelled",
+      "text": "已取消"
+    },
+    {
+      "key": "trace.token.CapacityExceeded",
+      "text": "超过容量"
+    },
+    {
+      "key": "trace.token.InactiveContentClearing",
+      "text": "未激活内容清理中"
+    },
+    {
+      "key": "trace.token.Ready",
+      "text": "已就绪"
+    },
+    {
+      "key": "trace.token.Committed",
+      "text": "已提交"
+    },
+    {
+      "key": "trace.token.BindingDetachUnsupported",
+      "text": "不支持解除绑定"
+    },
+    {
+      "key": "trace.token.完成",
+      "text": "完成"
+    },
+    {
+      "key": "trace.token.未完成",
+      "text": "未完成"
+    },
+    {
+      "key": "trace.token.未完成（异常、取消或同步能力不足）",
+      "text": "未完成（异常、取消或同步能力不足）"
+    },
+    {
+      "key": "trace.token.未请求",
+      "text": "未请求"
+    },
+    {
+      "key": "trace.token.抛出异常",
+      "text": "抛出异常"
+    },
+    {
+      "key": "trace.token.扫描异常",
+      "text": "扫描异常"
+    },
+    {
+      "key": "trace.token.缓存清理完成",
+      "text": "缓存清理完成"
+    },
+    {
+      "key": "trace.token.缓存清理异常",
+      "text": "缓存清理异常"
+    },
+    {
+      "key": "trace.token.缓存代际失效并清理完成",
+      "text": "缓存代际失效并清理完成"
+    },
+    {
+      "key": "trace.token.缓存失效异常",
+      "text": "缓存失效异常"
+    },
+    {
+      "key": "trace.token.闲置内容清理完成",
+      "text": "闲置内容清理完成"
+    },
+    {
+      "key": "trace.token.闲置内容清理异常",
+      "text": "闲置内容清理异常"
+    },
+    {
+      "key": "trace.token.清理异常",
+      "text": "清理异常"
+    },
+    {
+      "key": "trace.token.退出异常",
+      "text": "退出异常"
+    },
+    {
+      "key": "trace.token.导航器退出完成",
+      "text": "导航器退出完成"
+    },
+    {
+      "key": "trace.token.目标",
+      "text": "目标"
+    },
+    {
+      "key": "trace.token.源",
+      "text": "源"
+    },
+    {
+      "key": "trace.token.源清理",
+      "text": "源清理"
+    },
+    {
+      "key": "trace.token.未采集（不额外等待）",
+      "text": "未采集（不额外等待）"
+    },
+    {
+      "key": "trace.token.视图故障",
+      "text": "视图故障"
+    },
+    {
+      "key": "trace.token.复用预加载占位",
+      "text": "复用预加载占位"
+    },
+    {
+      "key": "trace.token.True",
+      "text": "是"
+    },
+    {
+      "key": "trace.token.False",
+      "text": "否"
+    },
+    {
+      "key": "sample.basic.sceneMissing",
+      "text": "基础示例场景缺失，请从包管理器重新导入示例。"
+    },
+    {
+      "key": "sample.basic.settingsMissing",
+      "text": "基础示例配置资产缺失，请重新导入示例。"
+    },
+    {
+      "key": "sample.previewHint",
+      "text": "请使用示例的打开场景菜单进行交互预览。"
+    },
+    {
+      "key": "sample.previewTimeout",
+      "text": "MUI {0} 演示超时，未收到清理完成标记。"
+    },
+    {
+      "key": "sample.previewFinished",
+      "text": "MUI {0} 运行模式预览已结束。"
+    },
+    {
+      "key": "sample.navigation.graphNotReady",
+      "text": "请先运行并成功初始化共享依赖示例，再采集其路由定义。"
+    },
+    {
+      "key": "sample.navigation.sceneSaveFailed",
+      "text": "示例场景保存失败：{0}"
+    },
+    {
+      "key": "settings.title",
+      "text": "UI 配置"
+    },
+    {
+      "key": "settings.description",
+      "text": "设置层级与默认规则，再通过预设覆盖需要的行为。"
+    },
+    {
+      "key": "settings.valid",
+      "text": "配置有效"
+    },
+    {
+      "key": "settings.invalid",
+      "text": "{0} 项问题"
+    },
+    {
+      "key": "settings.remove",
+      "text": "删除此项"
+    },
+    {
+      "key": "settings.layers.help",
+      "text": "值越大，页面越靠上。此值仅决定逻辑顺序，不是 Canvas Order；不同层级不固定切分排序空间。名称与逻辑排序值不能重复。"
+    },
+    {
+      "key": "settings.layers.add",
+      "text": "+ 添加层级"
+    },
+    {
+      "key": "settings.layers.empty",
+      "text": "暂无层级，点击下方按钮添加。"
+    },
+    {
+      "key": "settings.defaults.help",
+      "text": "未被预设或页面覆盖的字段使用这些默认值。"
+    },
+    {
+      "key": "settings.presets.help",
+      "text": "生效顺序：页面默认规则 → 预设 → 页面专属设置。页面专属设置在 CreateRoute 或 ResolvePolicy 的 overrides 参数中配置。明确指定预设的页面不受“未指定时使用”影响。"
+    },
+    {
+      "key": "settings.presets.add",
+      "text": "+ 添加预设"
+    },
+    {
+      "key": "settings.presets.empty",
+      "text": "暂无预设，至少需要声明一个。"
+    },
+    {
+      "key": "settings.preset.unnamed",
+      "text": "未命名预设"
+    },
+    {
+      "key": "settings.preset.inherit",
+      "text": "全部继承项目默认规则。"
+    },
+    {
+      "key": "settings.capacities",
+      "text": "容量与限制"
+    },
+    {
+      "key": "settings.rules.presentation",
+      "text": "层级与交互"
+    },
+    {
+      "key": "settings.rules.instances",
+      "text": "实例管理"
+    },
+    {
+      "key": "settings.rules.tick",
+      "text": "帧更新"
+    },
+    {
+      "key": "settings.rules.cache",
+      "text": "页面缓存"
+    },
+    {
+      "key": "settings.rules.timeouts",
+      "text": "阶段超时"
+    },
+    {
+      "key": "settings.choice.missing",
+      "text": "{0}（未声明）"
+    },
+    {
+      "key": "host.title",
+      "text": "界面宿主"
+    },
+    {
+      "key": "host.catalog.help",
+      "text": "默认提供方使用此目录加载页面。外部提供方可自行管理资源。"
+    },
+    {
+      "key": "host.editSettings",
+      "text": "编辑配置"
+    },
+    {
+      "key": "dashboard.title",
+      "text": "MUI 控制台"
+    },
+    {
+      "key": "dashboard.hosts.refresh",
+      "text": "刷新"
+    },
+    {
+      "key": "dashboard.summary",
+      "text": "{0} · 页面 {1} · 焦点 #{2} · 等待 {3} · 缓存 {4}"
+    },
+    {
+      "key": "dashboard.page.meta",
+      "text": "层级 {0} · {1} · 焦点 {2}"
+    },
+    {
+      "key": "dashboard.trace.title",
+      "text": "生命周期追踪"
+    },
+    {
+      "key": "dashboard.trace.empty",
+      "text": "进入运行模式并初始化宿主后开始记录，再打开或关闭页面查看事件。"
+    },
+    {
+      "key": "dashboard.configuration.title",
+      "text": "配置资产"
+    },
+    {
+      "key": "dashboard.configuration.locate",
+      "text": "定位资产"
+    },
+    {
+      "key": "dashboard.configuration.help",
+      "text": "选择资产可直接编辑；点击“绑定到宿主”才更新宿主引用。"
+    },
+    {
+      "key": "dashboard.configuration.empty",
+      "text": "选择或创建配置"
+    },
+    {
+      "key": "dashboard.validation.title",
+      "text": "配置与页面校验"
+    },
+    {
+      "key": "dashboard.validation.help",
+      "text": "配置实时校验显示在上方；页面目录校验覆盖项目已登记的目录。"
+    },
+    {
+      "key": "dashboard.capture.ready",
+      "text": "宿主已就绪，点击“采集运行状态”查看页面。"
+    },
+    {
+      "key": "dashboard.capture.help",
+      "text": "可手动采集，也可开启自动刷新。"
+    },
+    {
+      "key": "dashboard.pages.waiting",
+      "text": "尚无运行快照"
+    },
+    {
+      "key": "dashboard.pages.waiting.help",
+      "text": "初始化宿主后采集运行状态。"
+    },
+    {
+      "key": "dashboard.pages.empty",
+      "text": "当前没有页面"
+    },
+    {
+      "key": "dashboard.pages.empty.help",
+      "text": "打开页面后重新采集，或启用自动刷新。"
+    },
+    {
+      "key": "dashboard.pages.noMatches",
+      "text": "没有匹配的页面"
+    },
+    {
+      "key": "dashboard.pages.noMatches.help",
+      "text": "尝试其他路由名称，或清空搜索。"
+    },
+    {
+      "key": "dashboard.noHost",
+      "text": "当前场景没有界面宿主"
+    },
+    {
+      "key": "dashboard.noHost.help",
+      "text": "在场景中添加 UIHost，或打开包含宿主的示例场景。配置编辑无需运行宿主。"
+    },
+    {
+      "key": "dashboard.editMode",
+      "text": "编辑模式"
+    },
+    {
+      "key": "dashboard.editMode.help",
+      "text": "现在可以编辑和校验配置。运行信息需进入运行模式，并由项目显式初始化宿主。"
+    },
+    {
+      "key": "dashboard.notInitialized",
+      "text": "等待宿主初始化"
+    },
+    {
+      "key": "dashboard.notInitialized.help",
+      "text": "由项目调用 UIHost.Initialize 后即可采集。控制台不会自动启动宿主。"
+    },
+    {
+      "key": "dashboard.openConfiguration",
+      "text": "打开配置与校验"
+    },
+    {
+      "key": "dashboard.snapshot.limit",
+      "text": "快照上限"
+    },
+    {
+      "key": "dashboard.trace.capacity",
+      "text": "记录容量"
+    },
+    {
+      "key": "settings.runtime",
+      "text": "运行设置"
+    },
+    {
+      "key": "settings.update.help",
+      "text": "每帧自动处理界面请求并更新界面逻辑。关闭后需通过代码调用 UIHost.AdvanceFrame。"
+    },
+    {
+      "key": "settings.update.automatic",
+      "text": "自动"
+    },
+    {
+      "key": "settings.update.manual",
+      "text": "手动"
+    },
+    {
+      "key": "property.hiddenMode",
+      "text": "隐藏实现"
+    },
+    {
+      "key": "property.hiddenContentRoot",
+      "text": "隐藏时停用的内容子节点"
+    },
+    {
+      "key": "policy.layer.help",
+      "text": "选择页面所属的逻辑层级。层级排序值越大越靠上；实际 Canvas Order 由框架自动分配，不是这里的层级排序值。"
+    },
+    {
+      "key": "policy.focus.help",
+      "text": "允许页面成为框架焦点页，最上方可交互且允许获取焦点的页面优先。焦点变化会通知页面；取消勾选不等于禁止点击，也不会自动阻挡下层输入。"
+    },
+    {
+      "key": "policy.modal.help",
+      "text": "启用模态遮罩；遮挡设为“无”时，运行时自动按“阻挡输入”处理。关闭模态仅取消自动阻挡，明确设置的遮挡规则仍然生效。"
+    },
+    {
+      "key": "policy.back.help",
+      "text": "收到返回请求时：关闭＝请求关闭本页（仍经过关闭检查）；忽略＝继续查找下层；阻止＝停止本次返回；由展示器处理＝交给 Presenter 决定。页面内部的返回处理优先执行。"
+    },
+    {
+      "key": "policy.coverage.help",
+      "text": "不覆盖：不改变下层状态；阻止输入：下层保持显示但不可交互；隐藏下层：下层不可见且不可交互。这里不创建遮罩；下层是否暂停业务 Tick，由下层自己的 Tick 配置决定。"
+    },
+    {
+      "key": "policy.tick.help",
+      "text": "满足任意勾选条件时暂停本页面的业务 Tick；全部不勾选则不因覆盖或隐藏而暂停。这里只控制框架业务 Tick，不会自动暂停 Unity Update、动画或协程。"
+    },
+    {
+      "key": "policy.cache.help",
+      "text": "页面关闭后只缓存重置后的 View 及其资源，不保留 ViewModel 或 Presenter。长期缓存没有时间过期限制，但容量或预算不足、主动清理时仍可回收；下次打开时，缓存存在则复用，否则重新创建。页面业务状态需显式保存和恢复。"
+    },
+    {
+      "key": "policy.instances.help",
+      "text": "数量满额返回 InstanceLimit。关闭最旧实例仍受关闭决策约束；返回已有实例不会更新参数或置顶。"
+    },
+    {
+      "key": "policy.hidden.help",
+      "text": "隐藏时停用指定内容子树，恢复时仅激活由框架停用的节点。会触发 OnDisable/OnEnable，并停止该子树的协程（不会自动续跑）；View 根节点保持激活。"
+    },
+    {
+      "key": "policy.hidden.invalid",
+      "text": "隐藏模式无效，或未指定 View 根节点下的内容子节点；不能停用 View 根节点或外部对象。"
+    },
+    {
+      "key": "policy.hidden.status",
+      "text": "隐藏实现：{0}"
+    },
+    {
+      "key": "policy.runtime.status",
+      "text": "当前占用实例：{0}/{1}；最近一次业务 Tick 门控：{2}"
+    },
+    {
+      "key": "policy.dependency.entry",
+      "text": "依赖 {0}：必需={1}，缺失策略={2}，取得方式={3} {4}"
+    },
+    {
+      "key": "policy.cache.history",
+      "text": "最近缓存决策（最多 128 条，旧记录自动淘汰）"
+    },
+    {
+      "key": "policy.cache.entry",
+      "text": "{0} · {1} · {2}"
+    },
+    {
+      "key": "enum.MUI.Navigation.DependencyMissingPolicy.AutoOpen",
+      "text": "自动打开"
+    },
+    {
+      "key": "enum.MUI.Navigation.DependencyMissingPolicy.RequireOpen",
+      "text": "必须已打开"
+    },
+    {
+      "key": "enum.MUI.Navigation.DependencyMissingPolicy.Skip",
+      "text": "缺失时跳过"
+    },
+    {
+      "key": "enum.MUI.Navigation.DependencyResolutionKind.Pending",
+      "text": "待处理"
+    },
+    {
+      "key": "enum.MUI.Navigation.DependencyResolutionKind.AutoOpened",
+      "text": "自动打开"
+    },
+    {
+      "key": "enum.MUI.Navigation.DependencyResolutionKind.Reused",
+      "text": "共享复用"
+    },
+    {
+      "key": "enum.MUI.Navigation.DependencyResolutionKind.Skipped",
+      "text": "缺失跳过"
+    },
+    {
+      "key": "enum.MUI.Navigation.DependencyResolutionKind.Degraded",
+      "text": "失败降级"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewTickStatus.NotEvaluated",
+      "text": "尚未检查"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewTickStatus.Eligible",
+      "text": "允许更新"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewTickStatus.Inactive",
+      "text": "未激活"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewTickStatus.Rebinding",
+      "text": "重新绑定中"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewTickStatus.Entering",
+      "text": "入场中"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewTickStatus.Covered",
+      "text": "被覆盖，暂停"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewTickStatus.Hidden",
+      "text": "隐藏，暂停"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewTickStatus.HostShutdown",
+      "text": "宿主已关闭"
+    },
+    {
+      "key": "enum.MUI.UGUI.ViewHiddenMode.CanvasGroupOnly",
+      "text": "仅透明隐藏（默认）"
+    },
+    {
+      "key": "enum.MUI.UGUI.ViewHiddenMode.DeactivateContent",
+      "text": "停用内容子树"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewCacheDecision.Retained",
+      "text": "进入缓存"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewCacheDecision.Reused",
+      "text": "缓存命中"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewCacheDecision.Disabled",
+      "text": "未启用缓存"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewCacheDecision.Unsupported",
+      "text": "View 或凭证不支持缓存"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewCacheDecision.AbnormalClose",
+      "text": "非正常关闭，不缓存"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewCacheDecision.CleanupIncomplete",
+      "text": "清理未完成，不缓存"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewCacheDecision.ResetFailed",
+      "text": "缓存重置或释放失败"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewCacheDecision.CapacityDisabled",
+      "text": "缓存容量为零"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewCacheDecision.HostUnavailable",
+      "text": "宿主退出或清理中"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewCacheDecision.Incompatible",
+      "text": "资源代际或状态不兼容"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewCacheDecision.EstimateRequired",
+      "text": "缺少资源大小估算"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewCacheDecision.BudgetExceeded",
+      "text": "超出缓存预算"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewCacheDecision.RetirementPending",
+      "text": "等待淘汰资源释放"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewCacheDecision.EvictedForCapacity",
+      "text": "容量或预算淘汰"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewCacheDecision.Expired",
+      "text": "缓存已过期"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewCacheDecision.Destroyed",
+      "text": "View 已销毁"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewCacheDecision.Cleared",
+      "text": "主动清理"
+    },
+    {
+      "key": "enum.MUI.Navigation.OpenRejection.DependencyMissing",
+      "text": "依赖未打开"
+    },
+    {
+      "key": "enum.MUI.Navigation.ReplaceRejection.DependencyMissing",
+      "text": "依赖未打开"
+    },
+    {
+      "key": "enum.MUI.Navigation.ViewCacheDecision.ReuseFailed",
+      "text": "缓存复用准备失败"
+    },
+    {
+      "key": "settings.layers.gap",
+      "text": "层后间隔覆盖"
+    },
+    {
+      "key": "settings.layers.gap.help",
+      "text": "层后间隔覆盖：控制该 Layer 最后一个页面与后面下一个有页面的 Layer 之间的预留。-1 使用上方“默认 Layer 间隔”；0 不预留；正数覆盖默认值。空 Layer 不单独占位，不影响同层页面间隔。"
+    },
+    {
+      "key": "sorting.title",
+      "text": "页面渲染排序"
+    },
+    {
+      "key": "sorting.help",
+      "text": "页面排序区间始终启用。Layer 只决定逻辑顺序，不固定划分区间；根 Canvas Order 按页面跨度自动分配，空间不足才局部整理。最大值 + 1 保留给关闭手势屏障。"
+    },
+    {
+      "key": "sorting.gap.help",
+      "text": "页面间隔只用于同一 Layer 内；Layer 间隔只用于跨层边界，两者不相加。单位都是 Order 数，空间不足时自动缩小，不为 Layer 划分固定区间。"
+    },
+    {
+      "key": "sorting.page",
+      "text": "页面排序跨度"
+    },
+    {
+      "key": "sorting.span.help",
+      "text": "0 继承宿主默认值，非零至少为 2；偏移 0 是遮罩，1 是根 Canvas，内部 Canvas/特效使用 2 及以上。"
+    },
+    {
+      "key": "sorting.allocated",
+      "text": "实际区间：{0}～{1}；根 Canvas Order：{2}"
+    },
+    {
+      "key": "sorting.pool",
+      "text": "排序池：{0}～{1}；已预留 {2}；同层页面间隔 {3}；默认 Layer 间隔 {4}"
+    },
+    {
+      "key": "sorting.target.invalid",
+      "text": "页面排序目标必须是唯一的 Canvas/Renderer 子节点引用，偏移至少为 2。"
+    },
+    {
+      "key": "sorting.targets.help",
+      "text": "在下方排序目标中登记独立 Canvas 和全部 Renderer，相对偏移必须小于页面跨度。普通粒子需相机 Canvas 和兼容材质；Order 不提供 UI 裁剪。"
+    },
+    {
+      "key": "property.renderSortingLayer",
+      "text": "渲染 Sorting Layer"
+    },
+    {
+      "key": "property.renderOrderMinimum",
+      "text": "宿主 Order 最小值"
+    },
+    {
+      "key": "property.renderOrderMaximum",
+      "text": "宿主 Order 最大值"
+    },
+    {
+      "key": "property.defaultPageOrderSpan",
+      "text": "默认页面跨度"
+    },
+    {
+      "key": "property.preferredLayerGap",
+      "text": "默认 Layer 间隔"
+    },
+    {
+      "key": "property.preferredOrderGap",
+      "text": "同层页面间隔"
+    },
+    {
+      "key": "property.RenderOrderSpan",
+      "text": "页面排序跨度（0 继承）"
+    },
+    {
+      "key": "property.renderOrderTargets",
+      "text": "页面内部排序目标"
+    },
+    {
+      "key": "property.Offset",
+      "text": "相对 Order 偏移"
+    },
+    {
+      "key": "enum.MUI.UGUI.MUIPagePolicyFields.RenderOrder",
+      "text": "页面排序跨度"
+    },
+    {
+      "key": "enum.MUI.Navigation.OpenRejection.RenderOrderCapacity",
+      "text": "宿主排序空间不足"
+    },
+    {
+      "key": "enum.MUI.Navigation.ReplaceRejection.RenderOrderCapacity",
+      "text": "宿主排序空间不足"
+    },
+    {
+      "key": "property.PageRole",
+      "text": "页面角色"
+    },
+    {
+      "key": "property.OwnerDeparture",
+      "text": "所属页面离开时"
+    },
+    {
+      "key": "enum.MUI.Navigation.PageRole.Independent",
+      "text": "独立界面"
+    },
+    {
+      "key": "enum.MUI.Navigation.PageRole.Main",
+      "text": "主页面"
+    },
+    {
+      "key": "enum.MUI.Navigation.PageRole.Overlay",
+      "text": "附属界面"
+    },
+    {
+      "key": "enum.MUI.Navigation.OwnerDeparture.Close",
+      "text": "关闭"
+    },
+    {
+      "key": "enum.MUI.Navigation.OwnerDeparture.Hide",
+      "text": "隐藏并保留"
+    },
+    {
+      "key": "enum.MUI.UGUI.MUIPagePolicyFields.PageScope",
+      "text": "页面归属规则"
+    },
+    {
+      "key": "policy.pageRole.help",
+      "text": "主页面打开后成为当前页面，旧主页面组退出前台；附属界面默认归属于打开请求提交时的当前主页面，可在打开参数指定页面或显式归属宿主；独立界面不参与主页面切换。"
+    },
+    {
+      "key": "policy.ownerDeparture.help",
+      "text": "所属主页面退出前台时：关闭会先检查关闭许可；隐藏并保留可在返回时恢复。所属页面真正关闭时，两者都关闭；子界面关闭不会关闭父页面。"
+    },
+    {
+      "key": "scope.summary",
+      "text": "页面角色：{0}；所属页面离开时：{1}"
+    },
+    {
+      "key": "scope.parent",
+      "text": "归属页面（空表示宿主）"
+    },
+    {
+      "key": "property.modalBackdropStyle",
+      "text": "模态遮罩样式"
+    },
+    {
+      "key": "property.visualPrefab",
+      "text": "遮罩视觉 Prefab"
+    },
+    {
+      "key": "property.tint",
+      "text": "底色"
+    },
+    {
+      "key": "modal.backdrop.tint.help",
+      "text": "框架遮罩的底色，Alpha 控制透明度。即使完全透明也阻挡输入；自定义模糊不需要叠底色时可设为透明。"
+    },
+    {
+      "key": "modal.backdrop.prefab.help",
+      "text": "可选纯视觉 Prefab。项目可使用 Image/RawImage 与模糊材质；背景纹理由项目渲染管线提供。不能包含 Canvas、Renderer、Selectable 或 View。隐藏时停用实例，项目脚本应释放临时纹理。"
+    },
+    {
+      "key": "settings.layerName.help",
+      "text": "逻辑层级的唯一名称，供页面规则选择；修改后需同步使用旧名称的页面配置。"
+    },
+    {
+      "key": "settings.layerOrder.help",
+      "text": "逻辑排序值，越大越靠上；不同 Layer 不可重复。这不是 Canvas Order，也不决定固定 Order 区间。"
+    },
+    {
+      "key": "settings.preferredOrderGap.help",
+      "text": "同一 Layer 内相邻页面区间之间预留的 Order 数，至少为 0。用于减少插入、置顶时的重新排序；空间不足可缩小。不同 Layer 使用默认 Layer 间隔或层后覆盖值，不与本值相加。"
+    },
+    {
+      "key": "settings.preferredLayerGap.help",
+      "text": "不同 Layer 的相邻页面区间之间默认预留的 Order 数，至少为 0。可被前一个 Layer 的层后间隔覆盖；空 Layer 不占位，空间不足可缩小。"
+    },
+    {
+      "key": "settings.renderSortingLayer.help",
+      "text": "所有页面 Canvas 及登记的渲染目标使用的 Unity Sorting Layer 名称，必须在项目中存在。与上方逻辑 Layer 不同；同一宿主内的前后顺序由 Order 自动分配。"
+    },
+    {
+      "key": "settings.renderOrderMinimum.help",
+      "text": "宿主分配页面排序区间的最小 Order（含），不得小于 -32768，且须小于最大值。预留间隔也从此总范围中分配。"
+    },
+    {
+      "key": "settings.renderOrderMaximum.help",
+      "text": "宿主分配页面排序区间的最大 Order（含），不得大于 32766。最大值 + 1 留给关闭手势屏障；容量不足且无法整理时拒绝新增页面。"
+    },
+    {
+      "key": "settings.defaultPageOrderSpan.help",
+      "text": "每个页面默认占用的连续 Order 数，至少为 2。偏移 0 留给模态屏障，1 为根 Canvas，2 到跨度减 1 供内部 Canvas / 特效使用。页面规则的排序跨度为 0 时使用本值；页面间隔另算。"
+    },
+    {
+      "key": "settings.defaultPreset.help",
+      "text": "仅在 ResolvePolicy 未指定预设时使用。页面向导生成的入口会明确指定创建时选择的预设。"
+    },
+    {
+      "key": "settings.presetName.help",
+      "text": "预设的唯一名称，供默认预设及页面注册引用。修改名称后需同步对应引用。"
+    },
+    {
+      "key": "settings.overrides.help",
+      "text": "勾选的整组规则使用此预设的值；未勾选的组继承页面默认规则。实例、缓存和超时均按组覆盖。代码中的页面专属设置可逐字段覆盖。"
+    },
+    {
+      "key": "settings.cacheCapacity.help",
+      "text": "宿主最多保留的已关闭 View 缓存数，至少为 0；0 禁用缓存。达到容量时可淘汰旧缓存，持久缓存也受此限制；不缓存 Presenter 或 ViewModel。"
+    },
+    {
+      "key": "settings.queueCapacity.help",
+      "text": "宿主待处理导航操作的容量，至少为 1，打开、替换、参数更新等共用额度。达到上限时拒绝新请求，避免无限积压；不是页面实例上限。"
+    },
+    {
+      "key": "settings.preloadCapacity.help",
+      "text": "宿主预加载保留额度，至少为 1。预加载占用此额度，达到上限时拒绝新的预加载请求。"
+    },
+    {
+      "key": "settings.cleanupCapacity.help",
+      "text": "仍在退出或等待资源清理的实例容量，至少为 1；包含超时后仍持有资源的实例。达到上限时限制新的工作，避免快速开关造成资源积压。"
+    },
+    {
+      "key": "settings.terminalCapacity.help",
+      "text": "宿主保留的已结束句柄结果记录数量，至少为 1。超过后清理较旧记录；这是结果查询记录，不是页面缓存或返回历史。"
+    },
+    {
+      "key": "policy.allowMultiple.help",
+      "text": "是否允许同一路由同时打开多个实例。关闭时按已有实例策略处理重复打开；开启时按实例上限与超限策略处理。"
+    },
+    {
+      "key": "policy.maxInstances.help",
+      "text": "同一路由允许的实例上限，至少为 1；仅允许多个实例时生效。达到上限后使用超出上限策略。"
+    },
+    {
+      "key": "policy.existingInstance.help",
+      "text": "单实例页面重复打开时：拒绝复用会拒绝请求；返回已有实例仅复用准备完成且归属匹配的实例，不更新参数，也不自动置顶。"
+    },
+    {
+      "key": "policy.overflow.help",
+      "text": "路由实例额度已满时的处理策略：拒绝新请求，或按所选策略尝试淘汰旧实例；旧实例的关闭检查仍然生效。"
+    },
+    {
+      "key": "policy.cacheDuration.help",
+      "text": "限时缓存保留秒数，必须大于 0；仅限时缓存模式生效。过期后不再复用，容量压力可能使缓存提前淘汰。"
+    },
+    {
+      "key": "policy.EnterTimeout.help",
+      "text": "进入过渡的超时上限，单位秒，必须大于 0。用于防止进入动画无法结束而一直阻塞页面打开。"
+    },
+    {
+      "key": "policy.ExitTimeout.help",
+      "text": "退出过渡的超时上限，单位秒，必须大于 0。用于防止退出动画无法结束而一直阻塞关闭。"
+    },
+    {
+      "key": "policy.PrepareTimeoutSeconds.help",
+      "text": "页面异步准备的等待上限，单位秒，必须大于 0。超时会终止本次打开的等待；仍在运行的资源操作由框架跟踪清理。"
+    },
+    {
+      "key": "policy.CloseTimeoutSeconds.help",
+      "text": "页面关闭清理的等待上限，单位秒，必须大于 0。超时不代表资源已释放；未结束的清理仍由框架跟踪。"
+    },
+    {
+      "key": "policy.CloseDecisionTimeoutSeconds.help",
+      "text": "等待关闭检查或用户确认的上限，单位秒，必须大于 0；超时不能视为用户同意关闭。"
+    },
+    {
+      "key": "policy.tick.covered",
+      "text": "被覆盖时暂停"
+    },
+    {
+      "key": "policy.tick.hidden",
+      "text": "隐藏时暂停"
+    },
+    {
+      "key": "policy.input.help",
+      "text": "关闭后页面不接收输入、不阻挡自身 UI 射线，也不获取焦点。对下层页面的遮挡仍由遮挡规则控制。"
+    },
+    {
+      "key": "property.ReceivesInput",
+      "text": "接收输入"
+    },
+    {
+      "key": "enum.MUI.UGUI.MUIPagePolicyFields.Input",
+      "text": "输入"
+    },
+    {
+      "key": "settings.preset.Default",
+      "text": "继承默认规则"
+    },
+    {
+      "key": "settings.preset.FullScreen",
+      "text": "全屏主页面"
+    },
+    {
+      "key": "settings.preset.Popup",
+      "text": "模态弹窗"
+    },
+    {
+      "key": "settings.preset.Notice",
+      "text": "提示层"
+    },
+    {
+      "key": "settings.preset.Background",
+      "text": "背景层"
+    },
+    {
+      "key": "settings.preset.effective",
+      "text": "当前生效值（不含页面专属设置）"
+    },
+    {
+      "key": "settings.preset.value",
+      "text": "{0}：{1}（{2}）"
+    },
+    {
+      "key": "settings.preset.source.default",
+      "text": "页面默认规则"
+    },
+    {
+      "key": "settings.preset.source.override",
+      "text": "此预设"
+    },
+    {
+      "key": "settings.preset.source.modal",
+      "text": "模态自动阻挡"
+    },
+    {
+      "key": "settings.preset.invalid",
+      "text": "配置无效，修正下方错误后显示生效值。"
+    }
+  ]
+}

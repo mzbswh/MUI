@@ -12,11 +12,11 @@ namespace MUI.UGUI
     public sealed partial class UIHost : MonoBehaviour
     {
         [SerializeField]
+        private MUISettings settings = null;
+        [SerializeField]
         private RectTransform viewRoot = null;
         [SerializeField]
         private List<PrefabEntry> prefabs = new List<PrefabEntry>();
-        [SerializeField]
-        private bool automaticFramePump = true;
         private Navigator navigator;
         private UIThreadDispatcher dispatcher;
         private HostProviderCleanup ownedProviderCleanup;
@@ -28,14 +28,49 @@ namespace MUI.UGUI
 
         public Navigator Navigator => navigator ?? throw new InvalidOperationException("UIHost has not been initialized.");
 
+        public bool IsInitialized => navigator != null;
+
+        public bool IsShutdown => navigator != null && navigator.IsShutdown;
+
+        public MUISettings Settings
+        {
+            get => settings;
+            set
+            {
+                UnityMainThread.Require();
+                RequireInitializationCurrent();
+                if (initializing)
+                {
+                    throw new InvalidOperationException("初始化期间不能更换宿主配置。");
+                }
+                settings = value;
+            }
+        }
+
         /// <summary>在初始化时捕获的主线程入口，可交给项目后台服务提交表现状态。</summary>
         public UIThreadDispatcher Dispatcher => dispatcher ?? throw new InvalidOperationException("UIHost has not been initialized.");
 
         /// <summary>自动模式每帧使用 Unity 非缩放时间；关闭后由项目调用 AdvanceFrame。</summary>
-        public bool AutomaticFramePump
+        public bool AutomaticFramePump => settings == null || settings.AutomaticFramePump;
+
+        public RoutePolicy ResolvePolicy(string preset = null, string layer = null, RoutePolicyOverrides overrides = null)
         {
-            get => automaticFramePump;
-            set => automaticFramePump = value;
+            UnityMainThread.Require();
+            return settings == null ? MUISettings.ResolveBuiltInPolicy(preset, layer, overrides)
+                : settings.ResolvePolicy(preset, layer, overrides);
+        }
+
+        /// <summary>只读定位当前页面原生对象；不会创建、激活或调用业务。</summary>
+        public bool TryGetView(ViewHandle handle, out View view)
+        {
+            UnityMainThread.Require();
+            view = null;
+            if (navigator == null || !navigator.TryGetView(handle, out var candidate))
+            {
+                return false;
+            }
+            view = candidate as View;
+            return view != null && view.IsAlive;
         }
 
         /// <summary>
@@ -46,18 +81,30 @@ namespace MUI.UGUI
             bool ownsProvider = false,
             ICloseConfirmationService closeConfirmationService = null,
             UIUserPreferences userPreferences = null,
-            int cacheCapacity = 16,
+            int? cacheCapacity = null,
             long? maxCachedEstimatedBytes = null,
-            int cleanupCapacity = 16,
+            int? cleanupCapacity = null,
             Action<View> configureDefaultView = null,
-            int terminalCapacity = 256,
+            int? terminalCapacity = null,
             TimeSpan? terminalDuration = null,
-            int queueCapacity = 64,
-            int preloadCapacity = 32)
+            int? queueCapacity = null,
+            int? preloadCapacity = null,
+            RenderOrderOptions renderOrder = null)
         {
             BeginInitialization();
             try
             {
+                if (settings != null)
+                {
+                    settings.RequireValid();
+                }
+                // 在原生提供方可能触发项目回调前复制配置，避免初始化使用两次编辑之间的值。
+                var resolvedCacheCapacity = cacheCapacity ?? (settings == null ? 16 : settings.CacheCapacity);
+                var resolvedCleanupCapacity = cleanupCapacity ?? (settings == null ? 16 : settings.CleanupCapacity);
+                var resolvedTerminalCapacity = terminalCapacity ?? (settings == null ? 256 : settings.TerminalCapacity);
+                var resolvedQueueCapacity = queueCapacity ?? (settings == null ? 64 : settings.QueueCapacity);
+                var resolvedRenderOrder = renderOrder ?? (settings == null ? new RenderOrderOptions() : settings.CreateRenderOrderOptions());
+                var resolvedPreloadCapacity = preloadCapacity ?? (settings == null ? 32 : settings.PreloadCapacity);
                 if (cacheCapacity < 0)
                 {
                     throw new ArgumentOutOfRangeException(nameof(cacheCapacity));
@@ -126,11 +173,12 @@ namespace MUI.UGUI
                 {
                     RequireInitializationCurrent();
                     navigator = new Navigator(provider, closeConfirmationService: closeConfirmationService,
-                        userPreferences: userPreferences, cacheCapacity: cacheCapacity,
+                        userPreferences: userPreferences, cacheCapacity: resolvedCacheCapacity,
                         maxCachedEstimatedBytes: maxCachedEstimatedBytes,
-                        cleanupCapacity: cleanupCapacity, terminalCapacity: terminalCapacity,
-                        terminalDuration: terminalDuration, queueCapacity: queueCapacity,
-                        preloadCapacity: preloadCapacity);
+                        cleanupCapacity: resolvedCleanupCapacity,
+                        terminalCapacity: resolvedTerminalCapacity,
+                        terminalDuration: terminalDuration, queueCapacity: resolvedQueueCapacity,
+                        preloadCapacity: resolvedPreloadCapacity, renderOrder: resolvedRenderOrder);
                 }
                 catch (Exception failure)
                 {
@@ -223,7 +271,7 @@ namespace MUI.UGUI
 
         private void Update()
         {
-            if (automaticFramePump)
+            if (AutomaticFramePump)
             {
                 DriveFrame(Time.unscaledDeltaTime);
             }
@@ -243,9 +291,9 @@ namespace MUI.UGUI
                 throw new InvalidOperationException("停用的 UIHost 不能推进界面帧。");
             }
 
-            if (automaticFramePump)
+            if (AutomaticFramePump)
             {
-                throw new InvalidOperationException("请先关闭 UIHost 的自动帧驱动。");
+                throw new InvalidOperationException("请先在 MUI 配置中关闭“自动更新界面”。");
             }
 
             if (navigator == null)

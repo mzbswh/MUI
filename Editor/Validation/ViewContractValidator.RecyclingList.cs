@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using MUI.UGUI;
 using UnityEditor;
 using UnityEngine;
+using L = MUI.Editor.Localization.MUIEditorLocalization;
 
 namespace MUI.Editor
 {
@@ -15,33 +16,33 @@ namespace MUI.Editor
             var path = Path(element.transform, root);
             if (serialized.FindProperty("capacity").intValue < 1)
             {
-                errors.Add($"回收列表容量必须大于零：{path}。");
+                errors.Add(L.Format("editor.ViewContractValidator.RecyclingList.23a28f3e0f", path));
             }
 
             if (!IsInsideListBoundary(element.transform, content, false))
             {
-                errors.Add($"回收列表需要边界内独立的内容子节点，引用不能穿过其他 View 或 Element 边界：{path}。");
+                errors.Add(L.Format("editor.ViewContractValidator.RecyclingList.80fa4d3c4b", path));
             }
             else if (content.childCount != 0)
             {
-                errors.Add($"回收列表内容节点必须为空，条目由框架创建：{path}。");
+                errors.Add(L.Format("editor.ViewContractValidator.RecyclingList.e5160942f1", path));
             }
 
             if (template == null)
             {
-                errors.Add($"回收列表缺少 NestedViewElement 模板：{path}。");
+                errors.Add(L.Format("editor.ViewContractValidator.RecyclingList.a48fe7d434", path));
                 return;
             }
 
             if (!(template.transform is RectTransform) || template.gameObject.activeSelf ||
                 !IsInsideListBoundary(element.transform, template.transform, true))
             {
-                errors.Add($"回收列表模板必须是边界内非激活的 RectTransform 子节点，引用不能穿过其他 View 或 Element 边界：{path}。");
+                errors.Add(L.Format("editor.ViewContractValidator.RecyclingList.1b9153195e", path));
             }
 
             if (content != null && (template.transform.IsChildOf(content) || content.IsChildOf(template.transform)))
             {
-                errors.Add($"回收列表的模板与内容节点不能互相包含：{path}。");
+                errors.Add(L.Format("editor.ViewContractValidator.RecyclingList.7ece7c5b40", path));
             }
 
             ValidateNestedListChild(template, path, errors);
@@ -63,7 +64,7 @@ namespace MUI.Editor
 
                     if (child != null)
                     {
-                        errors.Add($"回收列表模板有多个直属 View，需显式指定 childView：{path}。");
+                        errors.Add(L.Format("editor.ViewContractValidator.RecyclingList.72c81031ca", path));
                         return;
                     }
 
@@ -74,7 +75,7 @@ namespace MUI.Editor
             if (template.GetComponent<View>() != null || child == null ||
                 child.transform == template.transform || !child.transform.IsChildOf(template.transform))
             {
-                errors.Add($"回收列表模板必须用 NestedViewElement 包装一个有效子 View：{path}。");
+                errors.Add(L.Format("editor.ViewContractValidator.RecyclingList.c30d9540d5", path));
             }
         }
 

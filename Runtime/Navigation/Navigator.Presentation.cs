@@ -59,7 +59,13 @@ namespace MUI.Navigation
             activeOrder.Sort((left, right) =>
             {
                 var layer = left.Route.Policy.Layer.CompareTo(right.Route.Policy.Layer);
-                return layer != 0 ? layer : left.Order.CompareTo(right.Order);
+                if (layer != 0)
+                {
+                    return layer;
+                }
+                var navigation = left.Order.CompareTo(right.Order);
+                // 同一请求的依赖沿用确定的登记顺序，再应用相对父页面的约束。
+                return navigation != 0 ? navigation : left.Handle.Id.CompareTo(right.Handle.Id);
             });
             if (ownership.HasDependencyEdges)
             {
@@ -67,7 +73,12 @@ namespace MUI.Navigation
                 activeOrder.Clear();
                 activeOrder.AddRange(ordered);
             }
+            if (updateOrder)
+            {
+                RefreshRenderOrders();
+            }
             var visible = activeOrder.Where(entry => entry.State == ViewState.Open || entry.ExitPending).ToArray();
+            var mainPage = CurrentMainPage;
             var hiddenBelow = false;
             var blockedBelow = false;
             var hiddenBy = default(ViewHandle);
@@ -76,17 +87,22 @@ namespace MUI.Navigation
             for (var i = visible.Length - 1; i >= 0; --i)
             {
                 var entry = visible[i];
-                entry.HostVisible = (entry.ActivationCommitted || entry.ExitPending) && !IsShutdown && !hiddenBelow;
-                entry.HostInteractable = entry.State == ViewState.Open && entry.HostVisible && !blockedBelow && !entry.EnterPending;
-                var covered = hiddenBelow || blockedBelow;
+                var inScope = IsInPageScope(entry, mainPage, new HashSet<ViewHandle>());
+                entry.HostVisible = (entry.ActivationCommitted || entry.ExitPending) && !IsShutdown && !hiddenBelow && inScope;
+                entry.HostInteractable = entry.State == ViewState.Open && entry.HostVisible && entry.Route.Policy.ReceivesInput && !blockedBelow && !entry.EnterPending;
+                var covered = !inScope || hiddenBelow || blockedBelow;
                 entry.Covered = covered;
-                entry.HiddenBy = hiddenBy;
+                entry.HiddenBy = inScope ? hiddenBy : mainPage;
                 entry.BlockedBy = blockedBy;
                 if (entry.NotifiedCovered != covered)
                 {
                     coverageChanges.Add((entry, covered));
                 }
 
+                if (!inScope)
+                {
+                    continue;
+                }
                 if (entry.Route.Policy.Coverage == CoveragePolicy.Hide)
                 {
                     hiddenBelow = true;
@@ -114,7 +130,8 @@ namespace MUI.Navigation
                         throw new InvalidOperationException("An active View was externally destroyed.");
                     }
 
-                    if (updateOrder && entry.View is IOrderedView ordered)
+                    ApplyRenderOrder(entry);
+                    if (updateOrder && renderOrder == null && entry.View is IOrderedView ordered)
                     {
                         ordered.MoveToFront();
                     }
@@ -320,7 +337,7 @@ namespace MUI.Navigation
             }
 
             entry.Order = ++order;
-            // 显示顺序与打开历史独立；关闭后由剩余页面的实际排序恢复前台。
+            // 显式修改同层导航顺序；打开历史独立，渲染器只投影新的顺序。
             RecomputePresentation();
             return entry.State == ViewState.Open;
         }
@@ -332,6 +349,10 @@ namespace MUI.Navigation
                 return false;
             }
 
+            if (!IsInPageScope(entry, CurrentMainPage, new HashSet<ViewHandle>()))
+            {
+                return false;
+            }
             var currentIndex = activeOrder.IndexOf(entry);
             if (currentIndex < 0)
             {

@@ -34,8 +34,14 @@ namespace MUI.Samples.Dialogs
 
             try
             {
-                confirmationRoute = ConfirmationDialog.CreateRoute(new ViewResource(confirmationKey));
-                alertRoute = AlertDialog.CreateRoute(new ViewResource(alertKey));
+                var policy = host.ResolvePolicy("Popup", overrides: new RoutePolicyOverrides
+                {
+                    AllowMultiple = true,
+                    MaxInstances = 1,
+                    ExistingInstance = ExistingInstancePolicy.Reject
+                });
+                confirmationRoute = ConfirmationDialog.CreateRoute(new ViewResource(confirmationKey), policy: policy);
+                alertRoute = AlertDialog.CreateRoute(new ViewResource(alertKey), policy: policy);
                 host.Initialize();
                 initialized = true;
                 ShowConfirmation();
@@ -81,7 +87,7 @@ namespace MUI.Samples.Dialogs
         private async Task<ViewResult<TResult>> OpenAsync<TModel, TArgs, TResult>(
             Route<TModel, TArgs, TResult> route, TArgs args) where TModel : ViewModel
         {
-            var opened = await host.Navigator.OpenAsync(route, args, lifetime.Token);
+            var opened = await host.Navigator.OpenAsync(route, args, lifetime.Token, owner: PageOwner.Host);
             if (!opened.IsSuccess)
             {
                 throw new InvalidOperationException($"对话框打开失败：{opened.Status}/{opened.Rejection}", opened.Error);

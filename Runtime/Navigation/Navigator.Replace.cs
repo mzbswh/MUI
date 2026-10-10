@@ -54,7 +54,8 @@ namespace MUI.Navigation
             }
 
             BeginNavigationRequest();
-            return new ValueTask<ReplaceOutcome<TResult>>(ReplaceCoreAsync(current, route, args, cancellationToken, assignedViewModel, trace: trace));
+            var requestOrder = ++order;
+            return new ValueTask<ReplaceOutcome<TResult>>(ReplaceCoreAsync(current, route, args, cancellationToken, assignedViewModel, requestOrder, trace: trace));
         }
 
         private static ValueTask<ReplaceOutcome<TResult>> ReplacementRejected<TResult>(ReplaceRejection reason) => new ValueTask<ReplaceOutcome<TResult>>(new ReplaceOutcome<TResult>(ReplaceStatus.Rejected, rejection: reason));
@@ -84,12 +85,14 @@ namespace MUI.Navigation
                     TArgs args,
                     CancellationToken token,
                     TViewModel assigned,
+                    long requestOrder,
                     bool queueAcquired = false,
                     bool ownsRequest = true, NavigationTraceOperation trace = default)
                     where TViewModel : ViewModel
         {
             var acquired = queueAcquired;
             var committed = false;
+            PageDepartureTransaction departure = null;
             var ownsCloseIntent = false;
             Task<CloseOutcome> sourceCleanup = null;
             ViewInstance<TViewModel, TArgs, TResult> candidate = null;
@@ -110,6 +113,11 @@ namespace MUI.Navigation
                         return new ReplaceOutcome<TResult>(ReplaceStatus.Rejected, rejection: ReplaceRejection.SourceUnavailable);
                     }
 
+                    if (route.Policy.PageRole != source.Route.Policy.PageRole ||
+                        (source.Route.Policy.PageRole == PageRole.Main && CurrentMainPage != source.Handle))
+                    {
+                        throw PageScopeRejected(OpenRejection.ConflictingData);
+                    }
                     Register(route);
                     if (!HasCleanupCapacity)
                     {
@@ -121,7 +129,8 @@ namespace MUI.Navigation
                         return new ReplaceOutcome<TResult>(ReplaceStatus.Rejected, rejection: ReplaceRejection.InstanceLimit);
                     }
 
-                    candidate = NewInstance(route, args, assigned);
+                    candidate = NewInstance(route, args, assigned, requestOrder);
+                    candidate.ParentPage = source.ParentPage;
                     candidate.ReplacementSource = source.Handle;
                     AssignPreparationTrace(candidate, trace);
                     // 源句柄的 replacing 记录及候选保持额度预留，加载和守卫不持有队列许可。
@@ -140,6 +149,7 @@ namespace MUI.Navigation
                     }
 
                     cancellation.Token.ThrowIfCancellationRequested();
+                    departure = await PreparePageDepartureAsync(source, true, cancellation.Token, guardRoot: false);
                     CloseApproval approval = default;
                     if (source.HasCloseGuard)
                     {
@@ -226,10 +236,13 @@ namespace MUI.Navigation
 
                     // 移除源实例与插入候选之间不能等待异步操作或调用外部回调。
                     RequireDependenciesCurrent(candidate);
+                    RequirePageOwner(candidate.ParentPage);
+                    departure.Validate();
                     presentationDeferrals++;
                     try
                     {
                         committed = true;
+                        departure.Commit();
                         _ = BeginClose(source, DismissReason.Replaced, replacement: candidate);
                         sourceCleanup = source.CleanupCompletion;
                         Observe(sourceCleanup);
@@ -280,6 +293,7 @@ namespace MUI.Navigation
                 }
                 finally
                 {
+                    departure?.Dispose();
                     replacing.Remove(source.Handle);
                     if (acquired)
                     {

@@ -3,6 +3,7 @@ using MUI.UGUI;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
+using L = MUI.Editor.Localization.MUIEditorLocalization;
 
 namespace MUI.Editor
 {
@@ -23,27 +24,27 @@ namespace MUI.Editor
             if (spacing.x < 0 || spacing.y < 0 || float.IsNaN(spacing.x) || float.IsNaN(spacing.y) ||
                 float.IsInfinity(spacing.x) || float.IsInfinity(spacing.y))
             {
-                errors.Add($"Virtual list spacing must be finite and nonnegative: {path}.");
+                errors.Add(L.Format("editor.ViewContractValidator.VirtualList.cc31c4f87c", path));
             }
             foreach (var side in new[] { "m_Left", "m_Right", "m_Top", "m_Bottom" })
             {
                 var inset = padding.FindPropertyRelative(side);
                 if (inset == null || inset.intValue < 0)
                 {
-                    errors.Add($"Virtual list padding must have four nonnegative sides: {path}.");
+                    errors.Add(L.Format("editor.ViewContractValidator.VirtualList.cd7fadd5fc", path));
                     break;
                 }
             }
             var followTolerance = serialized.FindProperty("endFollowTolerance").floatValue;
             if (followTolerance < 0 || float.IsNaN(followTolerance) || float.IsInfinity(followTolerance))
             {
-                errors.Add($"Virtual list end follow tolerance must be finite and nonnegative: {path}.");
+                errors.Add(L.Format("editor.ViewContractValidator.VirtualList.413554c7ee", path));
             }
             var axis = (RectTransform.Axis)serialized.FindProperty("scrollAxis").intValue;
             if ((axis != RectTransform.Axis.Horizontal && axis != RectTransform.Axis.Vertical) ||
                 (axis == RectTransform.Axis.Horizontal && columns != 1))
             {
-                errors.Add($"Virtual list requires a valid scroll axis and one column for horizontal scrolling: {path}.");
+                errors.Add(L.Format("editor.ViewContractValidator.VirtualList.1ec8ef741e", path));
             }
             if (serialized.FindProperty("automaticColumns").boolValue)
             {
@@ -51,49 +52,49 @@ namespace MUI.Editor
                 if (axis != RectTransform.Axis.Vertical || minimumWidth <= 0 ||
                     float.IsNaN(minimumWidth) || float.IsInfinity(minimumWidth))
                 {
-                    errors.Add($"Automatic grid requires vertical scrolling and a finite positive minimum width: {path}.");
+                    errors.Add(L.Format("editor.ViewContractValidator.VirtualList.b08e766b89", path));
                 }
             }
             ValidateScroll(scroll, element.transform, root, errors);
             if (estimatedItemExtent <= 0 || float.IsNaN(estimatedItemExtent) || float.IsInfinity(estimatedItemExtent))
             {
-                errors.Add($"Virtual list item extent must be positive and finite: {path}.");
+                errors.Add(L.Format("editor.ViewContractValidator.VirtualList.bf3ae6ec6b", path));
             }
 
             if (capacity < 1 || columns < 1 || columns > capacity || overscan < 0)
             {
-                errors.Add($"Virtual list requires positive capacity/columns, columns <= capacity and nonnegative overscan: {path}.");
+                errors.Add(L.Format("editor.ViewContractValidator.VirtualList.91c54ff8f0", path));
             }
 
             if (serialized.FindProperty("maxRevealCorrections").intValue < 1)
             {
-                errors.Add($"Virtual list reveal correction budget must be positive: {path}.");
+                errors.Add(L.Format("editor.ViewContractValidator.VirtualList.cfc374c27a", path));
             }
 
             if (serialized.FindProperty("measurementsPerFrame").intValue < 1)
             {
-                errors.Add($"Virtual list measurement budget must be positive: {path}.");
+                errors.Add(L.Format("editor.ViewContractValidator.VirtualList.cbd8e6c32d", path));
             }
 
             if (template == null)
             {
-                errors.Add($"Virtual list item template is missing: {path}.");
+                errors.Add(L.Format("editor.ViewContractValidator.VirtualList.922d53d064", path));
             }
             else
             {
                 if (template.gameObject.activeSelf)
                 {
-                    errors.Add($"Virtual list item template must be inactive: {path}.");
+                    errors.Add(L.Format("editor.ViewContractValidator.VirtualList.5cbde16ef0", path));
                 }
 
                 if (!template.transform.IsChildOf(element.transform))
                 {
-                    errors.Add($"Virtual list item template must belong to the list boundary: {path}.");
+                    errors.Add(L.Format("editor.ViewContractValidator.VirtualList.e5e8afe21e", path));
                 }
 
                 if (!(template.transform is RectTransform))
                 {
-                    errors.Add($"Virtual list item template requires a RectTransform: {path}.");
+                    errors.Add(L.Format("editor.ViewContractValidator.VirtualList.bc3ba759d5", path));
                 }
             }
 
@@ -107,19 +108,19 @@ namespace MUI.Editor
                 var namedView = entry.FindPropertyRelative("view").objectReferenceValue as View;
                 if (string.IsNullOrWhiteSpace(key) || !templateKeys.Add(key))
                 {
-                    errors.Add($"Virtual list named template keys must be non-empty and unique: {path}.");
+                    errors.Add(L.Format("editor.ViewContractValidator.VirtualList.544ef3258d", path));
                 }
 
                 if (namedView == null || !(namedView.transform is RectTransform))
                 {
-                    errors.Add($"Virtual list named template requires a RectTransform View: {path}/{key}.");
+                    errors.Add(L.Format("editor.ViewContractValidator.VirtualList.d51750887f", path, key));
                     continue;
                 }
 
                 if (namedView.gameObject.activeSelf || !namedView.transform.IsChildOf(element.transform) ||
                     (scroll != null && scroll.content != null && namedView.transform.IsChildOf(scroll.content)))
                 {
-                    errors.Add($"Virtual list named template must be inactive, inside its boundary and outside content: {path}/{key}.");
+                    errors.Add(L.Format("editor.ViewContractValidator.VirtualList.aa0d9f0ab5", path, key));
                 }
             }
 
@@ -130,17 +131,17 @@ namespace MUI.Editor
 
             if (!scroll.transform.IsChildOf(element.transform))
             {
-                errors.Add($"Virtual list ScrollRect must belong to the list boundary: {path}.");
+                errors.Add(L.Format("editor.ViewContractValidator.VirtualList.89039a932d", path));
             }
 
             if (scroll.viewport == null)
             {
-                errors.Add($"Virtual list requires an explicit viewport reference: {path}.");
+                errors.Add(L.Format("editor.ViewContractValidator.VirtualList.68fc07fd71", path));
             }
 
             if (scroll.GetComponent<ScrollRectElement>() != null)
             {
-                errors.Add($"Virtual list and ScrollRectElement cannot own the same ScrollRect: {Path(scroll.transform, root)}.");
+                errors.Add(L.Format("editor.ViewContractValidator.VirtualList.f8192fe74e", Path(scroll.transform, root)));
             }
 
             var content = scroll.content;
@@ -151,17 +152,17 @@ namespace MUI.Editor
 
             if (content.childCount != 0)
             {
-                errors.Add($"Virtual list content must be empty before initialization: {path}.");
+                errors.Add(L.Format("editor.ViewContractValidator.VirtualList.0028a0908f", path));
             }
 
             if (content.GetComponent<LayoutGroup>() != null || content.GetComponent<ContentSizeFitter>() != null)
             {
-                errors.Add($"Virtual list owns content layout; remove LayoutGroup/ContentSizeFitter from content: {path}.");
+                errors.Add(L.Format("editor.ViewContractValidator.VirtualList.b4082bbf93", path));
             }
 
             if (template != null && template.transform.IsChildOf(content))
             {
-                errors.Add($"Virtual list item template must be outside content: {path}.");
+                errors.Add(L.Format("editor.ViewContractValidator.VirtualList.cbeb11bf2d", path));
             }
         }
     }

@@ -15,7 +15,7 @@ namespace MUI.Samples.Navigation
             var model = new PageViewModel();
             var route = new Route<PageViewModel, PageArgs, int>("demo.args-update", resource,
                 () => model, _ => presenter, binding,
-                policy: new RoutePolicy(existingInstance: ExistingInstancePolicy.ReturnReady));
+                policy: host.ResolvePolicy(overrides: new RoutePolicyOverrides { AllowMultiple = false, ExistingInstance = ExistingInstancePolicy.ReturnReady }));
             var opened = await navigator.OpenAsync(route, new PageArgs("Initial", 10), cancellation.Token);
             if (!opened.IsSuccess)
             {
@@ -50,7 +50,7 @@ namespace MUI.Samples.Navigation
 
             var failingPresenter = new ArgsUpdatePagePresenter();
             var failingRoute = new Route<PageViewModel, PageArgs, int>("demo.args-commit-failure", resource,
-                () => new PageViewModel(), _ => failingPresenter, binding);
+                () => new PageViewModel(), _ => failingPresenter, binding, host.ResolvePolicy());
             var failingPage = await navigator.OpenAsync(failingRoute, new PageArgs("Initial", 10), cancellation.Token);
             if (!failingPage.IsSuccess)
             {

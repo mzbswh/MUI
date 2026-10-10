@@ -1,0 +1,33 @@
+.mui-dashboard { flex-grow: 1; padding: 10px; min-width: 0; }
+.mui-dashboard-header { flex-shrink: 0; }
+.mui-dashboard-toolbar { flex-direction: row; flex-wrap: wrap; align-items: center; margin-bottom: 4px; }
+.mui-dashboard-toolbar > Button { min-height: 24px; margin-right: 4px; margin-bottom: 3px; }
+.mui-dashboard-titlebar { margin-bottom: 8px; }
+.mui-dashboard-language { width: 280px; min-width: 210px; }
+.mui-dashboard-language > .unity-base-field__label { min-width: 80px; }
+.mui-dashboard-hosts { flex-grow: 1; flex-shrink: 1; flex-basis: 200px; min-width: 160px; margin-right: 6px; }
+.mui-dashboard-hosts .unity-base-popup-field__text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mui-dashboard-hosts > .unity-base-field__label { min-width: 50px; }
+.mui-dashboard-summary { white-space: normal; margin-top: 3px; margin-bottom: 4px; }
+.mui-dashboard-status-note { font-size: 11px; margin-bottom: 0; }
+.mui-dashboard-tabs { flex-direction: row; margin-bottom: 8px; flex-shrink: 0; }
+.mui-dashboard-tabs > Button { width: 144px; flex-shrink: 1; min-height: 32px; white-space: normal; -unity-text-align: middle-center; margin-left: 0; margin-right: 4px; }
+.mui-dashboard-active-tab { -unity-font-style: bold; background-color: var(--mui-active); border-bottom-width: 2px; border-bottom-color: var(--mui-accent); }
+.mui-dashboard-panel { flex-grow: 1; min-height: 0; min-width: 0; }
+.mui-dashboard-panel .unity-scroll-view__content-container { width: 100%; min-width: 0; }
+.mui-dashboard-settings-body { width: 100%; max-width: 860px; align-self: center; min-width: 0; }
+.mui-dashboard-sidebar { min-width: 250px; padding-right: 8px; }
+.mui-dashboard-sidebar > ToolbarSearchField { width: auto; min-width: 0; max-width: 100%; }
+.mui-dashboard-limit { width: 164px; }
+.mui-dashboard-limit > .unity-base-field__label { min-width: 80px; }
+.mui-dashboard-list { flex-grow: 1; min-height: 0; }
+.mui-dashboard-row { padding: 6px; white-space: normal; border-bottom-width: 1px; border-bottom-color: var(--mui-border); }
+.mui-dashboard-page-title { -unity-font-style: bold; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mui-dashboard-page-meta { color: var(--mui-muted); margin-top: 3px; font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mui-dashboard-details { flex-grow: 1; padding-left: 10px; min-width: 0; }
+.mui-dashboard-text { white-space: normal; margin-bottom: 7px; }
+.mui-dashboard-heading { -unity-font-style: bold; margin-top: 12px; margin-bottom: 7px; font-size: 13px; }
+.mui-dashboard-hidden { display: none; }
+.mui-dashboard-compact .mui-dashboard-sidebar { min-width: 0; padding-right: 0; padding-bottom: 8px; }
+.mui-dashboard-compact .mui-dashboard-details { padding-left: 0; padding-top: 8px; }
+.mui-dashboard-compact .mui-dashboard-language { width: 245px; min-width: 200px; }

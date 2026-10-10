@@ -6,8 +6,12 @@
     "MUI.Core",
     "MUI.Navigation",
     "MUI.Resources",
-    "MUI.Editor"
+    "MUI.UGUI",
+    "MUI.Editor",
+    "MUI.Editor.Localization"
   ],
-  "includePlatforms": ["Editor"],
+  "includePlatforms": [
+    "Editor"
+  ],
   "autoReferenced": true
 }

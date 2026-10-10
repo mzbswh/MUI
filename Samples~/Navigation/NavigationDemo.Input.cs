@@ -16,7 +16,7 @@ namespace MUI.Samples.Navigation
             var presenter = new InputDemoPresenter();
             var route = new Route<PageViewModel, PageArgs, int>("input.demo", resource,
                 () => new PageViewModel(), _ => presenter, binding,
-                new RoutePolicy(modal: true));
+                host.ResolvePolicy("Popup"));
             var opened = await navigator.OpenAsync(route, new PageArgs("Two input blockers", 7));
             if (!opened.IsSuccess)
             {

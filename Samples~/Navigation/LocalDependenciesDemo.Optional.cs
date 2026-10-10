@@ -31,7 +31,7 @@ namespace MUI.Samples.Navigation
                 () => new ThingItemViewModel { Label = "准备失败的可选界面" },
                 presenterFactory: _ => new FailingOptionalPresenter(),
                 bindingFactory: ThingItemViewModelBindingFactory.Create,
-                policy: new RoutePolicy(enterHistory: false, takesFocus: false, backBehavior: BackBehavior.Ignore));
+                policy: ResolveDependencyPolicy());
             optionalRoute = CreatePage("demo.shared.optional-parent", "允许共享依赖退出的父页面", page,
                 new[] { RouteDependency<string>.Optional(sharedRoute, _ => "default", sharedPlacement) });
             optionalFailureRoute = CreatePage("demo.shared.optional-failure-parent", "可选准备失败仍保留的父页面", page,

@@ -6,15 +6,16 @@ using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using L = MUI.Editor.Localization.MUIEditorLocalization;
 
 namespace MUI.Editor
 {
     internal static class ConfirmationDialogWizard
     {
-        [MenuItem("Tools/MUI/Create Confirmation Dialog Prefab")]
+        [MenuItem("Tools/MUI/创建确认弹窗 (Create Confirmation Dialog Prefab)")]
         private static void Create() => Create(false);
 
-        [MenuItem("Tools/MUI/Create Alert Dialog Prefab")]
+        [MenuItem("Tools/MUI/创建提示弹窗 (Create Alert Dialog Prefab)")]
         private static void CreateAlert() => Create(true);
 
         // 两种标准对话框共用正文滚动区与保存流程，按钮契约分别校验。
@@ -26,7 +27,7 @@ namespace MUI.Editor
             }
 
             var viewName = alert ? "AlertDialogView" : "ConfirmationDialogView";
-            var path = EditorUtility.SaveFilePanelInProject("创建 MUI 对话框", viewName, "prefab", "请选择新的 Prefab 路径。");
+            var path = EditorUtility.SaveFilePanelInProject(L.Get("editor.ConfirmationDialogWizard.93c9370677"), viewName, "prefab", L.Get("editor.ConfirmationDialogWizard.355c93a223"));
             if (string.IsNullOrEmpty(path))
             {
                 return;
@@ -34,7 +35,7 @@ namespace MUI.Editor
 
             if (File.Exists(path) || File.Exists(path + ".meta"))
             {
-                Debug.LogError("MUI will not overwrite an existing Prefab. Choose a new path.");
+                Debug.LogError(L.Get("editor.ConfirmationDialogWizard.43e83309d7"));
                 return;
             }
 
@@ -49,7 +50,7 @@ namespace MUI.Editor
                 rect.anchorMin = rect.anchorMax = new Vector2(0.5f, 0.5f);
                 rect.sizeDelta = new Vector2(640, 420);
                 root.GetComponent<Image>().color = new Color(0.12f, 0.14f, 0.18f, 1);
-                var title = PrefabAuthoring.CreateText("Title", rect, alert ? "提示" : "Confirmation");
+                var title = PrefabAuthoring.CreateText("Title", rect, alert ? L.Get("editor.ConfirmationDialogWizard.f56c6c8220") : "Confirmation");
                 title.gameObject.AddComponent<TextElement>();
                 title.rectTransform.anchorMin = new Vector2(0, 1);
                 title.rectTransform.anchorMax = Vector2.one;
@@ -64,7 +65,7 @@ namespace MUI.Editor
                 viewportRect.offsetMin = new Vector2(24, 96);
                 viewportRect.offsetMax = new Vector2(-24, -80);
                 viewport.GetComponent<Image>().color = Color.clear;
-                var message = PrefabAuthoring.CreateText("Message", viewportRect, alert ? "提示正文" : "Confirmation message");
+                var message = PrefabAuthoring.CreateText("Message", viewportRect, alert ? L.Get("editor.ConfirmationDialogWizard.df3021fd73") : L.Get("editor.ConfirmationDialogWizard.b736b1be54"));
                 message.gameObject.AddComponent<TextElement>();
                 message.alignment = TextAnchor.UpperLeft;
                 message.horizontalOverflow = HorizontalWrapMode.Wrap;
@@ -83,7 +84,7 @@ namespace MUI.Editor
                 Selectable defaultSelection;
                 if (alert)
                 {
-                    var acknowledge = AddButton(rect, "Acknowledge", "AcknowledgeLabel", 0, "确定");
+                    var acknowledge = AddButton(rect, "Acknowledge", "AcknowledgeLabel", 0, L.Get("editor.ConfirmationDialogWizard.fac2a67ad8"));
                     var navigation = acknowledge.navigation;
                     navigation.mode = UnityEngine.UI.Navigation.Mode.None;
                     acknowledge.navigation = navigation;
@@ -121,7 +122,7 @@ namespace MUI.Editor
                 var prefab = PrefabUtility.SaveAsPrefabAsset(root, path);
                 if (prefab == null)
                 {
-                    throw new IOException("无法保存对话框 Prefab。");
+                    throw new IOException(L.Get("editor.ConfirmationDialogWizard.ad6d4c241d"));
                 }
 
                 Selection.activeObject = prefab;

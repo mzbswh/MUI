@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
+using L = MUI.Editor.Localization.MUIEditorLocalization;
 
 namespace MUI.Editor
 {
@@ -93,7 +94,7 @@ namespace MUI.Editor
                 {
                     return;
                 }
-                var text = "MUI 增量校验：\n" + report.ExportText();
+                var text = L.Get("editor.UIIncrementalValidation.06bf605b8a") + report.ExportText();
                 if (text == previousReport)
                 {
                     return;

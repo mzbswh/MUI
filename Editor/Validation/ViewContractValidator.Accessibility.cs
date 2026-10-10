@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using MUI.UGUI;
+using L = MUI.Editor.Localization.MUIEditorLocalization;
 
 namespace MUI.Editor
 {
@@ -28,7 +29,7 @@ namespace MUI.Editor
                     var role = element.SemanticRole;
                     if (!Enum.IsDefined(typeof(AccessibilityRole), role))
                     {
-                        errors.Add($"Invalid accessibility role: {Path(element.transform, view.transform)}.");
+                        errors.Add(L.Format("editor.ViewContractValidator.Accessibility.852c506d7d", Path(element.transform, view.transform)));
                         continue;
                     }
 
@@ -48,18 +49,18 @@ namespace MUI.Editor
 
                     if (needsLabel && !bound && string.IsNullOrWhiteSpace(element.AccessibilityLabel))
                     {
-                        errors.Add($"Accessible {role} needs a label or a forward AccessibilityLabel binding; hide decorative elements explicitly: {Path(element.transform, view.transform)}.");
+                        errors.Add(L.Format("editor.ViewContractValidator.Accessibility.2998c776ae", role, Path(element.transform, view.transform)));
                     }
 
                     const AccessibilityState known = AccessibilityState.Disabled | AccessibilityState.Selected | AccessibilityState.Checked | AccessibilityState.Expanded | AccessibilityState.ReadOnly | AccessibilityState.Busy | AccessibilityState.Invalid;
                     if ((element.SemanticState & ~known) != 0)
                     {
-                        errors.Add($"Invalid accessibility state flags: {Path(element.transform, view.transform)}.");
+                        errors.Add(L.Format("editor.ViewContractValidator.Accessibility.27a823a589", Path(element.transform, view.transform)));
                     }
                 }
                 catch (Exception error)
                 {
-                    errors.Add($"Accessibility inspection failed at {Path(element.transform, view.transform)}: {error.Message}");
+                    errors.Add(L.Format("editor.ViewContractValidator.Accessibility.538b93e816", Path(element.transform, view.transform), error.Message));
                 }
             }
 

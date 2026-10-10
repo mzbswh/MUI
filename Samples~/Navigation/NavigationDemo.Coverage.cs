@@ -18,10 +18,10 @@ namespace MUI.Samples.Navigation
             var group = lowerView.GetComponent<CanvasGroup>();
             foreach (var policy in new[]
             {
-                new RoutePolicy(coverage: CoveragePolicy.None, takesFocus: false),
-                new RoutePolicy(coverage: CoveragePolicy.BlockInput),
-                new RoutePolicy(coverage: CoveragePolicy.Hide),
-                new RoutePolicy(modal: true)
+                host.ResolvePolicy(overrides: new RoutePolicyOverrides { Coverage = CoveragePolicy.None, TakesFocus = false, Modal = false }),
+                host.ResolvePolicy(overrides: new RoutePolicyOverrides { Coverage = CoveragePolicy.BlockInput, Modal = false }),
+                host.ResolvePolicy("FullScreen"),
+                host.ResolvePolicy("Popup")
             })
             {
                 var route = new Route<PageViewModel, PageArgs, int>("demo.coverage." + policy.Coverage + "." + policy.Modal, resource,

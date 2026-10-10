@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using L = MUI.Editor.Localization.MUIEditorLocalization;
 
 namespace MUI.Navigation.Editor
 {
@@ -45,7 +46,10 @@ namespace MUI.Navigation.Editor
                     Key = route.Key,
                     Resource = route.Resource.ToString(),
                     Layer = route.Policy.Layer,
-                    Policy = $"多实例={route.Policy.AllowMultiple}，上限={route.Policy.MaxInstances}，历史={route.Policy.EnterHistory}，焦点={route.Policy.TakesFocus}，缓存={route.Policy.CacheMode}"
+                    AllowMultiple = route.Policy.AllowMultiple,
+                    MaxInstances = route.Policy.MaxInstances,
+                    TakesFocus = route.Policy.TakesFocus,
+                    CacheMode = route.Policy.CacheMode
                 });
             }
             for (var i = 0; i < count; ++i)
@@ -62,15 +66,16 @@ namespace MUI.Navigation.Editor
                     {
                         Owner = i,
                         Target = target != null && indices.TryGetValue(target, out var index) ? index : -1,
-                        TargetKey = target == null ? "无效目标" : target.Key,
+                        TargetKey = target == null ? L.Get("editor.RouteGraphSnapshot.51cb866ffa") : target.Key,
                         Required = descriptor.IsRequired,
-                        Placement = descriptor.Placement.ToString()
+                        Placement = descriptor.Placement.ToString(),
+                        MissingPolicy = descriptor.MissingPolicy
                     });
                 }
             }
             foreach (var issue in validation.Issues)
             {
-                result.Issues.Add(new Issue { Key = issue.RouteKey, Code = issue.Rejection.ToString(), Message = issue.Message });
+                result.Issues.Add(new Issue { Key = issue.RouteKey, Code = issue.Rejection, Message = issue.Message });
             }
             return result;
         }
@@ -78,22 +83,22 @@ namespace MUI.Navigation.Editor
         internal string CreateReport()
         {
             var report = new StringBuilder();
-            report.AppendLine($"MUI 路由依赖图：{RootKey}");
-            report.AppendLine($"采集时间：{CapturedAt}；静态有效：{Valid}；总节点：{TotalNodes}；截断：{Truncated}");
-            report.AppendLine("此报告不验证运行时参数、资源可用性或跨根共享组合。");
+            report.AppendLine(L.Format("editor.RouteGraphSnapshot.9cc9fa8b20", RootKey));
+            report.AppendLine(L.Format("editor.RouteGraphSnapshot.158410a533", CapturedAt, Valid, TotalNodes, Truncated));
+            report.AppendLine(L.Get("editor.RouteGraphSnapshot.b375d3caee"));
             for (var i = 0; i < Nodes.Count; ++i)
             {
                 var node = Nodes[i];
-                report.AppendLine($"#{i + 1} {node.Key} | Layer={node.Layer} | {node.Resource}");
-                report.AppendLine("  " + node.Policy);
+                report.AppendLine(L.Format("editor.RouteGraphSnapshot.9d4ce01625", i + 1, node.Key, node.Layer, node.Resource));
+                report.AppendLine("  " + node.DescribePolicy());
             }
             foreach (var edge in Edges)
             {
-                report.AppendLine($"#{edge.Owner + 1} → {(edge.Target < 0 ? "未收录" : "#" + (edge.Target + 1))} {edge.TargetKey} | {(edge.Required ? "必需" : "可选")} | {edge.Placement}");
+                report.AppendLine($"#{edge.Owner + 1} → {(edge.Target < 0 ? L.Get("editor.RouteGraphSnapshot.01c47b74d0") : "#" + (edge.Target + 1))} {edge.TargetKey} | {(edge.Required ? L.Get("editor.RouteGraphSnapshot.92707d3318") : L.Get("editor.RouteGraphSnapshot.537352400c"))} | {L.EnumName(typeof(DependencyPlacement), edge.Placement)} | {L.Value(edge.MissingPolicy)}");
             }
             foreach (var issue in Issues)
             {
-                report.AppendLine($"错误 {issue.Key} / {issue.Code}：{issue.Message}");
+                report.AppendLine(L.Format("editor.RouteGraphSnapshot.c4d58b520a", issue.Key, issue.Code, L.Diagnostic(issue.Message)));
             }
             return report.ToString();
         }
@@ -104,7 +109,12 @@ namespace MUI.Navigation.Editor
             public string Key;
             public string Resource;
             public int Layer;
-            public string Policy;
+            public bool AllowMultiple;
+            public int MaxInstances;
+            public bool TakesFocus;
+            public ViewCacheMode CacheMode;
+
+            internal string DescribePolicy() => L.Format("editor.RouteGraphSnapshot.726b6750c3", AllowMultiple, MaxInstances, TakesFocus, CacheMode);
         }
 
         [Serializable]
@@ -115,13 +125,14 @@ namespace MUI.Navigation.Editor
             public string TargetKey;
             public bool Required;
             public string Placement;
+            public DependencyMissingPolicy MissingPolicy;
         }
 
         [Serializable]
         internal sealed class Issue
         {
             public string Key;
-            public string Code;
+            public OpenRejection Code;
             public string Message;
         }
     }

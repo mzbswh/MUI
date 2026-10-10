@@ -1,3 +1,4 @@
+using L = MUI.Editor.Localization.MUIEditorLocalization;
 using System;
 using UnityEditor;
 using UnityEditor.SceneManagement;
@@ -13,7 +14,7 @@ namespace MUI.Samples.Settings.Editor
         private static bool failed;
         private static bool completed;
 
-        [MenuItem("Tools/MUI/Samples/Open Settings Scene")]
+        [MenuItem("Tools/MUI/示例 (Samples)/打开设置场景 (Open Settings Scene)")]
         public static void Open()
         {
             if (!Application.isBatchMode && !EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo())
@@ -38,7 +39,7 @@ namespace MUI.Samples.Settings.Editor
         {
             if (!Application.isBatchMode)
             {
-                throw new InvalidOperationException("Use Open Settings Scene for interactive preview.");
+                throw new InvalidOperationException(L.Get("sample.previewHint"));
             }
 
             Open();
@@ -95,7 +96,7 @@ namespace MUI.Samples.Settings.Editor
             EditorApplication.update -= UpdatePreview;
             Application.logMessageReceived -= OnLog;
             var timedOut = !completed;
-            Debug.Log(timedOut ? "MUI Settings 演示超时，未收到清理完成标记。" : "MUI Settings Play-mode preview finished.");
+            Debug.Log(timedOut ? L.Format("sample.previewTimeout", "Settings") : L.Format("sample.previewFinished", "Settings"));
             EditorApplication.Exit(failed || timedOut ? 1 : 0);
         }
     }

@@ -1,3 +1,4 @@
+using L = MUI.Editor.Localization.MUIEditorLocalization;
 using System;
 using UnityEditor;
 using UnityEditor.SceneManagement;
@@ -13,7 +14,7 @@ namespace MUI.Samples.Tabs.Editor
         private static bool failed;
         private static bool completed;
 
-        [MenuItem("Tools/MUI/Samples/Open Tabs Scene")]
+        [MenuItem("Tools/MUI/示例 (Samples)/打开页签场景 (Open Tabs Scene)")]
         public static void Open()
         {
             if (!Application.isBatchMode && !EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo())
@@ -38,7 +39,7 @@ namespace MUI.Samples.Tabs.Editor
         {
             if (!Application.isBatchMode)
             {
-                throw new InvalidOperationException("Use Open Tabs Scene for interactive preview.");
+                throw new InvalidOperationException(L.Get("sample.previewHint"));
             }
 
             Open();
@@ -95,7 +96,7 @@ namespace MUI.Samples.Tabs.Editor
             EditorApplication.update -= UpdatePreview;
             Application.logMessageReceived -= OnLog;
             var timedOut = !completed;
-            Debug.Log(timedOut ? "MUI Tabs 演示超时，未收到清理完成标记。" : "MUI Tabs Play-mode preview finished.");
+            Debug.Log(timedOut ? L.Format("sample.previewTimeout", "Tabs") : L.Format("sample.previewFinished", "Tabs"));
             EditorApplication.Exit(failed || timedOut ? 1 : 0);
         }
     }

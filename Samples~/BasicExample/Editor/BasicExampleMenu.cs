@@ -1,3 +1,4 @@
+using L = MUI.Editor.Localization.MUIEditorLocalization;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 
@@ -7,7 +8,7 @@ namespace MUI.BasicExample.Editor
     {
         private const string SceneGuid = "c1237d8dbbdbb46c78a66de5682afdcf";
 
-        [MenuItem("MUI/Basic Example/Open Scene")]
+        [MenuItem("MUI/基础示例 (Basic Example)/打开场景 (Open Scene)")]
         public static void OpenScene()
         {
             if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo())
@@ -18,7 +19,7 @@ namespace MUI.BasicExample.Editor
             var scenePath = AssetDatabase.GUIDToAssetPath(SceneGuid);
             if (string.IsNullOrEmpty(scenePath))
             {
-                throw new System.InvalidOperationException("Basic Example scene is missing. Import the sample from Package Manager.");
+                throw new System.InvalidOperationException(L.Get("sample.basic.sceneMissing"));
             }
 
             EditorSceneManager.OpenScene(scenePath);

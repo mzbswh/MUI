@@ -4,6 +4,7 @@ using MUI.UGUI;
 using TMPro;
 using UnityEditor;
 using UnityEngine;
+using L = MUI.Editor.Localization.MUIEditorLocalization;
 
 namespace MUI.TMP.Editor
 {
@@ -21,7 +22,7 @@ namespace MUI.TMP.Editor
         {
             if (element.GetComponent<TextMeshProUGUI>() == null)
             {
-                Report(element, view, errors, "TMP text requires TextMeshProUGUI on the same object");
+                Report(element, view, errors, L.Get("editor.TMPElementValidation.5e17708354"));
             }
         }
 
@@ -30,7 +31,7 @@ namespace MUI.TMP.Editor
             var input = element.GetComponent<TMP_InputField>();
             if (input == null)
             {
-                Report(element, view, errors, "TMP input requires TMP_InputField");
+                Report(element, view, errors, L.Get("editor.TMPElementValidation.4969873d55"));
                 return;
             }
 
@@ -38,53 +39,53 @@ namespace MUI.TMP.Editor
             var text = input.textComponent;
             if (viewport == null)
             {
-                Report(element, view, errors, "TMP input text viewport is missing");
+                Report(element, view, errors, L.Get("editor.TMPElementValidation.1d8c5c36f6"));
             }
             else if (!viewport.IsChildOf(input.transform))
             {
-                Report(element, view, errors, "TMP input text viewport must belong to its hierarchy");
+                Report(element, view, errors, L.Get("editor.TMPElementValidation.1df8e0ccfc"));
             }
 
             if (viewport != null && viewport.GetComponentInParent<View>(true) != view)
             {
-                Report(element, view, errors, "TMP 输入框视口引用不能跨越 View 边界");
+                Report(element, view, errors, L.Get("editor.TMPElementValidation.2de1131ac8"));
             }
 
             if (text == null)
             {
-                Report(element, view, errors, "TMP input text component is missing");
+                Report(element, view, errors, L.Get("editor.TMPElementValidation.e476e0fbaf"));
             }
             else
             {
                 if (!(text is TextMeshProUGUI))
                 {
-                    Report(element, view, errors, "TMP input requires a uGUI text component");
+                    Report(element, view, errors, L.Get("editor.TMPElementValidation.fd176822a0"));
                 }
 
                 if (text.GetComponentInParent<View>(true) != view)
                 {
-                    Report(element, view, errors, "TMP 输入框文字引用不能跨越 View 边界");
+                    Report(element, view, errors, L.Get("editor.TMPElementValidation.fbfd3003d5"));
                 }
 
                 if (viewport != null && (text.transform == viewport || !text.transform.IsChildOf(viewport)))
                 {
-                    Report(element, view, errors, "TMP input text must be a descendant of its viewport");
+                    Report(element, view, errors, L.Get("editor.TMPElementValidation.1a3adba300"));
                 }
             }
 
             if (input.placeholder != null && viewport != null && !input.placeholder.transform.IsChildOf(viewport))
             {
-                Report(element, view, errors, "TMP input placeholder must belong to its viewport");
+                Report(element, view, errors, L.Get("editor.TMPElementValidation.8b054a99fa"));
             }
 
             if (input.placeholder != null && text != null && input.placeholder == text)
             {
-                Report(element, view, errors, "TMP input placeholder cannot also be the editable text");
+                Report(element, view, errors, L.Get("editor.TMPElementValidation.1ca7e4bdba"));
             }
 
             if (input.placeholder != null && input.placeholder.GetComponentInParent<View>(true) != view)
             {
-                Report(element, view, errors, "TMP 输入框占位引用不能跨越 View 边界");
+                Report(element, view, errors, L.Get("editor.TMPElementValidation.1f32665973"));
             }
         }
 
@@ -93,7 +94,7 @@ namespace MUI.TMP.Editor
             var dropdown = element.GetComponent<TMP_Dropdown>();
             if (dropdown == null)
             {
-                Report(element, view, errors, "TMP dropdown requires TMP_Dropdown");
+                Report(element, view, errors, L.Get("editor.TMPElementValidation.e88edcb824"));
                 return;
             }
 

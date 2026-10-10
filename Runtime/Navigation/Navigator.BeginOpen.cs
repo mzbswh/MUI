@@ -9,7 +9,7 @@ namespace MUI.Navigation
         public OpenRequest<TResult> BeginOpen<TViewModel, TArgs, TResult>(Route<TViewModel, TArgs, TResult> route,
             TArgs args,
             CancellationToken cancellationToken = default,
-            TViewModel assignedViewModel = null)
+            TViewModel assignedViewModel = null, PageOwner owner = default)
             where TViewModel : ViewModel
         {
             AssertThread();
@@ -18,7 +18,7 @@ namespace MUI.Navigation
                 throw new ArgumentNullException(nameof(route));
             }
 
-            return new OpenRequest<TResult>(token => OpenAsync(route, args, token, assignedViewModel), cancellationToken);
+            return new OpenRequest<TResult>(token => OpenAsync(route, args, token, assignedViewModel, owner), cancellationToken);
         }
     }
 }

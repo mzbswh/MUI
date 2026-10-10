@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Text;
+using L = MUI.Editor.Localization.MUIEditorLocalization;
 
 namespace MUI.Editor
 {
@@ -55,11 +56,11 @@ namespace MUI.Editor
         public string ExportText()
         {
             var text = new StringBuilder();
-            text.Append("MUI 构建校验：目录 ").Append(CatalogCount).Append("，页面 ").Append(PageCount)
-                .Append("，路由 ").Append(RouteCount).AppendLine();
+            text.Append(L.Get("editor.UIBuildValidationReport.b79876b776")).Append(CatalogCount).Append(L.Get("editor.UIBuildValidationReport.0fb3e9344a")).Append(PageCount)
+                .Append(L.Get("editor.UIBuildValidationReport.c636b7b038")).Append(RouteCount).AppendLine();
             if (CatalogCount == 0)
             {
-                text.AppendLine("未登记 UI 构建目录，本次未验证项目页面覆盖范围。");
+                text.AppendLine(L.Get("editor.UIBuildValidationReport.0dbf27f994"));
             }
             foreach (var issue in issues)
             {
@@ -67,7 +68,7 @@ namespace MUI.Editor
             }
             if (IsTruncated)
             {
-                text.AppendLine("问题超过报告上限，后续明细已省略；本次校验不通过。");
+                text.AppendLine(L.Get("editor.UIBuildValidationReport.60b24dd7ab"));
             }
             return text.ToString();
         }

@@ -6,15 +6,16 @@ using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using L = MUI.Editor.Localization.MUIEditorLocalization;
 
 namespace MUI.Editor
 {
     internal static class OverlayPrefabWizard
     {
-        [MenuItem("Tools/MUI/Create Context Menu Prefab")]
+        [MenuItem("Tools/MUI/创建上下文菜单 (Create Context Menu Prefab)")]
         private static void CreateContextMenu() => Create(true);
 
-        [MenuItem("Tools/MUI/Create Tooltip Prefab")]
+        [MenuItem("Tools/MUI/创建悬浮提示 (Create Tooltip Prefab)")]
         private static void CreateTooltip() => Create(false);
 
         private static void Create(bool menu)
@@ -25,7 +26,7 @@ namespace MUI.Editor
             }
 
             var name = menu ? "ContextMenuView" : "TooltipView";
-            var path = EditorUtility.SaveFilePanelInProject("Create MUI " + name, name, "prefab", "Choose a new Prefab path.");
+            var path = EditorUtility.SaveFilePanelInProject(L.Get("editor.OverlayPrefabWizard.3d439e23e6") + name, name, "prefab", L.Get("editor.OverlayPrefabWizard.a587f03b9b"));
             if (string.IsNullOrEmpty(path))
             {
                 return;
@@ -33,7 +34,7 @@ namespace MUI.Editor
 
             if (File.Exists(path) || File.Exists(path + ".meta"))
             {
-                Debug.LogError("MUI will not overwrite an existing Prefab. Choose a new path.");
+                Debug.LogError(L.Get("editor.OverlayPrefabWizard.43e83309d7"));
                 return;
             }
 
@@ -83,13 +84,13 @@ namespace MUI.Editor
                 // 保存前再次检查，向导不会更新已有资源。
                 if (File.Exists(path) || File.Exists(path + ".meta"))
                 {
-                    throw new IOException("Destination was created while preparing the Prefab.");
+                    throw new IOException(L.Get("editor.OverlayPrefabWizard.28ea9043a7"));
                 }
 
                 var prefab = PrefabUtility.SaveAsPrefabAsset(root, path);
                 if (prefab == null)
                 {
-                    throw new IOException("Could not save overlay Prefab.");
+                    throw new IOException(L.Get("editor.OverlayPrefabWizard.28d14ed8ee"));
                 }
 
                 Selection.activeObject = prefab;
@@ -120,8 +121,8 @@ namespace MUI.Editor
             surface.raycastTarget = false;
             bounds.gameObject.AddComponent<OverlayDismissArea>();
             bounds.gameObject.AddComponent<ContextMenuController>();
-            AddButton(content, "Action1", "Primary action", 26);
-            AddButton(content, "Action2", "Secondary action", -26);
+            AddButton(content, "Action1", L.Get("editor.OverlayPrefabWizard.da2eb576b5"), 26);
+            AddButton(content, "Action2", L.Get("editor.OverlayPrefabWizard.dbdebc5676"), -26);
         }
 
         private static void AddButton(RectTransform parent, string name, string title, float y)
@@ -147,7 +148,7 @@ namespace MUI.Editor
             group.blocksRaycasts = false;
             group.interactable = false;
             content.GetComponent<Image>().raycastTarget = false;
-            var label = PrefabAuthoring.CreateText("Message", content, "Tooltip message");
+            var label = PrefabAuthoring.CreateText("Message", content, L.Get("editor.OverlayPrefabWizard.613a9a6df1"));
             label.gameObject.AddComponent<TextElement>();
             label.alignment = TextAnchor.MiddleLeft;
             label.horizontalOverflow = HorizontalWrapMode.Wrap;

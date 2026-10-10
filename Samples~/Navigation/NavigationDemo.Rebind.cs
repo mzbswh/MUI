@@ -16,7 +16,7 @@ namespace MUI.Samples.Navigation
             var borrowed = new RebindPageViewModel { Title = "换绑后的页面" };
             var presenter = new RebindPagePresenter();
             var route = new Route<PageViewModel, PageArgs, int>("demo.rebind", resource,
-                () => original, _ => presenter, binding);
+                () => original, _ => presenter, binding, host.ResolvePolicy());
             var opened = await navigator.OpenAsync(route, new PageArgs("原页面", 10), cancellation.Token);
             if (!opened.IsSuccess)
             {
@@ -54,7 +54,7 @@ namespace MUI.Samples.Navigation
         {
             var original = new RebindPageViewModel();
             var route = new Route<PageViewModel, PageArgs, int>("demo.rebind-close", resource,
-                () => original, _ => new RebindPagePresenter(), binding);
+                () => original, _ => new RebindPagePresenter(), binding, host.ResolvePolicy());
             var opened = await navigator.OpenAsync(route, new PageArgs("延迟释放页面", 10), cancellation.Token);
             if (!opened.IsSuccess)
             {

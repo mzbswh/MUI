@@ -6,6 +6,7 @@
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
   <ItemGroup>
+    <ProjectReference Include="MUI.Editor.Localization.csproj" />
     <Compile Include="../../Samples~/Tabs/Editor/*.cs" />
     <ProjectReference Include="MUI.Samples.Tabs.csproj" />
     <Reference Include="UnityEngine.CoreModule"><HintPath>$(UnityManagedPath)/UnityEngine.CoreModule.dll</HintPath><Private>false</Private></Reference>

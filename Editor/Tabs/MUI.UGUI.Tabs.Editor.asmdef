@@ -6,7 +6,8 @@
     "MUI.UGUI",
     "MUI.Editor",
     "MUI.UGUI.Tabs",
-    "Unity.ugui"
+    "Unity.ugui",
+    "MUI.Editor.Localization"
   ],
   "includePlatforms": [
     "Editor"

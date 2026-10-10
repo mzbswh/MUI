@@ -6,6 +6,7 @@ namespace MUI.ChildViews
         where TViewModel : ViewModel
     {
         private float tickInterval;
+        private int maxTickCatchUp = 1;
         private double tickRemainder;
         private bool hasPresenterTick;
 
@@ -22,7 +23,7 @@ namespace MUI.ChildViews
 
             if (hasPresenterTick)
             {
-                var count = ViewTickTiming.Due(ref tickRemainder, delta, tickInterval, template.MaxTickCatchUp);
+                var count = ViewTickTiming.Due(ref tickRemainder, delta, tickInterval, maxTickCatchUp);
                 for (var i = 0; i < count && CanTick(); i++)
                 {
                     try

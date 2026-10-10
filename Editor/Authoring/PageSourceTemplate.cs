@@ -56,15 +56,7 @@ namespace MUI.Editor
 
         internal static string Policy(PagePreset preset)
         {
-            if (preset == PagePreset.Notice)
-            {
-                return "new global::MUI.Navigation.RoutePolicy(layer: 200, enterHistory: false, " +
-                    "coverage: global::MUI.Navigation.CoveragePolicy.None, takesFocus: false, " +
-                    "backBehavior: global::MUI.Navigation.BackBehavior.Ignore)";
-            }
-            return preset == PagePreset.Popup
-                ? "new global::MUI.Navigation.RoutePolicy(layer: 100, coverage: global::MUI.Navigation.CoveragePolicy.BlockInput, modal: true)"
-                : "new global::MUI.Navigation.RoutePolicy(coverage: global::MUI.Navigation.CoveragePolicy.Hide)";
+            return "global::MUI.UGUI.MUISettings.ResolveBuiltInPolicy(" + StringLiteral(preset.ToString()) + ")";
         }
 
         /// <summary>保留 Element 原名，转义为合法 C# 字符串，不将节点名称当作源码拼接。</summary>
@@ -223,7 +215,8 @@ namespace MUI.Editor
                 $"            {name}ViewModelRoute.Resource;",
                 "",
                 "        /// <summary>创建路由定义；每次打开的实例由导航器管理。</summary>",
-                $"        public static global::MUI.Navigation.Route<{name}ViewModel, {args}, {result}> CreateRoute()",
+                $"        public static global::MUI.Navigation.Route<{name}ViewModel, {args}, {result}> CreateRoute(",
+                "            global::MUI.UGUI.MUISettings settings = null, global::MUI.Navigation.RoutePolicyOverrides overrides = null)",
                 "        {",
                 $"            return {name}ViewModelRoute.Create(",
                 $"                () => new {name}ViewModel(),"
@@ -233,7 +226,9 @@ namespace MUI.Editor
                 pageLines.Add($"                presenterFactory: model => new {name}Presenter(),");
             }
 
-            pageLines.Add("                policy: " + Policy(preset) + ");");
+            pageLines.Add("                policy: settings == null");
+            pageLines.Add("                    ? global::MUI.UGUI.MUISettings.ResolveBuiltInPolicy(" + StringLiteral(preset.ToString()) + ", overrides: overrides)");
+            pageLines.Add("                    : settings.ResolvePolicy(" + StringLiteral(preset.ToString()) + ", overrides: overrides));");
             pageLines.Add("        }");
             pageLines.Add("    }");
             if (!string.IsNullOrEmpty(prefabAssetGuid))

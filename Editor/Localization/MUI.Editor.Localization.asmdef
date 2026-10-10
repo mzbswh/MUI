@@ -1,0 +1,6 @@
+{
+  "name": "MUI.Editor.Localization",
+  "rootNamespace": "MUI.Editor.Localization",
+  "includePlatforms": ["Editor"],
+  "autoReferenced": true
+}

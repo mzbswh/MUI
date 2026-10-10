@@ -7,6 +7,14 @@ namespace MUI.Navigation
     {
         private const int SnapshotOwnerLimit = 128;
 
+        /// <summary>只读取得当前原生视图关联；不保存引用或触发渲染器、业务回调。</summary>
+        public bool TryGetView(ViewHandle handle, out IView view)
+        {
+            AssertThread();
+            view = entries.TryGetValue(handle, out var instance) ? instance.View : null;
+            return view != null;
+        }
+
         /// <summary>
         /// 直接捕获导航账本；不创建任务，不读取渲染器或业务属性。
         /// 实例截断时可用 TryGetInstanceSnapshot 定位指定句柄；不从诊断入口强制重算表现。
@@ -53,12 +61,24 @@ namespace MUI.Navigation
                     indices[history[i]] = (index.presentation, i);
                 }
             }
+            var routeCounts = new Dictionary<Route, int>();
+            foreach (var instance in selected)
+            {
+                routeCounts[instance.Route] = 0;
+            }
+            foreach (var instance in entries.Values)
+            {
+                if (routeCounts.TryGetValue(instance.Route, out var count) && OccupiesInstanceSlot(instance))
+                {
+                    routeCounts[instance.Route] = count + 1;
+                }
+            }
             var snapshots = new ViewInstanceSnapshot[selected.Count];
             for (var i = 0; i < selected.Count; ++i)
             {
                 var instance = selected[i];
                 var index = indices[instance.Handle];
-                snapshots[i] = CaptureInstanceSnapshot(instance, index.presentation, index.history);
+                snapshots[i] = CaptureInstanceSnapshot(instance, index.presentation, index.history, routeCounts[instance.Route]);
             }
             var historyLength = Math.Min(history.Count, maxInstances);
             var recentHistory = new ViewHandle[historyLength];
@@ -67,7 +87,7 @@ namespace MUI.Navigation
                 !recomputingPresentation && !presentationDirty && presentationDeferrals == 0 && !IsReentrant,
                 focused, entries.Count, snapshots, history.Count, recentHistory, pending, posted.Count,
                 cachedContents.Count, retiringCachedViews, PreloadReservationCount, PendingCleanupCount,
-                hasCleanupFailure, DroppedLifecycleEventCount, host, cleanupCount, cleanup);
+                hasCleanupFailure, DroppedLifecycleEventCount, host, cleanupCount, cleanup, cacheDiagnostics.ToArray(), renderOrder, reservedRenderOrders);
         }
 
         /// <summary>取得仍在账本中的实例，包括准备中和等待清理的实例；终态历史不伪造活动快照。</summary>
@@ -79,11 +99,24 @@ namespace MUI.Navigation
                 snapshot = null;
                 return false;
             }
-            snapshot = CaptureInstanceSnapshot(instance, activeOrder.IndexOf(instance), history.IndexOf(handle));
+            snapshot = CaptureInstanceSnapshot(instance, activeOrder.IndexOf(instance), history.IndexOf(handle), CountRouteInstances(instance.Route));
             return true;
         }
 
-        private ViewInstanceSnapshot CaptureInstanceSnapshot(ViewInstance instance, int presentationIndex, int historyIndex)
+        private int CountRouteInstances(Route route)
+        {
+            var count = 0;
+            foreach (var candidate in entries.Values)
+            {
+                if (ReferenceEquals(candidate.Route, route) && OccupiesInstanceSlot(candidate))
+                {
+                    count++;
+                }
+            }
+            return count;
+        }
+
+        private ViewInstanceSnapshot CaptureInstanceSnapshot(ViewInstance instance, int presentationIndex, int historyIndex, int routeInstanceCount)
         {
             var operations = ViewOperationFlags.None;
             var executingCommands = instance.ExecutingBindingCommandCount;
@@ -127,9 +160,10 @@ namespace MUI.Navigation
             {
                 operations |= ViewOperationFlags.DependencyExit;
             }
+            renderSlots.TryGetValue(instance.Handle, out var renderSlot);
             return new ViewInstanceSnapshot(instance, presentationIndex, historyIndex,
                 ownership.HasExplicitOwner(instance.Handle), ownership.OwnerCount(instance.Handle),
-                ownership.CaptureOwners(instance.Handle, SnapshotOwnerLimit), ownership.CaptureDependencies(instance.Handle), operations, executingCommands);
+                ownership.CaptureOwners(instance.Handle, SnapshotOwnerLimit), ownership.CaptureDependencies(instance.Handle), operations, executingCommands, routeInstanceCount, renderSlot == null ? null : renderSlot.Start, renderSlot == null ? 0 : renderSlot.Span);
         }
     }
 }

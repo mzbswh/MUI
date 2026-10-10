@@ -39,7 +39,7 @@ namespace MUI.Navigation
         Block
     }
 
-    /// <summary>关闭后不保留、受容量限制保留，或在指定停用时长内保留。</summary>
+    /// <summary>仅缓存关闭并重置后的 View：不保留、无时间过期但受容量淘汰，或在指定停用时长内保留。</summary>
     public enum ViewCacheMode
     {
         None,
@@ -50,7 +50,6 @@ namespace MUI.Navigation
     public sealed class RoutePolicy
     {
         public RoutePolicy(int layer = 0,
-                    bool enterHistory = true,
                     bool allowMultiple = false,
                     int maxInstances = 1,
                     CoveragePolicy coverage = CoveragePolicy.None,
@@ -58,7 +57,6 @@ namespace MUI.Navigation
                     bool modal = false,
                     BackBehavior backBehavior = BackBehavior.Close,
                     TickPausePolicy tickPause = TickPausePolicy.Hidden,
-                    int maxTickCatchUp = 4,
                     OverflowPolicy overflow = OverflowPolicy.Reject,
                     float enterTimeout = 5f,
                     float exitTimeout = 5f,
@@ -67,7 +65,11 @@ namespace MUI.Navigation
                     TimeSpan? closeTimeout = null,
                     TimeSpan? prepareTimeout = null,
                     TimeSpan? closeDecisionTimeout = null,
-                    ExistingInstancePolicy existingInstance = ExistingInstancePolicy.Reject)
+                    ExistingInstancePolicy existingInstance = ExistingInstancePolicy.Reject,
+                    string layerName = null,
+                    string presetName = null,
+                    string configurationName = null,
+                    int renderOrderSpan = 0, PageRole pageRole = PageRole.Main, OwnerDeparture ownerDeparture = OwnerDeparture.Close, bool receivesInput = true)
         {
             if (!Enum.IsDefined(typeof(ExistingInstancePolicy), existingInstance) ||
                 (allowMultiple && existingInstance != ExistingInstancePolicy.Reject))
@@ -75,6 +77,17 @@ namespace MUI.Navigation
                 throw new ArgumentOutOfRangeException(nameof(existingInstance));
             }
 
+            if (renderOrderSpan != 0 && renderOrderSpan < 2)
+            {
+                throw new ArgumentOutOfRangeException(nameof(renderOrderSpan));
+            }
+            if (!Enum.IsDefined(typeof(PageRole), pageRole) || !Enum.IsDefined(typeof(OwnerDeparture), ownerDeparture))
+            {
+                throw new ArgumentOutOfRangeException(nameof(pageRole));
+            }
+            PageRole = pageRole;
+            OwnerDeparture = ownerDeparture;
+            RenderOrderSpan = renderOrderSpan;
             ExistingInstance = existingInstance;
             CloseDecisionTimeout = closeDecisionTimeout ?? TimeSpan.FromMinutes(2);
             if (CloseDecisionTimeout <= TimeSpan.Zero || CloseDecisionTimeout.TotalMilliseconds > int.MaxValue)
@@ -151,24 +164,43 @@ namespace MUI.Navigation
                 throw new ArgumentOutOfRangeException(nameof(tickPause));
             }
 
-            if (maxTickCatchUp < 1 || maxTickCatchUp > 32)
-            {
-                throw new ArgumentOutOfRangeException(nameof(maxTickCatchUp));
-            }
-
             TickPause = tickPause;
-            MaxTickCatchUp = maxTickCatchUp;
             BackBehavior = backBehavior;
             Layer = layer;
-            EnterHistory = enterHistory;
             AllowMultiple = allowMultiple;
             MaxInstances = allowMultiple ? maxInstances : 1;
+            ReceivesInput = receivesInput;
+            RequestedCoverage = coverage;
             Coverage = modal && coverage == CoveragePolicy.None ? CoveragePolicy.BlockInput : coverage;
             TakesFocus = takesFocus;
             Modal = modal;
+            LayerName = layerName;
+            PresetName = presetName;
+            ConfigurationName = configurationName;
+        }
+
+        /// <summary>零继承宿主默认跨度；非零至少为 2，包含遮罩和根 Canvas。</summary>
+        public int RenderOrderSpan
+        {
+            get;
         }
 
         public static RoutePolicy Default { get; } = new RoutePolicy();
+
+        public string LayerName
+        {
+            get;
+        }
+
+        public string PresetName
+        {
+            get;
+        }
+
+        public string ConfigurationName
+        {
+            get;
+        }
 
         /// <summary>默认拒绝重复打开；ReturnReady 仅返回参数和指定模型兼容的就绪实例。</summary>
         public ExistingInstancePolicy ExistingInstance
@@ -222,23 +254,23 @@ namespace MUI.Navigation
             get;
         }
 
-        /// <summary>默认仅在完全隐藏时暂停业务 Tick；输入门控和焦点不影响此策略。</summary>
+        /// <summary>自身业务 Tick 的暂停条件，默认仅隐藏时暂停；不暂停 Unity Update、协程或动画。</summary>
         public TickPausePolicy TickPause
         {
             get;
         }
 
-        public int MaxTickCatchUp
+        public PageRole PageRole
+        {
+            get;
+        }
+
+        public OwnerDeparture OwnerDeparture
         {
             get;
         }
 
         public int Layer
-        {
-            get;
-        }
-
-        public bool EnterHistory
         {
             get;
         }
@@ -253,6 +285,12 @@ namespace MUI.Navigation
             get;
         }
 
+        internal CoveragePolicy RequestedCoverage { get; }
+
+        /// <summary>是否接收页面输入；关闭时自身 UI 不阻挡射线，也不获取焦点。</summary>
+        public bool ReceivesInput { get; }
+
+        /// <summary>本页面对下层页面的显示和输入影响；下层业务 Tick 由下层自己的 TickPause 决定。</summary>
         public CoveragePolicy Coverage
         {
             get;

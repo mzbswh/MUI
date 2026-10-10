@@ -25,7 +25,9 @@ namespace MUI.Navigation
         DependencyCycle,
         DependencyLimit,
         DependencyOrderConflict,
-        CloseDecisionTimedOut
+        CloseDecisionTimedOut,
+        DependencyMissing,
+        RenderOrderCapacity
     }
 
     /// <summary>Committed 不可逆，即使目标激活或源清理失败也不会回滚提交。</summary>

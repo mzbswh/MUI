@@ -3,6 +3,7 @@ using MUI.UGUI;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using L = MUI.Editor.Localization.MUIEditorLocalization;
 
 namespace MUI.Editor
 {
@@ -17,25 +18,25 @@ namespace MUI.Editor
 
         private void DrawRaycastDiagnostics()
         {
-            showRaycastDiagnostics = EditorGUILayout.Foldout(showRaycastDiagnostics, "实际射线查询（显式执行）", true);
+            showRaycastDiagnostics = EditorGUILayout.Foldout(showRaycastDiagnostics, L.Get("editor.ViewInspector.Raycast.43ee9bc0cf"), true);
             if (!showRaycastDiagnostics)
             {
                 return;
             }
-            EditorGUILayout.HelpBox("输入 Game 画面的屏幕像素坐标，左下角为原点。查询会执行 Raycaster 和项目过滤回调，不派发点击或改变焦点；不会自动刷新。", MessageType.Info);
-            raycastEventSystem = (EventSystem)EditorGUILayout.ObjectField("事件系统（空为当前）",
+            EditorGUILayout.HelpBox(L.Get("editor.ViewInspector.Raycast.189804d838"), MessageType.Info);
+            raycastEventSystem = (EventSystem)EditorGUILayout.ObjectField(L.Get("editor.ViewInspector.Raycast.1fc3b8b8cd"),
                 raycastEventSystem, typeof(EventSystem), true);
-            raycastPosition = EditorGUILayout.Vector2Field("屏幕坐标", raycastPosition);
+            raycastPosition = EditorGUILayout.Vector2Field(L.Get("editor.ViewInspector.Raycast.5a9535753a"), raycastPosition);
             using (new EditorGUI.DisabledScope(!Application.isPlaying))
             {
-                if (GUILayout.Button("查询当前位置的命中对象"))
+                if (GUILayout.Button(L.Get("editor.ViewInspector.Raycast.0bf5670e7f")))
                 {
                     try
                     {
                         var view = target as View;
                         if (view == null)
                         {
-                            throw new InvalidOperationException("目标 View 已不存在。");
+                            throw new InvalidOperationException(L.Get("editor.ViewInspector.Raycast.7728ec29ef"));
                         }
                         var system = raycastEventSystem == null ? EventSystem.current : raycastEventSystem;
                         raycastSnapshot = UIRaycastDiagnostics.Capture(system, raycastPosition, view.gameObject, maxHits: 64);
@@ -51,29 +52,29 @@ namespace MUI.Editor
             }
             if (!string.IsNullOrEmpty(raycastError))
             {
-                EditorGUILayout.HelpBox(raycastError, MessageType.Error);
+                EditorGUILayout.HelpBox(L.Diagnostic(raycastError), MessageType.Error);
             }
             if (raycastSnapshot == null)
             {
                 return;
             }
-            EditorGUILayout.LabelField("采集时间 / 坐标", $"{raycastTime} / {raycastSnapshot.Position}");
-            EditorGUILayout.LabelField("有效命中 / 失效结果", $"{raycastSnapshot.TotalHits} / {raycastSnapshot.SkippedHits}");
-            EditorGUILayout.LabelField("当前 View 首次命中序号", raycastSnapshot.FirstTargetIndex.ToString());
-            EditorGUILayout.LabelField("最前命中属于当前 View", raycastSnapshot.TopHitBelongsToTarget.ToString());
+            EditorGUILayout.LabelField(L.Get("editor.ViewInspector.Raycast.06404dfdd1"), $"{raycastTime} / {raycastSnapshot.Position}");
+            EditorGUILayout.LabelField(L.Get("editor.ViewInspector.Raycast.dc319e6c35"), $"{raycastSnapshot.TotalHits} / {raycastSnapshot.SkippedHits}");
+            EditorGUILayout.LabelField(L.Get("editor.ViewInspector.Raycast.69f0f73432"), L.Value(raycastSnapshot.FirstTargetIndex));
+            EditorGUILayout.LabelField(L.Get("editor.ViewInspector.Raycast.6db8767712"), L.Value(raycastSnapshot.TopHitBelongsToTarget));
             if (raycastSnapshot.IsTruncated)
             {
-                EditorGUILayout.HelpBox("仅保留前 64 个有效命中；当前 View 首次命中序号仍按全部结果计算。", MessageType.Warning);
+                EditorGUILayout.HelpBox(L.Get("editor.ViewInspector.Raycast.c2793a1eb9"), MessageType.Warning);
             }
             for (var i = 0; i < raycastSnapshot.Hits.Count; ++i)
             {
                 var hit = raycastSnapshot.Hits[i];
                 EditorGUILayout.LabelField($"[{i}] {hit.Path}（{hit.ObjectId}）", EditorStyles.wordWrappedLabel);
-                EditorGUILayout.LabelField("点击处理对象", hit.ClickHandlerId == 0 ? "无" : $"{hit.ClickHandlerPath}（{hit.ClickHandlerId}）", EditorStyles.wordWrappedLabel);
-                EditorGUILayout.LabelField("射线器", hit.RaycasterType, EditorStyles.wordWrappedLabel);
-                EditorGUILayout.LabelField("排序层 / 顺序 / 深度 / 距离", $"{hit.SortingLayer} / {hit.SortingOrder} / {hit.Depth} / {hit.Distance:0.###}");
+                EditorGUILayout.LabelField(L.Get("editor.ViewInspector.Raycast.8e0ad2ae93"), hit.ClickHandlerId == 0 ? L.Get("editor.ViewInspector.Raycast.484d556139") : $"{hit.ClickHandlerPath}（{hit.ClickHandlerId}）", EditorStyles.wordWrappedLabel);
+                EditorGUILayout.LabelField(L.Get("editor.ViewInspector.Raycast.ce0cb78f83"), hit.RaycasterType, EditorStyles.wordWrappedLabel);
+                EditorGUILayout.LabelField(L.Get("editor.ViewInspector.Raycast.b6de5f51cf"), $"{hit.SortingLayer} / {hit.SortingOrder} / {hit.Depth} / {hit.Distance:0.###}");
             }
-            EditorGUILayout.HelpBox("结果反映采集时的射线排序。处理目标存在不保证点击执行；按下/拖动状态、Selectable 交互资格、命令门控与自定义输入模块需另行检查。路径最多 64 层、每层名称最多 128 字符，省略号表示截断。", MessageType.Info);
+            EditorGUILayout.HelpBox(L.Get("editor.ViewInspector.Raycast.8d553514be"), MessageType.Info);
         }
     }
 }

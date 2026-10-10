@@ -1,7 +1,12 @@
 {
   "name": "MUI.Samples.Settings.Editor",
   "rootNamespace": "MUI.Samples.Settings.Editor",
-  "references": ["MUI.Samples.Settings"],
-  "includePlatforms": ["Editor"],
+  "references": [
+    "MUI.Samples.Settings",
+    "MUI.Editor.Localization"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
   "autoReferenced": true
 }

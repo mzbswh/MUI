@@ -7,6 +7,7 @@ namespace MUI.Navigation
 {
     public sealed partial class Navigator
     {
+        private readonly Queue<ViewCacheDiagnostic> cacheDiagnostics = new Queue<ViewCacheDiagnostic>();
         private readonly int cacheCapacity;
         // 按最近归还顺序排列；命中移出，下一次关闭重新放到末尾。
         private readonly List<CachedContent> cachedContents = new List<CachedContent>();
@@ -41,6 +42,21 @@ namespace MUI.Navigation
             }
         }
 
+        internal void RecordCacheDecision(Route route, ViewCacheDecision decision)
+        {
+            if (cacheDiagnostics.Count == 128)
+            {
+                cacheDiagnostics.Dequeue();
+            }
+            cacheDiagnostics.Enqueue(new ViewCacheDiagnostic(route.Key, decision));
+        }
+
+        private bool RejectCache(Route route, ViewCacheDecision decision)
+        {
+            RecordCacheDecision(route, decision);
+            return false;
+        }
+
         private static bool CacheExpired(CachedContent entry, long now) =>
                     entry.Route.Policy.CacheMode == ViewCacheMode.Timed &&
                     (now - entry.CachedAt) / (double)Stopwatch.Frequency >= entry.Route.Policy.CacheDuration.Value.TotalSeconds;
@@ -57,12 +73,14 @@ namespace MUI.Navigation
                 if (ReferenceEquals(entry.Route, route) && IsCacheCompatible(entry.Content, providerVersion) && !CacheExpired(entry, now))
                 {
                     cachedContents.RemoveAt(index);
+                    var retirementReason = ViewCacheDecision.Incompatible;
                     try
                     {
                         using (EnterCallback(null))
                         {
                             if (!entry.Content.IsAlive)
                             {
+                                RecordCacheDecision(route, ViewCacheDecision.Destroyed);
                                 BeginCacheRetirement(new[] { entry });
                                 continue;
                             }
@@ -83,13 +101,16 @@ namespace MUI.Navigation
                         if (!IsShutdown && entry.Content.IsAlive && IsCacheCompatible(entry.Content, providerVersion))
                         {
                             reservedCacheEstimatedBytes -= entry.Route.EstimatedRetainedBytes ?? 0;
+                            RecordCacheDecision(route, ViewCacheDecision.Reused);
                             return entry.Content;
                         }
                     }
                     catch (Exception error)
                     {
+                        retirementReason = ViewCacheDecision.ReuseFailed;
                         UIErrors.Report(error);
                     }
+                    RecordCacheDecision(route, retirementReason);
                     BeginCacheRetirement(new[] { entry });
                 }
             }
@@ -101,10 +122,17 @@ namespace MUI.Navigation
         {
             AssertThread();
             var providerVersion = CaptureProviderVersion();
-            if (IsShutdown || IsClearingInactiveContent || IsCacheClearing || cacheCapacity == 0 ||
-                !content.IsAlive || !IsCacheCompatible(content, providerVersion))
+            if (IsShutdown || IsClearingInactiveContent || IsCacheClearing)
             {
-                return false;
+                return RejectCache(route, ViewCacheDecision.HostUnavailable);
+            }
+            if (cacheCapacity == 0)
+            {
+                return RejectCache(route, ViewCacheDecision.CapacityDisabled);
+            }
+            if (!content.IsAlive || !IsCacheCompatible(content, providerVersion))
+            {
+                return RejectCache(route, ViewCacheDecision.Incompatible);
             }
 
             if (!TryMakeCacheRoom(route))
@@ -116,11 +144,13 @@ namespace MUI.Navigation
             providerVersion = CaptureProviderVersion();
             if (IsShutdown || IsClearingInactiveContent || IsCacheClearing || !content.IsAlive || !IsCacheCompatible(content, providerVersion))
             {
-                return false;
+                return RejectCache(route, IsShutdown || IsClearingInactiveContent || IsCacheClearing
+                    ? ViewCacheDecision.HostUnavailable : ViewCacheDecision.Incompatible);
             }
 
             cachedContents.Add(new CachedContent { Route = route, Content = content, CachedAt = Stopwatch.GetTimestamp() });
             reservedCacheEstimatedBytes += route.EstimatedRetainedBytes ?? 0;
+            RecordCacheDecision(route, ViewCacheDecision.Retained);
             return true;
         }
 
@@ -151,7 +181,10 @@ namespace MUI.Navigation
             {
                 if (!cachedContents[index].Content.IsAlive || !IsCacheCompatible(cachedContents[index].Content, providerVersion) || CacheExpired(cachedContents[index], now))
                 {
-                    expired.Add(cachedContents[index]);
+                    var entry = cachedContents[index];
+                    RecordCacheDecision(entry.Route, !entry.Content.IsAlive ? ViewCacheDecision.Destroyed :
+                        CacheExpired(entry, now) ? ViewCacheDecision.Expired : ViewCacheDecision.Incompatible);
+                    expired.Add(entry);
                     cachedContents.RemoveAt(index);
                 }
             }
@@ -229,6 +262,10 @@ namespace MUI.Navigation
             }
 
             var saved = cachedContents.ToArray();
+            foreach (var entry in saved)
+            {
+                RecordCacheDecision(entry.Route, ViewCacheDecision.Cleared);
+            }
             cachedContents.Clear();
             var completion = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
             cacheClearing = completion.Task;

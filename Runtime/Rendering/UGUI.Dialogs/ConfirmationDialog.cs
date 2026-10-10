@@ -24,17 +24,17 @@ namespace MUI.UGUI
             new BindingEntry(nameof(ConfirmationViewModel.Cancel), "Cancel", typeof(ButtonElement), nameof(ButtonElement.Clicked), BindingMode.OneWay, BindingEntryKind.Command)
         });
 
-        /// <summary>创建单实例模态路由，使用统一导航及命令生命周期。</summary>
+        /// <summary>默认创建单实例模态路由；可显式传入已解析的项目策略。</summary>
         public static Route<ConfirmationViewModel, CloseConfirmation, bool> CreateRoute(
-            ViewResource resource, string key = "mui.confirmation", int layer = 1000)
+            ViewResource resource, string key = "mui.confirmation", int layer = 1000, RoutePolicy policy = null)
         {
             return new Route<ConfirmationViewModel, CloseConfirmation, bool>(
                 key, resource,
                 () => new ConfirmationViewModel(),
                 model => new ConfirmationPresenter(),
                 Create,
-                new RoutePolicy(layer: layer, enterHistory: false, allowMultiple: true, maxInstances: 1,
-                    coverage: CoveragePolicy.BlockInput, modal: true));
+                policy ?? new RoutePolicy(layer: layer, allowMultiple: true, maxInstances: 1,
+                    coverage: CoveragePolicy.BlockInput, modal: true, pageRole: PageRole.Independent));
         }
 
         /// <summary>创建本次界面的绑定上下文；生命周期由界面实例管理。</summary>

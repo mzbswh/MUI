@@ -41,6 +41,12 @@ namespace MUI.Navigation
                     {
                         continue;
                     }
+                    // 跳过是本次激活的明确决定；更新参数不偷偷获取后来打开的页面。
+                    if (parent.DependencyResolutions.TryGetValue(declaration.Target, out var resolution) &&
+                        resolution == DependencyResolutionKind.Skipped)
+                    {
+                        continue;
+                    }
                     var request = declaration.Resolve(args);
                     if (!dependencies.TryGetValue(request.Route, out var dependency))
                     {

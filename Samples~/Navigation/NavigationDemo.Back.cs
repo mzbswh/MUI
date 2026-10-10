@@ -33,7 +33,7 @@ namespace MUI.Samples.Navigation
                 Func<PageViewModel, Presenter<PageViewModel, PageArgs, int>> presenter = null)
                 => new Route<PageViewModel, PageArgs, int>(key, resource, () => new PageViewModel(),
                     presenter ?? (_ => new PagePresenter()), binding, policy);
-            var modal = await navigator.OpenAsync(Route("back.modal", new RoutePolicy(enterHistory: false, modal: true)), new PageArgs("Modal without history", 0));
+            var modal = await navigator.OpenAsync(Route("back.modal", host.ResolvePolicy("Popup")), new PageArgs("Modal back handling", 0));
             if (!modal.IsSuccess)
             {
                 throw new InvalidOperationException("Back modal failed.", modal.Error);
@@ -42,7 +42,7 @@ namespace MUI.Samples.Navigation
             var closedModal = await navigator.BackAsync();
             Debug.Log($"MUI Back modal: {closedModal.Status}; modal={navigator.GetState(modal.Handle.Identity)}; lower={navigator.GetState(lower)}");
 
-            var blocker = await navigator.OpenAsync(Route("back.block", new RoutePolicy(enterHistory: false, backBehavior: BackBehavior.Block)), new PageArgs("Blocks back", 0));
+            var blocker = await navigator.OpenAsync(Route("back.block", host.ResolvePolicy(overrides: new RoutePolicyOverrides { BackBehavior = BackBehavior.Block })), new PageArgs("Blocks back", 0));
             if (!blocker.IsSuccess)
             {
                 throw new InvalidOperationException("Back blocker failed.", blocker.Error);
@@ -51,9 +51,10 @@ namespace MUI.Samples.Navigation
             Debug.Log($"MUI Back blocked: {(await navigator.BackAsync()).Status}; lower={navigator.GetState(lower)}");
             await navigator.CloseAsync(blocker.Handle);
 
-            var target = await navigator.OpenAsync(Route("back.target", new RoutePolicy(layer: 2)), new PageArgs("Visually higher target", 0));
-            var ignored = await navigator.OpenAsync(Route("back.ignore", new RoutePolicy(layer: 3, backBehavior: BackBehavior.Ignore)), new PageArgs("Ignore back", 0));
-            var recent = await navigator.OpenAsync(Route("back.recent", new RoutePolicy()), new PageArgs("Newer but visually lower", 0));
+            var baseLayer = host.ResolvePolicy().Layer;
+            var target = await navigator.OpenAsync(Route("back.target", host.ResolvePolicy(overrides: new RoutePolicyOverrides { Layer = checked(baseLayer + 2) })), new PageArgs("Visually higher target", 0));
+            var ignored = await navigator.OpenAsync(Route("back.ignore", host.ResolvePolicy(overrides: new RoutePolicyOverrides { Layer = checked(baseLayer + 3), BackBehavior = BackBehavior.Ignore })), new PageArgs("Ignore back", 0));
+            var recent = await navigator.OpenAsync(Route("back.recent", host.ResolvePolicy()), new PageArgs("Newer but visually lower", 0));
             if (!target.IsSuccess || !ignored.IsSuccess || !recent.IsSuccess)
             {
                 throw new InvalidOperationException("Back order demo failed.");
@@ -65,7 +66,7 @@ namespace MUI.Samples.Navigation
             await navigator.CloseAsync(recent.Handle);
 
             var handler = new BackDemoPresenter(navigator);
-            var handled = await navigator.OpenAsync(Route("back.handler", new RoutePolicy(backBehavior: BackBehavior.HandleByPresenter), _ => handler), new PageArgs("Local editing", 0));
+            var handled = await navigator.OpenAsync(Route("back.handler", host.ResolvePolicy(overrides: new RoutePolicyOverrides { BackBehavior = BackBehavior.HandleByPresenter }), _ => handler), new PageArgs("Local editing", 0));
             if (!handled.IsSuccess)
             {
                 throw new InvalidOperationException("Back handler failed.", handled.Error);

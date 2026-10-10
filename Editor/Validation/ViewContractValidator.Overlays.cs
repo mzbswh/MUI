@@ -4,6 +4,7 @@ using MUI.UGUI;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
+using L = MUI.Editor.Localization.MUIEditorLocalization;
 
 namespace MUI.Editor
 {
@@ -23,28 +24,28 @@ namespace MUI.Editor
                 var content = OverlayReference<RectTransform>(data, "content");
                 if (content == null || content.parent != element.transform)
                 {
-                    errors.Add($"Overlay content must be a direct RectTransform child: {path}.");
+                    errors.Add(L.Format("editor.ViewContractValidator.Overlays.955db50acf", path));
                 }
 
                 if (content != null)
                 {
                     if (content.localScale != Vector3.one || Quaternion.Angle(content.localRotation, Quaternion.identity) > 0.01f)
                     {
-                        errors.Add($"Overlay content requires unit scale and identity rotation: {path}.");
+                        errors.Add(L.Format("editor.ViewContractValidator.Overlays.fedcdac7d9", path));
                     }
 
                     var layout = element.GetComponent<LayoutGroup>();
                     var layoutElement = content.GetComponent<LayoutElement>();
                     if (layout != null && layout.enabled && (layoutElement == null || !layoutElement.ignoreLayout))
                     {
-                        errors.Add($"Parent LayoutGroup competes with overlay placement; exclude content from layout: {path}.");
+                        errors.Add(L.Format("editor.ViewContractValidator.Overlays.62f7957076", path));
                     }
                 }
 
                 var side = data.FindProperty("placement").intValue;
                 if (!Enum.IsDefined(typeof(OverlayPlacement), side))
                 {
-                    errors.Add($"Unknown overlay placement: {path}.");
+                    errors.Add(L.Format("editor.ViewContractValidator.Overlays.4e3c940dd7", path));
                 }
 
                 ValidateOverlayNumber(data, "gap", path, errors);
@@ -61,7 +62,7 @@ namespace MUI.Editor
             var overlay = OverlayReference<AnchoredOverlayElement>(data, "overlay");
             if (overlay == null)
             {
-                errors.Add($"Tooltip overlay reference is missing: {path}.");
+                errors.Add(L.Format("editor.ViewContractValidator.Overlays.c1585ec208", path));
                 return;
             }
 
@@ -69,13 +70,13 @@ namespace MUI.Editor
             var content = OverlayReference<RectTransform>(overlayData, "content");
             if (content == null)
             {
-                errors.Add($"Tooltip overlay content is missing: {path}.");
+                errors.Add(L.Format("editor.ViewContractValidator.Overlays.7000c2e0e2", path));
                 return;
             }
 
             if (trigger.transform.IsChildOf(content))
             {
-                errors.Add($"Tooltip target cannot belong to its overlay content: {path}.");
+                errors.Add(L.Format("editor.ViewContractValidator.Overlays.e5c8bbe300", path));
             }
 
             // Prefab 资源可能尚未位于宿主 Canvas 下，仅拒绝可证实的不匹配。
@@ -83,7 +84,7 @@ namespace MUI.Editor
             var overlayCanvas = overlay.GetComponentInParent<Canvas>(true);
             if (targetCanvas != null && overlayCanvas != null && targetCanvas.rootCanvas != overlayCanvas.rootCanvas)
             {
-                errors.Add($"Tooltip target and overlay belong to different root Canvases: {path}.");
+                errors.Add(L.Format("editor.ViewContractValidator.Overlays.1df5f4ddfd", path));
             }
 
             foreach (var graphic in content.GetComponentsInChildren<Graphic>(true))
@@ -98,7 +99,7 @@ namespace MUI.Editor
                     continue;
                 }
 
-                errors.Add($"Tooltip Graphic can intercept hover; disable Raycast Target or use a blocking-disabled CanvasGroup: {Path(graphic.transform, root)}.");
+                errors.Add(L.Format("editor.ViewContractValidator.Overlays.b7251ed46c", Path(graphic.transform, root)));
             }
         }
 
@@ -138,19 +139,19 @@ namespace MUI.Editor
             var capacity = data.FindProperty("maxItems").intValue;
             if (capacity < 1)
             {
-                errors.Add($"Context menu item capacity must be positive: {path}.");
+                errors.Add(L.Format("editor.ViewContractValidator.Overlays.d8ce0ad48e", path));
             }
 
             var backView = OverlayReference<View>(data, "backNavigationView");
             if (backView != null && !menu.transform.IsChildOf(backView.transform))
             {
-                errors.Add($"菜单的返回目标必须是所属层级中的 View：{path}。");
+                errors.Add(L.Format("editor.ViewContractValidator.Overlays.5d06e12504", path));
             }
 
             var overlay = menu.GetComponent<AnchoredOverlayElement>();
             if (overlay == null)
             {
-                errors.Add($"Context menu requires AnchoredOverlayElement: {path}.");
+                errors.Add(L.Format("editor.ViewContractValidator.Overlays.e67dc06d2e", path));
                 return;
             }
 
@@ -163,7 +164,7 @@ namespace MUI.Editor
             var buttons = content.GetComponentsInChildren<Button>(true);
             if (buttons.Length > capacity)
             {
-                errors.Add($"Context menu exceeds its item capacity: {path}.");
+                errors.Add(L.Format("editor.ViewContractValidator.Overlays.6e7b5fd142", path));
             }
 
             foreach (var button in buttons)
@@ -171,7 +172,7 @@ namespace MUI.Editor
                 var relay = button.GetComponent<ContextMenuItemInput>();
                 if (relay == null || !relay.enabled)
                 {
-                    errors.Add($"Menu Button needs enabled ContextMenuItemInput for native Cancel: {Path(button.transform, root)}.");
+                    errors.Add(L.Format("editor.ViewContractValidator.Overlays.5698adc887", Path(button.transform, root)));
                 }
             }
 
@@ -179,7 +180,7 @@ namespace MUI.Editor
             {
                 if (child != menu)
                 {
-                    errors.Add($"Nested context menus are not supported by this controller: {Path(child.transform, root)}.");
+                    errors.Add(L.Format("editor.ViewContractValidator.Overlays.f1f55a0471", Path(child.transform, root)));
                 }
             }
         }
@@ -190,22 +191,22 @@ namespace MUI.Editor
             var image = area.GetComponent<Image>();
             if (image == null)
             {
-                errors.Add($"Overlay dismiss area needs an Image on the same object: {path}.");
+                errors.Add(L.Format("editor.ViewContractValidator.Overlays.b7542db637", path));
             }
 
             if (area.GetComponent<AnchoredOverlayElement>() == null)
             {
-                errors.Add($"Overlay dismiss area needs AnchoredOverlayElement on the same object: {path}.");
+                errors.Add(L.Format("editor.ViewContractValidator.Overlays.1cc729e41f", path));
             }
 
             if (area.GetComponent<Selectable>() != null)
             {
-                errors.Add($"Overlay background must not also be a Selectable: {path}.");
+                errors.Add(L.Format("editor.ViewContractValidator.Overlays.6969df3471", path));
             }
 
             if (image != null && image.alphaHitTestMinimumThreshold > 0)
             {
-                errors.Add($"Overlay background alpha hit testing can create holes in its input barrier: {path}.");
+                errors.Add(L.Format("editor.ViewContractValidator.Overlays.b49956a282", path));
             }
         }
 
@@ -217,7 +218,7 @@ namespace MUI.Editor
             var value = data.FindProperty(property).doubleValue;
             if (double.IsNaN(value) || double.IsInfinity(value) || value < 0)
             {
-                errors.Add($"{property} must be finite and nonnegative: {path}.");
+                errors.Add(L.Format("editor.ViewContractValidator.Overlays.7b287a6832", property, path));
             }
         }
     }

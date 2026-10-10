@@ -71,12 +71,17 @@ namespace MUI.Samples.Navigation
                 route = new Route<NavigationPageViewModel, string, int>("demo.local", resource,
                     () => new NavigationPageViewModel(), _ => new PagePresenter(this),
                     NavigationPageViewModelBindingFactory.Create,
-                    policy: new RoutePolicy(cacheMode: ViewCacheMode.KeepAlive));
+                    policy: host.ResolvePolicy(overrides: new RoutePolicyOverrides { CacheMode = ViewCacheMode.KeepAlive }));
                 batchRoute = new Route<NavigationPageViewModel, string, int>("demo.local.batch", resource,
                     () => new NavigationPageViewModel(), _ => new PagePresenter(this),
                     NavigationPageViewModelBindingFactory.Create,
-                    policy: new RoutePolicy(layer: 1, allowMultiple: true, maxInstances: 3,
-                        overflow: OverflowPolicy.CloseOldest));
+                    policy: host.ResolvePolicy(layer: "Popup", overrides: new RoutePolicyOverrides
+                    {
+                        AllowMultiple = true,
+                        MaxInstances = 3,
+                        Overflow = OverflowPolicy.CloseOldest,
+                        ExistingInstance = ExistingInstancePolicy.Reject
+                    }));
                 await OpenAsync();
             }
             catch (Exception error)
@@ -231,7 +236,7 @@ namespace MUI.Samples.Navigation
         {
             if (initialized && host != null)
             {
-                var outcome = await host.Navigator.OpenAsync(batchRoute, "第 1 层批量关闭示例");
+                var outcome = await host.Navigator.OpenAsync(batchRoute, "命名层级批量关闭示例");
                 ObservePage(outcome.Handle);
                 Debug.Log($"批次页面打开={outcome.Status}，拒绝原因={outcome.Rejection}，超限替换={outcome.IsReplacement}");
                 if (outcome.ReplacedCleanup != null)
@@ -242,14 +247,14 @@ namespace MUI.Samples.Navigation
             }
         }
 
-        [ContextMenu("本地关闭第 1 层")]
+        [ContextMenu("本地关闭批次所在层")]
         public void CloseLayer() => Run(CloseLayerAsync);
 
         private async Task CloseLayerAsync()
         {
             if (initialized && host != null)
             {
-                ReportBatch(await host.Navigator.CloseLayerAsync(1));
+                ReportBatch(await host.Navigator.CloseLayerAsync(batchRoute.Policy.Layer));
             }
         }
 

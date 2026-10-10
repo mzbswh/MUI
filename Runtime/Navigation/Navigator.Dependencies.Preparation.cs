@@ -39,8 +39,20 @@ namespace MUI.Navigation
                 var acquired = false;
                 try
                 {
+                    if (descriptor.MissingPolicy != DependencyMissingPolicy.AutoOpen && FindDependency(descriptor.Target) == null)
+                    {
+                        if (descriptor.MissingPolicy == DependencyMissingPolicy.Skip)
+                        {
+                            parent.DependencyResolutions[descriptor.Target] = DependencyResolutionKind.Skipped;
+                            continue;
+                        }
+                        throw new NavigationPreparationRejectedException(OpenRejection.DependencyMissing,
+                            $"依赖 {descriptor.Target.Key} 必须已打开。");
+                    }
                     var request = parent.ResolveDependency(i);
                     dependency = AcquireDependency(parent, request, out var created, out acquired);
+                    parent.DependencyResolutions[descriptor.Target] = dependency == null ? DependencyResolutionKind.Skipped :
+                        created ? DependencyResolutionKind.AutoOpened : DependencyResolutionKind.Reused;
                     if (created)
                     {
                         await PrepareCandidateAsync(dependency, token, depth + 1);
@@ -94,18 +106,15 @@ namespace MUI.Navigation
             created = false;
             acquired = false;
             Register(request.Route);
-            ViewInstance found = null;
-            foreach (var entry in entries.Values)
-            {
-                if (ReferenceEquals(entry.Route, request.Route) && OccupiesInstanceSlot(entry))
-                {
-                    found = entry;
-                    break;
-                }
-            }
+            var found = FindDependency(request.Route);
             if (found != null)
             {
                 ownership.ValidateAcquisition(parent.Handle, found.Handle, request.Placement, request.IsRequired);
+                if (!IsDependencyAvailable(found, request.MissingPolicy))
+                {
+                    throw new NavigationPreparationRejectedException(OpenRejection.Busy,
+                        $"共享依赖 {request.Route.Key} 尚未准备完成或已经退出。");
+                }
                 // 比较器属于项目代码，不在字典迭代中执行，返回后再次核对实例身份。
                 bool matches;
                 using (EnterCallback(parent))
@@ -114,11 +123,7 @@ namespace MUI.Navigation
                 }
 
                 parent.RequirePreparationCurrent();
-                if (!entries.TryGetValue(found.Handle, out var current) || !ReferenceEquals(current, found) ||
-                    found.HasCloseStarted || found.CloseRequest != null || found.IsUpdatingArgs || found.IsRebinding ||
-                    retiringDependencies.Contains(found.Handle) ||
-                    found.ActivationToken.IsCancellationRequested ||
-                    (found.State != ViewState.Open && !(found.State == ViewState.Opening && found.PreparationComplete)))
+                if (!IsDependencyAvailable(found, request.MissingPolicy))
                 {
                     throw new NavigationPreparationRejectedException(OpenRejection.Busy,
                         $"共享依赖 {request.Route.Key} 尚未准备完成或已经退出。");
@@ -132,19 +137,63 @@ namespace MUI.Navigation
                 created = false;
                 return found;
             }
+            if (request.MissingPolicy == DependencyMissingPolicy.Skip)
+            {
+                return null;
+            }
+            if (request.MissingPolicy == DependencyMissingPolicy.RequireOpen)
+            {
+                throw new NavigationPreparationRejectedException(OpenRejection.DependencyMissing,
+                    $"依赖 {request.Route.Key} 必须已打开。");
+            }
             if (!HasCleanupCapacity)
             {
                 throw new NavigationPreparationRejectedException(OpenRejection.CleanupCapacity,
                     "清理隔离容量不足，不能创建新的共享依赖。");
             }
             ownership.ValidateNewDependency(parent.Handle);
-            var dependency = request.Create(this);
+            // 新依赖属于父导航请求，不因较晚开始加载而越过后续独立页面。
+            var dependency = request.Create(this, parent.Order);
             dependency.PreparationOperationId = parent.PreparationOperationId;
             dependency.PreparationTraceSession = parent.PreparationTraceSession;
             // 工厂只构造内部候选，不运行项目回调；取得所有权后才开始任何可失败的准备。
             acquired = ownership.Acquire(parent.Handle, dependency.Handle, request.Placement, request.IsRequired);
             created = true;
             return dependency;
+        }
+
+        private bool IsDependencyAvailable(ViewInstance instance, DependencyMissingPolicy missingPolicy)
+        {
+            if (!entries.TryGetValue(instance.Handle, out var current) || !ReferenceEquals(current, instance) ||
+                instance.HasCloseStarted || instance.CloseRequest != null || instance.IsUpdatingArgs || instance.IsRebinding ||
+                retiringDependencies.Contains(instance.Handle) || instance.ActivationToken.IsCancellationRequested)
+            {
+                return false;
+            }
+            if (missingPolicy == DependencyMissingPolicy.RequireOpen)
+            {
+                return instance.State == ViewState.Open && instance.TryGetReadiness(out var readiness) && readiness.IsReady;
+            }
+            return instance.State == ViewState.Open || (instance.State == ViewState.Opening && instance.PreparationComplete);
+        }
+
+        private ViewInstance FindDependency(Route route)
+        {
+            // 退出中的实例仍是忙碌目标，不能当作缺失而跳过或重复创建。
+            ViewInstance retiring = null;
+            foreach (var entry in entries.Values)
+            {
+                if (!ReferenceEquals(entry.Route, route))
+                {
+                    continue;
+                }
+                if (OccupiesInstanceSlot(entry))
+                {
+                    return entry;
+                }
+                retiring = entry;
+            }
+            return retiring;
         }
 
         private static void RequireDependencyDepth(int depth)

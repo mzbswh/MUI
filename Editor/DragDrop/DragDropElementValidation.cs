@@ -3,6 +3,7 @@ using MUI.UGUI;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
+using L = MUI.Editor.Localization.MUIEditorLocalization;
 
 namespace MUI.Editor.Extensions
 {
@@ -28,7 +29,7 @@ namespace MUI.Editor.Extensions
             {
                 if (data.FindProperty("maxPendingDrops").intValue < 1)
                 {
-                    errors.Add($"Drop target capacity must be positive: {path}.");
+                    errors.Add(L.Format("editor.DragDropElementValidation.ee19296263", path));
                 }
 
                 var highlight = OverlayReference<GameObject>(data, "allowedHighlight");
@@ -36,19 +37,19 @@ namespace MUI.Editor.Extensions
                 {
                     if (highlight.transform == element.transform || !highlight.transform.IsChildOf(element.transform))
                     {
-                        errors.Add($"Drop highlight must be a strict child of the target: {path}.");
+                        errors.Add(L.Format("editor.DragDropElementValidation.097ff70a04", path));
                     }
 
                     if (highlight.GetComponentsInChildren<Selectable>(true).Length != 0)
                     {
-                        errors.Add($"Drop highlight must be decorative, without Selectable children: {path}.");
+                        errors.Add(L.Format("editor.DragDropElementValidation.856ef4d269", path));
                     }
 
                     foreach (var graphic in highlight.GetComponentsInChildren<Graphic>(true))
                     {
                         if (graphic.raycastTarget && graphic.enabled && !RaycastBlocked(graphic.transform, highlight.transform))
                         {
-                            errors.Add($"Drop highlight must not intercept pointer raycasts: {AnimationUtility.CalculateTransformPath(graphic.transform, root)}.");
+                            errors.Add(L.Format("editor.DragDropElementValidation.edec36e0d3", AnimationUtility.CalculateTransformPath(graphic.transform, root)));
                         }
                     }
                 }
@@ -65,30 +66,30 @@ namespace MUI.Editor.Extensions
 
             if (icon == null || host == null)
             {
-                errors.Add($"Drag ghost requires both Drag Icon and Ghost Root: {path}.");
+                errors.Add(L.Format("editor.DragDropElementValidation.165a5f71ed", path));
                 return;
             }
 
             if (!icon.transform.IsChildOf(element.transform))
             {
-                errors.Add($"Drag Icon must belong to the source hierarchy: {path}.");
+                errors.Add(L.Format("editor.DragDropElementValidation.332ea75fe2", path));
             }
 
             if (host.IsChildOf(element.transform))
             {
-                errors.Add($"Ghost Root must be outside the source hierarchy: {path}.");
+                errors.Add(L.Format("editor.DragDropElementValidation.dfa4574438", path));
             }
 
             var sourceCanvas = element.GetComponentInParent<Canvas>(true);
             var targetCanvas = host.GetComponentInParent<Canvas>(true);
             if (sourceCanvas != null && targetCanvas != null && sourceCanvas.rootCanvas != targetCanvas.rootCanvas)
             {
-                errors.Add($"Drag ghost and source use different root Canvases: {path}.");
+                errors.Add(L.Format("editor.DragDropElementValidation.07c3e3a8ea", path));
             }
 
             if (targetCanvas != null && targetCanvas.rootCanvas.renderMode != RenderMode.ScreenSpaceOverlay && targetCanvas.rootCanvas.worldCamera == null)
             {
-                errors.Add($"Camera/world-space ghost requires an explicit root Canvas camera: {path}.");
+                errors.Add(L.Format("editor.DragDropElementValidation.a8a32fbe33", path));
             }
         }
 

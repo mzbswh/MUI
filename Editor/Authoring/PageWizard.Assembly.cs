@@ -1,6 +1,7 @@
 using UnityEditor;
 using UnityEditor.Compilation;
 using UnityEngine;
+using L = MUI.Editor.Localization.MUIEditorLocalization;
 
 namespace MUI.Editor
 {
@@ -47,10 +48,10 @@ namespace MUI.Editor
         private string DrawAssemblyInspection()
         {
             var inspection = InspectAssembly();
-            EditorGUILayout.LabelField("目标程序集", inspection.AssemblyName ?? "尚未确定");
+            EditorGUILayout.LabelField(L.Get("editor.PageWizard.Assembly.aeb3fe5fac"), inspection.AssemblyName ?? L.Get("editor.PageWizard.Assembly.4eaf225048"));
             if (!string.IsNullOrEmpty(inspection.DefinitionPath))
             {
-                EditorGUILayout.LabelField("程序集定义", inspection.DefinitionPath);
+                EditorGUILayout.LabelField(L.Get("editor.PageWizard.Assembly.06a3c25a58"), inspection.DefinitionPath);
             }
             if (inspection.Error != null)
             {
@@ -62,9 +63,9 @@ namespace MUI.Editor
             }
             else if (inspection.Verified)
             {
-                EditorGUILayout.HelpBox("当前编译快照包含所需引用和绑定生成器；生成源码仍需通过实际编译。", MessageType.Info);
+                EditorGUILayout.HelpBox(L.Get("editor.PageWizard.Assembly.b3f8667ef3"), MessageType.Info);
             }
-            if (GUILayout.Button("重新检查程序集配置"))
+            if (GUILayout.Button(L.Get("editor.PageWizard.Assembly.3a7158af88")))
             {
                 InvalidateAssemblyInspection();
             }

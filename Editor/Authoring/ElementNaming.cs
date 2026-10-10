@@ -1,6 +1,7 @@
 using System;
 using System.Text;
 using MUI.UGUI;
+using L = MUI.Editor.Localization.MUIEditorLocalization;
 
 namespace MUI.Editor
 {
@@ -30,11 +31,11 @@ namespace MUI.Editor
             var result = configured == null ? SuggestDefault(name, type) : configured(name, type);
             if (string.IsNullOrWhiteSpace(result) || result != result.Trim() || result != BindingName(result))
             {
-                throw new InvalidOperationException("命名规则必须返回非空、无首尾空白且不带 (Clone) 后缀的名字。");
+                throw new InvalidOperationException(L.Get("editor.ElementNaming.0bbaa92a18"));
             }
             if (!ReferenceEquals(configured, rule))
             {
-                throw new InvalidOperationException("命名规则在计算过程中被替换，请重新生成建议。");
+                throw new InvalidOperationException(L.Get("editor.ElementNaming.75c2c05b0b"));
             }
             return result;
         }
@@ -48,7 +49,7 @@ namespace MUI.Editor
             }
             if (type == null || !typeof(Element).IsAssignableFrom(type))
             {
-                throw new ArgumentException("命名类型必须继承 Element。", nameof(type));
+                throw new ArgumentException(L.Get("editor.ElementNaming.621399f171"), nameof(type));
             }
             var prefix = Prefix(type);
             var value = BindingName(name);

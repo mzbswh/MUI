@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using L = MUI.Editor.Localization.MUIEditorLocalization;
 
 namespace MUI.Editor
 {
@@ -17,13 +18,13 @@ namespace MUI.Editor
 
             if (template == null)
             {
-                errors.Add($"Dropdown template is missing: {location}.");
+                errors.Add(L.Format("editor.DropdownTemplateValidation.05ffe01799", location));
                 return;
             }
 
             if (template.gameObject.activeSelf)
             {
-                errors.Add($"Dropdown template must be inactive: {location}.");
+                errors.Add(L.Format("editor.DropdownTemplateValidation.2323fb4b98", location));
             }
 
             Toggle item = null;
@@ -52,23 +53,23 @@ namespace MUI.Editor
 
             if (item == null || item.transform == template)
             {
-                errors.Add($"Dropdown template requires an active child Toggle item: {location}.");
+                errors.Add(L.Format("editor.DropdownTemplateValidation.5d2cad0d1c", location));
                 return;
             }
 
             if (!(item.transform.parent is RectTransform))
             {
-                errors.Add($"Dropdown Toggle item parent requires a RectTransform: {location}.");
+                errors.Add(L.Format("editor.DropdownTemplateValidation.aa11691f69", location));
             }
 
             if (itemText != null && !itemText.transform.IsChildOf(item.transform))
             {
-                errors.Add($"Dropdown item text must belong to its Toggle item: {location}.");
+                errors.Add(L.Format("editor.DropdownTemplateValidation.c4d2ef65fd", location));
             }
 
             if (itemImage != null && !itemImage.transform.IsChildOf(item.transform))
             {
-                errors.Add($"Dropdown item image must belong to its Toggle item: {location}.");
+                errors.Add(L.Format("editor.DropdownTemplateValidation.d98d996fa4", location));
             }
         }
     }

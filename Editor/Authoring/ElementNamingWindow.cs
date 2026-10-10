@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using MUI.UGUI;
 using UnityEditor;
 using UnityEngine;
+using L = MUI.Editor.Localization.MUIEditorLocalization;
 
 namespace MUI.Editor
 {
@@ -13,10 +14,10 @@ namespace MUI.Editor
         private Vector2 scroll;
         private string message;
 
-        [MenuItem("Tools/MUI/Element Naming")]
+        [MenuItem("Tools/MUI/控件命名 (Element Naming)")]
         private static void Open()
         {
-            var window = GetWindow<ElementNamingWindow>("MUI Element Names");
+            var window = GetWindow<ElementNamingWindow>(L.Get("editor.ElementNamingWindow.358bb9962f"));
             window.minSize = new Vector2(620, 360);
             var selected = Selection.activeGameObject;
             window.root = selected == null ? null : selected.GetComponentInParent<View>(true);
@@ -25,7 +26,8 @@ namespace MUI.Editor
 
         private void OnGUI()
         {
-            var next = (View)EditorGUILayout.ObjectField("View", root, typeof(View), true);
+            titleContent.text = L.Get("editor.ElementNamingWindow.358bb9962f");
+            var next = (View)EditorGUILayout.ObjectField(L.Get("editor.ElementNamingWindow.dcc839a401"), root, typeof(View), true);
             if (next != root)
             {
                 root = next;
@@ -33,13 +35,13 @@ namespace MUI.Editor
                 message = null;
             }
 
-            EditorGUILayout.HelpBox("Rename preview only. Binding declarations refer to these names: update affected source bindings yourself. Prefixes are optional suggestions. Nested View contents are excluded; nested Prefab names are reserved but not edited. Open Prefab assets in Prefab Mode.", MessageType.Info);
-            if (GUILayout.Button("Scan Names"))
+            EditorGUILayout.HelpBox(L.Get("editor.ElementNamingWindow.281ad19dde"), MessageType.Info);
+            if (GUILayout.Button(L.Get("editor.ElementNamingWindow.20ca39694d")))
             {
                 Scan();
             }
 
-            if (GUILayout.Button("Suggest Unique Names"))
+            if (GUILayout.Button(L.Get("editor.ElementNamingWindow.c3d72457bf")))
             {
                 Suggest();
             }
@@ -58,14 +60,14 @@ namespace MUI.Editor
                 EditorGUILayout.EndHorizontal();
                 if (!entry.Editable)
                 {
-                    EditorGUILayout.LabelField("Reserved: View root, nested Prefab, or multiple Elements on one object.");
+                    EditorGUILayout.LabelField(L.Get("editor.ElementNamingWindow.ae93df9c64"));
                 }
             }
 
             EditorGUILayout.EndScrollView();
             using (new EditorGUI.DisabledScope(root == null || EditorUtility.IsPersistent(root) || EditorApplication.isPlayingOrWillChangePlaymode))
             {
-                if (GUILayout.Button("Apply Selected Names (Undo Supported)"))
+                if (GUILayout.Button(L.Get("editor.ElementNamingWindow.3ac473e9b6")))
                 {
                     Apply();
                 }
@@ -73,7 +75,7 @@ namespace MUI.Editor
 
             if (!string.IsNullOrEmpty(message))
             {
-                EditorGUILayout.HelpBox(message, MessageType.Info);
+                EditorGUILayout.HelpBox(L.Diagnostic(message), MessageType.Info);
             }
         }
 
@@ -88,7 +90,7 @@ namespace MUI.Editor
 
             if (EditorUtility.IsPersistent(root))
             {
-                message = "Open the Prefab in Prefab Mode before scanning.";
+                message = L.Get("editor.ElementNamingWindow.a5e3077f3f");
                 return;
             }
 
@@ -110,7 +112,7 @@ namespace MUI.Editor
                 }
             }
 
-            message = $"{entries.Count} Element objects; {empty} empty names; {repeated} repeated names. Repeated names can be valid for different concrete types; use View contract validation to check actual ambiguity.";
+            message = L.Format("editor.ElementNamingWindow.ef6c4a64c8", entries.Count, empty, repeated);
         }
 
         private void Collect(Transform node, bool isRoot, bool protectedPrefab, List<Entry> result)
@@ -159,7 +161,7 @@ namespace MUI.Editor
 
             if (!IsCurrent())
             {
-                message = "层级、组件或名字已变化，请先重新扫描。";
+                message = L.Get("editor.ElementNamingWindow.98e9dc4d39");
                 return;
             }
 
@@ -195,7 +197,7 @@ namespace MUI.Editor
                 // 规则由项目提供，完成后重新检查快照，避免发布过期或半批建议。
                 if (root == null || !IsCurrent())
                 {
-                    message = "命名期间层级、组件或名字发生变化，请重新扫描。";
+                    message = L.Get("editor.ElementNamingWindow.25f9c635ef");
                     return;
                 }
                 foreach (var candidate in candidates)
@@ -203,11 +205,11 @@ namespace MUI.Editor
                     candidate.Key.Proposed = candidate.Value;
                     candidate.Key.Selected = candidate.Value != candidate.Key.Original;
                 }
-                message = "建议尚未应用。请审核名字和勾选项后再执行重命名。";
+                message = L.Get("editor.ElementNamingWindow.046d5fd2e9");
             }
             catch (Exception error)
             {
-                message = "命名规则执行失败，保留原预览：" + error.Message;
+                message = L.Get("editor.ElementNamingWindow.8f31895d55") + error.Message;
             }
         }
 
@@ -253,7 +255,7 @@ namespace MUI.Editor
 
             if (!IsCurrent())
             {
-                message = "Hierarchy, components or names changed. Scan again before applying.";
+                message = L.Get("editor.ElementNamingWindow.66a01cf520");
                 return;
             }
 
@@ -268,7 +270,7 @@ namespace MUI.Editor
 
             if (changes.Count == 0)
             {
-                message = "No name changes selected.";
+                message = L.Get("editor.ElementNamingWindow.2c1f2dca62");
                 return;
             }
 
@@ -285,25 +287,25 @@ namespace MUI.Editor
             {
                 if (string.IsNullOrWhiteSpace(changed.Proposed) || changed.Proposed != changed.Proposed.Trim() || changed.Proposed != ElementNaming.BindingName(changed.Proposed))
                 {
-                    message = "Names must be non-empty, trimmed, and must not end in (Clone).";
+                    message = L.Get("editor.ElementNamingWindow.668fbf85fb");
                     return;
                 }
 
                 if (nameCounts[changed.Proposed] > 1)
                 {
-                    message = $"Proposed name '{changed.Proposed}' conflicts with another Element object. Nothing was renamed.";
+                    message = L.Format("editor.ElementNamingWindow.5fb53e10b3", changed.Proposed);
                     return;
                 }
             }
 
             Undo.IncrementCurrentGroup();
             var group = Undo.GetCurrentGroup();
-            Undo.SetCurrentGroupName("Rename MUI Elements");
+            Undo.SetCurrentGroupName(L.Get("editor.ElementNamingWindow.d985880acf"));
             try
             {
                 foreach (var entry in changes)
                 {
-                    Undo.RecordObject(entry.Target, "Rename MUI Element");
+                    Undo.RecordObject(entry.Target, L.Get("editor.ElementNamingWindow.f1eab560bb"));
                     entry.Target.name = entry.Proposed;
                     if (PrefabUtility.IsPartOfPrefabInstance(entry.Target))
                     {
@@ -320,12 +322,12 @@ namespace MUI.Editor
                 Undo.RevertAllDownToGroup(group);
                 Debug.LogException(error);
                 Scan();
-                message = "Rename failed; reverted this batch. Inspect the Console.";
+                message = L.Get("editor.ElementNamingWindow.bae8c2d3dc");
                 return;
             }
 
             Scan();
-            message = $"Renamed {changes.Count} objects. Save the scene or Prefab and update affected binding declarations. Undo restores this batch.";
+            message = L.Format("editor.ElementNamingWindow.553f3cc103", changes.Count);
         }
 
         private sealed class Entry

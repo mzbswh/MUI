@@ -4,6 +4,7 @@ using MUI.UGUI;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
+using L = MUI.Editor.Localization.MUIEditorLocalization;
 
 namespace MUI.Editor
 {
@@ -14,17 +15,18 @@ namespace MUI.Editor
         private Vector2 scroll;
         private string message;
 
-        [MenuItem("Tools/MUI/Element Authoring")]
+        [MenuItem("Tools/MUI/控件创建 (Element Authoring)")]
         private static void Open()
         {
-            var window = GetWindow<ElementAuthoringWindow>("MUI Elements");
+            var window = GetWindow<ElementAuthoringWindow>(L.Get("editor.ElementAuthoringWindow.f27fa1ad5c"));
             window.root = Selection.activeGameObject;
             window.Scan();
         }
 
         private void OnGUI()
         {
-            var next = (GameObject)EditorGUILayout.ObjectField("Root", root, typeof(GameObject), true);
+            titleContent.text = L.Get("editor.ElementAuthoringWindow.f27fa1ad5c");
+            var next = (GameObject)EditorGUILayout.ObjectField(L.Get("editor.ElementAuthoringWindow.44cb005ee2"), root, typeof(GameObject), true);
             if (next != root)
             {
                 root = next;
@@ -32,8 +34,8 @@ namespace MUI.Editor
                 message = null;
             }
 
-            EditorGUILayout.HelpBox("Preview native uGUI controls before adding adapters. Nested Views, container boundaries and nested Prefab instances are excluded. Open Prefabs in Prefab Mode to edit them.", MessageType.Info);
-            if (GUILayout.Button("Scan"))
+            EditorGUILayout.HelpBox(L.Get("editor.ElementAuthoringWindow.4c72361bea"), MessageType.Info);
+            if (GUILayout.Button(L.Get("editor.ElementAuthoringWindow.ea1c510d1d")))
             {
                 Scan();
             }
@@ -48,14 +50,14 @@ namespace MUI.Editor
                 }
 
                 EditorGUILayout.ObjectField(candidate.Target, typeof(GameObject), true);
-                EditorGUILayout.LabelField(candidate.Adapter == null ? candidate.Note : candidate.Adapter.Name);
+                EditorGUILayout.LabelField(candidate.Adapter == null ? L.Diagnostic(candidate.Note) : candidate.Adapter.Name);
                 EditorGUILayout.EndHorizontal();
             }
 
             EditorGUILayout.EndScrollView();
             using (new EditorGUI.DisabledScope(root == null || EditorApplication.isPlayingOrWillChangePlaymode))
             {
-                if (GUILayout.Button("Add Selected Elements (Undo Supported)"))
+                if (GUILayout.Button(L.Get("editor.ElementAuthoringWindow.38399863b6")))
                 {
                     Apply();
                 }
@@ -63,7 +65,7 @@ namespace MUI.Editor
 
             if (!string.IsNullOrEmpty(message))
             {
-                EditorGUILayout.HelpBox(message, MessageType.Info);
+                EditorGUILayout.HelpBox(L.Diagnostic(message), MessageType.Info);
             }
         }
 
@@ -78,7 +80,7 @@ namespace MUI.Editor
 
             if (EditorUtility.IsPersistent(root))
             {
-                message = "Open the Prefab in Prefab Mode, then select its root.";
+                message = L.Get("editor.ElementAuthoringWindow.beb38a6ce0");
                 return;
             }
 
@@ -125,7 +127,7 @@ namespace MUI.Editor
             {
                 if (component == null)
                 {
-                    note = "Missing script: repair before adding an adapter.";
+                    note = L.Get("editor.ElementAuthoringWindow.e623e26a68");
                     return null;
                 }
             }
@@ -186,7 +188,7 @@ namespace MUI.Editor
                         var adapter = FindTMPAdapter(type.FullName == "TMPro.TMP_InputField" ? "TMPInputFieldElement" : "TMPDropdownElement");
                         if (adapter == null)
                         {
-                            note = "TMP control: MUI.TMP adapter assembly is unavailable.";
+                            note = L.Get("editor.ElementAuthoringWindow.e52e414963");
                             return null;
                         }
 
@@ -198,7 +200,7 @@ namespace MUI.Editor
 
             if (types.Count > 1)
             {
-                note = "Multiple controls: choose an adapter manually.";
+                note = L.Get("editor.ElementAuthoringWindow.57ec66460c");
                 return null;
             }
 
@@ -213,7 +215,7 @@ namespace MUI.Editor
                 {
                     if (type.Namespace == "TMPro" && type.FullName != "TMPro.TextMeshProUGUI" && type.FullName != "TMPro.TMP_Text")
                     {
-                        note = "Unsupported TMP control: choose an adapter manually.";
+                        note = L.Get("editor.ElementAuthoringWindow.dd39801df2");
                         return null;
                     }
                 }
@@ -232,7 +234,7 @@ namespace MUI.Editor
                             return adapter;
                         }
 
-                        note = "TMP text: MUI.TMP adapter assembly is unavailable.";
+                        note = L.Get("editor.ElementAuthoringWindow.0ae06aecdf");
                         return null;
                     }
                 }
@@ -258,7 +260,7 @@ namespace MUI.Editor
             var hasAspect = target.GetComponent<AspectRatioFitter>() != null;
             if (hasLayout && hasAspect)
             {
-                note = "存在多个布局组件，请手动选择所需适配器。";
+                note = L.Get("editor.ElementAuthoringWindow.49f6375235");
                 return null;
             }
 
@@ -301,7 +303,7 @@ namespace MUI.Editor
             Scan();
             Undo.IncrementCurrentGroup();
             var group = Undo.GetCurrentGroup();
-            Undo.SetCurrentGroupName("Add MUI Elements");
+            Undo.SetCurrentGroupName(L.Get("editor.ElementAuthoringWindow.26e0256cd8"));
             var count = 0;
             try
             {
@@ -311,7 +313,7 @@ namespace MUI.Editor
                     {
                         if (Undo.AddComponent(candidate.Target, type) == null)
                         {
-                            throw new InvalidOperationException("无法添加控件适配器：" + type.Name);
+                            throw new InvalidOperationException(L.Get("editor.ElementAuthoringWindow.742f9c0260") + type.Name);
                         }
                         ++count;
                     }
@@ -324,12 +326,12 @@ namespace MUI.Editor
                 Undo.RevertAllDownToGroup(group);
                 Debug.LogException(error);
                 Scan();
-                message = "挂载失败，已撤销本批组件，请查看控制台。";
+                message = L.Get("editor.ElementAuthoringWindow.cf61a83125");
                 return;
             }
 
             Scan();
-            message = $"Added {count} Elements. Save the scene or Prefab to persist the changes; Undo restores this batch.";
+            message = L.Format("editor.ElementAuthoringWindow.29e3c4643d", count);
         }
 
         private sealed class Candidate

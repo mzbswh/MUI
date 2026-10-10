@@ -7,6 +7,7 @@ using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using L = MUI.Editor.Localization.MUIEditorLocalization;
 
 namespace MUI.Editor
 {
@@ -18,14 +19,16 @@ namespace MUI.Editor
         private PagePreset preset;
         private bool createPresenter;
         private bool typedContracts;
+        [SerializeField] private MUISettings settings = null;
         [SerializeField] private string textBackendId = "ugui";
         private string message;
+        private string displayedLanguage;
         private Vector2 scroll;
 
-        [MenuItem("Tools/MUI/Page Wizard")]
+        [MenuItem("Tools/MUI/页面向导 (Page Wizard)")]
         private static void Open()
         {
-            var window = GetWindow<PageWizard>("MUI Page Wizard");
+            var window = GetWindow<PageWizard>(L.Get("editor.PageWizard.5a814a8beb"));
             window.minSize = new Vector2(600, 480);
             var path = AssetDatabase.GetAssetPath(Selection.activeObject);
             if (!AssetDatabase.IsValidFolder(path))
@@ -41,20 +44,27 @@ namespace MUI.Editor
 
         private void OnGUI()
         {
+            if (displayedLanguage != L.LanguageId)
+            {
+                displayedLanguage = L.LanguageId;
+                InvalidateAssemblyInspection();
+            }
+            titleContent.text = L.Get("editor.PageWizard.5a814a8beb");
             scroll = EditorGUILayout.BeginScrollView(scroll);
-            pageName = EditorGUILayout.TextField("页面名称", pageName);
-            targetNamespace = EditorGUILayout.TextField("命名空间", targetNamespace);
-            destination = EditorGUILayout.TextField("已有父目录", destination);
-            preset = (PagePreset)EditorGUILayout.EnumPopup("页面策略", preset);
+            pageName = EditorGUILayout.TextField(L.Get("editor.PageWizard.dd8fd8a18e"), pageName);
+            targetNamespace = EditorGUILayout.TextField(L.Get("editor.PageWizard.db772f3ff7"), targetNamespace);
+            destination = EditorGUILayout.TextField(L.Get("editor.PageWizard.4d698da8c0"), destination);
+            preset = L.EnumPopup(L.Get("editor.PageWizard.0706f9cb0a"), preset);
+            settings = (MUISettings)EditorGUILayout.ObjectField(L.Get("editor.PageWizard.c37f7fe785"), settings, typeof(MUISettings), false);
             var backends = PageTextBackend.Capture();
             var selected = Array.FindIndex(backends, item => item.Id == textBackendId);
-            var next = EditorGUILayout.Popup("文本组件", selected, Array.ConvertAll(backends, item => item.Label));
+            var next = EditorGUILayout.Popup(L.Get("editor.PageWizard.534ad4e758"), selected, Array.ConvertAll(backends, item => L.Diagnostic(item.Label)));
             if (next >= 0 && next < backends.Length)
             {
                 textBackendId = backends[next].Id;
             }
             DrawExistingView();
-            typedContracts = EditorGUILayout.Toggle("类型化参数与结果", typedContracts);
+            typedContracts = EditorGUILayout.Toggle(L.Get("editor.PageWizard.19288123a4"), typedContracts);
             if (typedContracts)
             {
                 createPresenter = true;
@@ -62,17 +72,17 @@ namespace MUI.Editor
 
             using (new EditorGUI.DisabledScope(typedContracts))
             {
-                createPresenter = EditorGUILayout.Toggle("创建 Presenter", createPresenter);
+                createPresenter = EditorGUILayout.Toggle(L.Get("editor.PageWizard.cf209c44b1"), createPresenter);
             }
 
-            EditorGUILayout.HelpBox("创建新页面目录、Prefab 和可编辑源码。目标程序集需要 MUI.Core、MUI.Resources、MUI.Navigation、MUI.UGUI 和绑定生成器；选择 TMP 时还需引用 MUI.TMP。Prefab 应放在 UIHost Canvas 下，创建后在资源提供方或 UIHost 目录登记资源键。页面生命周期使用统一异步入口，本地准备可立即完成。", MessageType.Info);
+            EditorGUILayout.HelpBox(L.Get("editor.PageWizard.593bb3ad77"), MessageType.Info);
             var error = ValidateDestination();
             if (error == null)
             {
-                EditorGUILayout.LabelField("即将创建的文件", EditorStyles.boldLabel);
+                EditorGUILayout.LabelField(L.Get("editor.PageWizard.8a83cce53b"), EditorStyles.boldLabel);
                 EditorGUILayout.LabelField(existingPrefab == null
                     ? destination + "/" + pageName + "/Prefabs/" + pageName + "View.prefab"
-                    : "关联已有资产：" + AssetDatabase.GetAssetPath(existingPrefab));
+                    : L.Get("editor.PageWizard.38e702fab3") + AssetDatabase.GetAssetPath(existingPrefab));
                 foreach (var file in PageSourceTemplate.Create(pageName, targetNamespace, preset, createPresenter, typedContracts, PageTextBackend.Find(textBackendId).ElementType,
                     existingPrefab == null ? "Title" : titleElementName,
                     existingPrefab == null ? "Close" : closeElementName, ExistingPrefabGuid))
@@ -80,18 +90,21 @@ namespace MUI.Editor
                     EditorGUILayout.LabelField(destination + "/" + pageName + "/Scripts/" + file.Key);
                 }
 
-                EditorGUILayout.LabelField("路由策略", EditorStyles.boldLabel);
-                EditorGUILayout.SelectableLabel(PageSourceTemplate.Policy(preset), EditorStyles.textArea, GUILayout.Height(60));
+                EditorGUILayout.LabelField(L.Get("editor.PageWizard.3715f68b64"), EditorStyles.boldLabel);
+                var policy = settings == null ? MUISettings.ResolveBuiltInPolicy(preset.ToString()) : settings.ResolvePolicy(preset.ToString());
+                EditorGUILayout.LabelField(L.Get("editor.PageWizard.1fa1a10b63"), settings == null ? L.Get("editor.PageWizard.03c3f68152") : settings.name);
+                EditorGUILayout.LabelField(L.Get("editor.PageWizard.4d0f13b4e9"), L.Format("editor.PageWizard.89b4e4e0de", policy.LayerName, policy.Layer, policy.Coverage, policy.Modal));
+                EditorGUILayout.HelpBox(L.Get("editor.PageWizard.7fe8b9bce7"), MessageType.Info);
                 error = DrawAssemblyInspection();
             }
             else
             {
-                EditorGUILayout.HelpBox(error, MessageType.Info);
+                EditorGUILayout.HelpBox(L.Diagnostic(error), MessageType.Info);
             }
 
             using (new EditorGUI.DisabledScope(error != null || EditorApplication.isPlayingOrWillChangePlaymode || EditorApplication.isCompiling))
             {
-                if (GUILayout.Button("创建页面"))
+                if (GUILayout.Button(L.Get("editor.PageWizard.f6f87e2c80")))
                 {
                     Create();
                 }
@@ -99,7 +112,7 @@ namespace MUI.Editor
 
             if (!string.IsNullOrEmpty(message))
             {
-                EditorGUILayout.HelpBox(message, MessageType.Info);
+                EditorGUILayout.HelpBox(L.Diagnostic(message), MessageType.Info);
             }
 
             EditorGUILayout.EndScrollView();
@@ -130,25 +143,36 @@ namespace MUI.Editor
 
         private string ValidateDestination()
         {
+            if (settings != null)
+            {
+                try
+                {
+                    settings.ResolvePolicy(preset.ToString());
+                }
+                catch (Exception error)
+                {
+                    return error.Message;
+                }
+            }
             if (!PageSourceTemplate.IsIdentifier(pageName))
             {
-                return "页面名只能包含英文字母、数字和下划线，且不能以数字开头。";
+                return L.Get("editor.PageWizard.245afa969c");
             }
 
             if (!PageSourceTemplate.IsNamespace(targetNamespace))
             {
-                return "命名空间应由合法标识符组成，以点分隔。";
+                return L.Get("editor.PageWizard.c8e5200b74");
             }
 
             if (!IsAssetsPath(destination) || !AssetDatabase.IsValidFolder(destination))
             {
-                return "请选择 Assets 下已存在的目录。";
+                return L.Get("editor.PageWizard.2ed479b29e");
             }
 
             var backend = PageTextBackend.Find(textBackendId);
             if (backend == null)
             {
-                return "所选文本模板不可用，请启用对应模块或重新选择。";
+                return L.Get("editor.PageWizard.e3acd6e42a");
             }
             var backendError = existingPrefab == null ? backend.Validate() : ValidateExistingView(backend);
             if (backendError != null)
@@ -158,7 +182,7 @@ namespace MUI.Editor
             var folder = destination + "/" + pageName;
             if (Directory.Exists(folder) || File.Exists(folder) || File.Exists(folder + ".meta") || AssetDatabase.LoadMainAssetAtPath(folder) != null)
             {
-                return "页面目录已存在，请修改名称或父目录；不会覆盖已有内容。";
+                return L.Get("editor.PageWizard.b93a5d933f");
             }
 
             return null;
@@ -198,7 +222,7 @@ namespace MUI.Editor
                 var guid = AssetDatabase.CreateFolder(destination, pageName);
                 if (string.IsNullOrEmpty(guid))
                 {
-                    throw new IOException("无法创建页面目录。");
+                    throw new IOException(L.Get("editor.PageWizard.b96a4455b0"));
                 }
 
                 created = true;
@@ -207,7 +231,7 @@ namespace MUI.Editor
                 if ((existingPrefab == null && string.IsNullOrEmpty(AssetDatabase.CreateFolder(folder, "Prefabs"))) ||
                     string.IsNullOrEmpty(AssetDatabase.CreateFolder(folder, "Scripts")))
                 {
-                    throw new IOException("无法创建页面子目录。");
+                    throw new IOException(L.Get("editor.PageWizard.ca7dc34857"));
                 }
 
                 var prefabPath = existingPrefab == null ? folder + "/Prefabs/" + pageName + "View.prefab"
@@ -227,7 +251,7 @@ namespace MUI.Editor
                     }
                 }
 
-                message = "已创建 " + folder + "。请登记资源键 '" + pageName + "View'，并使用 " + pageName + "Page.CreateRoute()。类型化结果需由项目补充完成命令。";
+                message = L.Get("editor.PageWizard.576a4a3ca2") + folder + L.Get("editor.PageWizard.cb599b951d") + pageName + L.Get("editor.PageWizard.02149f5808") + pageName + L.Get("editor.PageWizard.275da80635");
                 Selection.activeObject = AssetDatabase.LoadMainAssetAtPath(prefabPath);
                 EditorGUIUtility.PingObject(Selection.activeObject);
             }
@@ -235,7 +259,7 @@ namespace MUI.Editor
             {
                 Debug.LogException(failure);
                 var removed = !created || AssetDatabase.DeleteAsset(folder);
-                message = removed ? "创建失败，已移除本批新目录，请查看控制台。" : "创建和清理均失败，请检查新目录：" + folder;
+                message = removed ? L.Get("editor.PageWizard.0156b77f5b") : L.Get("editor.PageWizard.4f3f610097") + folder;
             }
             finally
             {
@@ -291,7 +315,7 @@ namespace MUI.Editor
                 root.SetActive(true);
                 if (PrefabUtility.SaveAsPrefabAsset(root, path) == null)
                 {
-                    throw new IOException("保存 View Prefab 失败。");
+                    throw new IOException(L.Get("editor.PageWizard.0680c075b1"));
                 }
             }
             finally
@@ -315,7 +339,7 @@ namespace MUI.Editor
             closeRect.anchoredPosition = new Vector2(-16, -16);
             closeRect.sizeDelta = new Vector2(80, 48);
             close.GetComponent<Button>().targetGraphic = close.GetComponent<Image>();
-            close.GetComponent<ButtonElement>().AccessibilityLabel = "关闭";
+            close.GetComponent<ButtonElement>().AccessibilityLabel = L.Get("editor.PageWizard.3fd47edce4");
             // 默认模板使用基础字体包含的关闭符号；语义名称独立保留，字体和语言由项目配置。
             var label = backend.CreateText("Label", closeRect, "×");
             label.color = Color.black;

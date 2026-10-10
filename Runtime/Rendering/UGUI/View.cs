@@ -323,6 +323,8 @@ namespace MUI.UGUI
                 lastInputEnabled = effective;
                 NotifyInputStateChanged();
             }
+            ApplyHiddenContentState();
+            ApplyRendererVisibility();
         }
 
         private void NotifyInputStateChanged()

@@ -4,6 +4,7 @@ using MUI.UGUI;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
+using L = MUI.Editor.Localization.MUIEditorLocalization;
 
 namespace MUI.Editor.Extensions
 {
@@ -22,14 +23,14 @@ namespace MUI.Editor.Extensions
             var indicator = OverlayReference<GameObject>(data, "indicator");
             if (indicator == null || indicator.transform == element.transform || !indicator.transform.IsChildOf(element.transform))
             {
-                errors.Add($"Indicator must be a strict child of the adapter: {path}.");
+                errors.Add(L.Format("editor.NotificationsElementValidation.c6205dce35", path));
                 return;
             }
 
             var message = OverlayReference<Text>(data, "message");
             if (message == null)
             {
-                errors.Add($"Notification message Text is missing: {path}.");
+                errors.Add(L.Format("editor.NotificationsElementValidation.143a5b79bd", path));
             }
             else
             {
@@ -39,7 +40,7 @@ namespace MUI.Editor.Extensions
             var button = OverlayReference<Button>(data, "dismissButton");
             if (button != null)
             {
-                ValidateOverlayChild(button.transform, indicator.transform, false, "Dismiss button", path, errors);
+                ValidateOverlayChild(button.transform, indicator.transform, false, L.Get("editor.NotificationsElementValidation.7b34326d17"), path, errors);
             }
         }
 
@@ -55,7 +56,7 @@ namespace MUI.Editor.Extensions
         {
             if ((strict && node == parent) || !node.IsChildOf(parent))
             {
-                errors.Add($"{label} must be {(strict ? "a strict child of" : "inside")} its indicator: {path}.");
+                errors.Add(L.Format("editor.NotificationsElementValidation.71eae1a677", label, (strict ? L.Get("editor.NotificationsElementValidation.ee5ca91704") : "inside"), path));
             }
         }
     }

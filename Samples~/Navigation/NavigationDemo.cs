@@ -15,6 +15,7 @@ namespace MUI.Samples.Navigation
 {
     public sealed partial class NavigationDemo : MonoBehaviour
     {
+        [SerializeField] private MUISettings settings = null;
         [SerializeField] private bool automaticWalkthrough;
         [SerializeField] private bool showEnterTransitionPreview;
         [SerializeField] private bool showMeasuredListPreview = false;
@@ -29,6 +30,19 @@ namespace MUI.Samples.Navigation
         private GameObject canvasObject;
         private GameObject eventSystemObject;
         private UIHost host;
+
+        public MUISettings Settings
+        {
+            get => settings;
+            set
+            {
+                if (host != null)
+                {
+                    throw new InvalidOperationException("请在示例创建宿主前配置 Settings。");
+                }
+                settings = value;
+            }
+        }
 
         public bool ShowEnterTransitionPreview
         {
@@ -152,9 +166,10 @@ namespace MUI.Samples.Navigation
                 PageViewModelBindingFactory.Register();
                 ThingItemViewModelBindingFactory.Register();
                 host = canvasObject.AddComponent<UIHost>();
-                host.Initialize(provider, ownsProvider: true, cacheCapacity: showCacheWalkthrough ? 2 : 16,
+                host.Settings = settings;
+                host.Initialize(provider, ownsProvider: true, cacheCapacity: showCacheWalkthrough ? (int?)2 : null,
                     maxCachedEstimatedBytes: showCacheWalkthrough ? (long?)(2 * 1024 * 1024) : null,
-                    cleanupCapacity: showCloseTimeoutWalkthrough ? 1 : 16);
+                    cleanupCapacity: showCloseTimeoutWalkthrough ? (int?)1 : null);
                 var navigator = host.Navigator;
                 if (recordLifecycleTrace)
                 {
@@ -166,9 +181,9 @@ namespace MUI.Samples.Navigation
                     await DemonstrateImmediateGuardAsync(navigator, resource, BindPage);
                 }
                 var synchronous = new Route<PageViewModel, PageArgs, int>("demo.sync", resource,
-                    () => new PageViewModel(), model => new PagePresenter(), BindPage);
+                    () => new PageViewModel(), model => new PagePresenter(), BindPage, host.ResolvePolicy());
                 var asynchronous = new Route<PageViewModel, PageArgs, int>("demo.async", resource,
-                    () => new PageViewModel(), model => new AsyncPagePresenter(navigator, synchronous), BindPage);
+                    () => new PageViewModel(), model => new AsyncPagePresenter(navigator, synchronous), BindPage, host.ResolvePolicy());
                 if (showEnterTransitionPreview)
                 {
                     await ShowEnterTransitionPreviewAsync(navigator, resource, BindPage);

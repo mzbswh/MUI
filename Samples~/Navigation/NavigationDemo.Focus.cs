@@ -19,7 +19,7 @@ namespace MUI.Samples.Navigation
             system.SetSelectedGameObject(lowerClose);
             var route = new Route<PageViewModel, PageArgs, int>("focus.modal", resource,
                 () => new PageViewModel(), _ => new PagePresenter(), binding,
-                new RoutePolicy(modal: true));
+                host.ResolvePolicy("Popup"));
             var opened = await navigator.OpenAsync(route, new PageArgs("Focus modal", 0));
             if (!opened.IsSuccess)
             {

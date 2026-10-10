@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using MUI.UGUI;
+using L = MUI.Editor.Localization.MUIEditorLocalization;
 
 namespace MUI.Editor
 {
@@ -25,7 +26,7 @@ namespace MUI.Editor
                     return;
                 }
 
-                throw new InvalidOperationException($"An Editor structure validator is already registered for {type.FullName}.");
+                throw new InvalidOperationException(L.Format("editor.ViewContractValidator.Extensions.4a2dda6f05", type.FullName));
             }
 
             elementValidators.Add(type, new ElementValidator { Identity = validator, Validate = (element, view, errors) => validator((TElement)element, view, errors) });
@@ -56,7 +57,7 @@ namespace MUI.Editor
                 }
                 catch (Exception error)
                 {
-                    errors.Add($"Element validator {pair.Key.FullName} failed at {Path(element.transform, view.transform)}: {error.Message}");
+                    errors.Add(L.Format("editor.ViewContractValidator.Extensions.803353dcf6", pair.Key.FullName, Path(element.transform, view.transform), error.Message));
                 }
             }
         }

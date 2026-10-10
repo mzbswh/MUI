@@ -60,8 +60,7 @@ namespace MUI.Samples.Navigation
                 sharedRoute = new Route<ThingItemViewModel, string, Unit>("demo.shared-status", item,
                     () => new ThingItemViewModel { Label = $"共享状态，第 {++sharedCreated} 次创建" },
                     bindingFactory: ThingItemViewModelBindingFactory.Create,
-                    policy: new RoutePolicy(layer: 0, enterHistory: false, takesFocus: false,
-                        backBehavior: BackBehavior.Ignore));
+                    policy: ResolveDependencyPolicy());
                 var dependencies = new[] { RouteDependency<string>.Required(sharedRoute,
                     title => title == DependencyChangeTitle ? "other" : "default", sharedPlacement) };
                 firstRoute = CreatePage("demo.shared.first", "第一个父页面", page, dependencies);
@@ -73,8 +72,7 @@ namespace MUI.Samples.Navigation
                     "demo.independent-status", item,
                     () => new ThingItemViewModel { Label = "独立上下文：other" },
                     bindingFactory: ThingItemViewModelBindingFactory.Create,
-                    policy: new RoutePolicy(layer: 0, enterHistory: false, takesFocus: false,
-                        backBehavior: BackBehavior.Ignore));
+                    policy: ResolveDependencyPolicy());
                 independentRoute = CreatePage("demo.independent.parent", "独立参数的父页面", page,
                     new[] { RouteDependency<string>.Required(independentDependency, _ => "other", sharedPlacement) });
                 InitializeOptionalRoutes(page, item);
@@ -87,12 +85,20 @@ namespace MUI.Samples.Navigation
             }
         }
 
-        private static Route<NavigationPageViewModel, string, int> CreatePage(string key, string title,
+        private RoutePolicy ResolveDependencyPolicy() => host.ResolvePolicy("Background", overrides: new RoutePolicyOverrides
+        {
+            Layer = host.ResolvePolicy().Layer,
+            AllowMultiple = false,
+            ExistingInstance = ExistingInstancePolicy.Reject
+        });
+
+        private Route<NavigationPageViewModel, string, int> CreatePage(string key, string title,
                     ViewResource resource, IReadOnlyList<RouteDependency<string>> dependencies) =>
                     new Route<NavigationPageViewModel, string, int>(key, resource,
                         () => new NavigationPageViewModel { Title = title },
                         presenterFactory: _ => new PagePresenter(),
                         bindingFactory: NavigationPageViewModelBindingFactory.Create,
+                        policy: host.ResolvePolicy(),
                         dependencies: dependencies);
 
         [ContextMenu("校验共享示例的静态路由图")]

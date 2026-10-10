@@ -67,14 +67,14 @@ namespace MUI.Navigation
             RefreshFailedCacheBudget();
             if (maxCachedEstimatedBytes.HasValue && !route.EstimatedRetainedBytes.HasValue)
             {
-                return false;
+                return RejectCache(route, ViewCacheDecision.EstimateRequired);
             }
 
             var estimate = route.EstimatedRetainedBytes ?? 0;
             var limit = maxCachedEstimatedBytes ?? long.MaxValue;
             if (estimate > limit)
             {
-                return false;
+                return RejectCache(route, ViewCacheDecision.BudgetExceeded);
             }
 
             if (cachedContents.Count < cacheCapacity && estimate <= limit - reservedCacheEstimatedBytes)
@@ -84,7 +84,7 @@ namespace MUI.Navigation
 
             if (IsCacheRetiring)
             {
-                return false;
+                return RejectCache(route, ViewCacheDecision.RetirementPending);
             }
 
             var removeCount = 0;
@@ -100,17 +100,25 @@ namespace MUI.Navigation
             // 在途或失败额度导致即使清空目录也不足时，保留现有可用内容。
             if (estimate > limit - (reservedCacheEstimatedBytes - reclaimable))
             {
-                return false;
+                return RejectCache(route, ViewCacheDecision.BudgetExceeded);
             }
 
             var retiring = cachedContents.GetRange(0, removeCount).ToArray();
             cachedContents.RemoveRange(0, removeCount);
+            foreach (var entry in retiring)
+            {
+                RecordCacheDecision(entry.Route, ViewCacheDecision.EvictedForCapacity);
+            }
             BeginCacheRetirement(retiring);
 
             // 移出目录不等于内存已释放；不等待淘汰，也不提前借用其尚未归还的额度。
             // 最终销毁回调可以请求宿主退出，因此接纳前同时复核宿主状态。
-            return !IsShutdown && !IsCacheClearing &&
-                cachedContents.Count < cacheCapacity && estimate <= limit - reservedCacheEstimatedBytes;
+            if (IsShutdown || IsCacheClearing)
+            {
+                return RejectCache(route, ViewCacheDecision.HostUnavailable);
+            }
+            return (cachedContents.Count < cacheCapacity && estimate <= limit - reservedCacheEstimatedBytes) ||
+                RejectCache(route, ViewCacheDecision.RetirementPending);
         }
 
         private sealed class FailedCacheBudget

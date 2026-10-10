@@ -11,6 +11,13 @@ namespace MUI.Navigation
         /// <summary>生命周期变化通知；可选依赖降级可发生在父提交前，回调不能阻塞等待自身导航操作。</summary>
         event Action<NavigationEvent> LifecycleChanged;
 
+        ViewHandle CurrentMainPage
+        {
+            get;
+        }
+
+        ViewHandle GetParentPage(ViewHandle page);
+
         /// <summary>开始有界生命周期追踪，清空上一轮记录；不订阅项目事件。</summary>
         void StartLifecycleTrace(int capacity = 512);
 
@@ -36,12 +43,12 @@ namespace MUI.Navigation
         ValueTask<ExplicitOwnershipReleaseOutcome> ReleaseExplicitOwnershipAsync(ViewHandle handle,
             CancellationToken cancellationToken = default);
 
-        /// <summary>异步准备并打开界面，等待首次激活就绪；返回结果仍需检查成功状态及错误。</summary>
-        ValueTask<OpenOutcome<TResult>> OpenAsync<TViewModel, TArgs, TResult>(Route<TViewModel, TArgs, TResult> route, TArgs args, CancellationToken cancellationToken = default, TViewModel assignedViewModel = null)
+        /// <summary>接纳时预留同层导航顺序，异步准备并等待首次激活就绪；返回结果仍需检查成功状态及错误。</summary>
+        ValueTask<OpenOutcome<TResult>> OpenAsync<TViewModel, TArgs, TResult>(Route<TViewModel, TArgs, TResult> route, TArgs args, CancellationToken cancellationToken = default, TViewModel assignedViewModel = null, PageOwner owner = default)
             where TViewModel : ViewModel;
 
         /// <summary>立即发起标准异步打开，提供取消与完成任务；请求对象不代表已成立的界面句柄。</summary>
-        OpenRequest<TResult> BeginOpen<TViewModel, TArgs, TResult>(Route<TViewModel, TArgs, TResult> route, TArgs args, CancellationToken cancellationToken = default, TViewModel assignedViewModel = null)
+        OpenRequest<TResult> BeginOpen<TViewModel, TArgs, TResult>(Route<TViewModel, TArgs, TResult> route, TArgs args, CancellationToken cancellationToken = default, TViewModel assignedViewModel = null, PageOwner owner = default)
             where TViewModel : ViewModel;
 
         /// <summary>先准备隐藏候选，再经过源界面守卫提交替换；源清理任务与目标激活结果分别报告。</summary>
@@ -76,7 +83,7 @@ namespace MUI.Navigation
         /// <summary>用类型化结果请求正常关闭；结果是否接受取决于关闭提交，仍需检查关闭结果。</summary>
         ValueTask<CloseOutcome> CompleteAsync<TResult>(ViewHandle<TResult> handle, TResult result, CancellationToken cancellationToken = default);
 
-        /// <summary>处理一次返回操作，结合局部返回处理器与导航历史决定关闭目标。</summary>
+        /// <summary>处理一次返回操作，结合局部返回处理器与当前显示顺序决定关闭目标。</summary>
         ValueTask<CloseOutcome> BackAsync(CancellationToken cancellationToken = default);
 
         /// <summary>直接捕获有界导航快照，不创建任务或执行项目/渲染器回调。</summary>

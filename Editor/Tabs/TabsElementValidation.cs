@@ -4,6 +4,7 @@ using MUI.UGUI;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
+using L = MUI.Editor.Localization.MUIEditorLocalization;
 
 namespace MUI.Editor.Extensions
 {
@@ -26,17 +27,17 @@ namespace MUI.Editor.Extensions
             {
                 if (template.gameObject.activeSelf)
                 {
-                    errors.Add($"Tab 按钮模板必须保持未激活：{path}。");
+                    errors.Add(L.Format("editor.TabsElementValidation.d12c877d65", path));
                 }
 
                 if (template.onClick.GetPersistentEventCount() != 0)
                 {
-                    errors.Add($"Tab 按钮模板不能配置持久化点击事件：{path}。");
+                    errors.Add(L.Format("editor.TabsElementValidation.3e961f144a", path));
                 }
 
                 if (template.GetComponentsInChildren<View>(true).Length != 0 || template.GetComponentsInChildren<Element>(true).Length != 0)
                 {
-                    errors.Add($"Tab 按钮模板不能包含 MUI View 或 Element：{path}。");
+                    errors.Add(L.Format("editor.TabsElementValidation.d8253c485e", path));
                 }
             }
 
@@ -82,28 +83,28 @@ namespace MUI.Editor.Extensions
         {
             if (string.IsNullOrWhiteSpace(key) || !keys.Add(key))
             {
-                errors.Add($"Tab 键必须非空且唯一：{path}，键 '{key}'。");
+                errors.Add(L.Format("editor.TabsElementValidation.904f504969", path, key));
             }
 
             if (button == null)
             {
-                errors.Add($"Tab 条目缺少 Button：{path}，键 '{key}'。");
+                errors.Add(L.Format("editor.TabsElementValidation.a5417c403b", path, key));
                 return;
             }
 
             if (!buttons.Add(button))
             {
-                errors.Add($"同一个 Button 不能绑定多个 Tab 条目：{path}，键 '{key}'。");
+                errors.Add(L.Format("editor.TabsElementValidation.72d62d1409", path, key));
             }
 
             if (button == template || button.transform == root || !button.transform.IsChildOf(root))
             {
-                errors.Add($"Tab 按钮必须位于 TabBar 子层级且不能兼作模板：{path}，键 '{key}'。");
+                errors.Add(L.Format("editor.TabsElementValidation.00d63bf64b", path, key));
             }
 
             if (mark != null && (mark == button.transform || !mark.IsChildOf(button.transform)))
             {
-                errors.Add($"Tab 选择标记必须是对应按钮的严格子节点：{path}，键 '{key}'。");
+                errors.Add(L.Format("editor.TabsElementValidation.c4c7744b46", path, key));
             }
         }
 
@@ -120,7 +121,7 @@ namespace MUI.Editor.Extensions
 
             if (content == null || content == root || !content.IsChildOf(root))
             {
-                errors.Add($"异步内容区必须具有子级 ContentHost：{path}。");
+                errors.Add(L.Format("editor.TabsElementValidation.b0057ac28f", path));
                 return;
             }
 
@@ -131,7 +132,7 @@ namespace MUI.Editor.Extensions
                 {
                     if (sibling.GetComponent<TabBarElement>() != null && sibling.GetSiblingIndex() <= root.GetSiblingIndex())
                     {
-                        errors.Add($"TabBar 必须排在同级内容区之后，才能显示在内容上方：{path}。");
+                        errors.Add(L.Format("editor.TabsElementValidation.00fb482d2d", path));
                     }
                 }
             }
@@ -140,13 +141,13 @@ namespace MUI.Editor.Extensions
             {
                 if (canvas.overrideSorting)
                 {
-                    errors.Add($"内容区 Canvas 不能启用 Override Sorting：{AnimationUtility.CalculateTransformPath(canvas.transform, view.transform)}。");
+                    errors.Add(L.Format("editor.TabsElementValidation.4996565283", AnimationUtility.CalculateTransformPath(canvas.transform, view.transform)));
                 }
             }
 
             // 缺省引用的自动发现规则必须与控件初始化保持一致。
             var loading = Reference<GameObject>(data, "loadingOverlay");
-            ValidateOverlay(root, content, loading == null ? root.Find("LoadingOverlay") : loading.transform, "加载提示", path, errors);
+            ValidateOverlay(root, content, loading == null ? root.Find("LoadingOverlay") : loading.transform, L.Get("editor.TabsElementValidation.58094f5945"), path, errors);
             var error = Reference<Text>(data, "errorLabel");
             var errorNode = root.Find("ErrorOverlay");
             if (error == null && errorNode != null)
@@ -154,7 +155,7 @@ namespace MUI.Editor.Extensions
                 error = errorNode.GetComponent<Text>();
             }
 
-            ValidateOverlay(root, content, error == null ? null : error.transform, "错误提示", path, errors);
+            ValidateOverlay(root, content, error == null ? null : error.transform, L.Get("editor.TabsElementValidation.8c7ec59497"), path, errors);
             var retry = Reference<Button>(data, "retryButton");
             var retryNode = root.Find("Retry");
             if (retry == null && retryNode != null)
@@ -162,7 +163,7 @@ namespace MUI.Editor.Extensions
                 retry = retryNode.GetComponent<Button>();
             }
 
-            ValidateOverlay(root, content, retry == null ? null : retry.transform, "重试按钮", path, errors);
+            ValidateOverlay(root, content, retry == null ? null : retry.transform, L.Get("editor.TabsElementValidation.33893eed55"), path, errors);
         }
 
         private static void ValidateOverlay(Transform root,
@@ -174,7 +175,7 @@ namespace MUI.Editor.Extensions
         {
             if (overlay != null && (overlay == root || !overlay.IsChildOf(root) || overlay.IsChildOf(content) || content.IsChildOf(overlay)))
             {
-                errors.Add($"{label}必须位于内容区内、ContentHost 外，且不能包含 ContentHost：{path}。");
+                errors.Add(L.Format("editor.TabsElementValidation.e307f11e2f", label, path));
             }
         }
 

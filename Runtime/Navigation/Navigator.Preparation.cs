@@ -197,6 +197,14 @@ namespace MUI.Navigation
                 {
                     try
                     {
+                        if (renderOrder != null)
+                        {
+                            RefreshRenderOrders();
+                            ApplyRenderOrder(candidate);
+                            // 候选仍隐藏；先收敛被局部整理影响的活动页面，错误按各页原有失败路径处理。
+                            RecomputePresentation();
+                        }
+                        candidate.RequirePreparationCurrent();
                         candidate.Prepare();
                         await candidate.PrepareAsync(cancellationToken);
                         if (candidate.Route.Policy.Modal && candidate.View is IModalView modal)

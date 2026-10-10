@@ -25,6 +25,16 @@ namespace MUI
             return interval;
         }
 
+        internal static int CatchUpLimit(object presenter)
+        {
+            var maximum = presenter is ILowFrequencyViewTickCatchUp catchUp ? catchUp.MaxTickCatchUp : 1;
+            if (maximum < 1 || maximum > 32)
+            {
+                throw new InvalidOperationException("Low-frequency tick catch-up limit must be between 1 and 32.");
+            }
+            return maximum;
+        }
+
         internal static int Due(ref double remainder, float delta, float interval, int maximum)
         {
             if (interval == 0)

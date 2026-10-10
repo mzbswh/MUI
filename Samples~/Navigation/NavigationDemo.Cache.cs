@@ -15,7 +15,7 @@ namespace MUI.Samples.Navigation
             var route = new Route<PageViewModel, PageArgs, int>(
                 "demo.cache", resource, () => new PageViewModel(),
                 _ => new CachedPagePresenter(), binding,
-                new RoutePolicy(cacheMode: ViewCacheMode.KeepAlive),
+                host.ResolvePolicy(overrides: new RoutePolicyOverrides { CacheMode = ViewCacheMode.KeepAlive }),
                 estimatedRetainedBytes: 1024 * 1024);
             var first = await navigator.OpenAsync(route, new PageArgs("首次打开", 10));
             if (!first.IsSuccess || !navigator.TryGetViewModel<PageViewModel>(first.Handle.Identity, out var firstModel))
@@ -100,8 +100,11 @@ namespace MUI.Samples.Navigation
                 return view;
             }
 
-            var timed = CreateRoute("demo.cache.timed", new RoutePolicy(
-                cacheMode: ViewCacheMode.Timed, cacheDuration: TimeSpan.FromMilliseconds(100)));
+            var timed = CreateRoute("demo.cache.timed", host.ResolvePolicy(overrides: new RoutePolicyOverrides
+            {
+                CacheMode = ViewCacheMode.Timed,
+                CacheDuration = TimeSpan.FromMilliseconds(100)
+            }));
             var beforeExpiry = await OpenAndCloseAsync(timed);
             await Task.Delay(200, cancellation.Token);
             var afterExpiry = await OpenAndCloseAsync(timed);
@@ -109,9 +112,9 @@ namespace MUI.Samples.Navigation
             navigator.RefreshCache();
             await navigator.ClearCacheAsync();
 
-            var first = CreateRoute("demo.cache.lru.first", new RoutePolicy(cacheMode: ViewCacheMode.KeepAlive));
-            var second = CreateRoute("demo.cache.lru.second", new RoutePolicy(cacheMode: ViewCacheMode.KeepAlive));
-            var third = CreateRoute("demo.cache.lru.third", new RoutePolicy(cacheMode: ViewCacheMode.KeepAlive));
+            var first = CreateRoute("demo.cache.lru.first", host.ResolvePolicy(overrides: new RoutePolicyOverrides { CacheMode = ViewCacheMode.KeepAlive }));
+            var second = CreateRoute("demo.cache.lru.second", host.ResolvePolicy(overrides: new RoutePolicyOverrides { CacheMode = ViewCacheMode.KeepAlive }));
+            var third = CreateRoute("demo.cache.lru.third", host.ResolvePolicy(overrides: new RoutePolicyOverrides { CacheMode = ViewCacheMode.KeepAlive }));
             var firstView = await OpenAndCloseAsync(first);
             var secondView = await OpenAndCloseAsync(second);
             await OpenAndCloseAsync(first);
@@ -125,15 +128,15 @@ namespace MUI.Samples.Navigation
 
             // 数值仅用于展示预算协议，不是本示例 Prefab 的实测内存。
             var larger = CreateRoute("demo.cache.budget.large",
-                new RoutePolicy(cacheMode: ViewCacheMode.KeepAlive), 1536 * 1024);
+                host.ResolvePolicy(overrides: new RoutePolicyOverrides { CacheMode = ViewCacheMode.KeepAlive }), 1536 * 1024);
             await OpenAndCloseAsync(first);
             await OpenAndCloseAsync(larger);
             Debug.Log($"MUI 字节预算淘汰：目录={navigator.CachedViewCount}，" +
                 $"预留字节={navigator.ReservedCacheEstimatedBytes}，失败字节={navigator.FailedCacheEstimatedBytes}");
             var unknown = CreateRoute("demo.cache.budget.unknown",
-                new RoutePolicy(cacheMode: ViewCacheMode.KeepAlive), null);
+                host.ResolvePolicy(overrides: new RoutePolicyOverrides { CacheMode = ViewCacheMode.KeepAlive }), null);
             var oversized = CreateRoute("demo.cache.budget.oversized",
-                new RoutePolicy(cacheMode: ViewCacheMode.KeepAlive), 3 * 1024 * 1024);
+                host.ResolvePolicy(overrides: new RoutePolicyOverrides { CacheMode = ViewCacheMode.KeepAlive }), 3 * 1024 * 1024);
             await OpenAndCloseAsync(unknown);
             await OpenAndCloseAsync(oversized);
             Debug.Log($"MUI 未知或过大项不缓存：目录={navigator.CachedViewCount}，预留字节={navigator.ReservedCacheEstimatedBytes}");

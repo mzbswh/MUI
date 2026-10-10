@@ -48,6 +48,11 @@ namespace MUI
             get; private set;
         }
 
+        internal int MaxTickCatchUp
+        {
+            get; private set;
+        } = 1;
+
         internal BindingContext Binding
         {
             get; private set;
@@ -96,7 +101,11 @@ namespace MUI
                     throw;
                 }
 
-                invoke(() => lifecycle.TickInterval = ViewTickTiming.Interval(presenter));
+                invoke(() =>
+                {
+                    lifecycle.TickInterval = ViewTickTiming.Interval(presenter);
+                    lifecycle.MaxTickCatchUp = ViewTickTiming.CatchUpLimit(presenter);
+                });
                 requireCurrent();
             }
 

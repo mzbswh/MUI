@@ -21,6 +21,66 @@ namespace MUI.Navigation
         DependencyExit = 512
     }
 
+    /// <summary>最近一次帧驱动检查的结果；诊断采集不调用渲染器属性。</summary>
+    public enum ViewTickStatus
+    {
+        NotEvaluated,
+        Eligible,
+        Inactive,
+        Rebinding,
+        Entering,
+        Covered,
+        Hidden,
+        HostShutdown
+    }
+
+    /// <summary>依赖在本次父激活中的取得方式；失败和运行中降级另有说明。</summary>
+    public enum DependencyResolutionKind
+    {
+        Pending,
+        AutoOpened,
+        Reused,
+        Skipped,
+        Degraded
+    }
+
+    public readonly struct DependencyResolutionSnapshot
+    {
+        internal DependencyResolutionSnapshot(RouteDependencyDescriptor descriptor, DependencyResolutionKind kind, string failure)
+        {
+            RouteKey = descriptor.Target.Key;
+            IsRequired = descriptor.IsRequired;
+            MissingPolicy = descriptor.MissingPolicy;
+            Kind = kind;
+            Failure = failure;
+        }
+
+        public string RouteKey
+        {
+            get;
+        }
+
+        public bool IsRequired
+        {
+            get;
+        }
+
+        public DependencyMissingPolicy MissingPolicy
+        {
+            get;
+        }
+
+        public DependencyResolutionKind Kind
+        {
+            get;
+        }
+
+        public string Failure
+        {
+            get;
+        }
+    }
+
     /// <summary>
     /// 单个导航实例的只读快照，不持有 View、ViewModel、路由工厂、参数或任务。
     /// 可见与交互字段仅表示导航门控，不等同于渲染器最终显示或 Element 可命中。
@@ -29,14 +89,36 @@ namespace MUI.Navigation
     {
         internal ViewInstanceSnapshot(ViewInstance instance, int presentationIndex, int historyIndex,
                     bool explicitOwner, int ownerCount, ViewHandle[] owners, ViewHandle[] dependencies,
-                    ViewOperationFlags operations, int executingCommands)
+                    ViewOperationFlags operations, int executingCommands, int routeInstanceCount, int? renderOrderStart, int renderOrderSpan)
         {
+            RenderOrderStart = renderOrderStart;
+            RenderOrderSpan = renderOrderSpan;
+            RouteInstanceCount = routeInstanceCount;
+            TickStatus = instance.LastTickStatus;
+            var resolutions = new List<DependencyResolutionSnapshot>();
+            foreach (var descriptor in instance.Route.DependencyDescriptors)
+            {
+                var kind = instance.DependencyResolutions.TryGetValue(descriptor.Target, out var resolution)
+                    ? resolution : DependencyResolutionKind.Pending;
+                string failureText = null;
+                if (instance.DependencyFailures != null && instance.DependencyFailures.TryGetValue(descriptor.Target, out var failure))
+                {
+                    kind = DependencyResolutionKind.Degraded;
+                    // Exception.Message 可被项目异常重写；只读采集不执行该回调。
+                    failureText = failure.Stage + ": " + (failure.Error is NavigationPreparationRejectedException rejection
+                        ? rejection.Rejection.ToString() : failure.Error == null ? string.Empty : failure.Error.GetType().Name);
+                }
+                resolutions.Add(new DependencyResolutionSnapshot(descriptor, kind, failureText));
+            }
+            DependencyResolutions = resolutions.AsReadOnly();
+            ParentPage = instance.ParentPage;
             Handle = instance.Handle;
             RouteKey = instance.Route.Key;
             ResourceKey = instance.Route.Resource.Key;
             ResourceVersion = instance.Route.Resource.Version;
             State = instance.State;
             Layer = instance.Route.Policy.Layer;
+            Policy = instance.Route.Policy;
             Order = instance.Order;
             CommitVersion = instance.CommitVersion;
             PresentationIndex = presentationIndex;
@@ -63,6 +145,36 @@ namespace MUI.Navigation
             Cleanup = instance.CompletedCloseOutcome.HasValue ? instance.CompletedCloseOutcome.Value.Cleanup :
                 instance.HasCloseStarted || (operations & ViewOperationFlags.DependencyExit) != 0
                     ? CleanupStatus.Pending : CleanupStatus.NotRequired;
+        }
+
+        public ViewHandle ParentPage
+        {
+            get;
+        }
+
+        public int? RenderOrderStart
+        {
+            get;
+        }
+
+        public int RenderOrderSpan
+        {
+            get;
+        }
+
+        public int RouteInstanceCount
+        {
+            get;
+        }
+
+        public ViewTickStatus TickStatus
+        {
+            get;
+        }
+
+        public IReadOnlyList<DependencyResolutionSnapshot> DependencyResolutions
+        {
+            get;
         }
 
         public ViewHandle Handle
@@ -95,7 +207,13 @@ namespace MUI.Navigation
             get;
         }
 
-        /// <summary>实例置前顺序号；真实导航显示位置读取 PresentationIndex。</summary>
+        /// <summary>已解析的不可变策略，包含配置来源；不引用配置资产或路由工厂。</summary>
+        public RoutePolicy Policy
+        {
+            get;
+        }
+
+        /// <summary>请求接纳时确定的导航顺序号，显式置前可更新；当前显示位置读取 PresentationIndex。</summary>
         public long Order
         {
             get;

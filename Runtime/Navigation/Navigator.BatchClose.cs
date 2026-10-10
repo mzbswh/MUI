@@ -44,11 +44,12 @@ namespace MUI.Navigation
 
         private ViewInstance[] CaptureCloseBatch(int? layer) =>
                     ownership.OrderCloseBatch(entries.Values
-                        .Where(instance => instance.Order != 0 &&
+                        .Where(instance => instance.HasOpenCommitted &&
                             (instance.State == ViewState.Open || instance.State == ViewState.Closing) &&
                             (!layer.HasValue || instance.Route.Policy.Layer == layer.Value))
                         .OrderByDescending(instance => instance.Route.Policy.Layer)
                         .ThenByDescending(instance => instance.Order)
+                        .ThenByDescending(instance => instance.Handle.Id)
                         .ToArray());
 
         private static BatchCloseItem[] CreateCloseBatchItems(ViewInstance[] snapshot)

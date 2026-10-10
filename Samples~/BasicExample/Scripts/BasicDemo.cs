@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using MUI.Navigation;
-using MUI.Resources;
 using MUI.UGUI;
 using UnityEngine;
 
@@ -12,7 +11,6 @@ namespace MUI.BasicExample
     public sealed class BasicDemo : MonoBehaviour
     {
         [SerializeField] private UIHost host = null;
-        [SerializeField] private GameObject pagePrefab = null;
         [SerializeField] private UnityEngine.UI.Button reopenButton = null;
         [SerializeField] private UnityEngine.UI.Text reopenLabel = null;
         private readonly LifetimeScope resultLifetime = new LifetimeScope();
@@ -29,33 +27,15 @@ namespace MUI.BasicExample
         {
             try
             {
-                if (host == null || pagePrefab == null || reopenButton == null || reopenLabel == null)
+                if (host == null || reopenButton == null || reopenLabel == null)
                 {
-                    throw new InvalidOperationException("Basic Demo needs a UIHost, BasicView prefab, reopen button, and label.");
+                    throw new InvalidOperationException("Basic Demo needs a UIHost, reopen button, and label.");
                 }
 
                 reopenButton.gameObject.SetActive(false);
                 Generated.BasicBindings.Initialize();
-                route = BasicPageViewModelRoute.Create(() => new BasicPageViewModel());
-                var provider = new PrefabViewProvider(host.transform,
-                    new[] { new KeyValuePair<ViewResource, GameObject>(route.Resource, pagePrefab) }, ConfigurePage);
-                try
-                {
-                    host.Initialize(provider, ownsProvider: true);
-                }
-                catch (Exception failure)
-                {
-                    try
-                    {
-                        provider.Dispose();
-                    }
-                    catch (Exception cleanupFailure)
-                    {
-                        throw new AggregateException("Basic Demo initialization and provider cleanup failed.", failure, cleanupFailure);
-                    }
-
-                    throw;
-                }
+                route = BasicPageViewModelRoute.Create(() => new BasicPageViewModel(), policy: host.ResolvePolicy());
+                host.Initialize(configureDefaultView: ConfigurePage);
 
                 initialized = true;
                 reopenButton.onClick.AddListener(OpenPage);

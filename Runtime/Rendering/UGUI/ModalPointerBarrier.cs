@@ -12,6 +12,8 @@ namespace MUI.UGUI
     {
         private static readonly List<ModalPointerBarrier> held = new List<ModalPointerBarrier>();
         private static readonly List<PressStateRegistration> pressStateProviders = new List<PressStateRegistration>();
+        private int? closingRenderOrder;
+        private int closingSortingLayer;
         private PointerEventData pointer;
         private BaseInputModule module;
         private Func<bool> isPressed;
@@ -20,6 +22,12 @@ namespace MUI.UGUI
         private int releaseFrame;
         private bool releasing;
         private bool standaloneInputFailed;
+
+        internal void SetClosingRenderOrder(int sortingLayerId, int order)
+        {
+            closingSortingLayer = sortingLayerId;
+            closingRenderOrder = order;
+        }
 
         /// <summary>兼容不区分指针的输入适配器；多指针模块应使用包含 PointerEventData 的重载。</summary>
         public static IDisposable RegisterPressStateProvider(Func<BaseInputModule, PointerEventData.InputButton, Func<bool>> provider)
@@ -62,6 +70,16 @@ namespace MUI.UGUI
                 image.color = Color.clear;
             }
 
+            if (closingRenderOrder.HasValue)
+            {
+                var canvas = GetComponent<Canvas>();
+                if (canvas != null)
+                {
+                    canvas.overrideSorting = true;
+                    canvas.sortingLayerID = closingSortingLayer;
+                    canvas.sortingOrder = closingRenderOrder.Value;
+                }
+            }
             held.Add(this);
             transform.SetAsLastSibling();
         }

@@ -1,0 +1,84 @@
+.mui-surface {
+    --mui-card: rgb(48, 48, 48);
+    --mui-border: rgb(68, 68, 68);
+    --mui-muted: rgb(170, 174, 181);
+    --mui-accent: rgb(82, 163, 231);
+    --mui-active: rgb(46, 72, 95);
+    --mui-success: rgb(133, 202, 154);
+    --mui-error: rgb(241, 147, 147);
+}
+.mui-surface.mui-light {
+    --mui-card: rgb(220, 220, 220);
+    --mui-border: rgb(183, 183, 183);
+    --mui-muted: rgb(80, 85, 92);
+    --mui-accent: rgb(30, 100, 170);
+    --mui-active: rgb(186, 210, 232);
+    --mui-success: rgb(37, 111, 63);
+    --mui-error: rgb(159, 43, 43);
+}
+.mui-inspector { padding: 4px; min-width: 0; }
+.mui-inspector .unity-base-field { min-width: 0; }
+.mui-card {
+    background-color: var(--mui-card);
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    border-left-color: var(--mui-border);
+    border-right-color: var(--mui-border);
+    border-top-color: var(--mui-border);
+    border-bottom-color: var(--mui-border);
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+    padding: 8px;
+    margin-bottom: 8px;
+}
+.mui-title { font-size: 16px; -unity-font-style: bold; margin-bottom: 4px; }
+.mui-inspector .mui-title { font-size: 12px; }
+.mui-heading { -unity-font-style: bold; margin-top: 8px; margin-bottom: 5px; }
+.mui-note { color: var(--mui-muted); white-space: normal; margin-top: 3px; margin-bottom: 8px; }
+.mui-row { flex-direction: row; align-items: center; margin-bottom: 4px; }
+.mui-grow { flex-grow: 1; flex-shrink: 1; flex-basis: 0; min-width: 0; }
+.mui-section > .unity-foldout__toggle,
+.mui-preset > .unity-foldout__toggle,
+.mui-rule-group > .unity-foldout__toggle {
+    margin-left: 0;
+    padding-left: 0;
+}
+.mui-section > .unity-foldout__toggle {
+    font-size: 12px;
+    -unity-font-style: bold;
+    margin-bottom: 4px;
+}
+.mui-section > .unity-foldout__content { margin-left: 0; padding-top: 2px; }
+.mui-status {
+    color: var(--mui-success);
+    font-size: 11px;
+    padding: 3px 7px;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+    border-bottom-left-radius: 4px;
+    border-bottom-right-radius: 4px;
+}
+.mui-status-error { color: var(--mui-error); }
+.mui-table-heading { color: var(--mui-muted); font-size: 11px; margin-left: 3px; }
+.mui-layer-name { flex-grow: 1; flex-shrink: 1; flex-basis: 70px; min-width: 70px; }
+.mui-layer-order { width: 86px; margin-left: 6px; }
+.mui-layer-gap { width: 110px; margin-left: 6px; }
+.mui-icon-button { width: 24px; min-width: 24px; height: 22px; margin-left: 6px; margin-right: 0; }
+.mui-actions { flex-direction: row; flex-wrap: wrap; align-items: center; margin-top: 4px; }
+.mui-actions > Button { min-height: 24px; margin-right: 5px; margin-bottom: 4px; }
+.mui-primary-button { border-bottom-width: 2px; border-bottom-color: var(--mui-accent); }
+.mui-preset {
+    border-top-width: 1px;
+    border-top-color: var(--mui-border);
+    padding-top: 6px;
+    padding-bottom: 4px;
+}
+.mui-preset > .unity-foldout__content { margin-left: 4px; }
+.mui-rule-group { margin-top: 3px; margin-bottom: 5px; }
+.mui-rule-group > .unity-foldout__toggle { color: var(--mui-muted); }
+.mui-empty { padding: 18px 12px; flex-grow: 1; justify-content: center; }
+.mui-empty-title { font-size: 14px; -unity-font-style: bold; white-space: normal; margin-bottom: 6px; }

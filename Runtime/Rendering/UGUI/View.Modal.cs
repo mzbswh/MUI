@@ -28,6 +28,7 @@ namespace MUI.UGUI
             }
 
             var barrier = EnsureModalBarrier();
+            SetModalBackdropVisible(false);
             var graphic = barrier.GetComponent<Image>();
             graphic.raycastTarget = false;
             graphic.color = Color.clear;
@@ -81,6 +82,7 @@ namespace MUI.UGUI
             RequireAlive();
             if (!enabled)
             {
+                SetModalBackdropVisible(false);
                 var barrier = modalBarrier;
                 try
                 {
@@ -135,6 +137,7 @@ namespace MUI.UGUI
 
                         if (transferred)
                         {
+                            modalBackdropVisual = null;
                             if (ReferenceEquals(modalBarrier, barrier))
                             {
                                 modalBarrier = null;
@@ -165,17 +168,21 @@ namespace MUI.UGUI
             var parent = transform.parent as RectTransform;
 
             // 导航器按从后到前排列页面；将本页的阻挡层放在其正下方。
-            barrierObject.transform.SetAsLastSibling();
-            transform.SetAsLastSibling();
+            if (!hasRenderOrder)
+            {
+                barrierObject.transform.SetAsLastSibling();
+                transform.SetAsLastSibling();
+            }
             ModalPointerBarrier.RaiseHeldBarriers(parent);
             barrierObject.SetActive(true);
             var barrierGraphic = barrierObject.GetComponent<Image>();
-            barrierGraphic.color = modalBarrierColor;
+            barrierGraphic.color = ModalBackdropTint;
             barrierGraphic.raycastTarget = true;
             if (barrierGraphic.depth == -1 || barrierGraphic.canvasRenderer.cull)
             {
                 throw new InvalidOperationException("Modal barrier must finish preparation before display is committed.");
             }
+            SetModalBackdropVisible(true);
             modalBarrierEnabled = true;
         }
 
@@ -189,7 +196,7 @@ namespace MUI.UGUI
 
             foreach (var canvas in GetComponentsInChildren<Canvas>(true))
             {
-                if (canvas.overrideSorting)
+                if (canvas.overrideSorting && !OwnsRenderCanvas(canvas))
                 {
                     throw new InvalidOperationException("Modal content cannot bypass sibling order with Canvas.overrideSorting.");
                 }
@@ -206,19 +213,23 @@ namespace MUI.UGUI
                 rect.offsetMin = Vector2.zero;
                 rect.offsetMax = Vector2.zero;
                 var graphic = modalBarrier.GetComponent<Image>();
-                graphic.color = modalBarrierColor;
+                graphic.color = ModalBackdropTint;
                 graphic.raycastTarget = true;
+                CreateModalBackdropVisual();
             }
             else if (modalBarrier.transform.parent != parent)
             {
                 modalBarrier.transform.SetParent(parent, false);
             }
 
+            ApplyModalRenderOrder();
             return modalBarrier;
         }
 
         private void ReleaseModalBarrier()
         {
+            SetModalBackdropVisible(false);
+            modalBackdropVisual = null;
             var barrier = modalBarrier;
             var pointer = modalClosingPointer;
             var module = modalClosingModule;

@@ -4,21 +4,21 @@ using MUI.Widgets;
 
 namespace MUI.UGUI
 {
-    public sealed partial class NestedViewElement
+    public sealed partial class WidgetReference
     {
         private sealed class PreparedRebind : IPreparedBindingTarget
         {
-            private readonly NestedViewElement element;
+            private readonly WidgetReference element;
             private readonly WidgetScope scope;
             private readonly LifetimeScope lifetime;
-            private readonly WidgetHandle<ViewModel, Unit> previous;
+            private readonly WidgetHandle previous;
             private readonly Task priorChange;
             private readonly long version;
             private readonly ViewModel model;
             private readonly bool bindsModel;
             private readonly bool unchanged;
             private readonly PreparedViewRebind staged;
-            private WidgetHandle<ViewModel, Unit> candidate;
+            private WidgetHandle candidate;
             private Task<bool> retirement;
             private ViewModel originalModel;
             private bool started;
@@ -26,10 +26,10 @@ namespace MUI.UGUI
             private bool committing;
             private int writes;
 
-            internal PreparedRebind(NestedViewElement element, WidgetScope scope, LifetimeScope lifetime,
-                WidgetHandle<ViewModel, Unit> previous, Task priorChange, long version,
+            internal PreparedRebind(WidgetReference element, WidgetScope scope, LifetimeScope lifetime,
+                WidgetHandle previous, Task priorChange, long version,
                 ViewModel model, bool bindsModel, bool unchanged, PreparedViewRebind staged,
-                WidgetHandle<ViewModel, Unit> candidate)
+                WidgetHandle candidate)
             {
                 this.element = element;
                 this.scope = scope;
@@ -212,8 +212,8 @@ namespace MUI.UGUI
                 return true;
             }
 
-            private static async Task<bool> CompleteRemovalAsync(NestedViewElement element,
-                WidgetHandle<ViewModel, Unit> previous, long committedVersion)
+            private static async Task<bool> CompleteRemovalAsync(WidgetReference element,
+                WidgetHandle previous, long committedVersion)
             {
                 try
                 {

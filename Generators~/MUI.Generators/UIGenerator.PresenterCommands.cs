@@ -28,10 +28,12 @@ namespace MUI.Generators
         private static INamedTypeSymbol AutoBindingPresenter(INamedTypeSymbol model, IEnumerable<INamedTypeSymbol> candidates)
         {
             var route = Attribute(model, "MUI.UIPageAttribute");
-            if (route != null && route.ConstructorArguments.Length < 2) return ResolveOpenPresenter(model, route);
-            if (route != null)
+            if (route != null && route.ConstructorArguments.Length < 2)
+                return ResolveOpenPresenter(model, route);
+            var selection = route ?? Attribute(model, "MUI.UIWidgetAttribute");
+            if (selection != null)
             {
-                foreach (var option in route.NamedArguments)
+                foreach (var option in selection.NamedArguments)
                 {
                     if (option.Key == "PresenterType")
                     {

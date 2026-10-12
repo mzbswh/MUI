@@ -4,6 +4,9 @@ namespace MUI
     public abstract class Presenter<TViewModel, TArgs, TResult>
         where TViewModel : ViewModel
     {
+        /// <summary>当前表现模型的简写；ViewModel 保留兼容。</summary>
+        protected TViewModel VM => ViewModel;
+
         protected TViewModel ViewModel
         {
             get; private set;
@@ -21,6 +24,9 @@ namespace MUI
 
         /// <summary>当前 Presenter 的命令契约，由生成器提供；不包含 ViewModel 自身的绑定。</summary>
         public virtual BindingManifest CommandManifest => null;
+
+        /// <summary>显式启用更新；每个实例创建时读取一次，默认禁用。</summary>
+        protected virtual UpdateOptions UpdateOptions => MUI.UpdateOptions.Disabled;
 
         /// <summary>由生成器将实例命令加入当前绑定会话，沿用其取消、预览和解绑协议。</summary>
         protected virtual void BuildCommandBindings(BindingBuilder<TViewModel> builder)
@@ -61,14 +67,12 @@ namespace MUI
 
         internal void Opened() => OnOpened();
 
-        /// <summary>显式启用更新；每个实例创建时读取一次，默认禁用。</summary>
-        protected virtual UpdateOptions UpdateOptions => MUI.UpdateOptions.Disabled;
-
         protected virtual void OnUpdate(UpdateTime time)
         {
         }
 
         internal UpdateOptions GetUpdateOptions() => UpdateOptions;
+
         internal void Update(UpdateTime time) => OnUpdate(time);
 
         protected virtual void OnClose()

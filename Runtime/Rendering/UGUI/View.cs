@@ -156,13 +156,9 @@ namespace MUI.UGUI
             }
 
             ApplyGates();
-            foreach (var element in elements)
-            {
-                if (element != null && element is IWidgetElement child)
-                {
+            foreach (var child in widgetParticipants)
+                if (WidgetParticipantExists(child))
                     child.BeginParentActivation(childViews, activation);
-                }
-            }
         }
 
         public void Initialize()
@@ -198,6 +194,7 @@ namespace MUI.UGUI
                 var candidate = new ElementIndex();
                 Collect(transform, candidate, true);
                 CollectNativeBindings(candidate);
+                CollectChildWidgets(candidate);
                 foreach (var selectable in GetComponentsInChildren<UnityEngine.UI.Selectable>(true))
                 {
                     if (selectable.GetComponentInParent<View>(true) == this)
@@ -256,6 +253,8 @@ namespace MUI.UGUI
                 }
 
                 elements.Add(element);
+                if (element is IWidgetElement participant)
+                    widgetParticipants.Add(participant);
                 GetCleanupScope().Own(element);
                 element.Initialize();
                 candidate.Add(element);

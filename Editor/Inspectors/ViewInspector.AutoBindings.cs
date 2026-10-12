@@ -19,14 +19,17 @@ namespace MUI.Editor
             foreach (var guid in AssetDatabase.FindAssets("t:Prefab", new[] { "Assets" }))
             {
                 var path = AssetDatabase.GUIDToAssetPath(guid);
-                if (path == prefabPath) continue;
+                if (path == prefabPath)
+                    continue;
                 foreach (var line in File.ReadLines(path))
                 {
                     const string marker = "muiAutoBindings: ";
                     var text = line.Trim();
-                    if (!text.StartsWith(marker, StringComparison.Ordinal)) continue;
+                    if (!text.StartsWith(marker, StringComparison.Ordinal))
+                        continue;
                     var encoded = text.Substring(marker.Length).Trim().Trim('"', '\'');
-                    if (encoded.Length == 0) continue;
+                    if (encoded.Length == 0)
+                        continue;
                     var definition = XElement.Parse(Encoding.UTF8.GetString(Convert.FromBase64String(encoded)));
                     if ((string)definition.Attribute("model") == model.FullName && (string)definition.Attribute("assembly") == model.Assembly.GetName().Name)
                         throw new InvalidOperationException(model.FullName + " 已由另一个 Prefab 生成绑定：" + path);
@@ -37,7 +40,8 @@ namespace MUI.Editor
         private XElement BuildAutoBindingMetadata(List<ControlRow> rows, BindingManifest manifest, bool captureInitialValues = true)
         {
             var model = manifest.ViewModelType;
-            if (model.IsNested || model.IsGenericType) throw new InvalidOperationException("自动绑定暂不支持嵌套或泛型 ViewModel。");
+            if (model.IsNested || model.IsGenericType)
+                throw new InvalidOperationException("自动绑定暂不支持嵌套或泛型 ViewModel。");
             var result = new XElement("bindings", new XAttribute("assembly", model.Assembly.GetName().Name), new XAttribute("model", model.FullName));
             var generated = new HashSet<string>(manifest.Entries.Where(entry => IsAutoBinding(entry)).Select(entry => entry.Source));
             var names = new HashSet<string>(StringComparer.Ordinal);
@@ -46,7 +50,8 @@ namespace MUI.Editor
             {
                 foreach (var choice in GetBindingChoices(row))
                 {
-                    if (manifest.Entries.Any(entry => entry.ElementName == row.Name && CanonicalBindingProperty(entry.TargetProperty) == CanonicalBindingProperty(choice.Property) && !IsAutoBinding(entry))) continue;
+                    if (manifest.Entries.Any(entry => entry.ElementName == row.Name && CanonicalBindingProperty(entry.TargetProperty) == CanonicalBindingProperty(choice.Property) && !IsAutoBinding(entry)))
+                        continue;
                     using (var adapter = NativeControl.Create(row.Name, row.Target))
                     {
                         var extension = ExtensionType(choice.Extension);
@@ -77,15 +82,19 @@ namespace MUI.Editor
                             throw new InvalidOperationException(row.Name + "." + property + "：属性已弃用，请选择替代属性。");
                         var contract = choice.Native || extension != null ? typeof(NativeControl) : type.GetInterfaces().Where(i => !i.IsGenericType && typeof(IElement).IsAssignableFrom(i) &&
                             (command ? i.GetEvent(property) != null : i.GetProperty(property) != null)).OrderBy(i => i.FullName, StringComparer.Ordinal).FirstOrDefault() ?? type;
-                        if (!contract.IsVisible || contract.IsGenericType) throw new InvalidOperationException(row.Name + "：绑定适配器必须是公开的非泛型类型或接口。");
-                        if (!writes.Add(row.Name + "\0" + CanonicalBindingProperty(property))) throw new InvalidOperationException("重复绑定目标：" + row.Name + "." + property);
+                        if (!contract.IsVisible || contract.IsGenericType)
+                            throw new InvalidOperationException(row.Name + "：绑定适配器必须是公开的非泛型类型或接口。");
+                        if (!writes.Add(row.Name + "\0" + CanonicalBindingProperty(property)))
+                            throw new InvalidOperationException("重复绑定目标：" + row.Name + "." + property);
                         var source = choice.Source;
-                        if (!PageSourceTemplate.IsIdentifier(source) || !names.Add(source) || source == model.Name) throw new InvalidOperationException("生成成员名称重复：" + source);
+                        if (!PageSourceTemplate.IsIdentifier(source) || !names.Add(source) || source == model.Name)
+                            throw new InvalidOperationException("生成成员名称重复：" + source);
                         if (!generated.Contains(source) && model.GetMember(source, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static).Length != 0)
                             throw new InvalidOperationException(source + " 与已有代码成员重名。请为已有成员添加 Bind 声明，或调整控件名称。");
                         var declaration = new XElement("binding", new XAttribute("name", row.Name), new XAttribute("contract", contract.FullName),
                             new XAttribute("source", source), new XAttribute("property", property), new XAttribute("mode", mode), new XAttribute("command", command ? "true" : "false"));
-                        if (readOnly) declaration.SetAttributeValue("readOnly", "true");
+                        if (readOnly)
+                            declaration.SetAttributeValue("readOnly", "true");
                         if (extension != null)
                         {
                             declaration.SetAttributeValue("extension", extension.FullName);
@@ -98,7 +107,8 @@ namespace MUI.Editor
                             if (notification != null)
                             {
                                 declaration.SetAttributeValue("notificationEvent", notification.Event);
-                                if (!string.IsNullOrEmpty(notification.Setter)) declaration.SetAttributeValue("notificationSetter", notification.Setter);
+                                if (!string.IsNullOrEmpty(notification.Setter))
+                                    declaration.SetAttributeValue("notificationSetter", notification.Setter);
                             }
                         }
                         if (captureInitialValues && extension == null && !command && !readOnly && targetProperty.GetMethod != null && targetProperty.GetMethod.IsPublic)
@@ -111,6 +121,7 @@ namespace MUI.Editor
                     }
                 }
             }
+            AppendWidgetMetadata(result, manifest);
             return result;
         }
 

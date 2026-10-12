@@ -289,7 +289,9 @@ namespace MUI.UGUI
                     var template = new WidgetDefinition<ViewModel, Unit>(resource,
                         () => throw new InvalidOperationException("Dynamic content uses an assigned model."),
                         (view, value) => value is UnboundModel ? new UnboundBinding(view, value) : BindingRegistry.Create(view, value));
-                    candidate = await parentScope.PrepareAsync(template, mounted, Unit.Value, assigned, cancellationToken);
+                    candidate = assigned is UnboundModel
+                        ? await parentScope.PrepareAsync(template, mounted, Unit.Value, assigned, cancellationToken)
+                        : await WidgetRegistry.PrepareAsync(parentScope, mounted, resource, assigned, null, cancellationToken);
                 }
 
                 cancellationToken.ThrowIfCancellationRequested();
@@ -385,13 +387,15 @@ namespace MUI.UGUI
 
                 if (reusable != null)
                 {
-                    change = owner.RebindAsync(reusable, assigned).AsTask();
+                    change = owner.RebindModelAsync(reusable, assigned).AsTask();
                 }
                 else
                 {
                     var mounted = new ContentViewProvider(currentProvider, transform, model != null || showUnbound);
                     var template = new WidgetDefinition<ViewModel, Unit>(resource, () => throw new InvalidOperationException("Dynamic content uses an assigned model."), (view, value) => value is UnboundModel ? new UnboundBinding(view, value) : BindingRegistry.Create(view, value));
-                    change = owner.ReplaceAsync(async (scope, token) => await scope.PrepareAsync(template, mounted, Unit.Value, assigned, token),
+                    change = owner.ReplaceAsync(async (scope, token) => assigned is UnboundModel
+                        ? await scope.PrepareAsync(template, mounted, Unit.Value, assigned, token)
+                        : await WidgetRegistry.PrepareAsync(scope, mounted, resource, assigned, null, token),
                         committed: _ =>
                         {
                             if (ReferenceEquals(slot, owner) && ReferenceEquals(refreshVersion, version))
@@ -444,16 +448,16 @@ namespace MUI.UGUI
         }
 
         /// <summary>只复用同提供方的已绑定内容；首次准备和未绑定显示仍走候选替换。</summary>
-        private WidgetHandle<ViewModel, Unit> FindReusableContent(WidgetSlot owner)
+        private WidgetHandle FindReusableContent(WidgetSlot owner)
         {
             var expectedProvider = provider;
             var expectedSource = source;
             var expectedModel = model;
-            var current = owner.Current as WidgetHandle<ViewModel, Unit>;
+            var current = owner.Current;
             if (current == null || expectedModel == null || current.Model == null || current.Model is UnboundModel ||
                 current.Model.GetType() != expectedModel.GetType() ||
                 !ReferenceEquals(displayedProvider, expectedProvider) || current.Resource.Key != expectedSource ||
-                !current.CanRebind)
+                !current.CanRebindModel)
             {
                 return null;
             }

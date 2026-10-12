@@ -757,3 +757,19 @@ protected override void OnUpdate(UpdateTime time)
 每帧最多调用一次，卡顿时合并遗漏的回调，保留间隔余量；DeltaTime 与 UnscaledDeltaTime 传实际累计时长，不伪装成配置间隔。准备和进入动画期间、隐藏暂停或缓存停用期间不累计；缓存重新激活从零开始，隐藏后恢复保留累计值。缩放时间停走而界面仍可更新时，非缩放累计值继续增长，在下次回调可读取。
 
 UIPage 和 UIWidget 共用规则。页面暂停由 PagePolicy.TickPause 控制（默认隐藏暂停），Widget 还受父级暂停及 WidgetDefinition.PauseTickWhenHidden 控制。UIHost 自动传递 Time.deltaTime 与 Time.unscaledDeltaTime；手动驱动使用 AdvanceFrame(deltaTime, unscaledDeltaTime)，PageManager.Tick 与 WidgetScope.Tick 同样接收两种帧时长。输入必须为有限非负数，不能同时使用自动与手动驱动。页面进入/退出动画仍使用非缩放时间。
+
+### 创建和直接引用 Widget
+
+页面向导的“创建类型”可选择 Widget。Widget 生成独立 View Prefab、`[UIWidget]` 模型及可选 Presenter / Args，不生成页面导航和关闭按钮。已有 Widget Prefab 不要求 Title / Close。目标程序集需引用 MUI.Core、MUI.Resources、MUI.Widgets、MUI.UGUI；Page 模式还需要 MUI.Pages。
+
+在父 Prefab 编辑模式选择根 View，将 Widget Prefab 拖入层级，或使用“子 Widget → 添加引用”。父 View 自动发现当前边界内关联了 UIWidget 的子 View；确认绑定名称和父 VM 属性后点击“生成绑定”。这会保存父 View 的子引用和生成声明，不添加包装节点，不改锚点和尺寸，也不改子 Prefab 的内部绑定。多次使用相同 Widget 时为每个引用指定唯一名称和父属性。其他 View、NestedViewElement、动态容器、列表模板均是发现边界。
+
+父模型生成具体类型的属性，例如 `ItemViewModel Item`，绑定到父 View 内部的 `WidgetReference.VM`；子模型访问会登记子模型的生成工厂。内部控件继续由子 View 独立索引。已有手写 `[Bind("Item", nameof(WidgetReference.VM))]` 优先，不覆盖源码。手写接线需显式调用子 BindingFactory.Register 或模块 Initialize。生成声明保存在父 Prefab，移除实例后再次生成以清理声明；业务仍使用已删除属性时由编译器报告。
+
+勾选“自动创建子 VM”时要求公共无参构造函数，每个父模型惰性创建独立子模型。生成的默认子模型归父模型所有，替换后保留到父模型最终释放，避免提前销毁仍在清理或被其他视图投影的对象。框架创建的父模型由框架收尾；外部持有父模型时，在所有投影结束后调用 `ReleaseWidgetVMsAsync()`。关闭自动创建后默认 null，由业务赋值；业务赋值的模型只借用，不自动释放。null 清理绑定并隐藏静态子 View，不删除它的 GameObject。
+
+Presenter、BindingContext 和 WidgetHandle 提供 `VM` 简写，原有 ViewModel 属性兼容保留，类型名仍使用 XxxViewModel。新 Presenter 模板使用 `VM`。Widget 的 Presenter 由生成工厂登记，可用 `[UIWidget(PresenterType = typeof(ItemPresenter))]` 明确选择。多个匹配 Presenter 时需显式选择，或在手写接线前调用 `WidgetRegistry.Register<TVM, TArgs>(presenterFactory, bindingFactory, replace: true)` 注入业务工厂；生成登记不会覆盖业务替换。`BindingRegistry.Reset()` 同时清除 Widget 工厂。
+
+初始化参数可绑定到 `WidgetReference.Args`（应先于 VM 提供），默认使用对应参数类型的 default 值。活动期间的参数更新要求 Presenter 实现 `IArgsUpdatePresenter<TArgs>`；不支持时明确报错。父模型的分阶段换绑保留子参数，不能同时以同一事务改变业务参数和子模型，应分别执行参数更新和父模型换绑。静态引用和动态内容共用已登记的类型化 Widget 工厂；旧 NestedViewElement 保留借用模型的兼容入口，并复用静态子项管理逻辑。
+
+代码构建层级可在父 View 初始化前调用 `ConfigureChildWidgets(...)`，以子 View 对象引用登记，不使用路径查找。Navigation 示例菜单“打开直接 Widget 场景”演示不带包装节点的打开、模型替换、清空、恢复和父级清理。

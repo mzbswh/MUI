@@ -58,7 +58,7 @@ namespace MUI.Generators
                         continue;
                     }
 
-                    var result = Generate(context, type);
+                    var result = Generate(context, type, candidates);
                     if (result != null)
                     {
                         generated.Add(result);
@@ -101,7 +101,7 @@ namespace MUI.Generators
         }
 
         /// <summary>校验模型契约并生成属性、绑定上下文、清单及工厂。</summary>
-        private static string Generate(GenerationContext context, INamedTypeSymbol type)
+        private static string Generate(GenerationContext context, INamedTypeSymbol type, ImmutableArray<INamedTypeSymbol> candidates)
         {
             ValidateTypeScope(context, type);
             if (type.IsStatic)
@@ -125,13 +125,15 @@ namespace MUI.Generators
 
             var page = Attribute(type, "MUI.UIPageAttribute");
             var widget = Attribute(type, "MUI.UIWidgetAttribute");
-            if (page != null && widget != null) Fail(type, "UIPage 和 UIWidget 不能同时声明。");
+            if (page != null && widget != null)
+                Fail(type, "UIPage 和 UIWidget 不能同时声明。");
             var contract = page ?? widget;
             var resourceKey = contract == null ? null : DefaultViewResourceKey(type.Name);
             if (page != null)
             {
                 foreach (var option in page.NamedArguments)
-                    if (option.Key == "ResourceKey") resourceKey = option.Value.Value as string;
+                    if (option.Key == "ResourceKey")
+                        resourceKey = option.Value.Value as string;
             }
             else if (widget != null && widget.ConstructorArguments.Length != 0)
                 resourceKey = widget.ConstructorArguments[0].Value as string;
@@ -273,7 +275,8 @@ namespace MUI.Generators
                     }
 
                     var componentType = attribute.NamedArguments.FirstOrDefault(pair => pair.Key == "ComponentType").Value.Value as INamedTypeSymbol;
-                    if (componentType != null && (mode == 1 || mode == 2) && !attribute.NamedArguments.Any(pair => pair.Key == "NativeNotifications" && pair.Value.Value is bool enabled && enabled)) Fail(member, "Native component properties without notifications support OneWay or OneTime only.");
+                    if (componentType != null && (mode == 1 || mode == 2) && !attribute.NamedArguments.Any(pair => pair.Key == "NativeNotifications" && pair.Value.Value is bool enabled && enabled))
+                        Fail(member, "Native component properties without notifications support OneWay or OneTime only.");
                     if (componentType != null && (!DerivesFrom(componentType, "UnityEngine.Component") || !DerivesFrom(elementType, "MUI.UGUI.NativeControl") && elementType.ToDisplayString() != "MUI.UGUI.NativeControl"))
                         Fail(member, "ComponentType requires a Unity component and NativeControl element.");
                     var targetReceiver = componentType == null ? "element" : "((" + TypeName(componentType) + ")element.Target)";
@@ -281,7 +284,8 @@ namespace MUI.Generators
                     if (propertyAdapterType != null)
                     {
                         var adapterBase = propertyAdapterType.BaseType;
-                        while (adapterBase != null && !adapterBase.OriginalDefinition.ToDisplayString().StartsWith("MUI.UGUI.GeneratedPropertyAdapter<", StringComparison.Ordinal)) adapterBase = adapterBase.BaseType;
+                        while (adapterBase != null && !adapterBase.OriginalDefinition.ToDisplayString().StartsWith("MUI.UGUI.GeneratedPropertyAdapter<", StringComparison.Ordinal))
+                            adapterBase = adapterBase.BaseType;
                         if (componentType == null || adapterBase == null || !SymbolEqualityComparer.Default.Equals(adapterBase.TypeArguments[0], componentType) || propertyAdapterType.IsAbstract ||
                             !propertyAdapterType.InstanceConstructors.Any(c => c.DeclaredAccessibility == Accessibility.Public && c.Parameters.Length == 1 && c.Parameters[0].Type.ToDisplayString() == "MUI.UGUI.NativeControl"))
                             Fail(member, "Invalid generated property adapter.");
@@ -423,7 +427,8 @@ namespace MUI.Generators
                 .Append("            new global::MUI.BindingEntry[]\n            {\n").Append(manifest).Append("            });\n")
                 .Append("        public static global::MUI.BindingContext<").Append(TypeName(type)).Append("> Create(global::MUI.IView view, ").Append(TypeName(type)).Append(" model)\n")
                 .Append("            => new ").Append(bindingName).Append(typeParameters).Append("(view, model);\n")
-                .Append("        public static void Register() => global::MUI.BindingRegistry.Register<").Append(TypeName(type)).Append(">(Create, Manifest);\n    }\n");
+                .Append("        public static void Register() { global::MUI.BindingRegistry.Register<").Append(TypeName(type)).Append(">(Create, Manifest);")
+                .Append(WidgetRegistration(context, type, candidates)).Append(" }\n    }\n");
             context.AddSource(Identifier(type.ToDisplayString()) + ".Bindings.g.cs", SourceText.From(WrapTypeScope(type, output), Encoding.UTF8));
             // 开放类型没有可用的运行时绑定身份；由项目显式注册需要的闭合工厂。
             return type.Arity == 0 ? FactoryQualifiedName(type, factoryName) : null;
@@ -433,7 +438,8 @@ namespace MUI.Generators
 
         private static string DefaultViewResourceKey(string name)
         {
-            if (name.EndsWith("ViewModel", StringComparison.Ordinal)) name = name.Substring(0, name.Length - "ViewModel".Length);
+            if (name.EndsWith("ViewModel", StringComparison.Ordinal))
+                name = name.Substring(0, name.Length - "ViewModel".Length);
             return name.EndsWith("View", StringComparison.Ordinal) ? name : name + "View";
         }
 
@@ -490,7 +496,8 @@ namespace MUI.Generators
                     throw new InvalidOperationException(string.Join("\n", layout.Conflicts));
                 }
                 var assemblyPrefix = Identifier(Compilation.AssemblyName) + ".";
-                if (!name.StartsWith(assemblyPrefix, StringComparison.Ordinal)) name = assemblyPrefix + name;
+                if (!name.StartsWith(assemblyPrefix, StringComparison.Ordinal))
+                    name = assemblyPrefix + name;
                 output.AddSource(name, SourceText.From(formatted, Encoding.UTF8));
                 sourceNames.Add(name);
                 return formatted;

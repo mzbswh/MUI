@@ -9,20 +9,7 @@ namespace MUI.UGUI
         /// <summary>捕获已有借用的稳定责任；不查询项目对象，也不因再次借用或解除父引用而遗失旧失败。</summary>
         internal Func<bool> CaptureWidgetCleanupConfirmation()
         {
-            childViewReleases.RemoveAll(release => release.CaptureSnapshot().State == CleanupResponsibilityState.Completed);
-            var releases = childViewReleases.ToArray();
-            return () =>
-            {
-                foreach (var release in releases)
-                {
-                    if (release.CaptureSnapshot().State != CleanupResponsibilityState.Completed)
-                    {
-                        return false;
-                    }
-                }
-
-                return true;
-            };
+            return reference == null ? (Func<bool>)(() => true) : reference.CaptureWidgetCleanupConfirmation();
         }
 
         /// <summary>节点责任包含最终原生收尾；尚未请求节点收尾时只检查子视图凭证。</summary>

@@ -66,7 +66,10 @@ namespace MUI.Samples.Navigation.Editor
         [MenuItem("Tools/MUI/示例 (Samples)/打开导航生命周期追踪场景 (Open Navigation Lifecycle Trace Scene)", false, 104)]
         public static void OpenLifecycleTrace() => OpenNavigationScene(true);
 
-        private static void OpenNavigationScene(bool lifecycleTrace)
+        [MenuItem("Tools/MUI/示例 (Samples)/打开直接 Widget 场景 (Open Direct Widget Scene)", false, 105)]
+        public static void OpenDirectWidgets() => OpenNavigationScene(false, true);
+
+        private static void OpenNavigationScene(bool lifecycleTrace, bool directWidgets = false)
         {
             if (EditorApplication.isPlayingOrWillChangePlaymode ||
                 (!Application.isBatchMode && !EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()))
@@ -78,6 +81,7 @@ namespace MUI.Samples.Navigation.Editor
             var sample = new GameObject("NavigationDemo", typeof(NavigationDemo)).GetComponent<NavigationDemo>();
             sample.AutomaticWalkthrough = Application.isBatchMode;
             sample.RecordLifecycleTrace = lifecycleTrace;
+            sample.DirectWidgetsOnly = directWidgets;
             sample.ShowEnterTransitionPreview = lifecycleTrace;
             sample.ShowCacheWalkthrough = lifecycleTrace;
             if (!AssetDatabase.IsValidFolder("Assets/MUI Samples"))
@@ -97,14 +101,16 @@ namespace MUI.Samples.Navigation.Editor
 
         public static void RunLifecycleTracePreviewBatch() => RunPreviewBatch(true);
 
-        private static void RunPreviewBatch(bool lifecycleTrace)
+        public static void RunDirectWidgetPreviewBatch() => RunPreviewBatch(false, true);
+
+        private static void RunPreviewBatch(bool lifecycleTrace, bool directWidgets = false)
         {
             if (!Application.isBatchMode)
             {
                 throw new InvalidOperationException(L.Get("sample.previewHint"));
             }
 
-            OpenNavigationScene(lifecycleTrace);
+            OpenNavigationScene(lifecycleTrace, directWidgets);
             SessionState.SetBool("MUI.PagesPreview", true);
             SessionState.SetFloat("MUI.PagesPreviewStart", (float)EditorApplication.timeSinceStartup);
             // 在进入运行模式前订阅，兼容关闭域重载的编辑器配置。

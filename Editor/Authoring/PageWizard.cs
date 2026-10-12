@@ -28,15 +28,6 @@ namespace MUI.Editor
         private string displayedLanguage;
         private Vector2 scroll;
         private bool creationQueued;
-
-        [MenuItem("Tools/MUI/页面向导 (Page Wizard)", false, 1)]
-        private static void Open()
-        {
-            var window = GetWindow<PageWizard>(L.Get("editor.PageWizard.5a814a8beb"));
-            window.minSize = new Vector2(600, 480);
-
-        }
-
         [SerializeField] private int step;
         [SerializeField] private string createdScriptDirectory;
         [SerializeField] private string createdPrefabPath;
@@ -45,6 +36,13 @@ namespace MUI.Editor
         private GUIStyle noteStyle;
         private GUIStyle policyValueStyle;
         private bool stylesUseDarkSkin;
+
+        [MenuItem("Tools/MUI/页面向导 (Page Wizard)", false, 1)]
+        private static void Open()
+        {
+            var window = GetWindow<PageWizard>(L.Get("editor.PageWizard.5a814a8beb"));
+            window.minSize = new Vector2(600, 480);
+        }
 
         private static GUIContent Hint(string labelKey, string hintKey) =>
             new GUIContent(L.Get(labelKey), L.Get("wizard." + hintKey));
@@ -152,6 +150,12 @@ namespace MUI.Editor
             {
                 GUILayout.Label(L.Get("wizard.identity"), EditorStyles.boldLabel);
                 GUILayout.Space(10);
+                var widgetMode = EditorGUILayout.Popup("创建类型", createWidget ? 1 : 0, new[] { "Page 页面", "Widget 子视图" }) == 1;
+                if (widgetMode != createWidget)
+                {
+                    createWidget = widgetMode;
+                    InvalidateExistingValidation();
+                }
                 pageName = EditorGUILayout.TextField(Hint("editor.PageWizard.dd8fd8a18e", "nameHint"), pageName);
                 targetNamespace = EditorGUILayout.TextField(Hint("editor.PageWizard.db772f3ff7", "namespaceHint"), targetNamespace);
                 using (new EditorGUI.DisabledScope(true))
@@ -184,6 +188,11 @@ namespace MUI.Editor
 
         private void DrawBehavior()
         {
+            if (createWidget)
+            {
+                DrawWidgetBehavior();
+                return;
+            }
             using (new EditorGUILayout.VerticalScope(cardStyle))
             {
                 GUILayout.Label(L.Get("editor.PageWizard.0706f9cb0a"), EditorStyles.boldLabel);
@@ -243,18 +252,19 @@ namespace MUI.Editor
                     GUILayout.Label(ScriptDirectory + "/" + file.Key, noteStyle);
                 GUILayout.Space(8);
                 GUILayout.Label(L.Format("wizard.resourceKey", PageResourceKey), noteStyle);
-                if (!PrefabPath.Contains("/Resources/"))
+                if (!createWidget && !PrefabPath.Contains("/Resources/"))
                     EditorGUILayout.HelpBox(L.Get("wizard.customDirectoryLoader"), MessageType.Info);
             }
-            using (new EditorGUILayout.VerticalScope(cardStyle))
-            {
-                GUILayout.Label(L.Get("editor.PageWizard.3715f68b64"), EditorStyles.boldLabel);
-                var policy = selectedPolicy;
-                GUILayout.Label(L.Get("editor.PageWizard.1fa1a10b63") + ": " + (settings == null ? L.Get("editor.PageWizard.03c3f68152") : settings.name), noteStyle);
-                GUILayout.Label(L.Format("editor.PageWizard.89b4e4e0de", policy.LayerName, policy.Layer, policy.Coverage, policy.Modal), noteStyle);
-                GUILayout.Space(8);
-                GUILayout.Label(L.Get("editor.PageWizard.7fe8b9bce7"), noteStyle);
-            }
+            if (!createWidget)
+                using (new EditorGUILayout.VerticalScope(cardStyle))
+                {
+                    GUILayout.Label(L.Get("editor.PageWizard.3715f68b64"), EditorStyles.boldLabel);
+                    var policy = selectedPolicy;
+                    GUILayout.Label(L.Get("editor.PageWizard.1fa1a10b63") + ": " + (settings == null ? L.Get("editor.PageWizard.03c3f68152") : settings.name), noteStyle);
+                    GUILayout.Label(L.Format("editor.PageWizard.89b4e4e0de", policy.LayerName, policy.Layer, policy.Coverage, policy.Modal), noteStyle);
+                    GUILayout.Space(8);
+                    GUILayout.Label(L.Get("editor.PageWizard.7fe8b9bce7"), noteStyle);
+                }
             using (new EditorGUILayout.VerticalScope(cardStyle))
             {
                 GUILayout.Label(L.Get("wizard.preflight"), EditorStyles.boldLabel);
@@ -286,8 +296,8 @@ namespace MUI.Editor
             {
                 GUILayout.Label(L.Get("wizard.nextSteps"), EditorStyles.boldLabel);
                 GUILayout.Space(8);
-                GUILayout.Label(L.Get("wizard.nextStepsBody"), noteStyle);
-                if (!createdPrefabPath.Contains("/Resources/"))
+                GUILayout.Label(createWidget ? "将 Widget Prefab 拖入父 View 的层级，在父 View 点击生成绑定。通过 Presenter 的 VM 属性访问生成的子模型属性。" : L.Get("wizard.nextStepsBody"), noteStyle);
+                if (!createWidget && !createdPrefabPath.Contains("/Resources/"))
                 {
                     GUILayout.Space(8);
                     EditorGUILayout.HelpBox(L.Get("wizard.customDirectoryLoader"), MessageType.Info);
@@ -343,7 +353,7 @@ namespace MUI.Editor
         {
             if (includePolicy && settingsError != null)
                 return settingsError;
-            if (includePolicy && policyError != null)
+            if (!createWidget && includePolicy && policyError != null)
                 return policyError;
             if (!PageSourceTemplate.IsIdentifier(pageName))
             {
@@ -378,6 +388,8 @@ namespace MUI.Editor
             var names = new List<string> { pageName + "ViewModel.cs" };
             if (createPresenter)
                 names.Add(pageName + "Presenter.cs");
+            if (createWidget && createPresenter && typedContracts)
+                names.Add(pageName + "Args.cs");
             foreach (var name in names)
                 if (PathOccupied(ScriptDirectory + "/" + name))
                     return L.Format("wizard.pathOccupied", ScriptDirectory + "/" + name);
@@ -496,10 +508,10 @@ namespace MUI.Editor
                 root.SetActive(false);
                 SceneManager.MoveGameObjectToScene(root, scene);
                 var rect = (RectTransform)root.transform;
-                if (selectedPolicy.PageRole != PageRole.Main)
+                if (createWidget || selectedPolicy.PageRole != PageRole.Main)
                 {
                     rect.anchorMin = rect.anchorMax = new Vector2(0.5f, 0.5f);
-                    rect.sizeDelta = !ReceivesInput ? new Vector2(480, 80) : new Vector2(600, 400);
+                    rect.sizeDelta = createWidget ? new Vector2(240, 120) : !ReceivesInput ? new Vector2(480, 80) : new Vector2(600, 400);
                 }
                 else
                 {
@@ -515,7 +527,7 @@ namespace MUI.Editor
                 var serializedView = new SerializedObject(view);
                 serializedView.FindProperty("hiddenMode").enumValueIndex = (int)ViewHiddenMode.DeactivateContent;
                 serializedView.FindProperty("hiddenContentRoot").objectReferenceValue = content;
-                serializedView.FindProperty("useGlobalModalBackdrop").boolValue = true;
+                serializedView.FindProperty("useGlobalModalBackdrop").boolValue = !createWidget;
                 serializedView.ApplyModifiedPropertiesWithoutUndo();
 
                 var background = content.AddComponent<Image>();
@@ -531,7 +543,12 @@ namespace MUI.Editor
                 title.rectTransform.pivot = new Vector2(0.5f, 1);
                 title.rectTransform.anchoredPosition = new Vector2(-48, -16);
                 title.rectTransform.sizeDelta = new Vector2(-128, 48);
-                if (!ReceivesInput)
+                if (createWidget)
+                {
+                    title.rectTransform.anchoredPosition = new Vector2(0, -16);
+                    title.rectTransform.sizeDelta = new Vector2(-32, 48);
+                }
+                if (!createWidget && !ReceivesInput)
                 {
                     // 路由不抢焦点，原生图形也不拦截下层射线；提示由业务持有的句柄关闭。
                     var group = root.GetComponent<CanvasGroup>();
@@ -541,7 +558,7 @@ namespace MUI.Editor
                     title.raycastTarget = false;
                     Stretch(title.rectTransform);
                 }
-                else
+                else if (!createWidget)
                 {
                     CreateCloseButton(view, contentRect, backend);
                 }

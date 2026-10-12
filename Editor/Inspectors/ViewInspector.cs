@@ -28,7 +28,8 @@ namespace MUI.Editor
         private void InitializeInspectorState()
         {
             inspectorReady = false;
-            if (manifests == null) manifests = new List<BindingManifest>();
+            if (manifests == null)
+                manifests = new List<BindingManifest>();
             ClearBindingTargets();
             Undo.undoRedoPerformed -= OnBindingUndoRedo;
             Undo.undoRedoPerformed += OnBindingUndoRedo;
@@ -98,7 +99,8 @@ namespace MUI.Editor
         private bool MatchesCurrentPrefab(BindingManifest manifest)
         {
             var view = (View)target;
-            if (view == null || string.IsNullOrEmpty(view.AutoBindingsMetadata)) return false;
+            if (view == null || string.IsNullOrEmpty(view.AutoBindingsMetadata))
+                return false;
             try
             {
                 var metadata = System.Xml.Linq.XElement.Parse(System.Text.Encoding.UTF8.GetString(Convert.FromBase64String(view.AutoBindingsMetadata)));
@@ -110,13 +112,17 @@ namespace MUI.Editor
 
         private void DrawBindings()
         {
-            if (this == null || !inspectorReady || target == null || manifests == null) return;
+            if (this == null || !inspectorReady || target == null || manifests == null)
+                return;
             DrawModelAssociation();
-            if (selected >= manifests.Count) selected = -1;
+            DrawChildWidgets();
+            if (selected >= manifests.Count)
+                selected = -1;
             if (displayedLanguage != L.LanguageId)
             {
                 displayedLanguage = L.LanguageId;
-                if (labels != null && labels.Length > 0) labels[0] = L.Get("editor.ViewInspector.6541599e58");
+                if (labels != null && labels.Length > 0)
+                    labels[0] = L.Get("editor.ViewInspector.6541599e58");
                 resourceManifest = null;
                 results = null;
             }
@@ -158,7 +164,6 @@ namespace MUI.Editor
                 {
                     EditorGUILayout.HelpBox(L.Get("editor.ViewInspector.ad9d661681"), MessageType.Info);
                 }
-
             }
 
             if (results == null)

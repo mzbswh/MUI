@@ -8,7 +8,7 @@ namespace MUI.Editor
     public sealed partial class PageWizard
     {
         private PageAssemblyInspection assemblyInspection;
-        private (string Path, string Backend)? assemblyInspectionKey;
+        private (string Path, string Backend, bool Widget)? assemblyInspectionKey;
 
         private void OnEnable()
         {
@@ -38,10 +38,10 @@ namespace MUI.Editor
         {
             var backend = PageTextBackend.Find(textBackendId);
             var scriptPath = ScriptDirectory + "/" + pageName + "ViewModel.cs";
-            var key = (scriptPath, textBackendId);
+            var key = (scriptPath, textBackendId, createWidget);
             if (refresh || assemblyInspection == null || !assemblyInspectionKey.HasValue || assemblyInspectionKey.Value != key)
             {
-                assemblyInspection = PageAssemblyInspection.Capture(scriptPath, backend.ElementType);
+                assemblyInspection = PageAssemblyInspection.Capture(scriptPath, backend.ElementType, createWidget);
                 assemblyInspectionKey = key;
             }
             return assemblyInspection;

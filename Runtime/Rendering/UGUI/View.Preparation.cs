@@ -16,12 +16,10 @@ namespace MUI.UGUI
             {
                 return false;
             }
-            foreach (var element in elements)
+            foreach (var child in widgetParticipants)
             {
-                if (element == null || !(element is IWidgetElement child))
-                {
+                if (!WidgetParticipantExists(child))
                     continue;
-                }
 
                 var preparation = child.Preparation;
                 RequirePreparationActivation(scope, resourceContext);
@@ -89,12 +87,10 @@ namespace MUI.UGUI
                     RequirePreparationActivation(scope, resourceContext);
                 }
 
-                foreach (var element in elements)
+                foreach (var child in widgetParticipants)
                 {
-                    if (element == null || !(element is IWidgetElement child))
-                    {
+                    if (!WidgetParticipantExists(child))
                         continue;
-                    }
 
                     var preparation = child.Preparation;
                     RequirePreparationActivation(scope, resourceContext);
@@ -102,7 +98,7 @@ namespace MUI.UGUI
                     {
                         await WaitForPreparationAsync(preparation, cancellationToken, activationToken);
                     }
-                    catch (Exception) when (IsAlive && ReferenceEquals(childViews, scope) && element != null &&
+                    catch (Exception) when (IsAlive && ReferenceEquals(childViews, scope) && WidgetParticipantExists(child) &&
                         !ReferenceEquals(preparation, child.Preparation))
                     {
                     }

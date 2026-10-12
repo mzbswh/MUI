@@ -31,6 +31,18 @@ namespace MUI.Widgets
             });
         }
 
+        internal ValueTask<WidgetChangeOutcome> RebindModelAsync(WidgetHandle expected, ViewModel next,
+            CancellationToken cancellationToken = default)
+        {
+            if (expected == null) throw new ArgumentNullException(nameof(expected));
+            if (next == null) throw new ArgumentNullException(nameof(next));
+            return Enqueue(null, cancellationToken, rebind: token =>
+            {
+                RequireRebindTarget(expected);
+                return expected.RebindModelAsync(next, token);
+            });
+        }
+
         private void RequireRebindTarget(WidgetHandle expected)
         {
             scope.RequireActive();

@@ -6,7 +6,7 @@ namespace MUI.Samples.Navigation
     public partial class PageViewModel : PageViewModelBase
     {
         [ObservableProperty]
-        [Bind("NestedItem", nameof(NestedViewElement.ViewModel))]
+        [Bind("NestedItem", nameof(WidgetReference.VM))]
         private ThingItemViewModel item = new ThingItemViewModel { Label = "Stone × 5" };
         [ObservableProperty]
         [Bind("DynamicItem", nameof(DynamicViewElement.Source))]

@@ -56,6 +56,16 @@ namespace MUI.Widgets
             get;
         }
 
+        internal abstract object CurrentArgs
+        {
+            get;
+        }
+
+        internal abstract bool CanRebindModel
+        {
+            get;
+        }
+
         internal abstract bool IsExecuting
         {
             get;
@@ -85,6 +95,12 @@ namespace MUI.Widgets
         {
             get;
         }
+
+        internal abstract ValueTask<RebindOutcome> RebindModelAsync(ViewModel model, CancellationToken token);
+
+        internal abstract ValueTask<PreparedViewRebind> StageModelAsync(ViewModel model, CancellationToken token);
+
+        internal abstract ValueTask<ArgsUpdateOutcome> UpdateWidgetArgsAsync(object args, CancellationToken token);
 
         internal abstract Func<bool> CaptureCleanupConfirmation();
 
@@ -177,28 +193,48 @@ namespace MUI.Widgets
     public abstract class WidgetHandle<TViewModel, TArgs> : WidgetHandle where TViewModel : ViewModel
     {
         private protected WidgetHandle(WidgetScope owner) : base(owner) { }
-        internal abstract ValueTask<PreparedViewRebind> PrepareStagedRebindAsync(TViewModel next, CancellationToken cancellationToken);
+
+        public TViewModel VM => ViewModel;
+
+        internal override object CurrentArgs => Args;
+
+        internal override bool CanRebindModel => CanRebind;
+
         public abstract TViewModel ViewModel
         {
             get;
         }
+
         public abstract TArgs Args
         {
             get;
         }
+
         public abstract bool IsUpdatingArgs
         {
             get;
         }
+
         public abstract bool IsRebinding
         {
             get;
         }
+
         public abstract bool CanRebind
         {
             get;
         }
+
+        internal override ValueTask<RebindOutcome> RebindModelAsync(ViewModel model, CancellationToken token) => RebindAsync((TViewModel)model, token);
+
+        internal override ValueTask<PreparedViewRebind> StageModelAsync(ViewModel model, CancellationToken token) => PrepareStagedRebindAsync((TViewModel)model, token);
+
+        internal override ValueTask<ArgsUpdateOutcome> UpdateWidgetArgsAsync(object args, CancellationToken token) => UpdateArgsAsync(args == null ? default : (TArgs)args, token);
+
+        internal abstract ValueTask<PreparedViewRebind> PrepareStagedRebindAsync(TViewModel next, CancellationToken cancellationToken);
+
         public abstract ValueTask<ArgsUpdateOutcome> UpdateArgsAsync(TArgs args, CancellationToken cancellationToken = default);
+
         public abstract ValueTask<RebindOutcome> RebindAsync(TViewModel model, CancellationToken cancellationToken = default);
     }
 }

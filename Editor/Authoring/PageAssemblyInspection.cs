@@ -36,12 +36,12 @@ namespace MUI.Editor
             get; private set;
         }
 
-        internal static PageAssemblyInspection Capture(string scriptPath, Type titleElementType)
+        internal static PageAssemblyInspection Capture(string scriptPath, Type titleElementType, bool widget = false)
         {
             var result = new PageAssemblyInspection();
             try
             {
-                result.Read(scriptPath, titleElementType);
+                result.Read(scriptPath, titleElementType, widget);
             }
             catch (Exception error)
             {
@@ -50,7 +50,7 @@ namespace MUI.Editor
             return result;
         }
 
-        private void Read(string scriptPath, Type titleElementType)
+        private void Read(string scriptPath, Type titleElementType, bool widget)
         {
             // 新页面目录尚未存在，从最近已有的父目录查找显式定义或引用。
             var directory = Path.GetDirectoryName(scriptPath);
@@ -143,8 +143,10 @@ namespace MUI.Editor
             }
             var required = new HashSet<string>(StringComparer.Ordinal)
             {
-                "MUI.Core", "MUI.Resources", "MUI.Pages", "MUI.UGUI", titleElementType.Assembly.GetName().Name
+                "MUI.Core", "MUI.Resources", "MUI.Widgets", "MUI.UGUI", titleElementType.Assembly.GetName().Name
             };
+            if (!widget)
+                required.Add("MUI.Pages");
             var errors = new List<string>();
             foreach (var name in required)
             {

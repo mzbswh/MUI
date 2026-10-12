@@ -139,6 +139,9 @@ namespace MUI
 
         public override IView BoundView => View;
 
+        /// <summary>当前绑定模型的简写。</summary>
+        public TViewModel VM => ViewModel;
+
         public TViewModel ViewModel
         {
             get;

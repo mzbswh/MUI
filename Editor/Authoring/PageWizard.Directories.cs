@@ -10,8 +10,10 @@ namespace MUI.Editor
     {
         private string ScriptDirectory => MUIEditorSettings.ResolvePageDirectory(
             MUIEditorSettings.instance.PageScriptDirectory, pageName);
+
         private string PrefabDirectory => MUIEditorSettings.ResolvePageDirectory(
             MUIEditorSettings.instance.PagePrefabDirectory, pageName);
+
         private string PrefabPath => existingPrefab == null ? PrefabDirectory + "/" + pageName + "View.prefab"
             : AssetDatabase.GetAssetPath(existingPrefab);
 
@@ -28,7 +30,7 @@ namespace MUI.Editor
         private bool UsesAutomaticPageBindings => existingPrefab == null &&
             typeof(NativeControl).IsAssignableFrom(PageTextBackend.Find(textBackendId).ElementType);
 
-        private IReadOnlyDictionary<string, string> CreatePageSources() => PageSourceTemplate.Create(
+        private IReadOnlyDictionary<string, string> CreatePageSources() => createWidget ? CreateWidgetSources() : PageSourceTemplate.Create(
             pageName, targetNamespace, presetName, ReceivesInput, createPresenter, typedContracts,
             PageTextBackend.Find(textBackendId).ElementType,
             existingPrefab == null ? "Title" : titleElementName,

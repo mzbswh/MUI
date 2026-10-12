@@ -12,7 +12,7 @@ namespace MUI.Editor
         [SerializeField] private GameObject existingPrefab;
         [SerializeField] private string titleElementName = "Title";
         [SerializeField] private string closeElementName = "Close";
-        private (int Instance, string Path, string Backend, string Title, string Close, bool ReceivesInput)? existingValidationKey;
+        private (int Instance, string Path, string Backend, string Title, string Close, bool ReceivesInput, bool Widget)? existingValidationKey;
         private string existingValidationError;
 
         private string ExistingPrefabGuid => existingPrefab == null ? null :
@@ -21,7 +21,7 @@ namespace MUI.Editor
         private void DrawExistingView()
         {
             existingPrefab = (GameObject)EditorGUILayout.ObjectField(Hint("editor.PageWizard.ExistingView.593ff81861", "existingHint"), existingPrefab, typeof(GameObject), false);
-            if (existingPrefab != null)
+            if (existingPrefab != null && !createWidget)
             {
                 titleElementName = EditorGUILayout.TextField(Hint("editor.PageWizard.ExistingView.f7f2eaad00", "titleHint"), titleElementName);
                 if (ReceivesInput)
@@ -45,7 +45,7 @@ namespace MUI.Editor
                 return null;
             }
             var path = AssetDatabase.GetAssetPath(existingPrefab);
-            var key = (existingPrefab.GetInstanceID(), path, backend.Id, titleElementName, closeElementName, ReceivesInput);
+            var key = (existingPrefab.GetInstanceID(), path, backend.Id, titleElementName, closeElementName, ReceivesInput, createWidget);
             if (existingValidationKey.HasValue && key == existingValidationKey.Value)
             {
                 return existingValidationError;
@@ -74,6 +74,11 @@ namespace MUI.Editor
             if (view == null || existingPrefab.GetComponent<RectTransform>() == null)
             {
                 return L.Get("editor.PageWizard.ExistingView.b5f1d7bd40");
+            }
+            if (createWidget)
+            {
+                var issues = ViewContractValidator.ValidateStructure(view);
+                return issues.Count == 0 ? null : string.Join("\n", issues);
             }
             if (string.IsNullOrWhiteSpace(titleElementName) ||
                 ReceivesInput && string.IsNullOrWhiteSpace(closeElementName))

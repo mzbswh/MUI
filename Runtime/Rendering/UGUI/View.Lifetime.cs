@@ -103,6 +103,8 @@ namespace MUI.UGUI
                     WidgetTickActivityChanged = null;
                     nativeGestures.Clear();
                     elements.Clear();
+                    widgetReferences.Clear();
+                    widgetParticipants.Clear();
                     index = null;
                 }
             }

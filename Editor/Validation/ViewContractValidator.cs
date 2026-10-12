@@ -23,6 +23,14 @@ namespace MUI.Editor
                 throw new ArgumentNullException(nameof(entry));
             }
 
+            if (entry.ElementType == typeof(WidgetReference))
+            {
+                var children = new List<Component>();
+                foreach (var child in view.ChildWidgets)
+                    if (child != null && child.Name == entry.ElementName && view.OwnsChildWidget(child.Target))
+                        children.Add(child.Target);
+                return children;
+            }
             var elements = new List<Element>();
             Collect(view.transform, view.transform, elements, new List<string>(), true);
             var matches = new List<Component>();
@@ -40,7 +48,8 @@ namespace MUI.Editor
                         view.OwnsNativeControl(binding.Target) && (entry.ComponentType == null || entry.ComponentType.IsInstanceOfType(binding.Target)))
                     {
                         using (var adapter = NativeControl.Create(binding.Name, binding.Target))
-                            if (entry.ElementType.IsInstanceOfType(adapter)) matches.Add(binding.Target);
+                            if (entry.ElementType.IsInstanceOfType(adapter))
+                                matches.Add(binding.Target);
                     }
             return matches;
         }
@@ -67,19 +76,22 @@ namespace MUI.Editor
             var nativeWriters = new HashSet<(Component, string)>();
             foreach (var entry in manifest.Entries)
             {
-                var nativeContract = typeof(NativeControl).IsAssignableFrom(entry.ElementType);
+                var nativeContract = typeof(NativeControl).IsAssignableFrom(entry.ElementType) || entry.ElementType == typeof(WidgetReference);
                 if (entry.ElementType.IsInterface)
                     foreach (var reference in view.NativeBindings)
-                        if (reference != null && reference.Name == entry.ElementName) nativeContract = true;
+                        if (reference != null && reference.Name == entry.ElementName)
+                            nativeContract = true;
                 if (nativeContract)
                 {
                     try
                     {
                         var found = FindBindingTargets(view, entry);
-                        if (found.Count != 1) errors.Add(entry.Source + ": 原生控件绑定必须唯一匹配：" + entry.ElementName);
+                        if (found.Count != 1)
+                            errors.Add(entry.Source + ": 原生控件绑定必须唯一匹配：" + entry.ElementName);
                         else
                         {
-                            if (entry.IsReadAccess) continue;
+                            if (entry.IsReadAccess)
+                                continue;
                             var property = entry.Kind == BindingEntryKind.Command ? entry.InteractableProperty : entry.TargetProperty;
                             if (entry.Mode != BindingMode.OneWayToSource && !nativeWriters.Add((found[0], property)))
                                 errors.Add(entry.ElementName + "." + property + ": 重复写入绑定。");
@@ -87,8 +99,10 @@ namespace MUI.Editor
                                 errors.Add(entry.ElementName + ": FillAmount 绑定需要 Filled 图片。");
                             if (entry.Mode == BindingMode.TwoWay || entry.Mode == BindingMode.OneWayToSource)
                             {
-                                if (sourceWriters.ContainsKey(entry.Source)) errors.Add(entry.Source + ": 多个控件回写同一属性。");
-                                else sourceWriters.Add(entry.Source, entry.ElementName + "." + property);
+                                if (sourceWriters.ContainsKey(entry.Source))
+                                    errors.Add(entry.Source + ": 多个控件回写同一属性。");
+                                else
+                                    sourceWriters.Add(entry.Source, entry.ElementName + "." + property);
                             }
                         }
                     }
@@ -240,6 +254,12 @@ namespace MUI.Editor
 
             var nativeTargets = new HashSet<Component>();
             var nativeNames = new HashSet<string>(StringComparer.Ordinal);
+            var widgetNames = new HashSet<string>(StringComparer.Ordinal);
+            var widgetTargets = new HashSet<View>();
+            foreach (var widget in view.ChildWidgets)
+                if (widget == null || string.IsNullOrWhiteSpace(widget.Name) || !widgetNames.Add(widget.Name) ||
+                    !view.OwnsChildWidget(widget.Target) || !widgetTargets.Add(widget.Target))
+                    errors.Add("子 Widget 引用失效、重名或跨越其他 View / 容器边界。");
             foreach (var binding in view.NativeBindings)
             {
                 if (binding == null || string.IsNullOrWhiteSpace(binding.Name) || !view.OwnsNativeControl(binding.Target) ||
@@ -248,7 +268,12 @@ namespace MUI.Editor
                     errors.Add("原生控件绑定名称和引用必须唯一、属于当前页面，且不能与 Element 重复绑定。");
                     continue;
                 }
-                try { using (NativeControl.Create(binding.Name, binding.Target)) { } }
+                try
+                {
+                    using (NativeControl.Create(binding.Name, binding.Target))
+                    {
+                    }
+                }
                 catch (Exception error) { errors.Add(error.Message); }
             }
             var sortingTargets = new HashSet<Component>();

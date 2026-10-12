@@ -6,18 +6,21 @@ using MUI.Widgets;
 
 namespace MUI.UGUI
 {
-    public sealed partial class NestedViewElement
+    public sealed partial class WidgetReference
     {
         async ValueTask<IPreparedBindingTarget> IBindingRebindTarget.PrepareRebindAsync(
             IReadOnlyDictionary<string, object> values, CancellationToken cancellationToken)
         {
             RequireAlive();
             RequireAvailableNode();
-            var bindsModel = values.TryGetValue(nameof(ViewModel), out var value);
+            var bindsModel = values.TryGetValue(nameof(VM), out var value) || values.TryGetValue(nameof(ViewModel), out value);
             if (bindsModel && value != null && !(value is ViewModel))
             {
                 throw new InvalidOperationException("Nested ViewModel binding must produce a ViewModel or null.");
             }
+
+            if (values.TryGetValue(nameof(Args), out var nextArgs) && !Equals(nextArgs, args))
+                throw new InvalidOperationException("Update Widget args explicitly before rebinding the parent; a parent rebind cannot atomically update business args and VM.");
 
             var next = bindsModel ? (ViewModel)value : requestedModel;
             var parentScope = scope;
@@ -45,7 +48,7 @@ namespace MUI.UGUI
             var unchanged = !bindsModel || (ReferenceEquals(DisplayedViewModel, next) &&
                 (next != null || previous == null || !previous.IsActive));
             PreparedViewRebind staged = null;
-            WidgetHandle<ViewModel, Unit> candidate = null;
+            WidgetHandle candidate = null;
             try
             {
                 if (!unchanged && next != null)
@@ -53,11 +56,13 @@ namespace MUI.UGUI
                     BindingRegistry.GetManifest(next.GetType());
                     if (previous != null && previous.IsActive)
                     {
-                        staged = await previous.PrepareStagedRebindAsync(next, cancellationToken);
+                        if (previous.Model.GetType() != next.GetType())
+                            throw new InvalidOperationException("A staged Widget rebind must preserve its VM contract.");
+                        staged = await previous.StageModelAsync(next, cancellationToken);
                     }
                     else
                     {
-                        candidate = await parentScope.PrepareAsync(template, provider, Unit.Value, next, cancellationToken);
+                        candidate = await prepare(parentScope, provider, next, args, cancellationToken);
                     }
                 }
 

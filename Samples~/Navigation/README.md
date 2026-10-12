@@ -20,7 +20,7 @@ The walkthrough logs hook order, lifecycle reentrancy rejection, typed completio
 
 The first page also contains a ThingItem child View with generated bindings. The sample prepares it hidden, commits it, preserves its local hidden intent across parent visibility changes, releases the borrowed childView without destroying its node, then reuses that node with an asynchronous Presenter. Closing the parent closes the child.
 
-A second item uses NestedViewElement and a generated binding from PageViewModel.Item. The walkthrough replaces its model, clears it with null, and binds it again. Its wrapper is a binding boundary, so the two items can each contain an ItemLabel without causing parent lookup ambiguity. Import the separate Tabs sample for tab navigation.
+A second item is referenced directly by the parent View and bound from PageViewModel.Item through WidgetReference.VM. The walkthrough replaces its model, clears it with null, and binds it again. Each child View is a component lookup boundary, so both items can contain an ItemLabel without parent lookup ambiguity or a wrapper node. Import the separate Tabs sample for tab navigation.
 
 This sample uses the legacy EventSystem input module. Use the legacy input backend (or Both), or supply a compatible EventSystem. Modal and transition examples are included in the navigation walkthrough.
 
@@ -563,3 +563,9 @@ UIPage 和 UIWidget 共用规则。页面暂停由 PagePolicy.TickPause 控制�
 ## Presenter 命令
 
 `PagePresenter` 为 partial 类，直接在 Confirm 方法上声明 `[Command]` 与 `[BindCommand]`，通过 `CommandContext.RequestClose(ViewModel.Selection)` 返回结果。生成的 ConfirmCommand 归 Presenter 实例持有，由页面/子视图宿主追加到当前绑定会话；无需 ViewModel Handler 或手写订阅。Close 继续由 PageViewModelBase 提供。两者共用输入资格、取消和解绑规则；同一事件重复接管会报错。当前变更仅做离线编译，尚未执行 Unity 交互验收。
+
+## 父 View 直接管理 Widget
+
+菜单 `Tools/MUI/示例 (Samples)/打开直接 Widget 场景 (Open Direct Widget Scene)` 打开精简演示。静态 ItemView 直接位于父 View 下，通过 `ConfigureChildWidgets` 登记；父模型绑定 `WidgetReference.VM`。示例显式登记子 Presenter 工厂，使用 `VM` 简写，并演示替换、清空、恢复与父级关闭。没有额外包装节点，子控件仍由子 View 管理。
+
+普通 Navigation 示例也使用此结构；LocalNestedDemo 与列表保留 NestedViewElement 兼容方式。直接引用的编辑器工作流是在父 Prefab 根 View 的“子 Widget”中配置名称与父属性，再生成绑定。

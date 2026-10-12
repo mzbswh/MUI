@@ -10,6 +10,8 @@ namespace MUI
         private static readonly Dictionary<Type, Registration> Entries = new Dictionary<Type, Registration>();
         private static object generation = new object();
 
+        internal static event Action ResetCompleted;
+
         /// <summary>注册内容代际；新增契约或重建注册表后使旧绑定缓存失效。</summary>
         internal static object Generation
         {
@@ -180,6 +182,7 @@ namespace MUI
                 Entries.Clear();
                 generation = new object();
             }
+            ResetCompleted?.Invoke();
         }
 
         private sealed class Registration

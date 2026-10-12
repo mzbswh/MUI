@@ -13,7 +13,7 @@ namespace MUI.Editor
              "public readonly ref return sbyte sealed short sizeof stackalloc static string struct switch this throw " +
              "true try typeof uint ulong unchecked unsafe ushort using virtual void volatile while").Split(' '), StringComparer.Ordinal);
 
-        private static string EscapeQualifiedName(string value)
+        internal static string EscapeQualifiedName(string value)
         {
             var parts = value.Split('.');
             for (var i = 0; i < parts.Length; i++)
@@ -69,7 +69,7 @@ namespace MUI.Editor
         }
 
         /// <summary>保留 Element 原名，转义为合法 C# 字符串，不将节点名称当作源码拼接。</summary>
-        private static string StringLiteral(string value)
+        internal static string StringLiteral(string value)
         {
             var result = new StringBuilder("\"");
             foreach (var character in value)
@@ -199,7 +199,6 @@ namespace MUI.Editor
                     "        /// <summary>页面初始标题。</summary>",
                     "        public string Title { get; }",
                     "    }"));
-
             }
 
             if (presenter)
@@ -215,7 +214,7 @@ namespace MUI.Editor
                         : "        private void OnPrepareOpen()",
                     "        {",
                     typed
-                        ? "            ViewModel.Title = title ?? string.Empty;"
+                        ? "            VM.Title = title ?? string.Empty;"
                         : "            // 需要等待数据加载时，可改为 async ValueTask 并声明 CancellationToken 参数。",
                     "        }",
                     "    }"));

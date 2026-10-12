@@ -16,20 +16,8 @@ namespace MUI.Editor
     {
         private string nativeBindingMessage;
         private readonly List<string> nativeRuleErrors = new List<string>();
-        private sealed class ControlRow
-        {
-            public string Name;
-            public Type Adapter;
-            public readonly List<Type> RequiredAdapters = new List<Type>();
-            public ControlNamingRule Rule;
-            public Type ComponentType;
-            public Component Target;
-            public BindingEntry Entry;
-            public string Error;
-            public bool IsElementBinding;
-            public bool DeclaredInCode;
-            public readonly List<Component> Candidates = new List<Component>();
-        }
+        private bool validationPending;
+        private double validationDue;
 
         private string CurrentPrefabPath()
         {
@@ -75,7 +63,8 @@ namespace MUI.Editor
             }
             if (selected >= 0)
                 foreach (var entry in manifests[selected].Entries)
-                    Add(entry.ElementName, entry.ElementType, entry, entry.ComponentType);
+                    if (entry.ElementType != typeof(WidgetReference))
+                        Add(entry.ElementName, entry.ElementType, entry, entry.ComponentType);
             var path = CurrentPrefabPath();
             var guid = string.IsNullOrEmpty(path) ? null : AssetDatabase.AssetPathToGUID(path);
             if (!string.IsNullOrEmpty(guid))
@@ -363,9 +352,6 @@ namespace MUI.Editor
                 EditorGUILayout.HelpBox(sourceOpenError, MessageType.Warning);
         }
 
-        private bool validationPending;
-        private double validationDue;
-
         private void QueueBindingValidation()
         {
             if (this == null || !inspectorReady || target == null)
@@ -439,12 +425,15 @@ namespace MUI.Editor
 
         private void SyncAndValidateBindings(List<ControlRow> rows)
         {
+            var undoGroup = -1;
+            var prefabSaved = false;
             try
             {
                 if (nativeRuleErrors.Count != 0)
                     throw new InvalidOperationException(L.Get("nativeRules.fixErrors"));
                 var bindings = rows.Where(row => !row.IsElementBinding).ToList();
-                if (bindings.Count == 0)
+                if (bindings.Count == 0 && FindChildWidgets().Count == 0 &&
+                    (selected < 0 || !manifests[selected].Entries.Any(entry => entry.ElementType == typeof(WidgetReference) && IsAutoBinding(entry))))
                     throw new InvalidOperationException(L.Get("nativeRules.empty"));
                 if (bindings.Any(row => row.Error != null || row.Target == null || !PageSourceTemplate.IsIdentifier(row.Name)))
                     throw new InvalidOperationException(L.Get("nativeRules.fixErrors"));
@@ -460,6 +449,10 @@ namespace MUI.Editor
                     throw new InvalidOperationException("请先关联页面的 ViewModel，再生成绑定。");
                 ValidateAutoBindingOwner(prefabPath, manifests[selected].ViewModelType);
                 var metadata = BuildAutoBindingMetadata(bindings, manifests[selected]);
+                Undo.IncrementCurrentGroup();
+                undoGroup = Undo.GetCurrentGroup();
+                Undo.SetCurrentGroupName(L.Get("nativeRules.generate"));
+                SaveChildWidgets(FindChildWidgets());
                 foreach (var row in bindings)
                 {
                     var choices = GetBindingChoices(row);
@@ -486,6 +479,7 @@ namespace MUI.Editor
                 }
                 else
                     PrefabUtility.ApplyObjectOverride(view, prefabPath, InteractionMode.UserAction);
+                prefabSaved = true;
                 UnityEditor.Compilation.CompilationPipeline.RequestScriptCompilation(UnityEditor.Compilation.RequestScriptCompilationOptions.CleanBuildCache);
                 var hint = CompilerGeneratedSources.AssemblyPrefix(manifests[selected].ViewModelType.Assembly.GetName().Name) + "_" + string.Concat(manifests[selected].ViewModelType.FullName.Select(c => char.IsLetterOrDigit(c) ? c.ToString() : "_" + ((int)c).ToString("X4")));
                 var validation = ViewContractValidator.ValidateStructure(view);
@@ -493,14 +487,39 @@ namespace MUI.Editor
                     (validation.Count == 0 ? "" : "\n" + string.Join("\n", validation));
                 Debug.LogFormat(validation.Count == 0 ? LogType.Log : LogType.Warning, LogOption.NoStacktrace, view,
                     "{0}\n{1}", nativeBindingMessage, "ViewModel: " + manifests[selected].ViewModelType.FullName + "\n编译器文档: " + hint + ".AutoBindings.g.cs / " + hint + ".Bindings.g.cs\n" + string.Join("\n", metadata.Elements("binding").Select(entry => (string)entry.Attribute("name") + " → " + (string)entry.Attribute("property") + ((string)entry.Attribute("command") == "true" ? "；业务入口 partial void On" + (((string)entry.Attribute("source")).EndsWith("Command", StringComparison.Ordinal) ? ((string)entry.Attribute("source")).Substring(0, ((string)entry.Attribute("source")).Length - 7) : (string)entry.Attribute("source")) + "(CommandContext context)" : ((string)entry.Attribute("readOnly") == "true" ? "；实时读取 ViewModel." : "；赋值 ViewModel.") + (string)entry.Attribute("source")))));
-
             }
             catch (Exception error)
             {
+                if (undoGroup >= 0 && !prefabSaved)
+                {
+                    Undo.RevertAllDownToGroup(undoGroup);
+                    serializedObject.Update();
+                    ClearBindingTargets();
+                }
                 nativeBindingMessage = error.Message;
                 Debug.LogFormat(LogType.Error, LogOption.NoStacktrace, target, "{0}\n{1}",
                     L.Get("nativeRules.logRejected"), error.Message);
             }
+            finally
+            {
+                if (undoGroup >= 0 && prefabSaved)
+                    Undo.CollapseUndoOperations(undoGroup);
+            }
+        }
+
+        private sealed class ControlRow
+        {
+            public string Name;
+            public Type Adapter;
+            public readonly List<Type> RequiredAdapters = new List<Type>();
+            public ControlNamingRule Rule;
+            public Type ComponentType;
+            public Component Target;
+            public BindingEntry Entry;
+            public string Error;
+            public bool IsElementBinding;
+            public bool DeclaredInCode;
+            public readonly List<Component> Candidates = new List<Component>();
         }
     }
 }

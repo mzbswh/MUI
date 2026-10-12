@@ -132,18 +132,14 @@ namespace MUI
 
         private static CleanupResponsibility CreateModelRelease(TViewModel model)
         {
+            if (model == null)
+                return null;
+            if (model.HasOwnedWidgetVMs)
+                return new CleanupResponsibility(() => ViewModel.ReleaseOwnedVMAsync(model), "ViewModel<" + typeof(TViewModel).Name + ">");
             if (model is IAsyncDisposable asynchronous)
-            {
                 return CleanupRegistry.GetResponsibility(asynchronous, "ViewModel<" + typeof(TViewModel).Name + ">");
-            }
-            else if (model is IDisposable synchronous)
-            {
-                return new CleanupResponsibility(() =>
-                {
-                    synchronous.Dispose();
-                    return default;
-                }, "ViewModel<" + typeof(TViewModel).Name + ">");
-            }
+            if (model is IDisposable synchronous)
+                return new CleanupResponsibility(() => { synchronous.Dispose(); return default; }, "ViewModel<" + typeof(TViewModel).Name + ">");
             return null;
         }
     }

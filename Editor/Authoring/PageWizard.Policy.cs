@@ -13,7 +13,8 @@ namespace MUI.Editor
         private readonly List<string> presetNames = new List<string>();
         private PagePolicy selectedPolicy;
         private string policyError;
-        private bool ReceivesInput => selectedPolicy == null || selectedPolicy.ReceivesInput;
+
+        private bool ReceivesInput => !createWidget && (selectedPolicy == null || selectedPolicy.ReceivesInput);
 
         private void OnInspectorUpdate() => Repaint();
 
@@ -25,14 +26,17 @@ namespace MUI.Editor
             presetNames.Clear();
             selectedPolicy = null;
             policyError = settingsError;
-            if (policyError != null) return;
+            if (policyError != null)
+                return;
             try
             {
-                if (settings == null) presetNames.AddRange(MUISettings.BuiltInPresetNames);
+                if (settings == null)
+                    presetNames.AddRange(MUISettings.BuiltInPresetNames);
                 else
                 {
                     settings.RequireValid();
-                    foreach (var entry in settings.Presets) presetNames.Add(entry.Name);
+                    foreach (var entry in settings.Presets)
+                        presetNames.Add(entry.Name);
                 }
                 if (string.IsNullOrEmpty(presetName))
                     presetName = settings == null ? "Default" : settings.DefaultPreset;
@@ -85,6 +89,7 @@ namespace MUI.Editor
                     GUILayout.Label(L.Get("wizard.overlayOwner"), noteStyle);
             }
         }
+
         private void DrawPolicyRow(string key, string value)
         {
             using (new EditorGUILayout.HorizontalScope())

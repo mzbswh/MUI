@@ -151,6 +151,8 @@ namespace MUI.Samples.Navigation
                 }
                 PageViewModelBindingFactory.Register();
                 ThingItemViewModelBindingFactory.Register();
+                // 此模型用于多个 Presenter 示例；静态引用显式选择当前演示的工厂。
+                WidgetRegistry.Register<ThingItemViewModel, Unit>(_ => new DirectItemPresenter(), ThingItemViewModelBindingFactory.Create, replace: true);
                 host = canvasObject.AddComponent<UIHost>();
                 host.Initialize(provider, ownsProvider: true, cacheCapacity: showCacheWalkthrough ? (int?)2 : null,
                     maxCachedEstimatedBytes: showCacheWalkthrough ? (long?)(2 * 1024 * 1024) : null,
@@ -169,6 +171,16 @@ namespace MUI.Samples.Navigation
                     () => new PageViewModel(), model => new PagePresenter(), BindPage, host.ResolvePolicy());
                 var asynchronous = new PageDefinition<PageViewModel, PageArgs, int>("demo.async", resource,
                     () => new PageViewModel(), model => new AsyncPagePresenter(pages, synchronous), BindPage, host.ResolvePolicy());
+                if (directWidgetsOnly)
+                {
+                    var opened = await pages.OpenAsync(synchronous, new PageArgs("Direct Widgets", 10));
+                    if (!opened.IsSuccess || !pages.TryGetViewModel<PageViewModel>(opened.Handle.Identity, out var vm))
+                        throw new InvalidOperationException("Cannot open direct Widget demo: " + opened.Status + "/" + opened.Rejection, opened.Error);
+                    await DemonstrateDirectWidgetAsync(FindFrontView(), vm);
+                    await host.ShutdownAsync();
+                    Debug.Log("MUI Navigation shutdown complete");
+                    return;
+                }
                 if (showEnterTransitionPreview)
                 {
                     await ShowEnterTransitionPreviewAsync(pages, resource, BindPage);
@@ -218,25 +230,10 @@ namespace MUI.Samples.Navigation
                 await DemonstrateFocusAsync(pages, resource, BindPage, firstView, first.Handle.Identity);
                 await DemonstrateTicksAsync(pages, resource, BindPage);
                 await DemonstrateWidgetTicksAsync(firstView);
-                var nested = firstView.GetElement<NestedViewElement>("NestedItem");
                 if (!pages.TryGetViewModel<PageViewModel>(first.Handle.Identity, out var pageModel))
-                {
                     throw new InvalidOperationException("Demo page model is unavailable.");
-                }
-
-                Debug.Log("MUI Nested initial: " + ((ThingItemViewModel)nested.DisplayedViewModel).Label);
+                await DemonstrateDirectWidgetAsync(firstView, pageModel);
                 await DemonstrateVirtualListAsync(firstView, pageModel);
-                var originalItem = pageModel.Item;
-                pageModel.Item = new ThingItemViewModel { Label = "Stone × 8" };
-                await nested.PendingChange;
-                originalItem.Label = "Detached old item";
-                Debug.Log("MUI Nested replaced: " + ((ThingItemViewModel)nested.DisplayedViewModel).Label);
-                pageModel.Item = null;
-                await nested.PendingChange;
-                Debug.Log("MUI Nested null clears: " + (nested.DisplayedViewModel == null));
-                pageModel.Item = new ThingItemViewModel { Label = "Stone × 12" };
-                await nested.PendingChange;
-                Debug.Log("MUI Nested rebound: " + ((ThingItemViewModel)nested.DisplayedViewModel).Label);
                 var dynamic = firstView.GetElement<DynamicViewElement>("DynamicItem");
                 Debug.Log("MUI Dynamic initial: " + ((ThingItemViewModel)dynamic.DisplayedViewModel).Label);
                 var originalDynamicView = dynamic.GetComponentInChildren<View>();
@@ -380,17 +377,16 @@ namespace MUI.Samples.Navigation
             item.gameObject.AddComponent<Image>().color = new Color(0.18f, 0.24f, 0.3f);
             AddText("ItemLabel", "Wood", item, new Vector2(330, 60), Vector2.zero).gameObject.AddComponent<TextElement>();
             item.gameObject.AddComponent<View>();
-            var nested = Node("NestedItem", root, new Vector2(360, 70), new Vector2(0, -20));
-            var nestedView = Node("NestedItemView", nested, new Vector2(360, 70), Vector2.zero);
+            var nestedView = Node("NestedItemView", root, new Vector2(360, 70), new Vector2(0, -20));
             nestedView.gameObject.AddComponent<Image>().color = new Color(0.22f, 0.28f, 0.32f);
             AddText("ItemLabel", "Stone", nestedView, new Vector2(330, 60), Vector2.zero).gameObject.AddComponent<TextElement>();
-            nestedView.gameObject.AddComponent<View>();
-            nested.gameObject.AddComponent<NestedViewElement>();
+            var directChild = nestedView.gameObject.AddComponent<View>();
             Node("DynamicItem", root, new Vector2(360, 70), new Vector2(0, -95)).gameObject.AddComponent<DynamicViewElement>();
             AddButton("Confirm", "Confirm", root, new Vector2(-110, -155));
             AddButton("Close", "Close", root, new Vector2(110, -155));
             BuildVirtualList(root, showMeasuredListPreview);
-            root.gameObject.AddComponent<View>();
+            var parentView = root.gameObject.AddComponent<View>();
+            parentView.ConfigureChildWidgets(new[] { new ChildWidgetBinding { Name = "NestedItem", Source = "Item", Target = directChild, CreateVM = false } });
             return root.gameObject;
         }
 
@@ -457,6 +453,11 @@ namespace MUI.Samples.Navigation
                     Destroy(eventSystemObject);
                 }
             }
+        }
+
+        private sealed class DirectItemPresenter : Presenter<ThingItemViewModel, Unit, Unit>
+        {
+            protected override void OnOpened() => Debug.Log("MUI direct Widget opened: " + VM.Label);
         }
     }
 }

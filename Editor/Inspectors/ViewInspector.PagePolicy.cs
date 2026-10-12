@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
-using MUI.Navigation;
+using MUI.Pages;
 using MUI.Resources;
 using MUI.UGUI;
 using UnityEditor;
@@ -87,8 +87,8 @@ namespace MUI.Editor
                 PagePolicyAssetSync.LinkFromView(entry, (View)target, manifests.Count == 0);
                 state.ApplyModifiedProperties();
                 PagePolicyControls.DrawPagePreset(state, entry, settings);
-                RoutePolicy inherited;
-                RoutePolicy effective;
+                PagePolicy inherited;
+                PagePolicy effective;
                 try
                 {
                     var preset = entry.FindPropertyRelative("Preset").stringValue;
@@ -127,8 +127,11 @@ namespace MUI.Editor
         {
             if (selected >= 0 && selected < manifests.Count)
             {
-                var contract = manifests[selected].ViewModelType.GetCustomAttribute<ViewContractAttribute>();
-                return contract == null ? null : contract.ResourceKey;
+                var modelType = manifests[selected].ViewModelType;
+                var page = modelType.GetCustomAttribute<UIPageAttribute>();
+                if (page != null) return page.GetResourceKey(modelType);
+                var widget = modelType.GetCustomAttribute<UIWidgetAttribute>();
+                return widget == null ? null : widget.GetResourceKey(modelType);
             }
             if (manifests.Count > 1) return null;
             var view = (View)target;

@@ -130,7 +130,7 @@ namespace MUI.Editor
                         Value("Layer", policy.LayerName, MUIPagePolicyFields.Layer),
                         Value("ReceivesInput", policy.ReceivesInput, MUIPagePolicyFields.Input),
                         Value("Coverage", policy.Coverage, MUIPagePolicyFields.Coverage,
-                            policy.Modal && rawCoverage == (int)MUI.Navigation.CoveragePolicy.None),
+                            policy.Modal && rawCoverage == (int)MUI.Pages.CoveragePolicy.None),
                         Value("TakesFocus", policy.TakesFocus, MUIPagePolicyFields.Focus),
                         Value("Modal", policy.Modal, MUIPagePolicyFields.Modal),
                         Value("BackBehavior", policy.BackBehavior, MUIPagePolicyFields.Back)

@@ -1,0 +1,200 @@
+using System;
+
+namespace MUI.Pages
+{
+    /// <summary>依赖相对父页面的准备、激活和同层显示顺序；两种方式都在父显示前完成准备。</summary>
+    public enum DependencyPlacement
+    {
+        RequiredBefore,
+        AttachedAfter
+    }
+
+    /// <summary>目标不存在时的处理，与必需/可选失败语义独立。</summary>
+    public enum DependencyMissingPolicy
+    {
+        AutoOpen,
+        RequireOpen,
+        Skip
+    }
+
+    /// <summary>父页面定义的共享依赖；参数工厂保留父参数与依赖参数的编译期类型约束。</summary>
+    public abstract class PageDependency<TParentArgs>
+    {
+        private protected PageDependency()
+        {
+        }
+
+        /// <summary>共享目标必须是单实例、Unit 结果页面定义，不能共享独立交互结果。</summary>
+        public abstract PageDefinition Target
+        {
+            get;
+        }
+
+        /// <summary>相对父页面的准备、激活与同层显示位置。</summary>
+        public abstract DependencyPlacement Placement
+        {
+            get;
+        }
+
+        /// <summary>必需依赖失败会终结父页面；可选依赖失败则撤销关系并发布降级通知。</summary>
+        public abstract bool IsRequired
+        {
+            get;
+        }
+
+        public abstract DependencyMissingPolicy MissingPolicy
+        {
+            get;
+        }
+
+        /// <summary>声明父提交前必须准备成功的依赖；工厂应只根据父参数生成不可变参数。</summary>
+        public static PageDependency<TParentArgs> Required<TViewModel, TArgs>(
+            PageDefinition<TViewModel, TArgs, Unit> route, Func<TParentArgs, TArgs> argsFactory,
+            DependencyPlacement placement = DependencyPlacement.RequiredBefore,
+            DependencyMissingPolicy missingPolicy = DependencyMissingPolicy.AutoOpen)
+            where TViewModel : ViewModel
+        {
+            return new SharedDependency<TViewModel, TArgs>(route, argsFactory, placement, true, missingPolicy);
+        }
+
+        /// <summary>声明不需要业务参数的必需依赖。</summary>
+        public static PageDependency<TParentArgs> Required<TViewModel>(PageDefinition<TViewModel, Unit, Unit> route,
+            DependencyPlacement placement = DependencyPlacement.RequiredBefore,
+            DependencyMissingPolicy missingPolicy = DependencyMissingPolicy.AutoOpen)
+            where TViewModel : ViewModel => Required(route, _ => Unit.Value, placement, missingPolicy);
+
+        /// <summary>
+        /// 声明可选依赖，明确允许失败后继续显示父页面。准备失败先完成回滚，运行期间退出则撤销关系。
+        /// 通过 GetDependencyFailures 和 DependencyDegraded 生命周期事件读取原因；取消、配置环及清理失败不降级。
+        /// </summary>
+        public static PageDependency<TParentArgs> Optional<TViewModel, TArgs>(
+            PageDefinition<TViewModel, TArgs, Unit> route, Func<TParentArgs, TArgs> argsFactory,
+            DependencyPlacement placement = DependencyPlacement.RequiredBefore,
+            DependencyMissingPolicy missingPolicy = DependencyMissingPolicy.AutoOpen)
+            where TViewModel : ViewModel => new SharedDependency<TViewModel, TArgs>(route, argsFactory, placement, false, missingPolicy);
+
+        /// <summary>声明不需要业务参数的可选依赖。</summary>
+        public static PageDependency<TParentArgs> Optional<TViewModel>(PageDefinition<TViewModel, Unit, Unit> route,
+            DependencyPlacement placement = DependencyPlacement.RequiredBefore,
+            DependencyMissingPolicy missingPolicy = DependencyMissingPolicy.AutoOpen)
+            where TViewModel : ViewModel => Optional(route, _ => Unit.Value, placement, missingPolicy);
+
+        internal abstract DependencyRequest Resolve(TParentArgs args);
+
+        private sealed class SharedDependency<TViewModel, TArgs> : PageDependency<TParentArgs>
+                    where TViewModel : ViewModel
+        {
+            private readonly PageDefinition<TViewModel, TArgs, Unit> route;
+            private readonly Func<TParentArgs, TArgs> argsFactory;
+
+            internal SharedDependency(PageDefinition<TViewModel, TArgs, Unit> route, Func<TParentArgs, TArgs> argsFactory,
+                            DependencyPlacement placement, bool isRequired, DependencyMissingPolicy missingPolicy)
+            {
+                if (!Enum.IsDefined(typeof(DependencyMissingPolicy), missingPolicy) ||
+                    (isRequired && missingPolicy == DependencyMissingPolicy.Skip))
+                {
+                    throw new ArgumentException("必需依赖不能跳过，且缺失策略必须有效。", nameof(missingPolicy));
+                }
+                MissingPolicy = missingPolicy;
+                if (!Enum.IsDefined(typeof(DependencyPlacement), placement))
+                {
+                    throw new ArgumentOutOfRangeException(nameof(placement));
+                }
+                Placement = placement;
+                IsRequired = isRequired;
+                this.route = route ?? throw new ArgumentNullException(nameof(route));
+                this.argsFactory = argsFactory ?? throw new ArgumentNullException(nameof(argsFactory));
+                if (route.Policy.AllowMultiple || route.Policy.MaxInstances != 1)
+                {
+                    throw new ArgumentException("共享依赖必须使用单实例页面定义。", nameof(route));
+                }
+            }
+
+            public override bool IsRequired
+            {
+                get;
+            }
+
+            public override DependencyMissingPolicy MissingPolicy
+            {
+                get;
+            }
+
+            public override PageDefinition Target => route;
+
+            public override DependencyPlacement Placement
+            {
+                get;
+            }
+
+            internal override DependencyRequest Resolve(TParentArgs args) =>
+                            new DependencyRequest<TViewModel, TArgs>(route, argsFactory(args), Placement, IsRequired, MissingPolicy);
+        }
+    }
+
+    /// <summary>内部异构候选请求；类型化实现负责创建及参数比较，不以 null 或 object 打开依赖。</summary>
+    internal abstract class DependencyRequest
+    {
+        internal abstract DependencyMissingPolicy MissingPolicy
+        {
+            get;
+        }
+
+        internal abstract PageDefinition Definition
+        {
+            get;
+        }
+
+        internal abstract DependencyPlacement Placement
+        {
+            get;
+        }
+
+        internal abstract bool IsRequired
+        {
+            get;
+        }
+
+        internal abstract PageInstance Create(PageManager pages, long navigationOrder);
+
+        internal abstract bool Matches(PageInstance instance);
+    }
+
+    internal sealed class DependencyRequest<TViewModel, TArgs> : DependencyRequest where TViewModel : ViewModel
+    {
+        private readonly PageDefinition<TViewModel, TArgs, Unit> route;
+        private readonly TArgs args;
+
+        internal DependencyRequest(PageDefinition<TViewModel, TArgs, Unit> route, TArgs args, DependencyPlacement placement, bool isRequired, DependencyMissingPolicy missingPolicy)
+        {
+            this.route = route;
+            this.args = args;
+            MissingPolicy = missingPolicy;
+            Placement = placement;
+            IsRequired = isRequired;
+        }
+
+        internal override DependencyMissingPolicy MissingPolicy
+        {
+            get;
+        }
+
+        internal override bool IsRequired
+        {
+            get;
+        }
+
+        internal override PageDefinition Definition => route;
+
+        internal override DependencyPlacement Placement
+        {
+            get;
+        }
+
+        internal override PageInstance Create(PageManager pages, long navigationOrder) =>
+                    pages.NewInstance(route, args, null, navigationOrder, explicitOwner: false);
+
+        internal override bool Matches(PageInstance instance) =>
+                    instance is PageInstance<TViewModel, TArgs, Unit> typed && route.ArgsEqual(typed.Args, args);
+    }
+}

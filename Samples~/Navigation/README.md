@@ -8,7 +8,7 @@
 
 ## UI 配置与调试入口
 
-创建 Navigation 场景时，菜单同时在 `Assets/MUI Samples` 创建 `NavigationSettings.asset` 并赋给 NavigationDemo。运行时创建的 UIHost 绑定同一资产；普通页面解析默认策略，弹窗解析 Popup，覆盖、缓存、Tick、返回及超时演示通过 `RoutePolicyOverrides` 显式覆盖相关字段。缓存和关闭超时演示分别显式使用容量 2 和 1，其余宿主容量继承资产。修改配置后重新进入 Play Mode，观察新建路由的策略。
+创建 Navigation 场景时，菜单同时在 `Assets/MUI Samples` 创建 `NavigationSettings.asset` 并赋给 NavigationDemo。运行时创建的 UIHost 绑定同一资产；普通页面解析默认策略，弹窗解析 Popup，覆盖、缓存、Tick、返回及超时演示通过 `PagePolicyOverrides` 显式覆盖相关字段。缓存和关闭超时演示分别显式使用容量 2 和 1，其余宿主容量继承资产。修改配置后重新进入 Play Mode，观察新建路由的策略。
 
 UIHost Inspector 只保留 Settings、View Root、简短状态和 Dashboard 按钮。页面资源由加载器按标识解析，宿主不维护 Prefab 目录。自动更新界面统一在 MUISettings 的“运行设置”中配置；关闭后需通过代码调用 UIHost.AdvanceFrame。运行后打开 `Tools/MUI/控制台 (Dashboard)`，选择 **MUI Navigation Canvas**，采集页面状态及最终策略；在“生命周期”页开始记录和复制报告。快照上限可调整为 1—4096。
 
@@ -28,7 +28,7 @@ A DynamicViewElement shows Source and VM as separate inputs. Its sample provider
 
 The preload walkthrough uses DemoPrefabLoader to show independent preload/view claims, release after Unity destruction, and cleanup of successful late loads after cancellation. The loader borrows a scene template; this is not validation of a third-party resource library.
 
-Navigator preload walkthrough covers shared-resource wait cancellation, capacity limits, clear-before-load-completes invalidation, and shutdown release accounting. Its preload-only model factory deliberately throws if invoked, demonstrating that preloading does not create business instances.
+PageManager preload walkthrough covers shared-resource wait cancellation, capacity limits, clear-before-load-completes invalidation, and shutdown release accounting. Its preload-only model factory deliberately throws if invoked, demonstrating that preloading does not create business instances.
 
 
 Enable **Show Enter Transition Preview** on NavigationDemo to display a dedicated page before the regular demonstration. It fades in over 0.8 seconds with controls gated, waits for the shared readiness result, stays visible for 1.2 seconds, then closes. The route configures only its own View through its binding factory, so other sample routes retain their original timings. Cancelling/destroying the demo closes the preview through its finally block. This is an opt-in visual example; it has compiled but has not been run in Unity.
@@ -78,7 +78,7 @@ Play 前启用 NavigationDemo 的 **Show Cache Walkthrough**，建议关闭两�
 
 ## 显式清理预加载与缓存
 
-MUI 不监听平台低内存事件，也不提供全局资源预算或自动回收服务。项目可以在自己的场景切换、低内存或资源策略流程中显式调用 `navigator.ClearPreloadsAsync()`、`navigator.ClearCacheAsync()` 或 `navigator.InvalidateCacheAsync()`；这些入口只清理 Navigator 自己持有的预加载和停用 UI 内容，不改变活动页面，也不替项目资源后端卸载共享资源。
+MUI 不监听平台低内存事件，也不提供全局资源预算或自动回收服务。项目可以在自己的场景切换、低内存或资源策略流程中显式调用 `pages.ClearPreloadsAsync()`、`pages.ClearCacheAsync()` 或 `pages.InvalidateCacheAsync()`；这些入口只清理 PageManager 自己持有的预加载和停用 UI 内容，不改变活动页面，也不替项目资源后端卸载共享资源。
 
 示例中的清理日志仅用于观察导航内部计数。平台低内存事件、实际内存下降、共享资源计数和物理卸载必须由项目资源系统自行验证。
 
@@ -234,7 +234,7 @@ LabelFont 演示 TextElement.Font 的直接对象绑定，绑定前应赋予实�
 
 `LocalNavigationDemo` 对普通打开、替换目标和批次页面统一订阅 `ObserveReadiness` / `ObserveResult`。两种订阅都不创建任务；已发布的状态立即通知，尚未发布则由导航器在安全的通知阶段直接回调。Ready 只表示首次激活就绪，不保证当前可见或输入门控开放。
 
-示例用同步 `LifetimeScope` 管理订阅，以激活句柄去重，避免重复打开已有页面时重复通知；最终结果到达后移除登记。缓存重开属于新的激活，会重新订阅。销毁示例时先同步释放订阅生命周期，再调用宿主 Shutdown，防止关闭通知访问正在销毁的组件。回调内如需打开下一页，使用 `Navigator.PostOpen`，由后续同步 Pump 执行，不重入当前导航事务。
+示例用同步 `LifetimeScope` 管理订阅，以激活句柄去重，避免重复打开已有页面时重复通知；最终结果到达后移除登记。缓存重开属于新的激活，会重新订阅。销毁示例时先同步释放订阅生命周期，再调用宿主 Shutdown，防止关闭通知访问正在销毁的组件。回调内如需打开下一页，使用 `PageManager.PostOpen`，由后续同步 Pump 执行，不重入当前导航事务。
 
 这里的等待用户操作是事件订阅，不是阻塞主线程，也不需要 Task、async/await 或每帧轮询结果。实际 Unity 通知时序尚未运行验收。
 
@@ -257,7 +257,7 @@ LabelFont 演示 TextElement.Font 的直接对象绑定，绑定前应赋予实�
 启动共享示例前可设置 Shared Placement：RequiredBefore 将共享状态放在两个父页面下方；AttachedAfter 放在上方。依赖和父页面使用同一 Layer，实际布局仍由所配置的 Prefab 决定。两种模式都在父显示前准备好依赖，切换配置需要重新启动示例。相对顺序仅离线源码检查，尚未执行 Unity 可视验收。
 
 
-“校验共享示例的静态路由图”菜单读取 RouteGraphValidator 的诊断结果，不加载额外资源、不调用依赖参数工厂。参数冲突示例应静态通过，实际打开时再拒绝不同参数；静态图合法不代表运行时任意共享组合都合法。该菜单尚未在 Unity 执行。
+“校验共享示例的静态路由图”菜单读取 PageGraphValidator 的诊断结果，不加载额外资源、不调用依赖参数工厂。参数冲突示例应静态通过，实际打开时再拒绝不同参数；静态图合法不代表运行时任意共享组合都合法。该菜单尚未在 Unity 执行。
 
 
 共享示例提供两个换绑菜单：父页面换绑应 Applied，并保留共享状态实例及其两个拥有者；直接换绑仍被父页面持有的共享模型应 Rejected/InUse。新父模型为借用，不由导航器作为工厂模型缓存。相关显示和提交故障关闭尚未运行验收。
@@ -285,7 +285,7 @@ LabelFont 演示 TextElement.Font 的直接对象绑定，绑定前应赋予实�
 
 运行并成功初始化 `LocalDependenciesDemo` 后，使用组件右键菜单“查看路由依赖图”。窗口可切换五个示例路由根，搜索节点，点击父拥有者或直接依赖跳转，查看必需/可选策略与静态错误，并复制报告。参数冲突示例应静态通过，因为冲突由运行时参数工厂的结果决定。
 
-项目自己的编辑器程序集引用 `MUI.Navigation.Editor` 与 `MUI.Navigation`，即可调用 `MUI.Navigation.Editor.RouteGraphWindow.Show(rootRoute)`；也可以传入不超过 32 个根。`Tools/MUI/检查 (Inspect)/路由依赖图 (Route Graph)` 可打开或恢复窗口，首次没有数据时会显示接入说明。路由元数据只在显式调用时采集，窗口不自动调用项目代码。
+项目自己的编辑器程序集引用 `MUI.Pages.Editor` 与 `MUI.Pages`，即可调用 `MUI.Pages.Editor.PageGraphWindow.Show(rootRoute)`；也可以传入不超过 32 个根。`Tools/MUI/检查 (Inspect)/路由依赖图 (PageDefinition Graph)` 可打开或恢复窗口，首次没有数据时会显示接入说明。路由元数据只在显式调用时采集，窗口不自动调用项目代码。
 
 工具使用独立 UXML/USS 以及 UI Toolkit。已完成编辑器 C# 离线编译和 XML 结构检查；Unity 实际模板导入、明暗主题、关系跳转和域重载后快照恢复仍需运行验收。
 
@@ -307,7 +307,7 @@ LabelFont 演示 TextElement.Font 的直接对象绑定，绑定前应赋予实�
 
 播放模式中打开 `Tools/MUI/控制台 (Dashboard)` 并选择 UIHost，在“生命周期”页点击开始，再执行示例打开/关闭/参数更新等操作。点击采集后可复制报告；停止保留已有记录，停止并清除会释放缓冲区。默认最近 512 条，可设置 1—8192 条；旧条目覆盖数量与通知队列丢弃数量分别显示，关闭窗口不自动停止记录。
 
-代码入口是 `host.Navigator.StartLifecycleTrace()`、`CaptureLifecycleTrace().ExportText()` 和 `StopLifecycleTrace()`，同步模式不创建任务。报告记录事件顺序和相对时间，Open/OpenAsync 另有请求编号、结束结果及总耗时（包括失败、取消、提前拒绝），不等于各准备阶段耗时；未启用前的历史不会补记。受理的异步 PostOpen 包含排队时间，同步 PostOpen 从实际执行 Open 开始计时。停止或重启后不将旧在途请求的结束写入新一轮记录。
+代码入口是 `host.PageManager.StartLifecycleTrace()`、`CaptureLifecycleTrace().ExportText()` 和 `StopLifecycleTrace()`，同步模式不创建任务。报告记录事件顺序和相对时间，Open/OpenAsync 另有请求编号、结束结果及总耗时（包括失败、取消、提前拒绝），不等于各准备阶段耗时；未启用前的历史不会补记。受理的异步 PostOpen 包含排队时间，同步 PostOpen 从实际执行 Open 开始计时。停止或重启后不将旧在途请求的结束写入新一轮记录。
 
 菜单 `Tools/MUI/示例 (Samples)/打开导航生命周期追踪场景 (Open Navigation Lifecycle Trace Scene)` 创建启用追踪、转场和缓存演示的导航场景。`RecordLifecycleTrace` 使用 2048 条有界记录；自动演示在导航退出后输出完整报告。批处理入口为 `MUI.Samples.Navigation.Editor.NavigationSampleMenu.RunLifecycleTracePreviewBatch`，它等待演示清理完成后自行退出，启动 Unity 时不要附加 `-quit`。该入口已在 Unity 2022.3.62f3 采集到真实阶段报告；Dashboard 按钮和复制交互仍需单独操作验收。
 
@@ -364,7 +364,7 @@ using (var snapshot = automation.CaptureSnapshot())
     byte[] png = snapshot.EncodePng();
     // 项目按需保存或展示 png；快照释放后字节数组仍有效。
 }
-string trace = automation.ExportTrace(navigator);
+string trace = automation.ExportTrace(pages);
 ```
 
 截图为整个 Game View，不裁剪到当前 View，可能含其他界面和可见文本。项目负责导出内容与存储策略；默认及最大像素预算为 16777216，PNG 编码另有内存成本。截图、编码和 Dispose 均同步完成其托管逻辑，不启动 Task；原生纹理 Destroy 仍由 Unity 在帧末执行。方法不会自动等待合适的渲染时机，详见 [Unity 截图时机要求](https://docs.unity3d.com/2022.3/Documentation/ScriptReference/ScreenCapture.CaptureScreenshotAsTexture.html)。此入口已在 Unity 2022.3.62f3 的真实 Prefab Play Mode 中，等待渲染结束后验证正常 PNG、重复释放、释放后访问保护和后续帧原生纹理销毁；像素预算异常、其他时机和平台仍待验收。
@@ -380,7 +380,7 @@ private static void RegisterUIBuildCatalog()
     MUI.Editor.UIBuildValidation.RegisterCatalog("GameUI", catalog =>
     {
         var settings = UnityEditor.AssetDatabase.LoadAssetAtPath<MUI.UGUI.MUISettings>("Assets/UI/MUISettings.asset");
-        var route = InventoryPage.CreateRoute(settings);
+        var route = InventoryPage.CreateDefinition(settings);
         var prefab = UnityEditor.AssetDatabase.LoadAssetAtPath<UnityEngine.GameObject>(
             "Assets/UI/Inventory/Prefabs/InventoryView.prefab");
         catalog.AddPage(route, prefab, InventoryViewModelBindingFactory.Manifest);
@@ -467,7 +467,7 @@ LabeledItemViewModelBindingFactory<string>.Register();
 也可直接构造带绑定工厂的路由：
 
 ```csharp
-var route = LabeledItemViewModelRoute<string>.Create(
+var route = LabeledItemViewModelDefinition<string>.Create(
     () => new LabeledItemViewModel<string> { Item = "Wood", Label = "木材 × 10" });
 ```
 
@@ -490,9 +490,9 @@ LocalDependenciesDemo 中，“尝试通过父参数改写共享依赖”应被�
 - 依赖新增 `missingPolicy` 参数，默认 `AutoOpen` 保持原行为。`RequireOpen` 要求目标已打开且就绪；目标不存在时返回 `DependencyMissing`，正在准备或退出时按忙碌处理。`Optional` 可将这些拒绝降级，`Required` 则拒绝父页面。`Skip` 仅供可选依赖使用：缺失时不执行参数工厂、不加载目标、不报告失败；目标存在时仍校验参数和状态。本次激活跳过的依赖在更新参数时不会隐式重新获取。
 
 ```csharp
-RouteDependency<Unit>.Required(backgroundRoute,
+PageDependency<Unit>.Required(backgroundRoute,
     missingPolicy: DependencyMissingPolicy.RequireOpen);
-RouteDependency<Unit>.Optional(noticeRoute,
+PageDependency<Unit>.Optional(noticeRoute,
     missingPolicy: DependencyMissingPolicy.Skip);
 ```
 
@@ -503,9 +503,9 @@ UGUI View 默认仍采用 CanvasGroup 透明隐藏。需要停止内容子树的
 
 ## 稳定的页面渲染区间
 
-UIHost 始终启用页面排序区间，没有启用开关。在 MUISettings 的“页面渲染排序”中配置宿主 Sorting Layer、Order 最小/最大值、默认页面跨度；在 Layer 列表上方分别配置“同层页面间隔”（默认 32）和“默认 Layer 间隔”（默认 128）；未绑定设置资产时也使用默认排序配置。也可给 `UIHost.Initialize(renderOrder: new RenderOrderOptions(...))` 显式传入配置。独立于 UGUI 的 `Navigator` 仍由调用方传入排序配置。设置在宿主初始化时捕获，运行中修改资产不会替换现有分配器。
+UIHost 始终启用页面排序区间，没有启用开关。在 MUISettings 的“页面渲染排序”中配置宿主 Sorting Layer、Order 最小/最大值、默认页面跨度；在 Layer 列表上方分别配置“同层页面间隔”（默认 32）和“默认 Layer 间隔”（默认 128）；未绑定设置资产时也使用默认排序配置。也可给 `UIHost.Initialize(renderOrder: new RenderOrderOptions(...))` 显式传入配置。独立于 UGUI 的 `PageManager` 仍由调用方传入排序配置。设置在宿主初始化时捕获，运行中修改资产不会替换现有分配器。
 
-Layer 仍只表示逻辑先后，不切固定区间。同层相邻页面使用“同层页面间隔”；跨层相邻页面使用左侧（先渲染）Layer 的“层后间隔覆盖”，-1 使用“默认 Layer 间隔”，0 不预留，正数覆盖默认值。跨层间隔与同层页面间隔不相加。空 Layer 不单独占位，边界连接下一个有页面的 Layer；排序池首尾使用页面间隔。两种间隔均为空间不足时可缩小的软预留。代码可用 `RenderOrderOptions(preferredGap: 32, preferredLayerGap: 128, layerGapOverrides: ...)` 配置，覆盖字典按逻辑 Layer 排序值索引，`GetLayerGapAfter(layer)` 查询生效的层后间隔。`RoutePolicy.renderOrderSpan` 或预设中的页面排序跨度可覆盖单页大小，0 继承宿主默认值。区间包含遮罩（偏移 0）、根 Canvas（偏移 1）和内部内容（偏移 2 至跨度减 1）。单页所有对象使用同一个 Sorting Layer，绝对 Order = 区间起点 + 相对偏移。
+Layer 仍只表示逻辑先后，不切固定区间。同层相邻页面使用“同层页面间隔”；跨层相邻页面使用左侧（先渲染）Layer 的“层后间隔覆盖”，-1 使用“默认 Layer 间隔”，0 不预留，正数覆盖默认值。跨层间隔与同层页面间隔不相加。空 Layer 不单独占位，边界连接下一个有页面的 Layer；排序池首尾使用页面间隔。两种间隔均为空间不足时可缩小的软预留。代码可用 `RenderOrderOptions(preferredGap: 32, preferredLayerGap: 128, layerGapOverrides: ...)` 配置，覆盖字典按逻辑 Layer 排序值索引，`GetLayerGapAfter(layer)` 查询生效的层后间隔。`PagePolicy.renderOrderSpan` 或预设中的页面排序跨度可覆盖单页大小，0 继承宿主默认值。区间包含遮罩（偏移 0）、根 Canvas（偏移 1）和内部内容（偏移 2 至跨度减 1）。单页所有对象使用同一个 Sorting Layer，绝对 Order = 区间起点 + 相对偏移。
 
 分配器优先在现有页面之间寻找空隙。关闭只释放本页区间；置顶优先迁移本页，不紧凑排列其他页面。插入窗口不足时向邻近区间局部整理，必要时扩大到整个宿主。间隔独立于页面跨度，例如页面占用 100～131、预留 32 时，下一页面可从 164 开始；设为 0 则不主动预留。它是软预留，可缩小到零，不因预留空隙拒绝本来能放下的页面。准备中的候选和退出动画中的页面占用容量；视觉退出完成后释放。替换时新旧页面会暂时共存，因此需留出一个候选页面的容量，空间不足返回 `RenderOrderCapacity` 并保留源页面。可用范围为 -32768～32766，配置最大值 + 1 专供关闭手势屏障，防止关闭点击穿透。
 
@@ -519,14 +519,14 @@ Dashboard 的页面详情和导出报告显示分配区间与根 Canvas Order，
 
 ## 页面归属、主页面切换与模态外观
 
-页面角色与 Layer、Coverage、Modal 独立。设置的 Default/FullScreen 为主页面；Popup 为附属界面；Notice/Background 为独立界面。直接构造 `RoutePolicy` 默认仍为 Independent，业务可显式指定 `pageRole`。旧设置资产首次加载时按内置预设名称补齐角色；自定义预设请检查角色是否符合业务需求。
+页面角色与 Layer、Coverage、Modal 独立。设置的 Default/FullScreen 为主页面；Popup 为附属界面；Notice/Background 为独立界面。直接构造 `PagePolicy` 默认仍为 Independent，业务可显式指定 `pageRole`。旧设置资产首次加载时按内置预设名称补齐角色；自定义预设请检查角色是否符合业务需求。
 
 附属界面打开时默认捕获当前主页面，也可指定页面实例或宿主：
 
 ```csharp
-await navigator.OpenAsync(popupRoute, args); // 固定归属当前主页面
-await navigator.OpenAsync(popupRoute, args, owner: PageOwner.For(pageHandle));
-await navigator.OpenAsync(popupRoute, args, owner: PageOwner.Host); // 显式声明跨页面保留
+await pages.OpenAsync(popupRoute, args); // 固定归属当前主页面
+await pages.OpenAsync(popupRoute, args, owner: PageOwner.For(pageHandle));
+await pages.OpenAsync(popupRoute, args, owner: PageOwner.Host); // 显式声明跨页面保留
 ```
 
 找不到当前页面、归属已关闭或正在离开时拒绝请求，不自动升级为宿主级。BeginOpen 和 PostOpen 同样支持 owner。页面归属与共享依赖是两套关系；关闭附属界面不会关闭所属页面。实例复用不能跨归属迁移。
@@ -554,7 +554,7 @@ public void OnLowFrequencyTick(float intervalSeconds)
 }
 ```
 
-页面和子视图使用相同规则。旧 `RoutePolicy`、`RoutePolicyOverrides`、`ChildViewTemplate` 上的 `MaxTickCatchUp` / `maxTickCatchUp` 已移除；显式配置需要迁移到 Presenter。旧设置资产中的同名字段不再生效，未实现可选接口时使用新默认值 1。
+页面和子视图使用相同规则。旧 `PagePolicy`、`PagePolicyOverrides`、`ChildViewTemplate` 上的 `MaxTickCatchUp` / `maxTickCatchUp` 已移除；显式配置需要迁移到 Presenter。旧设置资产中的同名字段不再生效，未实现可选接口时使用新默认值 1。
 
 ## Presenter 命令
 

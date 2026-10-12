@@ -2,7 +2,7 @@ using System;
 using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
-using MUI.Navigation;
+using MUI.Pages;
 
 namespace MUI.UGUI
 {
@@ -11,7 +11,7 @@ namespace MUI.UGUI
         /// <summary>独立于原生宿主组件的提供方持有权；恢复只确认依赖，不重放未知项目回调。</summary>
         private sealed class HostProviderCleanup
         {
-            private Navigator navigator;
+            private PageManager pages;
             private object provider;
             private Func<ValueTask> release;
             private CleanupResponsibility providerResponsibility;
@@ -20,9 +20,9 @@ namespace MUI.UGUI
             private bool releaseStarted;
             private bool releaseSucceeded;
 
-            internal HostProviderCleanup(Navigator navigator, IAsyncDisposable asynchronous, IDisposable synchronous)
+            internal HostProviderCleanup(PageManager pages, IAsyncDisposable asynchronous, IDisposable synchronous)
             {
-                this.navigator = navigator;
+                this.pages = pages;
                 provider = (object)asynchronous ?? synchronous;
                 if (asynchronous != null)
                 {
@@ -36,7 +36,7 @@ namespace MUI.UGUI
                         return default;
                     };
                 }
-                var hostId = navigator.CaptureSnapshot(1, 1).HostId;
+                var hostId = pages.CaptureSnapshot(1, 1).HostId;
                 using (UIErrors.BeginContext(new UIErrorContext(hostId, 0, null, "UIHost.Shutdown", "ProviderRelease")))
                 {
                     Responsibility = new CleanupResponsibility(ReleaseAsync, "UIHost.Provider", true,
@@ -72,12 +72,12 @@ namespace MUI.UGUI
                     catch (Exception)
                     {
                         // 导航首次错误由宿主结果保留；当前责任判断决定提供方是否仍被占用。
-                        if (!navigator.IsShutdown)
+                        if (!pages.IsShutdown)
                         {
                             throw;
                         }
                     }
-                    if (navigator.HasOutstandingProviderUse(Responsibility.Id))
+                    if (pages.HasOutstandingProviderUse(Responsibility.Id))
                     {
                         throw new InvalidOperationException("UIHost retained its provider until navigation resources are confirmed returned.");
                     }
@@ -109,7 +109,7 @@ namespace MUI.UGUI
                 // 依赖与提供方均已确认；解除引用不改写首次 Shutdown 或释放任务的结果。
                 provider = null;
                 release = null;
-                navigator = null;
+                pages = null;
                 navigationCompletion = null;
                 providerResponsibility = null;
                 registrationFailure = null;

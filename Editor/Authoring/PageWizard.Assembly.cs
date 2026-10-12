@@ -18,6 +18,8 @@ namespace MUI.Editor
 
         private void OnDisable()
         {
+            EditorApplication.delayCall -= CreateDeferred;
+            creationQueued = false;
             EditorApplication.projectChanged -= InvalidateAssemblyInspection;
             CompilationPipeline.compilationFinished -= OnCompilationFinished;
         }

@@ -1,5 +1,5 @@
 using MUI.Dialogs;
-using MUI.Navigation;
+using MUI.Pages;
 using MUI.Resources;
 
 namespace MUI.UGUI
@@ -22,22 +22,22 @@ namespace MUI.UGUI
         });
 
         /// <summary>默认创建单实例模态路由；可显式传入已解析的项目策略。</summary>
-        public static Route<AlertViewModel, AlertRequest, Unit> CreateRoute(
-            ViewResource resource, string key = "mui.alert", int layer = 1000, RoutePolicy policy = null)
+        public static PageDefinition<AlertViewModel, AlertRequest, Unit> CreateDefinition(
+            ViewResource resource, string key = "mui.alert", int layer = 1000, PagePolicy policy = null)
         {
-            return new Route<AlertViewModel, AlertRequest, Unit>(
+            return new PageDefinition<AlertViewModel, AlertRequest, Unit>(
                 key, resource,
                 () => new AlertViewModel(),
                 model => new AlertPresenter(),
                 Create,
-                policy ?? new RoutePolicy(layer: layer, allowMultiple: true, maxInstances: 1,
+                policy ?? new PagePolicy(layer: layer, allowMultiple: true, maxInstances: 1,
                     coverage: CoveragePolicy.BlockInput, modal: true, pageRole: PageRole.Independent));
         }
 
         /// <summary>创建本次界面的绑定上下文；生命周期由界面实例管理。</summary>
         public static BindingContext<AlertViewModel> Create(IView view, AlertViewModel model) => new Context(view, model);
 
-        /// <summary>显式注册绑定工厂；直接使用 CreateRoute 时已提供绑定工厂。</summary>
+        /// <summary>显式注册绑定工厂；直接使用 CreateDefinition 时已提供绑定工厂。</summary>
         public static void Register() => BindingRegistry.Register<AlertViewModel>(Create, Manifest);
 
         private static BindingEntry TextEntry(string property, string name) => new BindingEntry(property, name, typeof(TextElement), nameof(TextElement.Content), BindingMode.OneWay);

@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
-using MUI.Navigation;
+using MUI.Pages;
 using MUI.Resources;
 using MUI.UGUI;
 using UnityEditor;
@@ -53,7 +53,7 @@ namespace MUI.Editor
         }
 
         internal static void DrawPagePolicyGroup(SerializedObject state, SerializedProperty entry, MUISettings settings,
-            MUIPagePolicyFields mask, string[] fields, RoutePolicy inherited, HashSet<MUIPagePolicyFields> expandedPagePolicyGroups)
+            MUIPagePolicyFields mask, string[] fields, PagePolicy inherited, HashSet<MUIPagePolicyFields> expandedPagePolicyGroups)
         {
             var overrides = entry.FindPropertyRelative("Overrides");
             var enabled = (overrides.intValue & (int)mask) != 0;
@@ -99,7 +99,7 @@ namespace MUI.Editor
         }
 
         private static void DrawPagePolicyField(SerializedObject state, SerializedProperty entry, MUISettings settings,
-            string field, RoutePolicy inherited, bool enabled)
+            string field, PagePolicy inherited, bool enabled)
         {
             var property = entry.FindPropertyRelative("Values." + field);
             if (!enabled)
@@ -130,7 +130,7 @@ namespace MUI.Editor
             else property.intValue = Convert.ToInt32(value);
         }
 
-        private static object PolicyValue(RoutePolicy policy, string field)
+        private static object PolicyValue(PagePolicy policy, string field)
         {
             switch (field)
             {
@@ -140,7 +140,7 @@ namespace MUI.Editor
                 case "PrepareTimeoutSeconds": return (float)policy.PrepareTimeout.TotalSeconds;
                 case "CloseTimeoutSeconds": return (float)policy.CloseTimeout.TotalSeconds;
                 case "CloseDecisionTimeoutSeconds": return (float)policy.CloseDecisionTimeout.TotalSeconds;
-                default: return typeof(RoutePolicy).GetProperty(field).GetValue(policy);
+                default: return typeof(PagePolicy).GetProperty(field).GetValue(policy);
             }
         }
     }

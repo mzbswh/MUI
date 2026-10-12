@@ -58,6 +58,7 @@ namespace MUI.Generators
             var compilation = context.Compilation;
             foreach (var pair in definitions)
             {
+                if (!pair.Value.Elements("binding").Any()) continue;
                 var type = compilation.GetTypeByMetadataName(pair.Key);
                 if (type == null) continue;
                 try
@@ -228,7 +229,7 @@ namespace MUI.Generators
             return false;
         }
 
-        private static string CanonicalAutoProperty(string value) => value == "Content" ? "text" : value?.ToLowerInvariant();
+        private static string CanonicalAutoProperty(string value) => value;
 
         private static string InitialBindingValue(XElement entry, ITypeSymbol type)
         {

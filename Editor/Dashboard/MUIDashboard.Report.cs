@@ -14,12 +14,12 @@ namespace MUI.Editor
             report.AppendLine().AppendLine(L.Get("editor.MUIDashboard.Report.d5bb561464"));
             foreach (var item in snapshot.Instances.OrderByDescending(item => item.PresentationIndex).ThenByDescending(item => item.Handle.Id))
             {
-                report.AppendLine(L.Format("editor.MUIDashboard.Report.090aca7127", item.Handle.Id, SafeReportText(item.RouteKey), item.State, item.PresentationIndex, item.Layer));
+                report.AppendLine(L.Format("editor.MUIDashboard.Report.090aca7127", item.Handle.Id, SafeReportText(item.PageKey), item.State, item.PresentationIndex, item.Layer));
                 report.AppendLine(L.Format("editor.MUIDashboard.Report.2aadcc0c7c", item.HostVisible, item.HostInteractable, item.Focused, item.HiddenBy.Id, item.BlockedBy.Id));
-                report.AppendLine(L.Format("policy.runtime.status", item.RouteInstanceCount, item.Policy.MaxInstances, item.TickStatus));
+                report.AppendLine(L.Format("policy.runtime.status", item.DefinitionInstanceCount, item.Policy.MaxInstances, item.TickStatus));
                 foreach (var dependency in item.DependencyResolutions)
                 {
-                    report.AppendLine(L.Format("policy.dependency.entry", SafeReportText(dependency.RouteKey), dependency.IsRequired,
+                    report.AppendLine(L.Format("policy.dependency.entry", SafeReportText(dependency.PageKey), dependency.IsRequired,
                         dependency.MissingPolicy, dependency.Kind, SafeReportText(dependency.Failure)));
                 }
                 if (item.RenderOrderStart.HasValue)
@@ -40,7 +40,7 @@ namespace MUI.Editor
             report.AppendLine(L.Get("policy.cache.history"));
             foreach (var decision in snapshot.CacheDiagnostics)
             {
-                report.AppendLine(L.Format("policy.cache.entry", decision.TimestampUtc.ToLocalTime(), SafeReportText(decision.RouteKey), decision.Decision));
+                report.AppendLine(L.Format("policy.cache.entry", decision.TimestampUtc.ToLocalTime(), SafeReportText(decision.PageKey), decision.Decision));
             }
             return report.ToString();
         }

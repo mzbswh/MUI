@@ -6,7 +6,7 @@ namespace MUI.Samples.Navigation
     /// 资源键绑定示例：View 在绑定前配置图像与字体控件的加载器及生命周期。
     /// 模型只提供资源键，不接触原生对象或资源凭证。
     /// </summary>
-    [ViewContract("ResourceImage")]
+    [UIWidget("ResourceImage")]
     public partial class ResourceImageViewModel : ViewModel
     {
         [ObservableProperty]

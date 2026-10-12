@@ -1,0 +1,152 @@
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+
+namespace MUI.Pages
+{
+    public sealed partial class PageManager
+    {
+        // 强制收敛占位使父页面释放关系时不反向等待正在关闭父页面的依赖。
+        private readonly HashSet<PageHandle> retiringDependencies = new HashSet<PageHandle>();
+        private readonly Dictionary<PageHandle, Task<CloseOutcome>> dependencyClosures =
+            new Dictionary<PageHandle, Task<CloseOutcome>>();
+
+        internal async ValueTask ReleaseDependenciesAsync(PageInstance owner, List<Exception> errors)
+        {
+            foreach (var handle in ownership.ReleaseDependencies(owner.Handle))
+            {
+                if (retiringDependencies.Contains(handle) || !entries.TryGetValue(handle, out var dependency))
+                {
+                    continue;
+                }
+                try
+                {
+                    // 父清理等待真实释放，不以依赖的逻辑关闭超时冒充资源已经归还。
+                    await BeginClose(dependency, DismissReason.Closed);
+                    var result = dependency.CleanupCompletion == null
+                        ? new CloseOutcome(CloseStatus.Blocked, cleanup: CleanupStatus.NotRequired)
+                        : await dependency.CleanupCompletion;
+                    AddDependencyCleanupError(result, errors);
+                }
+                catch (Exception error)
+                {
+                    errors.Add(error);
+                }
+            }
+        }
+
+        private static void AddDependencyCleanupError(CloseOutcome result, List<Exception> errors)
+        {
+            if (result.Error != null)
+            {
+                errors.Add(result.Error);
+            }
+            else if ((result.Status != CloseStatus.Closed && result.Status != CloseStatus.AlreadyClosed) ||
+                result.Cleanup != CleanupStatus.Complete)
+            {
+                errors.Add(new InvalidOperationException($"依赖界面清理未完成：{result.Status}/{result.Cleanup}。"));
+            }
+        }
+
+        private Task<CloseOutcome> CloseOwnedDependencyAsync(PageInstance dependency, DismissReason reason,
+            Action acceptResult, PageInstance replacement)
+        {
+            var completion = new TaskCompletionSource<CloseOutcome>(TaskCreationOptions.RunContinuationsAsynchronously);
+            retiringDependencies.Add(dependency.Handle);
+            dependencyClosures.Add(dependency.Handle, completion.Task);
+            _ = FinishOwnedDependencyCloseAsync(dependency, reason, acceptResult, replacement, completion);
+            return completion.Task;
+        }
+
+        private async Task FinishOwnedDependencyCloseAsync(PageInstance dependency, DismissReason reason,
+            Action acceptResult, PageInstance replacement, TaskCompletionSource<CloseOutcome> completion)
+        {
+            try
+            {
+                DetachOptionalOwners(dependency, reason);
+                var errors = new List<Exception>();
+                foreach (var parent in CaptureDependentParents(dependency.Handle))
+                {
+                    if (!entries.ContainsKey(parent.Handle))
+                    {
+                        continue;
+                    }
+                    PropagateDependencyFailure(dependency, parent);
+                    await BeginClose(parent, DismissReason.Forced);
+                    if (parent.CleanupCompletion != null)
+                    {
+                        AddDependencyCleanupError(await parent.CleanupCompletion, errors);
+                    }
+                }
+                if (ownership.HasOwners(dependency.Handle))
+                {
+                    completion.TrySetResult(new CloseOutcome(CloseStatus.Blocked, cleanup: CleanupStatus.NotRequired));
+                    return;
+                }
+                foreach (var error in errors)
+                {
+                    dependency.RecordPreparationCleanupFailure(error);
+                }
+                completion.TrySetResult(await BeginCloseCore(dependency, reason, acceptResult, replacement));
+            }
+            catch (Exception error)
+            {
+                UIErrors.Report(error);
+                completion.TrySetResult(new CloseOutcome(CloseStatus.Failed, error, CleanupStatus.Failed));
+            }
+            finally
+            {
+                dependencyClosures.Remove(dependency.Handle);
+                retiringDependencies.Remove(dependency.Handle);
+            }
+        }
+
+        private static void PropagateDependencyFailure(PageInstance dependency, PageInstance parent)
+        {
+            if (dependency.Failure != null && parent.Failure == null && !parent.HasCloseStarted)
+            {
+                parent.SetFailure(new InvalidOperationException(
+                    $"必需依赖 {dependency.Definition.Key} 失败，父页面无法继续保持有效。", dependency.Failure));
+            }
+        }
+
+        private PageInstance[] CaptureDependentParents(PageHandle dependency)
+        {
+            var visited = new HashSet<PageHandle>();
+            var pendingParents = new Stack<PageHandle>();
+            foreach (var owner in ownership.CaptureOwners(dependency))
+            {
+                if (ownership.IsRequiredDependency(owner, dependency))
+                {
+                    pendingParents.Push(owner);
+                }
+            }
+            var result = new List<PageInstance>();
+            while (pendingParents.Count > 0)
+            {
+                var handle = pendingParents.Pop();
+                if (!visited.Add(handle))
+                {
+                    continue;
+                }
+                if (entries.TryGetValue(handle, out var parent))
+                {
+                    result.Add(parent);
+                    foreach (var ancestor in ownership.CaptureOwners(handle))
+                    {
+                        if (ownership.IsRequiredDependency(ancestor, handle))
+                        {
+                            pendingParents.Push(ancestor);
+                        }
+                    }
+                }
+            }
+            result.Sort((left, right) =>
+            {
+                var navigation = right.Order.CompareTo(left.Order);
+                return navigation != 0 ? navigation : right.Handle.Id.CompareTo(left.Handle.Id);
+            });
+            return ownership.OrderCloseBatch(result.ToArray());
+        }
+    }
+}

@@ -1,8 +1,9 @@
+using MUI.Pages.Diagnostics;
 using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using MUI.Navigation;
+using MUI.Pages;
 using MUI.Resources;
 using MUI.UGUI;
 using UnityEngine;
@@ -19,15 +20,15 @@ namespace MUI.Samples.Navigation
         [SerializeField, Min(0)] private int prepareDelayMilliseconds = 1000;
         [SerializeField, Min(0)] private int cleanupDelayMilliseconds = 500;
         [SerializeField] private bool simulateNonCooperativeLoading = false;
-        private Route<NavigationPageViewModel, string, int> optionalRoute;
-        private Route<NavigationPageViewModel, string, int> failureRoute;
-        private ViewHandle<int> optionalParent;
-        private ViewHandle<int> failureParent;
-        private ViewHandle shared;
+        private PageDefinition<NavigationPageViewModel, string, int> optionalRoute;
+        private PageDefinition<NavigationPageViewModel, string, int> failureRoute;
+        private PageHandle<int> optionalParent;
+        private PageHandle<int> failureParent;
+        private PageHandle shared;
         private CancellationTokenSource openCancellation;
         private Task opening;
         private Task closingShared;
-        private Navigator navigator;
+        private PageManager pages;
         private bool disposed;
 
         private void Start()
@@ -55,32 +56,32 @@ namespace MUI.Samples.Navigation
                 Debug.LogException(error, this);
                 return;
             }
-            navigator = host.Navigator;
+            pages = host.Pages;
             var prepareDelay = Math.Max(0, prepareDelayMilliseconds);
             var cleanupDelay = Math.Max(0, cleanupDelayMilliseconds);
             var sharedRoute = CreateDependency("demo.async.shared", item, false, prepareDelay, cleanupDelay);
             var failingRoute = CreateDependency("demo.async.failing", item, true, prepareDelay, cleanupDelay);
             optionalRoute = CreatePage("demo.async.optional-parent", page,
-                new[] { RouteDependency<string>.Optional(sharedRoute) });
+                new[] { PageDependency<string>.Optional(sharedRoute) });
             failureRoute = CreatePage("demo.async.failure-parent", page,
                 new[]
                 {
-                    RouteDependency<string>.Required(sharedRoute),
-                    RouteDependency<string>.Optional(failingRoute, DependencyPlacement.AttachedAfter)
+                    PageDependency<string>.Required(sharedRoute),
+                    PageDependency<string>.Optional(failingRoute, DependencyPlacement.AttachedAfter)
                 });
-            navigator.LifecycleChanged += OnLifecycleChanged;
+            pages.LifecycleChanged += OnLifecycleChanged;
         }
 
-        private Route<NavigationPageViewModel, string, int> CreatePage(string key, ViewResource page,
-                    IReadOnlyList<RouteDependency<string>> dependencies) =>
-                    new Route<NavigationPageViewModel, string, int>(key, page,
+        private PageDefinition<NavigationPageViewModel, string, int> CreatePage(string key, ViewResource page,
+                    IReadOnlyList<PageDependency<string>> dependencies) =>
+                    new PageDefinition<NavigationPageViewModel, string, int>(key, page,
                         () => new NavigationPageViewModel(), presenterFactory: _ => new PagePresenter(),
                         bindingFactory: NavigationPageViewModelBindingFactory.Create, policy: host.ResolvePolicy(), dependencies: dependencies);
 
         [ContextMenu("异步打开两个依赖父页面")]
         public void OpenParents()
         {
-            if (disposed || navigator == null || (opening != null && !opening.IsCompleted))
+            if (disposed || pages == null || (opening != null && !opening.IsCompleted))
             {
                 return;
             }
@@ -93,16 +94,16 @@ namespace MUI.Samples.Navigation
         {
             try
             {
-                var optional = await navigator.OpenAsync(optionalRoute, "可选共享依赖退出后保留", cancellation.Token);
+                var optional = await pages.OpenAsync(optionalRoute, "可选共享依赖退出后保留", cancellation.Token);
                 optionalParent = optional.Handle;
                 Debug.Log($"异步可选父打开={optional.Status}");
                 if (!optional.IsSuccess || cancellation.IsCancellationRequested || disposed)
                 {
                     return;
                 }
-                var dependencies = navigator.GetDependencies(optional.Handle.Identity);
+                var dependencies = pages.GetDependencies(optional.Handle.Identity);
                 shared = dependencies.Count == 0 ? default : dependencies[0];
-                var failed = await navigator.OpenAsync(failureRoute, "可选准备失败，等回滚后显示", cancellation.Token);
+                var failed = await pages.OpenAsync(failureRoute, "可选准备失败，等回滚后显示", cancellation.Token);
                 failureParent = failed.Handle;
                 Debug.Log($"异步准备失败父打开={failed.Status}，错误={failed.Error}");
                 ReportParents();
@@ -138,7 +139,7 @@ namespace MUI.Samples.Navigation
         [ContextMenu("异步强制关闭共享依赖")]
         public void ForceCloseShared()
         {
-            if (disposed || navigator == null || !shared.IsValid ||
+            if (disposed || pages == null || !shared.IsValid ||
                 (closingShared != null && !closingShared.IsCompleted))
             {
                 return;
@@ -150,7 +151,7 @@ namespace MUI.Samples.Navigation
         {
             try
             {
-                var closed = await navigator.ForceCloseAsync(shared);
+                var closed = await pages.ForceCloseAsync(shared);
                 Debug.Log($"共享依赖强制关闭={closed.Status}，清理={closed.Cleanup}");
                 ReportParents();
             }
@@ -160,12 +161,12 @@ namespace MUI.Samples.Navigation
             }
         }
 
-        private void OnLifecycleChanged(NavigationEvent change)
+        private void OnLifecycleChanged(PageEvent change)
         {
             if (change.DependencyFailure.HasValue)
             {
                 var failure = change.DependencyFailure.Value;
-                Debug.LogWarning($"异步父页面 {change.Route.Key} 降级：{failure.Target.Key}/{failure.Stage}/{failure.Error.Message}");
+                Debug.LogWarning($"异步父页面 {change.Definition.Key} 降级：{failure.Target.Key}/{failure.Stage}/{failure.Error.Message}");
             }
         }
 
@@ -179,7 +180,7 @@ namespace MUI.Samples.Navigation
             {
                 if (parent.IsValid)
                 {
-                    Debug.Log($"父状态={navigator.GetState(parent.Identity)}，降级数={navigator.GetDependencyFailures(parent.Identity).Count}，首次就绪={parent.Readiness.Status}/{parent.Readiness.IsDegraded}");
+                    Debug.Log($"父状态={pages.GetState(parent.Identity)}，降级数={pages.GetDependencyFailures(parent.Identity).Count}，首次就绪={parent.Readiness.Status}/{parent.Readiness.IsDegraded}");
                 }
             }
         }
@@ -188,9 +189,9 @@ namespace MUI.Samples.Navigation
         {
             disposed = true;
             CancelOpen();
-            if (navigator != null)
+            if (pages != null)
             {
-                navigator.LifecycleChanged -= OnLifecycleChanged;
+                pages.LifecycleChanged -= OnLifecycleChanged;
                 if (host != null)
                 {
                     _ = ObserveShutdownAsync(host.ShutdownAsync());

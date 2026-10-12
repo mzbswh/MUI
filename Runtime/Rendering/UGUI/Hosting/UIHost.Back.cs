@@ -1,6 +1,6 @@
 using System;
 using System.Threading.Tasks;
-using MUI.Navigation;
+using MUI.Pages;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -42,7 +42,7 @@ namespace MUI.UGUI
 
         private bool TryRequestBackForSelf(EventSystem inputSystem)
         {
-            if (this == null || !isActiveAndEnabled || navigator == null || navigator.IsShutdown ||
+            if (this == null || !isActiveAndEnabled || pages == null || pages.IsShutdown ||
                 shutdown != null || backInputPending || lastBackInputFrame == Time.frameCount)
             {
                 return false;
@@ -66,7 +66,7 @@ namespace MUI.UGUI
             var releaseStarted = false;
             try
             {
-                var operation = navigator.BackAsync(out var inputSettled);
+                var operation = pages.BackAsync(out var inputSettled);
                 _ = ReleaseBackInputAsync(inputSettled);
                 releaseStarted = true;
                 var outcome = await operation;
@@ -101,7 +101,7 @@ namespace MUI.UGUI
         private void PublishBackInput(CloseOutcome outcome)
         {
             // 退出期间的迟到结果不再回调已释放的项目界面。
-            if (this == null || navigator.IsShutdown || shutdown != null)
+            if (this == null || pages.IsShutdown || shutdown != null)
             {
                 return;
             }
@@ -115,7 +115,7 @@ namespace MUI.UGUI
             foreach (Action<CloseOutcome> handler in handlers.GetInvocationList())
             {
                 // 前一个订阅者可能已经关闭宿主。
-                if (this == null || navigator.IsShutdown || shutdown != null)
+                if (this == null || pages.IsShutdown || shutdown != null)
                 {
                     break;
                 }

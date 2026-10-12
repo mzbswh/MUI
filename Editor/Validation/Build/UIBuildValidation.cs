@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using MUI.Navigation;
+using MUI.Pages;
 using MUI.Resources;
 using MUI.UGUI;
 using UnityEditor;
@@ -123,50 +123,50 @@ namespace MUI.Editor
                 report.Issue(id + L.Get("editor.UIBuildValidation.81196b916d"));
                 return;
             }
-            var registeredRoutes = new HashSet<Route>();
+            var registeredRoutes = new HashSet<PageDefinition>();
             foreach (var page in catalog.Pages)
             {
-                registeredRoutes.Add(page.Route);
+                registeredRoutes.Add(page.Definition);
             }
             var completeGraph = true;
             var resources = new Dictionary<ViewResource, GameObject>();
             foreach (var page in catalog.Pages)
             {
-                foreach (var dependency in page.Route.DependencyDescriptors)
+                foreach (var dependency in page.Definition.DependencyDescriptors)
                 {
                     if (!registeredRoutes.Contains(dependency.Target))
                     {
                         completeGraph = false;
-                        report.Issue(id + "/" + page.Route.Key + L.Get("editor.UIBuildValidation.061c7b88d2") + dependency.Target.Key);
+                        report.Issue(id + "/" + page.Definition.Key + L.Get("editor.UIBuildValidation.061c7b88d2") + dependency.Target.Key);
                     }
                 }
-                if (resources.TryGetValue(page.Route.Resource, out var prefab) && prefab != page.Prefab)
+                if (resources.TryGetValue(page.Definition.Resource, out var prefab) && prefab != page.Prefab)
                 {
-                    report.Issue(id + L.Get("editor.UIBuildValidation.99a69df3cd") + page.Route.Resource);
+                    report.Issue(id + L.Get("editor.UIBuildValidation.99a69df3cd") + page.Definition.Resource);
                 }
                 else
                 {
-                    resources[page.Route.Resource] = page.Prefab;
+                    resources[page.Definition.Resource] = page.Prefab;
                 }
             }
             // 先要求依赖闭合在有界目录内，避免从漏登记的根无限扩展未受控图。
-            report.RouteCount += registeredRoutes.Count;
-            var visited = new HashSet<Route>();
-            var keys = new Dictionary<string, Route>(StringComparer.Ordinal);
+            report.DefinitionCount += registeredRoutes.Count;
+            var visited = new HashSet<PageDefinition>();
+            var keys = new Dictionary<string, PageDefinition>(StringComparer.Ordinal);
             foreach (var page in catalog.Pages)
             {
-                if (completeGraph && !visited.Contains(page.Route))
+                if (completeGraph && !visited.Contains(page.Definition))
                 {
-                    var graph = RouteGraphValidator.Validate(page.Route, maxIssues: 256);
+                    var graph = PageGraphValidator.Validate(page.Definition, maxIssues: 256);
                     foreach (var issue in graph.Issues)
                     {
-                        report.Issue(id + "/" + issue.RouteKey + "：" + issue.Message);
+                        report.Issue(id + "/" + issue.PageKey + "：" + issue.Message);
                     }
                     if (graph.IsTruncated)
                     {
                         report.Issue(id + L.Get("editor.UIBuildValidation.83ee63aae8"));
                     }
-                    foreach (var route in graph.Routes)
+                    foreach (var route in graph.Definitions)
                     {
                         if (!visited.Add(route))
                         {
@@ -188,7 +188,7 @@ namespace MUI.Editor
 
         private static void ValidatePage(string id, UIBuildCatalog.Page page, UIBuildValidationReport report)
         {
-            var prefix = id + "/" + page.Route.Key + "：";
+            var prefix = id + "/" + page.Definition.Key + "：";
             var path = AssetDatabase.GetAssetPath(page.Prefab);
             if (page.Prefab == null || string.IsNullOrEmpty(path) ||
                 !PrefabUtility.IsPartOfPrefabAsset(page.Prefab) ||

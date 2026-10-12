@@ -2,7 +2,7 @@ using MUI.UGUI;
 
 namespace MUI.Samples.Tabs
 {
-    [ViewContract("TabPage")]
+    [UIWidget("TabPage")]
     public partial class TabPageViewModel : ViewModel
     {
         [ObservableProperty]

@@ -2,7 +2,7 @@ using MUI.UGUI;
 
 namespace MUI.Samples.Navigation
 {
-    [ViewContract("NavigationView")]
+    [UIPage(typeof(PageArgs), typeof(int), ResourceKey = "NavigationView", PresenterType = typeof(PagePresenter))]
     public partial class PageViewModel : PageViewModelBase
     {
         [ObservableProperty]

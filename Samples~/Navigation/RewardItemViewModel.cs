@@ -4,7 +4,7 @@ using MUI.UGUI;
 namespace MUI.Samples.Navigation
 {
     /// <summary>奖励条目的同步删除入口，业务只修改集合，不等待控件回收自己。</summary>
-    [ViewContract("RewardItem")]
+    [UIWidget("RewardItem")]
     public partial class RewardItemViewModel : ViewModel
     {
         [ObservableProperty]

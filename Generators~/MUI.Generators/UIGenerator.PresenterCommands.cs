@@ -13,7 +13,7 @@ namespace MUI.Generators
     {
         private static INamedTypeSymbol PresenterBase(INamedTypeSymbol type)
         {
-            for (var current = type.BaseType; current != null; current = current.BaseType)
+            for (var current = type?.BaseType; current != null; current = current.BaseType)
             {
                 if (current.OriginalDefinition.ToDisplayString() == "MUI.Presenter<TViewModel, TArgs, TResult>")
                 {
@@ -27,7 +27,8 @@ namespace MUI.Generators
         /// <summary>Prefab 自动命令让位于明确选择或唯一匹配的 Presenter 声明。</summary>
         private static INamedTypeSymbol AutoBindingPresenter(INamedTypeSymbol model, IEnumerable<INamedTypeSymbol> candidates)
         {
-            var route = Attribute(model, "MUI.Navigation.ViewRouteAttribute");
+            var route = Attribute(model, "MUI.UIPageAttribute");
+            if (route != null && route.ConstructorArguments.Length < 2) return ResolveOpenPresenter(model, route);
             if (route != null)
             {
                 foreach (var option in route.NamedArguments)
@@ -41,7 +42,7 @@ namespace MUI.Generators
 
             var matches = candidates.Where(type => type != null && !type.IsAbstract && PresenterBase(type) != null &&
                 SymbolEqualityComparer.Default.Equals(PresenterBase(type).TypeArguments[0], model) &&
-                (route == null || IsCompatiblePresenter(type, model,
+                (route == null || route.ConstructorArguments.Length == 2 && IsCompatiblePresenter(type, model,
                     route.ConstructorArguments[0].Value as ITypeSymbol, route.ConstructorArguments[1].Value as ITypeSymbol)))
                 .Distinct(SymbolEqualityComparer.Default).ToArray();
             return matches.Length == 1 ? (INamedTypeSymbol)matches[0] : null;
@@ -74,9 +75,9 @@ namespace MUI.Generators
                 }
             }
 
-            if (Attribute(type, "MUI.ViewContractAttribute") != null || Attribute(type, "MUI.Navigation.ViewRouteAttribute") != null)
+            if (Attribute(type, "MUI.UIWidgetAttribute") != null || Attribute(type, "MUI.UIPageAttribute") != null)
             {
-                Fail(type, "ViewContract and ViewRoute belong on the ViewModel, not the Presenter.");
+                Fail(type, "UIWidget and UIPage belong on the ViewModel, not the Presenter.");
             }
 
             var writers = new HashSet<string>(StringComparer.Ordinal);

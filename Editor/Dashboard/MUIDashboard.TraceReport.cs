@@ -1,7 +1,8 @@
+using MUI.Pages.Diagnostics;
 using System.Globalization;
 using System.Text;
 using System.Text.RegularExpressions;
-using MUI.Navigation;
+using MUI.Pages;
 using L = MUI.Editor.Localization.MUIEditorLocalization;
 
 namespace MUI.Editor
@@ -20,10 +21,10 @@ namespace MUI.Editor
                 var milliseconds = (entry.Timestamp - origin) * 1000.0 / trace.TimestampFrequency;
                 report.Append(milliseconds.ToString("F3", CultureInfo.InvariantCulture)).Append(" ms | #")
                     .Append(entry.Sequence).Append(" | ").Append(L.Value(entry.TraceKind))
-                    .Append('/').Append(entry.TraceKind == NavigationTraceKind.Lifecycle ? L.Value(entry.Kind) : entry.OperationName)
+                    .Append('/').Append(entry.TraceKind == PageTraceKind.Lifecycle ? L.Value(entry.Kind) : entry.OperationName)
                     .Append(" | ").Append(entry.Handle);
                 AppendTraceField(report, "trace.version", entry.CommitVersion);
-                AppendTraceField(report, "trace.route", SafeReportText(entry.RouteKey));
+                AppendTraceField(report, "trace.route", SafeReportText(entry.PageKey));
                 AppendTraceField(report, "trace.reason", entry.Reason);
                 AppendTraceField(report, "trace.outcome", Regex.Replace(entry.Outcome ?? string.Empty, @"[^/;=]+",
                     match => L.Get("trace.token." + match.Value, match.Value)));

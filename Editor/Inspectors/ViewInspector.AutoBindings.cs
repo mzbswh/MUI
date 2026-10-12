@@ -116,8 +116,7 @@ namespace MUI.Editor
 
         private static string CanonicalBindingProperty(string property)
         {
-            if (property == "Content") return "text";
-            return property.ToLowerInvariant();
+            return property;
         }
 
         private static void CaptureInitialValue(XElement entry, object value)

@@ -6,6 +6,21 @@ namespace MUI.Editor
 {
     internal static class PageSourceTemplate
     {
+        private static readonly HashSet<string> Keywords = new HashSet<string>(
+            ("abstract as base bool break byte case catch char checked class const continue decimal default delegate " +
+             "do double else enum event explicit extern false finally fixed float for foreach goto if implicit in int " +
+             "interface internal is lock long namespace new null object operator out override params private protected " +
+             "public readonly ref return sbyte sealed short sizeof stackalloc static string struct switch this throw " +
+             "true try typeof uint ulong unchecked unsafe ushort using virtual void volatile while").Split(' '), StringComparer.Ordinal);
+
+        private static string EscapeQualifiedName(string value)
+        {
+            var parts = value.Split('.');
+            for (var i = 0; i < parts.Length; i++)
+                if (Keywords.Contains(parts[i])) parts[i] = "@" + parts[i];
+            return string.Join(".", parts);
+        }
+
         internal static bool IsIdentifier(string value)
         {
             if (string.IsNullOrEmpty(value) || !IsStart(value[0]))
@@ -83,7 +98,7 @@ namespace MUI.Editor
             bool presenter,
             bool typed,
             Type titleElementType = null,
-            string titleElementName = "Title", string closeElementName = "Close", string prefabAssetGuid = null, string resourceKey = null)
+            string titleElementName = "Title", string closeElementName = "Close", string resourceKey = null, bool autoBindings = false, string defaultPreset = "Default")
         {
             if (!IsIdentifier(name) || !IsNamespace(ns))
             {
@@ -99,7 +114,7 @@ namespace MUI.Editor
             PageTextBackend.RequireElementType(titleElementType);
             var titleContract = typeof(ITextElement).IsAssignableFrom(titleElementType)
                 ? typeof(ITextElement) : titleElementType;
-            var titleTypeName = "global::@" + titleContract.FullName.Replace(".", ".@");
+            var titleTypeName = "global::" + EscapeQualifiedName(titleContract.FullName);
             if (string.IsNullOrWhiteSpace(titleElementName) ||
                 receivesInput && string.IsNullOrWhiteSpace(closeElementName))
             {
@@ -107,7 +122,7 @@ namespace MUI.Editor
             }
             var titleName = StringLiteral(titleElementName);
             var closeName = !receivesInput ? null : StringLiteral(closeElementName);
-            var escapedNamespace = "@" + ns.Replace(".", ".@");
+            var escapedNamespace = EscapeQualifiedName(ns);
             string Wrap(params string[] lines)
             {
                 return "// 由 MUI 页面向导创建。此源码归项目所有，可以自由修改。\n" +
@@ -116,39 +131,47 @@ namespace MUI.Editor
 
             var buttonType = "global::MUI.IButtonElement";
             var args = typed ? name + "Args" : "global::MUI.Unit";
-            var result = typed ? name + "Result" : "global::MUI.Unit";
-            var routeDeclaration = $"    [global::MUI.Navigation.ViewRoute(typeof({args}), typeof({result}), Key = {StringLiteral(ns + "." + name)}";
-            if (presenter)
-            {
-                routeDeclaration += $", PresenterType = typeof({name}Presenter)";
-            }
-
-            routeDeclaration += ")]";
+            var result = "global::MUI.Unit";
+            var pageOptions = new List<string>();
+            if (!presenter) pageOptions.Add($"typeof({args}), typeof({result})");
+            if (resourceKey != null && resourceKey != (name.EndsWith("View", StringComparison.Ordinal) ? name : name + "View"))
+                pageOptions.Add($"ResourceKey = {StringLiteral(resourceKey)}");
+            if (preset != defaultPreset) pageOptions.Add($"PolicyPreset = {StringLiteral(preset)}");
+            var pageDeclaration = pageOptions.Count == 0 ? "    [global::MUI.UIPage]"
+                : "    [global::MUI.UIPage(" + string.Join(", ", pageOptions) + ")]";
 
             var files = new Dictionary<string, string>(StringComparer.Ordinal);
             var modelLines = new List<string>
             {
                 "    /// <summary>页面表现状态，通过生成绑定连接到预制控件。</summary>",
-                $"    [global::MUI.ViewContract({StringLiteral(resourceKey ?? name + "View")}{(string.IsNullOrEmpty(prefabAssetGuid) ? string.Empty : ", PrefabAssetGuid = " + StringLiteral(prefabAssetGuid))})]",
-                routeDeclaration,
+                pageDeclaration,
                 $"    public partial class {name}ViewModel : global::MUI.ViewModel",
-                "    {",
+                "    {"
+            };
+            if (!autoBindings) modelLines.AddRange(new[]
+            {
                 "        /// <summary>页面标题，由生成的 Title 属性发布变化。</summary>",
                 "        [global::MUI.ObservableProperty]",
                 $"        [global::MUI.Bind({titleName}, nameof({titleTypeName}.Content),",
                 $"            ElementType = typeof({titleTypeName}))]",
                 $"        private string title = \"{name}\";"
-            };
+            });
             if (receivesInput)
             {
+                modelLines.Add("        /// <summary>请求关闭本次激活，不等待自身命令清理。</summary>");
+                if (autoBindings)
+                {
+                    modelLines.Add("        partial void OnClose(global::MUI.CommandContext context)");
+                }
+                else
+                {
+                    modelLines.Add("        [global::MUI.Command]");
+                    modelLines.Add($"        [global::MUI.BindCommand({closeName}, nameof({buttonType}.Clicked),");
+                    modelLines.Add($"            ElementType = typeof({buttonType}))]");
+                    modelLines.Add("        private void Close(global::MUI.CommandContext context)");
+                }
                 modelLines.AddRange(new[]
                 {
-                    "",
-                    "        /// <summary>请求关闭本次激活，不等待自身命令清理。</summary>",
-                    "        [global::MUI.Command]",
-                    $"        [global::MUI.BindCommand({closeName}, nameof({buttonType}.Clicked),",
-                    $"            ElementType = typeof({buttonType}))]",
-                    "        private void Close(global::MUI.CommandContext context)",
                     "        {",
                     "            context.RequestClose();",
                     "        }"
@@ -159,7 +182,7 @@ namespace MUI.Editor
 
             if (typed)
             {
-                files.Add(name + "Args.cs", Wrap(
+                if (!presenter) files.Add(name + "Args.cs", Wrap(
                     "    /// <summary>本次打开页面的参数，按项目需求扩展。</summary>",
                     $"    public readonly struct {name}Args",
                     "    {",
@@ -171,71 +194,28 @@ namespace MUI.Editor
                     "        /// <summary>页面初始标题。</summary>",
                     "        public string Title { get; }",
                     "    }"));
-                files.Add(name + "Result.cs", Wrap(
-                    "    /// <summary>页面完成时返回的数据；关闭页面不自动产生此结果。</summary>",
-                    $"    public readonly struct {name}Result",
-                    "    {",
-                    $"        public {name}Result(string value)",
-                    "        {",
-                    "            Value = value;",
-                    "        }",
-                    "",
-                    "        /// <summary>示例结果值，按业务含义替换。</summary>",
-                    "        public string Value { get; }",
-                    "    }"));
+
             }
 
             if (presenter)
             {
-                files.Add(name + "Presenter.cs", Wrap(
+                files.Add(name + "Presenter.cs", "using MUI;\n\n" + Wrap(
                     "    /// <summary>接入页面生命周期，业务数据写入 ViewModel。</summary>",
-                    $"    public sealed class {name}Presenter : global::MUI.Presenter<{name}ViewModel, {args}, {result}>",
+                    $"    public sealed partial class {name}Presenter",
                     "    {",
-                    $"        protected override void OnOpen({args} args)",
+                    "        /// <summary>显示前初始化；需要等待加载时改为 async Task 或 async ValueTask，框架会等待完成再显示。</summary>",
+                    "        [OpenEntry]",
+                    typed
+                        ? "        private void OnOpen(string title)"
+                        : "        private void OnOpen()",
                     "        {",
                     typed
-                        ? "            ViewModel.Title = args.Title ?? string.Empty;"
-                        : "            // 使用本次激活的生命周期加载页面数据。",
+                        ? "            ViewModel.Title = title ?? string.Empty;"
+                        : "            // 需要等待数据加载时，可改为 async ValueTask 并声明 CancellationToken 参数。",
                     "        }",
                     "    }"));
             }
 
-            var pageLines = new List<string>
-            {
-                "    /// <summary>页面资源标识与类型化路由入口。</summary>",
-                $"    public static class {name}Page",
-                "    {",
-                "        /// <summary>页面预制体的资源标识，由资源提供器解析。</summary>",
-                "        public static global::MUI.Resources.ViewResource Resource { get; } =",
-                $"            {name}ViewModelRoute.Resource;",
-                "",
-                "        /// <summary>创建路由定义；每次打开的实例由导航器管理。</summary>",
-                $"        public static global::MUI.Navigation.Route<{name}ViewModel, {args}, {result}> CreateRoute(",
-                "            global::MUI.UGUI.MUISettings settings = null, global::MUI.Navigation.RoutePolicyOverrides overrides = null)",
-                "        {",
-                $"            return {name}ViewModelRoute.Create(",
-                $"                () => new {name}ViewModel(),"
-            };
-            if (presenter)
-            {
-                pageLines.Add($"                presenterFactory: model => new {name}Presenter(),");
-            }
-
-            pageLines.Add("                policy: settings == null");
-            pageLines.Add("                    ? global::MUI.UGUI.MUISettings.ResolveGlobalPolicy(" + StringLiteral(preset) + ", overrides: overrides)");
-            pageLines.Add("                    : settings.ResolvePolicy(" + StringLiteral(preset) + ", overrides: overrides));");
-            pageLines.Add("        }");
-            pageLines.Add("    }");
-            if (!string.IsNullOrEmpty(prefabAssetGuid))
-            {
-                pageLines.InsertRange(3, new[]
-                {
-                    "        /// <summary>关联的已有 Prefab 资产 GUID；项目须将 Resource 登记到该资产，不作为运行时加载路径。</summary>",
-                    "        public const string PrefabAssetGuid = " + StringLiteral(prefabAssetGuid) + ";",
-                    ""
-                });
-            }
-            files.Add(name + "Page.cs", Wrap(pageLines.ToArray()));
             return files;
         }
     }

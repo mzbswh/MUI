@@ -2,8 +2,7 @@ using MUI.UGUI;
 
 namespace MUI.BasicExample
 {
-    [ViewContract("BasicView")]
-    [Navigation.ViewRoute(typeof(Unit), typeof(int), Key = "basic.page")]
+    [UIPage(typeof(Unit), typeof(int), Key = "basic.page", ResourceKey = "BasicView")]
     public partial class BasicPageViewModel : ViewModel
     {
         [ObservableProperty]

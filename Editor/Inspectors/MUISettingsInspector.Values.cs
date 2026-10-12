@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using MUI.UGUI;
-using MUI.Navigation;
+using MUI.Pages;
 using UnityEditor;
 using UnityEngine.UIElements;
 using L = MUI.Editor.Localization.MUIEditorLocalization;

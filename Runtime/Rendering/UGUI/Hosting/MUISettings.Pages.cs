@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using MUI.Navigation;
+using MUI.Pages;
 using MUI.Resources;
 using UnityEngine;
 
@@ -23,10 +23,10 @@ namespace MUI.UGUI
     {
         [SerializeField] private List<MUIPageSettings> pagePolicies = new List<MUIPageSettings>();
 
-        private RoutePolicy AttachPagePolicies(RoutePolicy fallback, string preset, string layer, RoutePolicyOverrides overrides)
+        private PagePolicy AttachPagePolicies(PagePolicy fallback, string preset, string layer, PagePolicyOverrides overrides)
         {
             if (pagePolicies == null || pagePolicies.Count == 0) return fallback;
-            var resolved = new Dictionary<ViewResource, RoutePolicy>();
+            var resolved = new Dictionary<ViewResource, PagePolicy>();
             foreach (var page in pagePolicies)
             {
                 var policy = ResolvePageEntry(page, preset, layer);
@@ -36,7 +36,7 @@ namespace MUI.UGUI
             return fallback.WithResourcePolicies(resolved, overrides);
         }
 
-        private RoutePolicy ResolvePageEntry(MUIPageSettings page, string preset, string layer)
+        private PagePolicy ResolvePageEntry(MUIPageSettings page, string preset, string layer)
         {
             if (page.Values == null || (page.Overrides & ~MUIPagePolicyFields.All) != 0)
                 throw new ArgumentException("Invalid page policy override: " + page.ResourceKey);
@@ -47,7 +47,7 @@ namespace MUI.UGUI
             policy = page.Values.CreateOverrides(page.Overrides, pageLayer).Apply(policy,
                 (page.Overrides & MUIPagePolicyFields.Layer) != 0 ? page.Values.Layer : null);
             if (layer != null)
-                policy = new RoutePolicyOverrides { Layer = FindLayer(layers, layer).Order }.Apply(policy, layer);
+                policy = new PagePolicyOverrides { Layer = FindLayer(layers, layer).Order }.Apply(policy, layer);
             return policy;
         }
 

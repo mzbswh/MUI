@@ -1,0 +1,14 @@
+{
+  "name": "MUI.Pages.Editor",
+  "rootNamespace": "MUI.Pages.Editor",
+  "references": [
+    "MUI.Core",
+    "MUI.Resources",
+    "MUI.Pages",
+    "MUI.Editor.Localization"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "autoReferenced": true
+}

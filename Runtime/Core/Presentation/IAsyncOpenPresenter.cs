@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace MUI
 {
-    /// <summary>显式可选能力；同步 Open 拒绝实现此接口的 Presenter。</summary>
+    /// <summary>异步打开准备能力；框架建立 Context 后等待此方法完成，再提交页面打开。</summary>
     public interface IAsyncOpenPresenter<in TArgs>
     {
         ValueTask OnOpenAsync(TArgs args, CancellationToken cancellationToken);

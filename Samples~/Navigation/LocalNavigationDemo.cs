@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using MUI.Navigation;
+using MUI.Pages;
 using MUI.Resources;
 using MUI.Samples.ResourceIntegration;
 using MUI.UGUI;
@@ -19,13 +19,13 @@ namespace MUI.Samples.Navigation
         [SerializeField] private GameObject pagePrefab = null;
         [SerializeField] private string resourcesPath = string.Empty;
         [SerializeField] private bool allowClose = true;
-        private Route<NavigationPageViewModel, string, int> route;
-        private Route<NavigationPageViewModel, string, int> batchRoute;
-        private ViewHandle<int> current;
+        private PageDefinition<NavigationPageViewModel, string, int> route;
+        private PageDefinition<NavigationPageViewModel, string, int> batchRoute;
+        private PageHandle<int> current;
         private int createdPages;
         private bool initialized;
         private readonly LifetimeScope observationLifetime = new LifetimeScope();
-        private readonly HashSet<ViewHandle> observedPages = new HashSet<ViewHandle>();
+        private readonly HashSet<PageHandle> observedPages = new HashSet<PageHandle>();
 
         private async void Start()
         {
@@ -68,14 +68,14 @@ namespace MUI.Samples.Navigation
                 }
 
                 initialized = true;
-                route = new Route<NavigationPageViewModel, string, int>("demo.local", resource,
+                route = new PageDefinition<NavigationPageViewModel, string, int>("demo.local", resource,
                     () => new NavigationPageViewModel(), _ => new PagePresenter(this),
                     NavigationPageViewModelBindingFactory.Create,
-                    policy: host.ResolvePolicy(overrides: new RoutePolicyOverrides { CacheMode = ViewCacheMode.KeepAlive }));
-                batchRoute = new Route<NavigationPageViewModel, string, int>("demo.local.batch", resource,
+                    policy: host.ResolvePolicy(overrides: new PagePolicyOverrides { CacheMode = ViewCacheMode.KeepAlive }));
+                batchRoute = new PageDefinition<NavigationPageViewModel, string, int>("demo.local.batch", resource,
                     () => new NavigationPageViewModel(), _ => new PagePresenter(this),
                     NavigationPageViewModelBindingFactory.Create,
-                    policy: host.ResolvePolicy(layer: "Popup", overrides: new RoutePolicyOverrides
+                    policy: host.ResolvePolicy(layer: "Popup", overrides: new PagePolicyOverrides
                     {
                         AllowMultiple = true,
                         MaxInstances = 3,
@@ -99,10 +99,10 @@ namespace MUI.Samples.Navigation
             {
                 return;
             }
-            var result = await host.Navigator.OpenAsync(route, "本地资源的顶层界面");
+            var result = await host.Pages.OpenAsync(route, "本地资源的顶层界面");
             current = result.Handle;
             ObservePage(current);
-            Debug.Log($"本地打开={result.Status}，实际创建次数={createdPages}，缓存数={host.Navigator.CachedViewCount}");
+            Debug.Log($"本地打开={result.Status}，实际创建次数={createdPages}，缓存数={host.Pages.CachedViewCount}");
         }
 
         [ContextMenu("本地关闭")]
@@ -112,7 +112,7 @@ namespace MUI.Samples.Navigation
         {
             if (initialized && host != null)
             {
-                Debug.Log($"本地关闭={(await host.Navigator.CloseAsync(current)).Status}");
+                Debug.Log($"本地关闭={(await host.Pages.CloseAsync(current)).Status}");
                 ReadResult();
             }
         }
@@ -124,7 +124,7 @@ namespace MUI.Samples.Navigation
         {
             if (initialized && host != null)
             {
-                Debug.Log($"本地返回={(await host.Navigator.BackAsync()).Status}");
+                Debug.Log($"本地返回={(await host.Pages.BackAsync()).Status}");
             }
         }
 
@@ -133,12 +133,12 @@ namespace MUI.Samples.Navigation
         {
             if (current.IsValid && host != null && current.TryGetResult(out var result))
             {
-                Debug.Log($"业务结果={result.Status}，缓存数={host.Navigator.CachedViewCount}");
+                Debug.Log($"业务结果={result.Status}，缓存数={host.Pages.CachedViewCount}");
             }
         }
 
         /// <summary>每次激活只订阅一次；通知直接执行，不创建任务或依赖轮询。</summary>
-        private void ObservePage(ViewHandle<int> handle)
+        private void ObservePage(PageHandle<int> handle)
         {
             if (!handle.IsValid || !observedPages.Add(handle.Identity))
             {
@@ -155,7 +155,7 @@ namespace MUI.Samples.Navigation
                 {
                     observedPages.Remove(handle.Identity);
                     Debug.Log($"本地页面={handle.Identity}，结果={result.Status}，值={result.Value}，清理={result.Cleanup}");
-                    // 通知中需要打开下一页时使用 Navigator.PostOpen，避免重入导航事务。
+                    // 通知中需要打开下一页时使用 PageManager.PostOpen，避免重入导航事务。
                 });
             }
             catch
@@ -181,7 +181,7 @@ namespace MUI.Samples.Navigation
         {
             if (initialized && host != null)
             {
-                var outcome = await host.Navigator.UpdateArgsAsync(current.Identity, route, title);
+                var outcome = await host.Pages.UpdateArgsAsync(current.Identity, route, title);
                 Debug.Log($"本地参数更新={outcome.Status}，清理={outcome.Cleanup}，视图故障={outcome.ViewFaulted}");
             }
         }
@@ -195,7 +195,7 @@ namespace MUI.Samples.Navigation
             {
                 // 新模型由示例借出；导航器不会将其当作工厂创建的自有模型。
                 var next = new NavigationPageViewModel();
-                var outcome = await host.Navigator.RebindAsync(current.Identity, route, next);
+                var outcome = await host.Pages.RebindAsync(current.Identity, route, next);
                 Debug.Log($"本地换绑={outcome.Status}，清理={outcome.Cleanup}，视图故障={outcome.ViewFaulted}");
             }
         }
@@ -215,13 +215,13 @@ namespace MUI.Samples.Navigation
                 return;
             }
             var original = current;
-            var outcome = await host.Navigator.ReplaceAsync(current.Identity, route, title);
+            var outcome = await host.Pages.ReplaceAsync(current.Identity, route, title);
             if (outcome.IsCommitted)
             {
                 current = outcome.Destination.Handle;
                 ObservePage(current);
             }
-            Debug.Log($"本地替换={outcome.Status}，拒绝={outcome.Rejection}，原页状态={host.Navigator.GetState(original.Identity)}");
+            Debug.Log($"本地替换={outcome.Status}，拒绝={outcome.Rejection}，原页状态={host.Pages.GetState(original.Identity)}");
             if (outcome.SourceCleanup != null)
             {
                 var sourceClose = await outcome.SourceCleanup;
@@ -236,7 +236,7 @@ namespace MUI.Samples.Navigation
         {
             if (initialized && host != null)
             {
-                var outcome = await host.Navigator.OpenAsync(batchRoute, "命名层级批量关闭示例");
+                var outcome = await host.Pages.OpenAsync(batchRoute, "命名层级批量关闭示例");
                 ObservePage(outcome.Handle);
                 Debug.Log($"批次页面打开={outcome.Status}，拒绝原因={outcome.Rejection}，超限替换={outcome.IsReplacement}");
                 if (outcome.ReplacedCleanup != null)
@@ -254,7 +254,7 @@ namespace MUI.Samples.Navigation
         {
             if (initialized && host != null)
             {
-                ReportBatch(await host.Navigator.CloseLayerAsync(batchRoute.Policy.Layer));
+                ReportBatch(await host.Pages.CloseLayerAsync(batchRoute.Policy.Layer));
             }
         }
 
@@ -265,7 +265,7 @@ namespace MUI.Samples.Navigation
         {
             if (initialized && host != null)
             {
-                ReportBatch(await host.Navigator.CloseAllAsync());
+                ReportBatch(await host.Pages.CloseAllAsync());
             }
         }
 
@@ -289,8 +289,8 @@ namespace MUI.Samples.Navigation
         {
             if (initialized && host != null)
             {
-                var outcome = await host.Navigator.PreloadAsync(route);
-                Debug.Log($"本地预加载={outcome.Status}，驻留占用={host.Navigator.PreloadReservationCount}");
+                var outcome = await host.Pages.PreloadAsync(route);
+                Debug.Log($"本地预加载={outcome.Status}，驻留占用={host.Pages.PreloadReservationCount}");
             }
         }
 
@@ -301,8 +301,8 @@ namespace MUI.Samples.Navigation
         {
             if (initialized && host != null)
             {
-                await host.Navigator.ClearPreloadsAsync();
-                Debug.Log($"本地预加载清除，占用={host.Navigator.PreloadReservationCount}");
+                await host.Pages.ClearPreloadsAsync();
+                Debug.Log($"本地预加载清除，占用={host.Pages.PreloadReservationCount}");
             }
         }
 

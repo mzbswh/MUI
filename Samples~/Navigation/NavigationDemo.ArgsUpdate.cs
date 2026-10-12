@@ -1,6 +1,6 @@
 using System;
 using System.Threading.Tasks;
-using MUI.Navigation;
+using MUI.Pages;
 using MUI.Resources;
 using UnityEngine;
 
@@ -8,15 +8,15 @@ namespace MUI.Samples.Navigation
 {
     public sealed partial class NavigationDemo
     {
-        private async Task DemonstrateArgsUpdateAsync(Navigator navigator, ViewResource resource,
+        private async Task DemonstrateArgsUpdateAsync(PageManager pages, ViewResource resource,
             Func<IView, PageViewModel, BindingContext<PageViewModel>> binding)
         {
             var presenter = new ArgsUpdatePagePresenter();
             var model = new PageViewModel();
-            var route = new Route<PageViewModel, PageArgs, int>("demo.args-update", resource,
+            var route = new PageDefinition<PageViewModel, PageArgs, int>("demo.args-update", resource,
                 () => model, _ => presenter, binding,
-                policy: host.ResolvePolicy(overrides: new RoutePolicyOverrides { AllowMultiple = false, ExistingInstance = ExistingInstancePolicy.ReturnReady }));
-            var opened = await navigator.OpenAsync(route, new PageArgs("Initial", 10), cancellation.Token);
+                policy: host.ResolvePolicy(overrides: new PagePolicyOverrides { AllowMultiple = false, ExistingInstance = ExistingInstancePolicy.ReturnReady }));
+            var opened = await pages.OpenAsync(route, new PageArgs("Initial", 10), cancellation.Token);
             if (!opened.IsSuccess)
             {
                 throw new InvalidOperationException("Argument update walkthrough could not open.", opened.Error);
@@ -25,17 +25,17 @@ namespace MUI.Samples.Navigation
             try
             {
                 var updated = new PageArgs("Updated", 20);
-                var applied = await navigator.UpdateArgsAsync(opened.Handle.Identity, route, updated, cancellation.Token);
-                var reused = await navigator.OpenAsync(route, updated, cancellation.Token);
+                var applied = await pages.UpdateArgsAsync(opened.Handle.Identity, route, updated, cancellation.Token);
+                var reused = await pages.OpenAsync(route, updated, cancellation.Token);
                 Debug.Log($"MUI 参数更新成功：状态={applied.Status}，同句柄={opened.Handle.Identity == reused.Handle.Identity}，" +
                     $"打开次数={presenter.OpenCount}，上下文标题={presenter.CurrentArgs.Title}，模型标题={model.Title}");
 
-                var preparation = await navigator.UpdateArgsAsync(opened.Handle.Identity, route,
+                var preparation = await pages.UpdateArgsAsync(opened.Handle.Identity, route,
                     new PageArgs("Prepare failure", 30), cancellation.Token);
                 Debug.Log($"MUI 参数准备失败保留页面：状态={preparation.Status}，标题={model.Title}");
 
-                var late = navigator.UpdateArgsAsync(opened.Handle.Identity, route, new PageArgs("Slow", 50)).AsTask();
-                var close = navigator.ForceCloseAsync(opened.Handle.Identity).AsTask();
+                var late = pages.UpdateArgsAsync(opened.Handle.Identity, route, new PageArgs("Slow", 50)).AsTask();
+                var close = pages.ForceCloseAsync(opened.Handle.Identity).AsTask();
                 presenter.SlowRelease.TrySetResult(true);
                 var cancelled = await late;
                 var closed = await close;
@@ -45,31 +45,31 @@ namespace MUI.Samples.Navigation
             finally
             {
                 presenter.SlowRelease.TrySetResult(true);
-                await navigator.ForceCloseAsync(opened.Handle.Identity);
+                await pages.ForceCloseAsync(opened.Handle.Identity);
             }
 
             var failingPresenter = new ArgsUpdatePagePresenter();
-            var failingRoute = new Route<PageViewModel, PageArgs, int>("demo.args-commit-failure", resource,
+            var failingRoute = new PageDefinition<PageViewModel, PageArgs, int>("demo.args-commit-failure", resource,
                 () => new PageViewModel(), _ => failingPresenter, binding, host.ResolvePolicy());
-            var failingPage = await navigator.OpenAsync(failingRoute, new PageArgs("Initial", 10), cancellation.Token);
+            var failingPage = await pages.OpenAsync(failingRoute, new PageArgs("Initial", 10), cancellation.Token);
             if (!failingPage.IsSuccess)
             {
                 throw new InvalidOperationException("Commit failure walkthrough could not open.", failingPage.Error);
             }
             try
             {
-                var failed = await navigator.UpdateArgsAsync(failingPage.Handle.Identity, failingRoute,
+                var failed = await pages.UpdateArgsAsync(failingPage.Handle.Identity, failingRoute,
                     new PageArgs("Commit failure", 40), cancellation.Token);
-                await navigator.WaitForCleanupAsync(failingPage.Handle.Identity);
+                await pages.WaitForCleanupAsync(failingPage.Handle.Identity);
                 Debug.Log($"MUI 参数提交异常故障关闭：状态={failed.Status}，视图故障={failed.ViewFaulted}，" +
                     $"候选释放数={failingPresenter.CandidatesDisposed}");
             }
             finally
             {
-                await navigator.ForceCloseAsync(failingPage.Handle.Identity);
+                await pages.ForceCloseAsync(failingPage.Handle.Identity);
             }
 
-            await DemonstrateArgsCleanupAsync(navigator, resource, binding);
+            await DemonstrateArgsCleanupAsync(pages, resource, binding);
         }
     }
 }

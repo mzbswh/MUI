@@ -5,7 +5,7 @@
     "MUI.Core",
     "MUI.Resources",
     "MUI.UGUI",
-    "MUI.Navigation",
+    "MUI.Pages",
     "Unity.ugui",
     "MUI.Editor.Localization"
   ],

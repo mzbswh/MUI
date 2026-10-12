@@ -11,7 +11,7 @@ Enable Automatic Walkthrough on SettingsDemo to see these actions demonstrated a
 
 The sample uses the legacy EventSystem input module. Enable the legacy input backend (or Both), or supply an EventSystem configured for the project's input backend. An EventSystem is created only when none exists.
 
-This sample directly drives binding, not a Navigator. It does not yet exercise Presenter hooks, result completion or UI resource loading.
+This sample directly drives binding, not a PageManager. It does not yet exercise Presenter hooks, result completion or UI resource loading.
 
 The analyzer DLL is included under Analyzers with the RoslynAnalyzer label. After changing generator source, rebuild it with `bash 'Tools~/publish-generator.sh'`.
 

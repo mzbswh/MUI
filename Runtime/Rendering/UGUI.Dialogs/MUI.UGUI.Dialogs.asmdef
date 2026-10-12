@@ -6,7 +6,7 @@
     "MUI.UGUI",
     "MUI.Dialogs",
     "Unity.ugui",
-    "MUI.Navigation",
+    "MUI.Pages",
     "MUI.Resources"
   ],
   "autoReferenced": true

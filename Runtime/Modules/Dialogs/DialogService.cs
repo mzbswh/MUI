@@ -2,31 +2,31 @@ using System;
 using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
-using MUI.Navigation;
+using MUI.Pages;
 
 namespace MUI.Dialogs
 {
     /// <summary>
     /// 有界的串行确认服务，同一服务一次只展示一个确认框，前一个完成清理后才处理下一个。
-    /// 在 Navigator 所属 UI 线程创建和调用，并保留该线程的 SynchronizationContext。
+    /// 在 PageManager 所属 UI 线程创建和调用，并保留该线程的 SynchronizationContext。
     /// </summary>
     public sealed class DialogService<TViewModel> : ICloseConfirmationService, IAsyncDisposable where TViewModel : ViewModel
     {
         private readonly AsyncLocal<RequestFrame> current = new AsyncLocal<RequestFrame>();
-        private readonly Func<INavigator> resolveNavigator;
-        private readonly Route<TViewModel, CloseConfirmation, bool> route;
+        private readonly Func<IPageManager> resolveNavigator;
+        private readonly PageDefinition<TViewModel, CloseConfirmation, bool> route;
         private readonly LifetimeScope lifetime = new LifetimeScope();
         private readonly SemaphoreSlim serial = new SemaphoreSlim(1, 1);
         private readonly int capacity;
         private readonly int thread = Thread.CurrentThread.ManagedThreadId;
-        private ViewHandle activeDialog;
+        private PageHandle activeDialog;
 
         /// <summary>创建确认服务，路由必须为独占实例的模态、获取焦点界面。</summary>
         /// <param name="resolveNavigator">展示时解析导航器，便于宿主与确认服务相互接入。</param>
         /// <param name="route">接收 CloseConfirmation 并返回 bool 的路由，不允许借用已有界面。</param>
         /// <param name="capacity">尚未结束的请求上限，包含正在展示及等待的请求。</param>
-        public DialogService(Func<INavigator> resolveNavigator,
-            Route<TViewModel, CloseConfirmation, bool> route, int capacity = 16)
+        public DialogService(Func<IPageManager> resolveNavigator,
+            PageDefinition<TViewModel, CloseConfirmation, bool> route, int capacity = 16)
         {
             this.resolveNavigator = resolveNavigator ?? throw new ArgumentNullException(nameof(resolveNavigator));
             this.route = route ?? throw new ArgumentNullException(nameof(route));
@@ -123,8 +123,8 @@ namespace MUI.Dialogs
 
         private async ValueTask<bool> ShowAsync(CloseConfirmation confirmation, CancellationToken token)
         {
-            INavigator navigator = null;
-            ViewHandle<bool> handle = default;
+            IPageManager pages = null;
+            PageHandle<bool> handle = default;
             Exception failure = null;
             var answer = false;
             var settled = false;
@@ -132,8 +132,8 @@ namespace MUI.Dialogs
             try
             {
                 token.ThrowIfCancellationRequested();
-                navigator = resolveNavigator() ?? throw new InvalidOperationException("Dialog Navigator is unavailable.");
-                var opened = await navigator.OpenAsync(route, confirmation, token, owner: PageOwner.Host);
+                pages = resolveNavigator() ?? throw new InvalidOperationException("Dialog PageManager is unavailable.");
+                var opened = await pages.OpenAsync(route, confirmation, token, owner: PageOwner.Host);
                 handle = opened.Handle;
                 activeDialog = handle.Identity;
                 token.ThrowIfCancellationRequested();
@@ -169,7 +169,7 @@ namespace MUI.Dialogs
             {
                 try
                 {
-                    var closed = await navigator.ForceCloseAsync(handle.Identity);
+                    var closed = await pages.ForceCloseAsync(handle.Identity);
                     cleanupPending = closed.Cleanup == CleanupStatus.Pending;
                     if (closed.Status != CloseStatus.Closed && closed.Status != CloseStatus.AlreadyClosed)
                     {
@@ -194,7 +194,7 @@ namespace MUI.Dialogs
             {
                 try
                 {
-                    var cleaned = await navigator.WaitForCleanupAsync(handle.Identity);
+                    var cleaned = await pages.WaitForCleanupAsync(handle.Identity);
                     if (cleaned.Error != null)
                     {
                         throw cleaned.Error;
@@ -222,7 +222,7 @@ namespace MUI.Dialogs
 
         /// <summary>
         /// 取消服务持有的请求并等待其清理；活动请求内不能等待自身服务销毁。
-        /// 此服务不拥有 Navigator，也不会在释放时销毁宿主。
+        /// 此服务不拥有 PageManager，也不会在释放时销毁宿主。
         /// </summary>
         public ValueTask DisposeAsync()
         {

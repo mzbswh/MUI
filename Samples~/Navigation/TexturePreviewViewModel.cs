@@ -7,7 +7,7 @@ namespace MUI.Samples.Navigation
     /// 纹理预览的生成绑定示例；Preview 节点挂 RawImageElement。
     /// 模型仅借用纹理，资源提供方负责在解绑并清空显示后归还纹理。
     /// </summary>
-    [ViewContract("TexturePreview")]
+    [UIWidget("TexturePreview")]
     public partial class TexturePreviewViewModel : ViewModel
     {
         [ObservableProperty]

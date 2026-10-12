@@ -1,7 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using MUI.Dialogs;
-using MUI.Navigation;
+using MUI.Pages;
 using MUI.Resources;
 using MUI.UGUI;
 using UnityEngine;
@@ -18,9 +18,9 @@ namespace MUI.Samples.Dialogs
         [SerializeField] private string confirmationKey = "demo.confirmation";
         [SerializeField] private string alertKey = "demo.alert";
         private readonly LifetimeScope lifetime = new LifetimeScope();
-        private Route<ConfirmationViewModel, CloseConfirmation, bool> confirmationRoute;
-        private Route<AlertViewModel, AlertRequest, Unit> alertRoute;
-        private ViewHandle active;
+        private PageDefinition<ConfirmationViewModel, CloseConfirmation, bool> confirmationRoute;
+        private PageDefinition<AlertViewModel, AlertRequest, Unit> alertRoute;
+        private PageHandle active;
         private bool initialized;
         private bool showing;
 
@@ -34,14 +34,14 @@ namespace MUI.Samples.Dialogs
 
             try
             {
-                var policy = host.ResolvePolicy("Popup", overrides: new RoutePolicyOverrides
+                var policy = host.ResolvePolicy("Popup", overrides: new PagePolicyOverrides
                 {
                     AllowMultiple = true,
                     MaxInstances = 1,
                     ExistingInstance = ExistingInstancePolicy.Reject
                 });
-                confirmationRoute = ConfirmationDialog.CreateRoute(new ViewResource(confirmationKey), policy: policy);
-                alertRoute = AlertDialog.CreateRoute(new ViewResource(alertKey), policy: policy);
+                confirmationRoute = ConfirmationDialog.CreateDefinition(new ViewResource(confirmationKey), policy: policy);
+                alertRoute = AlertDialog.CreateDefinition(new ViewResource(alertKey), policy: policy);
                 host.Initialize();
                 initialized = true;
                 ShowConfirmation();
@@ -84,10 +84,10 @@ namespace MUI.Samples.Dialogs
             Debug.Log($"提示框结束：{result.Status}", this);
         }
 
-        private async Task<ViewResult<TResult>> OpenAsync<TModel, TArgs, TResult>(
-            Route<TModel, TArgs, TResult> route, TArgs args) where TModel : ViewModel
+        private async Task<PageResult<TResult>> OpenAsync<TModel, TArgs, TResult>(
+            PageDefinition<TModel, TArgs, TResult> route, TArgs args) where TModel : ViewModel
         {
-            var opened = await host.Navigator.OpenAsync(route, args, lifetime.Token, owner: PageOwner.Host);
+            var opened = await host.Pages.OpenAsync(route, args, lifetime.Token, owner: PageOwner.Host);
             if (!opened.IsSuccess)
             {
                 throw new InvalidOperationException($"对话框打开失败：{opened.Status}/{opened.Rejection}", opened.Error);
@@ -98,7 +98,7 @@ namespace MUI.Samples.Dialogs
             {
                 var result = await opened.Handle.WaitForResultAsync(lifetime.Token);
                 // 结果提交不等于退出完成；保留活动句柄直到资源真正归还。
-                var cleanup = await host.Navigator.WaitForCleanupAsync(active, lifetime.Token);
+                var cleanup = await host.Pages.WaitForCleanupAsync(active, lifetime.Token);
                 if (result.Error != null)
                 {
                     throw result.Error;
@@ -148,7 +148,7 @@ namespace MUI.Samples.Dialogs
             }
             try
             {
-                await host.Navigator.CloseAsync(active, lifetime.Token);
+                await host.Pages.CloseAsync(active, lifetime.Token);
             }
             catch (OperationCanceledException) when (lifetime.IsEnded)
             {
@@ -169,7 +169,7 @@ namespace MUI.Samples.Dialogs
             }
             try
             {
-                await host.Navigator.BackAsync(lifetime.Token);
+                await host.Pages.BackAsync(lifetime.Token);
             }
             catch (OperationCanceledException) when (lifetime.IsEnded)
             {

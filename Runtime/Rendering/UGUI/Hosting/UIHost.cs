@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using MUI.Navigation;
+using MUI.Pages;
 using MUI.Resources;
 using UnityEngine;
 
@@ -14,7 +14,7 @@ namespace MUI.UGUI
         private MUISettings settings;
         [SerializeField]
         private RectTransform viewRoot = null;
-        private Navigator navigator;
+        private PageManager pages;
         private UIThreadDispatcher dispatcher;
         private HostProviderCleanup ownedProviderCleanup;
         private Task shutdown;
@@ -23,11 +23,11 @@ namespace MUI.UGUI
         private bool drivingFrame;
         private bool destroyed;
 
-        public Navigator Navigator => navigator ?? throw new InvalidOperationException("UIHost has not been initialized.");
+        public PageManager Pages => pages ?? throw new InvalidOperationException("UIHost has not been initialized.");
 
-        public bool IsInitialized => navigator != null;
+        public bool IsInitialized => pages != null;
 
-        public bool IsShutdown => navigator != null && navigator.IsShutdown;
+        public bool IsShutdown => pages != null && pages.IsShutdown;
 
         /// <summary>所有宿主共享项目全局配置。初始化后保留本次使用的资产。</summary>
         public MUISettings Settings
@@ -49,7 +49,7 @@ namespace MUI.UGUI
         /// <summary>自动模式每帧使用 Unity 非缩放时间；关闭后由项目调用 AdvanceFrame。</summary>
         public bool AutomaticFramePump => Settings == null || Settings.AutomaticFramePump;
 
-        public RoutePolicy ResolvePolicy(string preset = null, string layer = null, RoutePolicyOverrides overrides = null)
+        public PagePolicy ResolvePolicy(string preset = null, string layer = null, PagePolicyOverrides overrides = null)
         {
             UnityMainThread.Require();
             var configuration = Settings;
@@ -58,11 +58,11 @@ namespace MUI.UGUI
         }
 
         /// <summary>只读定位当前页面原生对象；不会创建、激活或调用业务。</summary>
-        public bool TryGetView(ViewHandle handle, out View view)
+        public bool TryGetView(PageHandle handle, out View view)
         {
             UnityMainThread.Require();
             view = null;
-            if (navigator == null || !navigator.TryGetView(handle, out var candidate))
+            if (pages == null || !pages.TryGetView(handle, out var candidate))
             {
                 return false;
             }
@@ -177,7 +177,7 @@ namespace MUI.UGUI
                 try
                 {
                     RequireInitializationCurrent();
-                    navigator = new Navigator(provider, closeConfirmationService: closeConfirmationService,
+                    pages = new PageManager(provider, closeConfirmationService: closeConfirmationService,
                         userPreferences: userPreferences, cacheCapacity: resolvedCacheCapacity,
                         maxCachedEstimatedBytes: maxCachedEstimatedBytes,
                         cleanupCapacity: resolvedCleanupCapacity,
@@ -198,7 +198,7 @@ namespace MUI.UGUI
                 // 导航器构造成功才接管提供方；失败时外部提供方仍完全属于调用者。
                 if (ownsProvider)
                 {
-                    ownedProviderCleanup = new HostProviderCleanup(navigator, asynchronousDisposable, disposable);
+                    ownedProviderCleanup = new HostProviderCleanup(pages, asynchronousDisposable, disposable);
                 }
                 dispatcher = capturedDispatcher;
                 UnityErrorLogging.RegisterHost();
@@ -207,6 +207,7 @@ namespace MUI.UGUI
             finally
             {
                 initializing = false;
+                if (pages == null) ReleaseGlobalHost();
             }
         }
 
@@ -220,6 +221,7 @@ namespace MUI.UGUI
                 throw new InvalidOperationException("UIHost 正在初始化，不能从回调中重复初始化。");
             }
 
+            ClaimGlobalHost();
             initializing = true;
         }
 
@@ -230,7 +232,7 @@ namespace MUI.UGUI
                 throw new ObjectDisposedException(nameof(UIHost));
             }
 
-            if (navigator != null || shutdown != null)
+            if (pages != null || shutdown != null)
             {
                 throw new InvalidOperationException("UIHost is already initialized or shut down.");
             }
@@ -303,7 +305,7 @@ namespace MUI.UGUI
                 throw new InvalidOperationException("请先在 MUI 配置中关闭“自动更新界面”。");
             }
 
-            if (navigator == null)
+            if (pages == null)
             {
                 throw new InvalidOperationException("UIHost 尚未初始化。");
             }
@@ -323,7 +325,7 @@ namespace MUI.UGUI
                 throw new InvalidOperationException("UIHost 不能在当前帧的回调中再次推进帧。");
             }
 
-            if (navigator == null || navigator.IsShutdown)
+            if (pages == null || pages.IsShutdown)
             {
                 return;
             }
@@ -331,8 +333,8 @@ namespace MUI.UGUI
             drivingFrame = true;
             try
             {
-                navigator.Pump();
-                navigator.Tick(unscaledDeltaTime);
+                pages.Pump();
+                pages.Tick(unscaledDeltaTime);
             }
             finally
             {
@@ -347,12 +349,12 @@ namespace MUI.UGUI
         public ValueTask ShutdownAsync(CancellationToken cancellationToken = default)
         {
             UnityMainThread.Require();
-            if (navigator == null)
+            if (pages == null)
             {
                 throw new InvalidOperationException("UIHost shutdown requires initialization.");
             }
 
-            if (!navigator.CanAwaitShutdown || (ownedProviderCleanup != null &&
+            if (!pages.CanAwaitShutdown || (ownedProviderCleanup != null &&
                 ownedProviderCleanup.Responsibility.IsReleaseCallbackActive))
             {
                 return new ValueTask(Task.FromException(new InvalidOperationException("A lifecycle hook, command or provider cleanup cannot await its own UIHost shutdown.")));
@@ -382,11 +384,11 @@ namespace MUI.UGUI
             Task navigatorShutdown;
             try
             {
-                navigatorShutdown = navigator == null ? Task.CompletedTask : navigator.RequestShutdownForHost();
+                navigatorShutdown = pages == null ? Task.CompletedTask : pages.RequestShutdownForHost();
             }
             catch (Exception error)
             {
-                if (navigator == null || !navigator.IsShutdown)
+                if (pages == null || !pages.IsShutdown)
                 {
                     shutdown = null;
                 }
@@ -395,8 +397,9 @@ namespace MUI.UGUI
                 return;
             }
 
-            if (navigator == null || navigator.IsShutdown)
+            if (pages == null || pages.IsShutdown)
             {
+                ReleaseGlobalHost();
                 BackInputCompleted = null;
             }
             var errors = new List<Exception>();
@@ -419,7 +422,7 @@ namespace MUI.UGUI
             }
             catch (Exception error)
             {
-                if (navigator == null || !navigator.IsShutdown)
+                if (pages == null || !pages.IsShutdown)
                 {
                     shutdown = null;
                     completion.TrySetException(error);
@@ -468,9 +471,10 @@ namespace MUI.UGUI
         private void OnDestroy()
         {
             destroyed = true;
+            ReleaseGlobalHost();
             UnregisterSharedInput();
             BackInputCompleted = null;
-            if (navigator == null)
+            if (pages == null)
             {
                 // 初始化尚未交付时没有接管提供方；外层创建事务负责回滚，不启动异步清理。
                 return;

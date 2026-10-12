@@ -21,7 +21,7 @@
 
 示例使用 `UIHost.Initialize`、`OpenAsync`、`WaitForResultAsync` 和 `WaitForCleanupAsync`。本地资源允许立即完成，用户操作及窗口退出仍可异步完成。
 
-对话框通过 `host.ResolvePolicy("Popup", overrides: ...)` 解析项目预设，并显式设置最多一个实例及拒绝复用；已解析策略传给 `ConfirmationDialog.CreateRoute(..., policy: policy)` 和 `AlertDialog.CreateRoute(..., policy: policy)`。未绑定配置时使用内置 Popup。运行状态与追踪统一在 `Tools/MUI/控制台 (Dashboard)` 查看，UIHost Inspector 提供快捷按钮。
+对话框通过 `host.ResolvePolicy("Popup", overrides: ...)` 解析项目预设，并显式设置最多一个实例及拒绝复用；已解析策略传给 `ConfirmationDialog.CreateDefinition(..., policy: policy)` 和 `AlertDialog.CreateDefinition(..., policy: policy)`。未绑定配置时使用内置 Popup。运行状态与追踪统一在 `Tools/MUI/控制台 (Dashboard)` 查看，UIHost Inspector 提供快捷按钮。
 
 业务结果提交时，清理状态可能为 `Pending`；确认后先等待真实清理，再展示提示框，避免与退出中的窗口争用路由容量。取消按钮产生 `Completed(false)`；返回、普通关闭或宿主退出产生 `Dismissed`，都不执行业务确认操作。
 

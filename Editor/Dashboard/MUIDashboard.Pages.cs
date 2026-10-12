@@ -1,7 +1,8 @@
+using MUI.Pages.Diagnostics;
 using System;
 using System.Linq;
 using System.Text;
-using MUI.Navigation;
+using MUI.Pages;
 using MUI.UGUI;
 using UnityEditor;
 using UnityEngine.UIElements;
@@ -24,7 +25,7 @@ namespace MUI.Editor
                 if (snapshot != null)
                 {
                     var query = search.value ?? string.Empty;
-                    pages.AddRange(snapshot.Instances.Where(item => item.RouteKey.IndexOf(query, StringComparison.OrdinalIgnoreCase) >= 0 ||
+                    pages.AddRange(snapshot.Instances.Where(item => item.PageKey.IndexOf(query, StringComparison.OrdinalIgnoreCase) >= 0 ||
                         item.Handle.ToString().IndexOf(query, StringComparison.OrdinalIgnoreCase) >= 0)
                         .OrderByDescending(item => item.PresentationIndex).ThenByDescending(item => item.Handle.Id));
                 }
@@ -67,7 +68,7 @@ namespace MUI.Editor
             AddText(L.Get("policy.cache.history"), heading: true);
             foreach (var decision in snapshot.CacheDiagnostics)
             {
-                AddText(L.Format("policy.cache.entry", decision.TimestampUtc.ToLocalTime(), decision.RouteKey, decision.Decision));
+                AddText(L.Format("policy.cache.entry", decision.TimestampUtc.ToLocalTime(), decision.PageKey, decision.Decision));
             }
             AddText(L.Get("editor.MUIDashboard.Pages.a800e96c6e") + snapshot.HostId.ToString("N"));
             AddHandle(L.Get("editor.MUIDashboard.Pages.b4929391ad"), snapshot.Focused);
@@ -87,10 +88,10 @@ namespace MUI.Editor
             }
         }
 
-        private void ShowPage(ViewInstanceSnapshot item)
+        private void ShowPage(PageInstanceSnapshot item)
         {
             details.Clear();
-            AddText($"#{item.Handle.Id} {item.RouteKey}", heading: true);
+            AddText($"#{item.Handle.Id} {item.PageKey}", heading: true);
             AddText(L.Format("editor.MUIDashboard.Pages.d2d0fcf76e", item.State, item.Cleanup, item.Operations, item.ResourceKey, item.ResourceVersion));
             AddText(L.Format("editor.MUIDashboard.Pages.ff516ae1fc", item.Handle, item.CommitVersion, item.HistoryIndex, item.DependencyFailureCount));
             AddText(L.Format("editor.MUIDashboard.Pages.3b0f2c1681", item.PresentationIndex, item.Policy.LayerName ?? L.Get("editor.MUIDashboard.Pages.d7d27662cb"), item.Layer, item.Order) +
@@ -106,10 +107,10 @@ namespace MUI.Editor
                 AddText(L.Format("sorting.allocated", item.RenderOrderStart.Value,
                     item.RenderOrderStart.Value + item.RenderOrderSpan - 1, item.RenderOrderStart.Value + 1));
             }
-            AddText(L.Format("policy.runtime.status", item.RouteInstanceCount, item.Policy.MaxInstances, item.TickStatus));
+            AddText(L.Format("policy.runtime.status", item.DefinitionInstanceCount, item.Policy.MaxInstances, item.TickStatus));
             foreach (var dependency in item.DependencyResolutions)
             {
-                AddText(L.Format("policy.dependency.entry", dependency.RouteKey, dependency.IsRequired,
+                AddText(L.Format("policy.dependency.entry", dependency.PageKey, dependency.IsRequired,
                     dependency.MissingPolicy, dependency.Kind, dependency.Failure ?? string.Empty));
             }
             var policy = item.Policy;
@@ -144,7 +145,7 @@ namespace MUI.Editor
             AddText(L.Get("editor.MUIDashboard.Pages.74ae6efb2d"));
         }
 
-        private void LocatePage(ViewHandle handle) => Run(() =>
+        private void LocatePage(PageHandle handle) => Run(() =>
         {
             if (!TryFindView(handle, out var view))
             {
@@ -154,13 +155,13 @@ namespace MUI.Editor
             EditorGUIUtility.PingObject(view.gameObject);
         });
 
-        private bool TryFindView(ViewHandle handle, out View view)
+        private bool TryFindView(PageHandle handle, out View view)
         {
             view = null;
             return UnityEngine.Application.isPlaying && selectedHost != null && selectedHost.TryGetView(handle, out view);
         }
 
-        private void CaptureView(ViewInstanceSnapshot item) => Run(() =>
+        private void CaptureView(PageInstanceSnapshot item) => Run(() =>
         {
             if (!TryFindView(item.Handle, out var view))
             {
@@ -204,7 +205,7 @@ namespace MUI.Editor
             details.Add(label);
         }
 
-        private void AddHandle(string label, ViewHandle handle)
+        private void AddHandle(string label, PageHandle handle)
         {
             if (!handle.IsValid)
             {

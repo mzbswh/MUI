@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using MUI.ChildViews;
-using MUI.Navigation;
+using MUI.Pages;
 using MUI.Resources;
 using MUI.Samples.ResourceIntegration;
 using MUI.UGUI;
@@ -97,25 +97,25 @@ namespace MUI.Samples.Navigation
                         }
                         catch (OperationCanceledException) { Debug.Log($"MUI Preload late cancelled: loads={loader.Loads}; releases={loader.Releases}"); }
                     }
-                    var preloadNavigator = new Navigator(loadedProvider, preloadCapacity: 1);
-                    var preloadRoute = new Route<PageViewModel, Unit, Unit>("demo.preload", resource,
+                    var preloadNavigator = new PageManager(loadedProvider, preloadCapacity: 1);
+                    var preloadRoute = new PageDefinition<PageViewModel, Unit, Unit>("demo.preload", resource,
                         () => throw new InvalidOperationException("Preloading must not create a model."),
                         bindingFactory: PageViewModelBindingFactory.Create);
-                    var extraRoute = new Route<PageViewModel, Unit, Unit>("demo.preload.extra", new ViewResource("Other"),
+                    var extraRoute = new PageDefinition<PageViewModel, Unit, Unit>("demo.preload.extra", new ViewResource("Other"),
                         () => new PageViewModel(), bindingFactory: PageViewModelBindingFactory.Create);
                     try
                     {
                         var warm = preloadNavigator.PreloadAsync(preloadRoute).AsTask();
                         var duplicateWarm = await preloadNavigator.PreloadAsync(preloadRoute, new CancellationToken(true));
                         var full = await preloadNavigator.PreloadAsync(extraRoute);
-                        Debug.Log($"MUI Navigator preload: duplicate={duplicateWarm.Status}; full={full.Status}; result={(await warm).Status}; reservations={preloadNavigator.PreloadReservationCount}");
+                        Debug.Log($"MUI PageManager preload: duplicate={duplicateWarm.Status}; full={full.Status}; result={(await warm).Status}; reservations={preloadNavigator.PreloadReservationCount}");
                         await preloadNavigator.ClearPreloadsAsync();
-                        Debug.Log($"MUI Navigator preload cleared: reservations={preloadNavigator.PreloadReservationCount}; resident={loadedProvider.IsResident(resource)}");
+                        Debug.Log($"MUI PageManager preload cleared: reservations={preloadNavigator.PreloadReservationCount}; resident={loadedProvider.IsResident(resource)}");
                         var staleWarm = preloadNavigator.PreloadAsync(preloadRoute).AsTask();
                         var clearing = preloadNavigator.ClearPreloadsAsync().AsTask();
                         var retiringFull = await preloadNavigator.PreloadAsync(preloadRoute);
                         await clearing;
-                        Debug.Log($"MUI Navigator preload late clear: old={(await staleWarm).Status}; whileRetiring={retiringFull.Status}; reservations={preloadNavigator.PreloadReservationCount}");
+                        Debug.Log($"MUI PageManager preload late clear: old={(await staleWarm).Status}; whileRetiring={retiringFull.Status}; reservations={preloadNavigator.PreloadReservationCount}");
                         await preloadNavigator.PreloadAsync(preloadRoute);
                         loadedProvider.Invalidate();
                         var refreshedWarm = await preloadNavigator.PreloadAsync(preloadRoute);
@@ -132,7 +132,7 @@ namespace MUI.Samples.Navigation
                             $"回收中新请求={whileTrimming.Status}，剩余额度={preloadNavigator.PreloadReservationCount}");
                     }
                     finally { await preloadNavigator.ShutdownAsync(); }
-                    Debug.Log($"MUI Navigator preload shutdown: reservations={preloadNavigator.PreloadReservationCount}; loads={loader.Loads}; releases={loader.Releases}");
+                    Debug.Log($"MUI PageManager preload shutdown: reservations={preloadNavigator.PreloadReservationCount}; loads={loader.Loads}; releases={loader.Releases}");
                 }
                 finally { await loadedProvider.DisposeAsync(); }
                 var provider = new PrefabViewProvider(canvasObject.transform,
@@ -155,46 +155,46 @@ namespace MUI.Samples.Navigation
                 host.Initialize(provider, ownsProvider: true, cacheCapacity: showCacheWalkthrough ? (int?)2 : null,
                     maxCachedEstimatedBytes: showCacheWalkthrough ? (long?)(2 * 1024 * 1024) : null,
                     cleanupCapacity: showCloseTimeoutWalkthrough ? (int?)1 : null);
-                var navigator = host.Navigator;
+                var pages = host.Pages;
                 if (recordLifecycleTrace)
                 {
-                    navigator.StartLifecycleTrace(2048);
+                    pages.StartLifecycleTrace(2048);
                 }
-                navigator.LifecycleChanged += LogLifecycle;
+                pages.LifecycleChanged += LogLifecycle;
                 if (showImmediateGuardWalkthrough)
                 {
-                    await DemonstrateImmediateGuardAsync(navigator, resource, BindPage);
+                    await DemonstrateImmediateGuardAsync(pages, resource, BindPage);
                 }
-                var synchronous = new Route<PageViewModel, PageArgs, int>("demo.sync", resource,
+                var synchronous = new PageDefinition<PageViewModel, PageArgs, int>("demo.sync", resource,
                     () => new PageViewModel(), model => new PagePresenter(), BindPage, host.ResolvePolicy());
-                var asynchronous = new Route<PageViewModel, PageArgs, int>("demo.async", resource,
-                    () => new PageViewModel(), model => new AsyncPagePresenter(navigator, synchronous), BindPage, host.ResolvePolicy());
+                var asynchronous = new PageDefinition<PageViewModel, PageArgs, int>("demo.async", resource,
+                    () => new PageViewModel(), model => new AsyncPagePresenter(pages, synchronous), BindPage, host.ResolvePolicy());
                 if (showEnterTransitionPreview)
                 {
-                    await ShowEnterTransitionPreviewAsync(navigator, resource, BindPage);
+                    await ShowEnterTransitionPreviewAsync(pages, resource, BindPage);
                 }
 
                 if (showCacheWalkthrough)
                 {
-                    await DemonstrateCacheAsync(navigator, resource, BindPage);
+                    await DemonstrateCacheAsync(pages, resource, BindPage);
                 }
 
                 if (showArgsUpdateWalkthrough)
                 {
-                    await DemonstrateArgsUpdateAsync(navigator, resource, BindPage);
+                    await DemonstrateArgsUpdateAsync(pages, resource, BindPage);
                 }
 
                 if (showRebindWalkthrough)
                 {
-                    await DemonstrateRebindAsync(navigator, resource, BindPage);
+                    await DemonstrateRebindAsync(pages, resource, BindPage);
                 }
 
                 if (showCloseTimeoutWalkthrough)
                 {
-                    await DemonstrateCloseTimeoutAsync(navigator, resource, BindPage);
+                    await DemonstrateCloseTimeoutAsync(pages, resource, BindPage);
                 }
 
-                var first = await navigator.OpenAsync(synchronous, new PageArgs("Resident page", 10));
+                var first = await pages.OpenAsync(synchronous, new PageArgs("Resident page", 10));
                 Debug.Log("MUI Navigation resident open: " + first.Status);
                 if (!first.IsSuccess)
                 {
@@ -204,7 +204,7 @@ namespace MUI.Samples.Navigation
                 var firstView = FindFrontView();
                 if (showMeasuredListPreview)
                 {
-                    if (!navigator.TryGetViewModel<PageViewModel>(first.Handle.Identity, out var measuredModel))
+                    if (!pages.TryGetViewModel<PageViewModel>(first.Handle.Identity, out var measuredModel))
                     {
                         throw new InvalidOperationException("Measured list preview model is unavailable.");
                     }
@@ -212,14 +212,14 @@ namespace MUI.Samples.Navigation
                     await DemonstrateMeasuredListAsync(firstView, measuredModel);
                     return;
                 }
-                await DemonstrateCoverageAsync(navigator, resource, BindPage, first.Handle.Identity, firstView);
-                await DemonstrateBackAsync(navigator, resource, BindPage, first.Handle.Identity);
-                await DemonstrateInputAsync(navigator, resource, BindPage);
-                await DemonstrateFocusAsync(navigator, resource, BindPage, firstView, first.Handle.Identity);
-                await DemonstrateTicksAsync(navigator, resource, BindPage);
+                await DemonstrateCoverageAsync(pages, resource, BindPage, first.Handle.Identity, firstView);
+                await DemonstrateBackAsync(pages, resource, BindPage, first.Handle.Identity);
+                await DemonstrateInputAsync(pages, resource, BindPage);
+                await DemonstrateFocusAsync(pages, resource, BindPage, firstView, first.Handle.Identity);
+                await DemonstrateTicksAsync(pages, resource, BindPage);
                 await DemonstrateChildTicksAsync(firstView);
                 var nested = firstView.GetElement<NestedViewElement>("NestedItem");
-                if (!navigator.TryGetViewModel<PageViewModel>(first.Handle.Identity, out var pageModel))
+                if (!pages.TryGetViewModel<PageViewModel>(first.Handle.Identity, out var pageModel))
                 {
                     throw new InvalidOperationException("Demo page model is unavailable.");
                 }
@@ -293,7 +293,7 @@ namespace MUI.Samples.Navigation
                     await DemonstrateChildRebindAsync(asyncItem, itemPresenter);
                 }
 
-                var second = await navigator.OpenAsync(asynchronous, new PageArgs("Asynchronous page", 42), cancellation.Token);
+                var second = await pages.OpenAsync(asynchronous, new PageArgs("Asynchronous page", 42), cancellation.Token);
                 Debug.Log("MUI Navigation async open: " + second.Status);
                 if (!second.IsSuccess)
                 {
@@ -309,33 +309,33 @@ namespace MUI.Samples.Navigation
                 FindFrontView().GetElement<ButtonElement>("Confirm").GetComponent<Button>().onClick.Invoke();
                 var selection = await second.Handle.WaitForResultAsync(cancellation.Token);
                 Debug.Log($"MUI Navigation result: {selection.Status}, value={selection.Value}, cleanup={selection.Cleanup}");
-                var duplicate = await navigator.CloseAsync(second.Handle);
+                var duplicate = await pages.CloseAsync(second.Handle);
                 Debug.Log("MUI Navigation repeated close: " + duplicate.Status);
-                await navigator.BackAsync(cancellation.Token);
+                await pages.BackAsync(cancellation.Token);
                 var dismissed = await first.Handle.WaitForResultAsync(cancellation.Token);
-                Debug.Log($"MUI Navigation back: {dismissed.Status}/{dismissed.Reason}; history={navigator.History.Count}");
+                Debug.Log($"MUI Navigation back: {dismissed.Status}/{dismissed.Reason}; history={pages.History.Count}");
                 Debug.Log($"MUI ChildView parent closed: {asyncItem.State}");
                 using (var cancelledOpen = CancellationTokenSource.CreateLinkedTokenSource(cancellation.Token))
                 {
                     cancelledOpen.CancelAfter(20);
-                    var cancelled = await navigator.OpenAsync(asynchronous, new PageArgs("Cancelled preparation", 0), cancelledOpen.Token);
-                    Debug.Log($"MUI Navigation cancelled prepare: {cancelled.Status}; history={navigator.History.Count}");
+                    var cancelled = await pages.OpenAsync(asynchronous, new PageArgs("Cancelled preparation", 0), cancelledOpen.Token);
+                    Debug.Log($"MUI Navigation cancelled prepare: {cancelled.Status}; history={pages.History.Count}");
                 }
-                var closingPage = await navigator.OpenAsync(asynchronous, new PageArgs("Cancelled close waiter", 0), cancellation.Token);
+                var closingPage = await pages.OpenAsync(asynchronous, new PageArgs("Cancelled close waiter", 0), cancellation.Token);
                 if (!closingPage.IsSuccess)
                 {
                     throw new InvalidOperationException("Close waiter demo could not open.", closingPage.Error);
                 }
 
-                var cancelledWait = await navigator.CloseAsync(closingPage.Handle, new CancellationToken(true));
-                Debug.Log($"MUI Navigation cancelled close wait: {cancelledWait.Status}; state={navigator.GetState(closingPage.Handle.Identity)}");
+                var cancelledWait = await pages.CloseAsync(closingPage.Handle, new CancellationToken(true));
+                Debug.Log($"MUI Navigation cancelled close wait: {cancelledWait.Status}; state={pages.GetState(closingPage.Handle.Identity)}");
                 var stillClosed = await closingPage.Handle.WaitForResultAsync(cancellation.Token);
                 Debug.Log($"MUI Navigation close continued: {stillClosed.Status}; cleanup={stillClosed.Cleanup}");
                 await host.ShutdownAsync();
                 if (recordLifecycleTrace)
                 {
-                    Debug.Log("MUI Navigation lifecycle trace:\n" + navigator.CaptureLifecycleTrace().ExportText());
-                    navigator.StopLifecycleTrace();
+                    Debug.Log("MUI Navigation lifecycle trace:\n" + pages.CaptureLifecycleTrace().ExportText());
+                    pages.StopLifecycleTrace();
                 }
                 Debug.Log("MUI Navigation shutdown complete");
             }

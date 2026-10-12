@@ -3,8 +3,8 @@
   "rootNamespace": "MUI.Samples.Navigation.Editor",
   "references": [
     "MUI.Samples.Navigation",
-    "MUI.Navigation",
-    "MUI.Navigation.Editor",
+    "MUI.Pages",
+    "MUI.Pages.Editor",
     "MUI.UGUI",
     "MUI.Editor.Localization"
   ],

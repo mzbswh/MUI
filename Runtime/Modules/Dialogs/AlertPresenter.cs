@@ -1,4 +1,4 @@
-using MUI.Navigation;
+using MUI.Pages;
 
 namespace MUI.Dialogs
 {

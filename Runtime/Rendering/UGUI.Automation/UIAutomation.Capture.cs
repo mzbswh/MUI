@@ -1,5 +1,5 @@
 using System;
-using MUI.Navigation;
+using MUI.Pages;
 using UnityEngine;
 using UnityEngine.Rendering;
 
@@ -54,14 +54,14 @@ namespace MUI.UGUI
         }
 
         /// <summary>导出调用方明确指定的导航器当前追踪快照，不启动记录，不输出业务参数。</summary>
-        public string ExportTrace(INavigator navigator)
+        public string ExportTrace(IPageManager pages)
         {
             RequireThread();
-            if (navigator == null)
+            if (pages == null)
             {
-                throw new ArgumentNullException(nameof(navigator));
+                throw new ArgumentNullException(nameof(pages));
             }
-            return navigator.CaptureLifecycleTrace().ExportText();
+            return pages.CaptureLifecycleTrace().ExportText();
         }
 
         private static void CheckSnapshotSize(int width, int height, int maxPixels)

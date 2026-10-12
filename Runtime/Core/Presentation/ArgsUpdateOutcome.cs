@@ -25,7 +25,7 @@ namespace MUI
         Reentrant,
         Busy,
         SourceUnavailable,
-        RouteMismatch,
+        PageDefinitionMismatch,
         Unsupported,
         InputControlUnsupported,
         /// <summary>其他父页面仍持有此共享实例。</summary>

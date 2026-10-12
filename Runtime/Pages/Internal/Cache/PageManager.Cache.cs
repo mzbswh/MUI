@@ -1,0 +1,382 @@
+using MUI.Pages.Diagnostics;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Threading.Tasks;
+
+namespace MUI.Pages
+{
+    public sealed partial class PageManager
+    {
+        private readonly Queue<PageCacheDiagnostic> cacheDiagnostics = new Queue<PageCacheDiagnostic>();
+        private readonly int cacheCapacity;
+        // 按最近归还顺序排列；命中移出，下一次关闭重新放到末尾。
+        private readonly List<CachedContent> cachedContents = new List<CachedContent>();
+        private Task cacheClearing;
+        private Task<Exception> cacheRetiring;
+        private int retiringCachedViews;
+        private long lastCacheSweep;
+        private readonly List<Exception> cacheReleaseErrors = new List<Exception>();
+        private long omittedCacheReleaseErrors;
+
+        private bool IsCacheClearing => cacheClearing != null && !cacheClearing.IsCompleted;
+
+        private bool IsCacheRetiring => cacheRetiring != null && !cacheRetiring.IsCompleted;
+
+        /// <summary>缓存目录条目数；过期项在命中时不可复用，并由维护扫描移出。</summary>
+        public int CachedViewCount
+        {
+            get
+            {
+                AssertThread();
+                return cachedContents.Count;
+            }
+        }
+
+        /// <summary>已不可命中但尚未完成最终释放的缓存实例数。</summary>
+        public int RetiringCachedViewCount
+        {
+            get
+            {
+                AssertThread();
+                return retiringCachedViews;
+            }
+        }
+
+        internal void RecordCacheDecision(PageDefinition route, PageCacheDecision decision)
+        {
+            if (cacheDiagnostics.Count == 128)
+            {
+                cacheDiagnostics.Dequeue();
+            }
+            cacheDiagnostics.Enqueue(new PageCacheDiagnostic(route.Key, decision));
+        }
+
+        private bool RejectCache(PageDefinition route, PageCacheDecision decision)
+        {
+            RecordCacheDecision(route, decision);
+            return false;
+        }
+
+        private static bool CacheExpired(CachedContent entry, long now) =>
+                    entry.Definition.Policy.CacheMode == ViewCacheMode.Timed &&
+                    (now - entry.CachedAt) / (double)Stopwatch.Frequency >= entry.Definition.Policy.CacheDuration.Value.TotalSeconds;
+
+        internal CachedViewContent TakeCachedContent(PageDefinition route)
+        {
+            AssertThread();
+            RefreshFailedCacheBudget();
+            var providerVersion = CaptureProviderVersion();
+            var now = Stopwatch.GetTimestamp();
+            for (var index = cachedContents.Count - 1; index >= 0; --index)
+            {
+                var entry = cachedContents[index];
+                if (ReferenceEquals(entry.Definition, route) && IsCacheCompatible(entry.Content, providerVersion) && !CacheExpired(entry, now))
+                {
+                    cachedContents.RemoveAt(index);
+                    var retirementReason = PageCacheDecision.Incompatible;
+                    try
+                    {
+                        using (EnterCallback(null))
+                        {
+                            if (!entry.Content.IsAlive)
+                            {
+                                RecordCacheDecision(route, PageCacheDecision.Destroyed);
+                                BeginCacheRetirement(new[] { entry });
+                                continue;
+                            }
+                            using (UIErrors.BeginPhase("CachePrepare"))
+                            {
+                                try
+                                {
+                                    entry.Content.PrepareForReuse();
+                                }
+                                catch (Exception error)
+                                {
+                                    UIErrors.AttachPhase(error, "CachePrepare");
+                                    throw;
+                                }
+                            }
+                        }
+                        providerVersion = CaptureProviderVersion();
+                        if (!IsShutdown && entry.Content.IsAlive && IsCacheCompatible(entry.Content, providerVersion))
+                        {
+                            reservedCacheEstimatedBytes -= entry.Definition.EstimatedRetainedBytes ?? 0;
+                            RecordCacheDecision(route, PageCacheDecision.Reused);
+                            return entry.Content;
+                        }
+                    }
+                    catch (Exception error)
+                    {
+                        retirementReason = PageCacheDecision.ReuseFailed;
+                        UIErrors.Report(error);
+                    }
+                    RecordCacheDecision(route, retirementReason);
+                    BeginCacheRetirement(new[] { entry });
+                }
+            }
+
+            return null;
+        }
+
+        internal bool RetainContent(PageDefinition route, CachedViewContent content)
+        {
+            AssertThread();
+            var providerVersion = CaptureProviderVersion();
+            if (IsShutdown || IsClearingInactiveContent || IsCacheClearing)
+            {
+                return RejectCache(route, PageCacheDecision.HostUnavailable);
+            }
+            if (cacheCapacity == 0)
+            {
+                return RejectCache(route, PageCacheDecision.CapacityDisabled);
+            }
+            if (!content.IsAlive || !IsCacheCompatible(content, providerVersion))
+            {
+                return RejectCache(route, PageCacheDecision.Incompatible);
+            }
+
+            if (!TryMakeCacheRoom(route))
+            {
+                return false;
+            }
+
+            // 淘汰回调可能重建绑定注册表，准入检查必须覆盖回调后的代际。
+            providerVersion = CaptureProviderVersion();
+            if (IsShutdown || IsClearingInactiveContent || IsCacheClearing || !content.IsAlive || !IsCacheCompatible(content, providerVersion))
+            {
+                return RejectCache(route, IsShutdown || IsClearingInactiveContent || IsCacheClearing
+                    ? PageCacheDecision.HostUnavailable : PageCacheDecision.Incompatible);
+            }
+
+            cachedContents.Add(new CachedContent { Definition = route, Content = content, CachedAt = Stopwatch.GetTimestamp() });
+            reservedCacheEstimatedBytes += route.EstimatedRetainedBytes ?? 0;
+            RecordCacheDecision(route, PageCacheDecision.Retained);
+            return true;
+        }
+
+        /// <summary>无帧驱动的宿主可显式清理过期项；不等待物理释放，不关闭活动页面。</summary>
+        private void RefreshCacheUntraced()
+        {
+            AssertThread();
+            if (IsShutdown || IsReentrant || IsSourceCommandRunning || HasCloseEvaluation)
+            {
+                return;
+            }
+
+            SweepExpiredCache();
+        }
+
+        private void SweepExpiredCache()
+        {
+            RefreshFailedCacheBudget();
+            if (IsCacheClearing || IsCacheRetiring)
+            {
+                return;
+            }
+
+            var providerVersion = CaptureProviderVersion();
+            var now = Stopwatch.GetTimestamp();
+            var expired = new List<CachedContent>();
+            for (var index = cachedContents.Count - 1; index >= 0; --index)
+            {
+                if (!cachedContents[index].Content.IsAlive || !IsCacheCompatible(cachedContents[index].Content, providerVersion) || CacheExpired(cachedContents[index], now))
+                {
+                    var entry = cachedContents[index];
+                    RecordCacheDecision(entry.Definition, !entry.Content.IsAlive ? PageCacheDecision.Destroyed :
+                        CacheExpired(entry, now) ? PageCacheDecision.Expired : PageCacheDecision.Incompatible);
+                    expired.Add(entry);
+                    cachedContents.RemoveAt(index);
+                }
+            }
+
+            if (expired.Count != 0)
+            {
+                BeginCacheRetirement(expired.ToArray());
+            }
+        }
+
+        private void TickCache()
+        {
+            var now = Stopwatch.GetTimestamp();
+            if ((now - lastCacheSweep) / (double)Stopwatch.Frequency >= 1)
+            {
+                lastCacheSweep = now;
+                try
+                {
+                    PruneTerminals(now);
+                    RefreshCacheUntraced();
+                    RefreshPreloadReservations();
+                    RefreshPreloadProviderVersion();
+                }
+                catch (Exception error)
+                {
+                    UIErrors.Report(error);
+                }
+            }
+        }
+
+        private void BeginCacheRetirement(CachedContent[] saved)
+        {
+            var completion = new TaskCompletionSource<Exception>(TaskCreationOptions.RunContinuationsAsynchronously);
+            // 已报告的历史失败由有界错误目录保留，不把每次已完成的淘汰永久串成任务链。
+            cacheRetiring = JoinCacheRetirementAsync(IsCacheRetiring ? cacheRetiring : null, completion.Task);
+            retiringCachedViews += saved.Length;
+            _ = ReleaseCachedContentsAsync(saved, completion);
+            _ = ReportCacheRetirementAsync(completion.Task);
+        }
+
+        private static async Task<Exception> JoinCacheRetirementAsync(Task<Exception> previous, Task<Exception> current)
+        {
+            var failure = await current;
+            var prior = previous == null ? null : await previous;
+            return failure == null ? prior : prior == null ? failure :
+                new AggregateException("Page cache retirements failed.", prior, failure);
+        }
+
+        private static async Task ReportCacheRetirementAsync(Task<Exception> operation)
+        {
+            var error = await operation;
+            if (error != null)
+            {
+                UIErrors.Report(error);
+            }
+        }
+
+        /// <summary>移出缓存并等待在途淘汰及最终销毁；不关闭活动页面，重复调用共享清理。</summary>
+        private ValueTask ClearCacheAsyncUntraced()
+        {
+            AssertThread();
+            if (IsReentrant || IsSourceCommandRunning || HasCloseEvaluation)
+            {
+                throw new InvalidOperationException("Cannot await cache clearing from navigation callbacks.");
+            }
+
+            return new ValueTask(BeginCacheClear());
+        }
+
+        private Task BeginCacheClear()
+        {
+            if (IsCacheClearing)
+            {
+                return cacheClearing;
+            }
+
+            var saved = cachedContents.ToArray();
+            foreach (var entry in saved)
+            {
+                RecordCacheDecision(entry.Definition, PageCacheDecision.Cleared);
+            }
+            cachedContents.Clear();
+            var completion = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+            cacheClearing = completion.Task;
+            retiringCachedViews += saved.Length;
+            _ = FinishCacheClearAsync(saved, cacheRetiring, completion);
+            return cacheClearing;
+        }
+
+        private async Task FinishCacheClearAsync(CachedContent[] saved, Task<Exception> retirement,
+                    TaskCompletionSource<bool> completion)
+        {
+            var release = new TaskCompletionSource<Exception>(TaskCreationOptions.RunContinuationsAsynchronously);
+            // 同时释放已移出的目录内容，不能让一个旧淘汰阻止其他无依赖实例收尾。
+            _ = ReleaseCachedContentsAsync(saved, release);
+            var failure = await release.Task;
+            var priorFailure = retirement == null ? null : await retirement;
+            // 清理已观察过的淘汰结果不污染下一次清缓存；历史错误仍保留到宿主退出。
+            if (ReferenceEquals(cacheRetiring, retirement))
+            {
+                cacheRetiring = null;
+            }
+
+            if (failure == null && priorFailure == null)
+            {
+                completion.TrySetResult(true);
+            }
+            else
+            {
+                completion.TrySetException(failure == null ? priorFailure : priorFailure == null ? failure :
+                    new AggregateException("Page cache clearing failed.", priorFailure, failure));
+            }
+        }
+
+        private async Task ReleaseCachedContentsAsync(CachedContent[] saved, TaskCompletionSource<Exception> completion)
+        {
+            var errors = new List<Exception>();
+            var trace = CurrentTraceOperation;
+            foreach (var entry in saved)
+            {
+                var errorsBeforeRelease = errors.Count;
+                try
+                {
+                    // 实例资源和凭证释放也会执行外部代码，不能在回调中等待自身清理。
+                    using (EnterCallback(null))
+                    {
+                        await entry.Content.ReleaseCachedAsync(errors,
+                            CreateResourceReleaseTrace(default, entry.Definition.Key, trace));
+                    }
+                }
+                catch (Exception error)
+                {
+                    errors.Add(error);
+                }
+                finally
+                {
+                    retiringCachedViews--;
+                    var estimate = entry.Definition.EstimatedRetainedBytes ?? 0;
+                    if (errors.Count == errorsBeforeRelease || entry.Content.IsCleanupConfirmed)
+                    {
+                        reservedCacheEstimatedBytes -= estimate;
+                    }
+                    else
+                    {
+                        // 无法证明释放成功时不归还额度，避免错误路径重复透支。
+                        failedCacheEstimatedBytes += estimate;
+                        if (estimate != 0)
+                        {
+                            failedCacheBudgets.Add(new FailedCacheBudget { Content = entry.Content, EstimatedBytes = estimate });
+                        }
+                    }
+                }
+            }
+
+            if (errors.Count == 0)
+            {
+                completion.TrySetResult(null);
+            }
+            else
+            {
+                hasCleanupFailure = true;
+                var failure = new AggregateException("Page cache cleanup failed.", errors);
+                if (cacheReleaseErrors.Count < terminalCapacity)
+                {
+                    cacheReleaseErrors.Add(failure);
+                }
+                else if (omittedCacheReleaseErrors < long.MaxValue)
+                {
+                    omittedCacheReleaseErrors++;
+                }
+
+                completion.TrySetResult(failure);
+            }
+        }
+
+        private bool IsRecordedCacheFailure(Exception failure)
+        {
+            if (cacheReleaseErrors.Contains(failure))
+            {
+                return true;
+            }
+
+            return failure is AggregateException aggregate && aggregate.InnerExceptions.Count != 0 &&
+                System.Linq.Enumerable.All(aggregate.InnerExceptions, IsRecordedCacheFailure);
+        }
+
+        private sealed class CachedContent
+        {
+            public PageDefinition Definition;
+            public CachedViewContent Content;
+            public long CachedAt;
+        }
+    }
+}

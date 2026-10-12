@@ -4,6 +4,18 @@
   "fallbackLanguageId": "en-US",
   "entries": [
     {
+      "key": "settings.development",
+      "text": "开发工具"
+    },
+    {
+      "key": "property.outputCompilerGeneratedSources",
+      "text": "输出生成源码供 IDE 使用"
+    },
+    {
+      "key": "settings.outputCompilerGeneratedSources.help",
+      "text": "默认开启。将编译器生成的源码输出到 Library 并同步 IDE 工程，方便补全和跳转。关闭后不再由 MUI 配置源码输出，IDE 自行运行生成器；自动绑定和 Unity 编译不受影响。"
+    },
+    {
       "key": "editor.ConfirmationDialogWizard.355c93a223",
       "text": "请选择新的 Prefab 路径。"
     },
@@ -757,7 +769,7 @@
     },
     {
       "key": "editor.PageWizard.275da80635",
-      "text": "Page.CreateRoute(host.Settings)。类型化结果需由项目补充完成命令。"
+      "text": "ViewModelDefinition.CreateDefinition(host.Settings)。类型化结果需由项目补充完成命令。"
     },
     {
       "key": "editor.PageWizard.2ed479b29e",
@@ -797,7 +809,7 @@
     },
     {
       "key": "editor.PageWizard.593bb3ad77",
-      "text": "创建新页面目录、Prefab 和可编辑源码。目标程序集需要 MUI.Core、MUI.Resources、MUI.Navigation、MUI.UGUI 和绑定生成器；选择 TMP 时还需引用 MUI.TMP。Prefab 应放在 UIHost Canvas 下，创建后在资源提供方或 UIHost 目录登记资源键。页面生命周期使用统一异步入口，本地准备可立即完成。"
+      "text": "创建新页面目录、Prefab 和可编辑源码。目标程序集需要 MUI.Core、MUI.Resources、MUI.Pages、MUI.UGUI 和绑定生成器；选择 TMP 时还需引用 MUI.TMP。Prefab 应放在 UIHost Canvas 下，创建后在资源提供方或 UIHost 目录登记资源键。页面生命周期使用统一异步入口，本地准备可立即完成。"
     },
     {
       "key": "editor.PageWizard.5a814a8beb",
@@ -924,155 +936,155 @@
       "text": "创建页面"
     },
     {
-      "key": "editor.RouteGraphSnapshot.01c47b74d0",
+      "key": "editor.PageGraphSnapshot.01c47b74d0",
       "text": "未收录"
     },
     {
-      "key": "editor.RouteGraphSnapshot.158410a533",
+      "key": "editor.PageGraphSnapshot.158410a533",
       "text": "采集时间：{0}；静态有效：{1}；总节点：{2}；截断：{3}"
     },
     {
-      "key": "editor.RouteGraphSnapshot.51cb866ffa",
+      "key": "editor.PageGraphSnapshot.51cb866ffa",
       "text": "无效目标"
     },
     {
-      "key": "editor.RouteGraphSnapshot.537352400c",
+      "key": "editor.PageGraphSnapshot.537352400c",
       "text": "可选"
     },
     {
-      "key": "editor.RouteGraphSnapshot.726b6750c3",
+      "key": "editor.PageGraphSnapshot.726b6750c3",
       "text": "多实例={0}，上限={1}，焦点={2}，缓存={3}"
     },
     {
-      "key": "editor.RouteGraphSnapshot.92707d3318",
+      "key": "editor.PageGraphSnapshot.92707d3318",
       "text": "必需"
     },
     {
-      "key": "editor.RouteGraphSnapshot.9cc9fa8b20",
+      "key": "editor.PageGraphSnapshot.9cc9fa8b20",
       "text": "MUI 路由依赖图：{0}"
     },
     {
-      "key": "editor.RouteGraphSnapshot.9d4ce01625",
+      "key": "editor.PageGraphSnapshot.9d4ce01625",
       "text": "#{0} {1} | 层级={2} | {3}"
     },
     {
-      "key": "editor.RouteGraphSnapshot.b375d3caee",
+      "key": "editor.PageGraphSnapshot.b375d3caee",
       "text": "此报告不验证运行时参数、资源可用性或跨根共享组合。"
     },
     {
-      "key": "editor.RouteGraphSnapshot.c4d58b520a",
+      "key": "editor.PageGraphSnapshot.c4d58b520a",
       "text": "错误 {0} / {1}：{2}"
     },
     {
-      "key": "editor.RouteGraphWindow.0133cebb0b",
+      "key": "editor.PageGraphWindow.0133cebb0b",
       "text": "依赖图窗口缺少模板："
     },
     {
-      "key": "editor.RouteGraphWindow.Details.01c47b74d0",
+      "key": "editor.PageGraphWindow.Details.01c47b74d0",
       "text": "未收录"
     },
     {
-      "key": "editor.RouteGraphWindow.Details.273b96485f",
+      "key": "editor.PageGraphWindow.Details.273b96485f",
       "text": "无效顺序："
     },
     {
-      "key": "editor.RouteGraphWindow.Details.2d40633e66",
+      "key": "editor.PageGraphWindow.Details.2d40633e66",
       "text": "父拥有者（指向当前路由）"
     },
     {
-      "key": "editor.RouteGraphWindow.Details.404b2b7b9c",
+      "key": "editor.PageGraphWindow.Details.404b2b7b9c",
       "text": "此校验根的可达图中没有父拥有者。"
     },
     {
-      "key": "editor.RouteGraphWindow.Details.40e06e6a94",
+      "key": "editor.PageGraphWindow.Details.40e06e6a94",
       "text": "跨层显示仍按 Layer 排序"
     },
     {
-      "key": "editor.RouteGraphWindow.Details.4804324f1f",
+      "key": "editor.PageGraphWindow.Details.4804324f1f",
       "text": "没有直接依赖。"
     },
     {
-      "key": "editor.RouteGraphWindow.Details.5853629b17",
+      "key": "editor.PageGraphWindow.Details.5853629b17",
       "text": "必需，失败关闭父链"
     },
     {
-      "key": "editor.RouteGraphWindow.Details.5e80d84deb",
+      "key": "editor.PageGraphWindow.Details.5e80d84deb",
       "text": "层级：{0}"
     },
     {
-      "key": "editor.RouteGraphWindow.Details.655f0f0b1a",
+      "key": "editor.PageGraphWindow.Details.655f0f0b1a",
       "text": "资源：{0}"
     },
     {
-      "key": "editor.RouteGraphWindow.Details.695a39529f",
+      "key": "editor.PageGraphWindow.Details.695a39529f",
       "text": "直接依赖（当前路由指向）"
     },
     {
-      "key": "editor.RouteGraphWindow.Details.76f5a111c9",
+      "key": "editor.PageGraphWindow.Details.76f5a111c9",
       "text": "本图静态问题"
     },
     {
-      "key": "editor.RouteGraphWindow.Details.7cbe752ca7",
+      "key": "editor.PageGraphWindow.Details.7cbe752ca7",
       "text": "父后"
     },
     {
-      "key": "editor.RouteGraphWindow.Details.840cc3e250",
+      "key": "editor.PageGraphWindow.Details.840cc3e250",
       "text": "父拥有者 → 当前路由 → 直接依赖。点击关系可跳转；同键不同定义以编号区分。"
     },
     {
-      "key": "editor.RouteGraphWindow.Details.936ac0c9d9",
+      "key": "editor.PageGraphWindow.Details.936ac0c9d9",
       "text": "当前快照已截断，关系列表可能不完整。复制报告会保留已采集的关系与截断标记。"
     },
     {
-      "key": "editor.RouteGraphWindow.Details.9b73c23f45",
+      "key": "editor.PageGraphWindow.Details.9b73c23f45",
       "text": "共 {0} 条关系，此处展示前 {1} 条；其余已采集关系可从复制报告查看。"
     },
     {
-      "key": "editor.RouteGraphWindow.Details.a4c1e252ea",
+      "key": "editor.PageGraphWindow.Details.a4c1e252ea",
       "text": "父前"
     },
     {
-      "key": "editor.RouteGraphWindow.Details.d3fc914f82",
+      "key": "editor.PageGraphWindow.Details.d3fc914f82",
       "text": "同层按依赖顺序约束"
     },
     {
-      "key": "editor.RouteGraphWindow.Details.d5adb4d085",
+      "key": "editor.PageGraphWindow.Details.d5adb4d085",
       "text": "可选，允许缺席降级"
     },
     {
-      "key": "editor.RouteGraphWindow.Details.efbcfd92f1",
+      "key": "editor.PageGraphWindow.Details.efbcfd92f1",
       "text": "未发现静态声明错误；这不证明运行时参数或资源一定可用。"
     },
     {
-      "key": "editor.RouteGraphWindow.a55f3f74c9",
+      "key": "editor.PageGraphWindow.a55f3f74c9",
       "text": " · 快照或问题列表已截断，不代表完整图"
     },
     {
-      "key": "editor.RouteGraphWindow.a5db00d95d",
+      "key": "editor.PageGraphWindow.a5db00d95d",
       "text": "静态校验通过"
     },
     {
-      "key": "editor.RouteGraphWindow.afa6c08140",
+      "key": "editor.PageGraphWindow.afa6c08140",
       "text": "#{0} {1}\n层级 {2}"
     },
     {
-      "key": "editor.RouteGraphWindow.be20609b83",
+      "key": "editor.PageGraphWindow.be20609b83",
       "text": "MUI 路由依赖图"
     },
     {
-      "key": "editor.RouteGraphWindow.ce2152f7d4",
+      "key": "editor.PageGraphWindow.ce2152f7d4",
       "text": "存在静态错误"
     },
     {
-      "key": "editor.RouteGraphWindow.dd7478c175",
+      "key": "editor.PageGraphWindow.dd7478c175",
       "text": "{0} · 节点 {1}/{2} · 关系 {3} · 问题 {4} · {5}"
     },
     {
-      "key": "editor.RouteGraphWindow.efe8e45d2f",
+      "key": "editor.PageGraphWindow.efe8e45d2f",
       "text": "未采集路由元数据。"
     },
     {
-      "key": "editor.RouteGraphWindow.fbc36492c3",
+      "key": "editor.PageGraphWindow.fbc36492c3",
       "text": "请提供 1 至 32 个路由根。"
     },
     {
@@ -2217,7 +2229,7 @@
     },
     {
       "key": "editor.ViewInspector.e32a3bfa20",
-      "text": "未找到生成的绑定清单。请编译声明了 ViewContract 或 Bind 特性的 partial ViewModel。"
+      "text": "未找到生成的绑定清单。请编译声明了 UIPage、UIWidget 或 Bind 特性的 partial ViewModel。"
     },
     {
       "key": "editor.ViewInspector.f9d933d15c",
@@ -2360,7 +2372,7 @@
       "text": "重入"
     },
     {
-      "key": "enum.MUI.ArgsUpdateRejection.RouteMismatch",
+      "key": "enum.MUI.ArgsUpdateRejection.PageDefinitionMismatch",
       "text": "路由不匹配"
     },
     {
@@ -2624,723 +2636,723 @@
       "text": "更新"
     },
     {
-      "key": "enum.MUI.Navigation.BackBehavior.Block",
+      "key": "enum.MUI.Pages.BackBehavior.Block",
       "text": "阻止"
     },
     {
-      "key": "enum.MUI.Navigation.BackBehavior.Close",
+      "key": "enum.MUI.Pages.BackBehavior.Close",
       "text": "关闭"
     },
     {
-      "key": "enum.MUI.Navigation.BackBehavior.HandleByPresenter",
+      "key": "enum.MUI.Pages.BackBehavior.HandleByPresenter",
       "text": "由展示器处理"
     },
     {
-      "key": "enum.MUI.Navigation.BackBehavior.Ignore",
+      "key": "enum.MUI.Pages.BackBehavior.Ignore",
       "text": "忽略"
     },
     {
-      "key": "enum.MUI.Navigation.BackResponse.Close",
+      "key": "enum.MUI.Pages.BackResponse.Close",
       "text": "关闭"
     },
     {
-      "key": "enum.MUI.Navigation.BackResponse.Handled",
+      "key": "enum.MUI.Pages.BackResponse.Handled",
       "text": "已处理"
     },
     {
-      "key": "enum.MUI.Navigation.BackResponse.Ignore",
+      "key": "enum.MUI.Pages.BackResponse.Ignore",
       "text": "忽略"
     },
     {
-      "key": "enum.MUI.Navigation.BatchCloseStatus.Busy",
+      "key": "enum.MUI.Pages.BatchCloseStatus.Busy",
       "text": "繁忙"
     },
     {
-      "key": "enum.MUI.Navigation.BatchCloseStatus.Completed",
+      "key": "enum.MUI.Pages.BatchCloseStatus.Completed",
       "text": "已完成"
     },
     {
-      "key": "enum.MUI.Navigation.BatchCloseStatus.Reentrant",
+      "key": "enum.MUI.Pages.BatchCloseStatus.Reentrant",
       "text": "重入"
     },
     {
-      "key": "enum.MUI.Navigation.BatchCloseStatus.WaitCancelled",
+      "key": "enum.MUI.Pages.BatchCloseStatus.WaitCancelled",
       "text": "等待已取消"
     },
     {
-      "key": "enum.MUI.Navigation.CleanupStatus.Complete",
+      "key": "enum.MUI.Pages.CleanupStatus.Complete",
       "text": "完成"
     },
     {
-      "key": "enum.MUI.Navigation.CleanupStatus.Failed",
+      "key": "enum.MUI.Pages.CleanupStatus.Failed",
       "text": "失败"
     },
     {
-      "key": "enum.MUI.Navigation.CleanupStatus.NotRequired",
+      "key": "enum.MUI.Pages.CleanupStatus.NotRequired",
       "text": "不需要"
     },
     {
-      "key": "enum.MUI.Navigation.CleanupStatus.Pending",
+      "key": "enum.MUI.Pages.CleanupStatus.Pending",
       "text": "等待中"
     },
     {
-      "key": "enum.MUI.Navigation.CloseDecisionKind.Allow",
+      "key": "enum.MUI.Pages.CloseDecisionKind.Allow",
       "text": "允许"
     },
     {
-      "key": "enum.MUI.Navigation.CloseDecisionKind.Deny",
+      "key": "enum.MUI.Pages.CloseDecisionKind.Deny",
       "text": "拒绝"
     },
     {
-      "key": "enum.MUI.Navigation.CloseDecisionKind.NeedsConfirmation",
+      "key": "enum.MUI.Pages.CloseDecisionKind.NeedsConfirmation",
       "text": "需要确认"
     },
     {
-      "key": "enum.MUI.Navigation.CloseRequestIntent.Complete",
+      "key": "enum.MUI.Pages.CloseRequestIntent.Complete",
       "text": "完成"
     },
     {
-      "key": "enum.MUI.Navigation.CloseRequestIntent.Dismiss",
+      "key": "enum.MUI.Pages.CloseRequestIntent.Dismiss",
       "text": "关闭"
     },
     {
-      "key": "enum.MUI.Navigation.CloseRequestIntent.Replace",
+      "key": "enum.MUI.Pages.CloseRequestIntent.Replace",
       "text": "替换"
     },
     {
-      "key": "enum.MUI.Navigation.CloseStatus.AlreadyClosed",
+      "key": "enum.MUI.Pages.CloseStatus.AlreadyClosed",
       "text": "已关闭"
     },
     {
-      "key": "enum.MUI.Navigation.CloseStatus.AlreadyClosing",
+      "key": "enum.MUI.Pages.CloseStatus.AlreadyClosing",
       "text": "正在关闭"
     },
     {
-      "key": "enum.MUI.Navigation.CloseStatus.Blocked",
+      "key": "enum.MUI.Pages.CloseStatus.Blocked",
       "text": "被阻止"
     },
     {
-      "key": "enum.MUI.Navigation.CloseStatus.Busy",
+      "key": "enum.MUI.Pages.CloseStatus.Busy",
       "text": "繁忙"
     },
     {
-      "key": "enum.MUI.Navigation.CloseStatus.Closed",
+      "key": "enum.MUI.Pages.CloseStatus.Closed",
       "text": "已关闭"
     },
     {
-      "key": "enum.MUI.Navigation.CloseStatus.ClosedWithCleanupPending",
+      "key": "enum.MUI.Pages.CloseStatus.ClosedWithCleanupPending",
       "text": "已关闭但清理未完成"
     },
     {
-      "key": "enum.MUI.Navigation.CloseStatus.ConfirmationUnavailable",
+      "key": "enum.MUI.Pages.CloseStatus.ConfirmationUnavailable",
       "text": "确认服务不可用"
     },
     {
-      "key": "enum.MUI.Navigation.CloseStatus.Denied",
+      "key": "enum.MUI.Pages.CloseStatus.Denied",
       "text": "被拒绝"
     },
     {
-      "key": "enum.MUI.Navigation.CloseStatus.Failed",
+      "key": "enum.MUI.Pages.CloseStatus.Failed",
       "text": "失败"
     },
     {
-      "key": "enum.MUI.Navigation.CloseStatus.Handled",
+      "key": "enum.MUI.Pages.CloseStatus.Handled",
       "text": "已处理"
     },
     {
-      "key": "enum.MUI.Navigation.CloseStatus.InUse",
+      "key": "enum.MUI.Pages.CloseStatus.InUse",
       "text": "使用中"
     },
     {
-      "key": "enum.MUI.Navigation.CloseStatus.NotFound",
+      "key": "enum.MUI.Pages.CloseStatus.NotFound",
       "text": "未找到"
     },
     {
-      "key": "enum.MUI.Navigation.CloseStatus.Reentrant",
+      "key": "enum.MUI.Pages.CloseStatus.Reentrant",
       "text": "重入"
     },
     {
-      "key": "enum.MUI.Navigation.CloseStatus.Superseded",
+      "key": "enum.MUI.Pages.CloseStatus.Superseded",
       "text": "已被替代"
     },
     {
-      "key": "enum.MUI.Navigation.CloseStatus.UnknownOrExpired",
+      "key": "enum.MUI.Pages.CloseStatus.UnknownOrExpired",
       "text": "未知或已过期"
     },
     {
-      "key": "enum.MUI.Navigation.CloseStatus.WaitCancelled",
+      "key": "enum.MUI.Pages.CloseStatus.WaitCancelled",
       "text": "等待已取消"
     },
     {
-      "key": "enum.MUI.Navigation.CoveragePolicy.BlockInput",
+      "key": "enum.MUI.Pages.CoveragePolicy.BlockInput",
       "text": "阻止输入"
     },
     {
-      "key": "enum.MUI.Navigation.CoveragePolicy.Hide",
+      "key": "enum.MUI.Pages.CoveragePolicy.Hide",
       "text": "隐藏下层"
     },
     {
-      "key": "enum.MUI.Navigation.CoveragePolicy.None",
+      "key": "enum.MUI.Pages.CoveragePolicy.None",
       "text": "不覆盖"
     },
     {
-      "key": "enum.MUI.Navigation.DependencyFailureStage.Preparation",
+      "key": "enum.MUI.Pages.DependencyFailureStage.Preparation",
       "text": "准备"
     },
     {
-      "key": "enum.MUI.Navigation.DependencyFailureStage.RuntimeExit",
+      "key": "enum.MUI.Pages.DependencyFailureStage.RuntimeExit",
       "text": "运行时退出"
     },
     {
-      "key": "enum.MUI.Navigation.DependencyPlacement.AttachedAfter",
+      "key": "enum.MUI.Pages.DependencyPlacement.AttachedAfter",
       "text": "父页面之后"
     },
     {
-      "key": "enum.MUI.Navigation.DependencyPlacement.RequiredBefore",
+      "key": "enum.MUI.Pages.DependencyPlacement.RequiredBefore",
       "text": "父页面之前"
     },
     {
-      "key": "enum.MUI.Navigation.DismissReason.ArgsUpdateFailed",
+      "key": "enum.MUI.Pages.DismissReason.ArgsUpdateFailed",
       "text": "参数更新失败"
     },
     {
-      "key": "enum.MUI.Navigation.DismissReason.Back",
+      "key": "enum.MUI.Pages.DismissReason.Back",
       "text": "返回"
     },
     {
-      "key": "enum.MUI.Navigation.DismissReason.Closed",
+      "key": "enum.MUI.Pages.DismissReason.Closed",
       "text": "已关闭"
     },
     {
-      "key": "enum.MUI.Navigation.DismissReason.Forced",
+      "key": "enum.MUI.Pages.DismissReason.Forced",
       "text": "强制关闭"
     },
     {
-      "key": "enum.MUI.Navigation.DismissReason.HostShutdown",
+      "key": "enum.MUI.Pages.DismissReason.HostShutdown",
       "text": "宿主退出"
     },
     {
-      "key": "enum.MUI.Navigation.DismissReason.OpenCancelled",
+      "key": "enum.MUI.Pages.DismissReason.OpenCancelled",
       "text": "打开取消"
     },
     {
-      "key": "enum.MUI.Navigation.DismissReason.OpenFailed",
+      "key": "enum.MUI.Pages.DismissReason.OpenFailed",
       "text": "打开失败"
     },
     {
-      "key": "enum.MUI.Navigation.DismissReason.RebindFailed",
+      "key": "enum.MUI.Pages.DismissReason.RebindFailed",
       "text": "换绑失败"
     },
     {
-      "key": "enum.MUI.Navigation.DismissReason.Replaced",
+      "key": "enum.MUI.Pages.DismissReason.Replaced",
       "text": "已替换"
     },
     {
-      "key": "enum.MUI.Navigation.ExistingInstancePolicy.Reject",
+      "key": "enum.MUI.Pages.ExistingInstancePolicy.Reject",
       "text": "拒绝复用"
     },
     {
-      "key": "enum.MUI.Navigation.ExistingInstancePolicy.ReturnReady",
+      "key": "enum.MUI.Pages.ExistingInstancePolicy.ReturnReady",
       "text": "返回就绪实例"
     },
     {
-      "key": "enum.MUI.Navigation.ExplicitOwnershipReleaseStatus.AlreadyReleased",
+      "key": "enum.MUI.Pages.ExplicitOwnershipReleaseStatus.AlreadyReleased",
       "text": "已释放"
     },
     {
-      "key": "enum.MUI.Navigation.ExplicitOwnershipReleaseStatus.Pending",
+      "key": "enum.MUI.Pages.ExplicitOwnershipReleaseStatus.Pending",
       "text": "等待中"
     },
     {
-      "key": "enum.MUI.Navigation.ExplicitOwnershipReleaseStatus.Rejected",
+      "key": "enum.MUI.Pages.ExplicitOwnershipReleaseStatus.Rejected",
       "text": "被拒绝"
     },
     {
-      "key": "enum.MUI.Navigation.ExplicitOwnershipReleaseStatus.Released",
+      "key": "enum.MUI.Pages.ExplicitOwnershipReleaseStatus.Released",
       "text": "已释放"
     },
     {
-      "key": "enum.MUI.Navigation.FocusPolicy.None",
+      "key": "enum.MUI.Pages.FocusPolicy.None",
       "text": "不获取焦点"
     },
     {
-      "key": "enum.MUI.Navigation.NavigationEventKind.ArgsUpdateFinished",
+      "key": "enum.MUI.Pages.PageEventKind.ArgsUpdateFinished",
       "text": "参数更新完成"
     },
     {
-      "key": "enum.MUI.Navigation.NavigationEventKind.CloseCleanupPending",
+      "key": "enum.MUI.Pages.PageEventKind.CloseCleanupPending",
       "text": "关闭清理中"
     },
     {
-      "key": "enum.MUI.Navigation.NavigationEventKind.CloseCommitted",
+      "key": "enum.MUI.Pages.PageEventKind.CloseCommitted",
       "text": "关闭已提交"
     },
     {
-      "key": "enum.MUI.Navigation.NavigationEventKind.Closed",
+      "key": "enum.MUI.Pages.PageEventKind.Closed",
       "text": "已关闭"
     },
     {
-      "key": "enum.MUI.Navigation.NavigationEventKind.DependencyDegraded",
+      "key": "enum.MUI.Pages.PageEventKind.DependencyDegraded",
       "text": "依赖降级"
     },
     {
-      "key": "enum.MUI.Navigation.NavigationEventKind.ExplicitOwnershipReleased",
+      "key": "enum.MUI.Pages.PageEventKind.ExplicitOwnershipReleased",
       "text": "显式持有已撤销"
     },
     {
-      "key": "enum.MUI.Navigation.NavigationEventKind.OpenCommitted",
+      "key": "enum.MUI.Pages.PageEventKind.OpenCommitted",
       "text": "打开已提交"
     },
     {
-      "key": "enum.MUI.Navigation.NavigationEventKind.ViewModelRebindFinished",
+      "key": "enum.MUI.Pages.PageEventKind.ViewModelRebindFinished",
       "text": "视图模型换绑完成"
     },
     {
-      "key": "enum.MUI.Navigation.NavigationOperationStage.EnterTransition",
+      "key": "enum.MUI.Pages.PageOperationStage.EnterTransition",
       "text": "进入转场"
     },
     {
-      "key": "enum.MUI.Navigation.NavigationOperationStage.ExitTransition",
+      "key": "enum.MUI.Pages.PageOperationStage.ExitTransition",
       "text": "退出转场"
     },
     {
-      "key": "enum.MUI.Navigation.NavigationOperationStage.InstanceCleanup",
+      "key": "enum.MUI.Pages.PageOperationStage.InstanceCleanup",
       "text": "实例清理"
     },
     {
-      "key": "enum.MUI.Navigation.NavigationOperationStage.ViewResourceRelease",
+      "key": "enum.MUI.Pages.PageOperationStage.ViewResourceRelease",
       "text": "视图资源归还"
     },
     {
-      "key": "enum.MUI.Navigation.NavigationPreparationStage.ActivationPreparation",
+      "key": "enum.MUI.Pages.PagePreparationStage.ActivationPreparation",
       "text": "激活准备"
     },
     {
-      "key": "enum.MUI.Navigation.NavigationPreparationStage.AttachedDependencies",
+      "key": "enum.MUI.Pages.PagePreparationStage.AttachedDependencies",
       "text": "附属依赖"
     },
     {
-      "key": "enum.MUI.Navigation.NavigationPreparationStage.Binding",
+      "key": "enum.MUI.Pages.PagePreparationStage.Binding",
       "text": "绑定"
     },
     {
-      "key": "enum.MUI.Navigation.NavigationPreparationStage.ModelCreation",
+      "key": "enum.MUI.Pages.PagePreparationStage.ModelCreation",
       "text": "创建模型"
     },
     {
-      "key": "enum.MUI.Navigation.NavigationPreparationStage.PresenterCreate",
+      "key": "enum.MUI.Pages.PagePreparationStage.PresenterCreate",
       "text": "创建展示器"
     },
     {
-      "key": "enum.MUI.Navigation.NavigationPreparationStage.PresenterOpen",
+      "key": "enum.MUI.Pages.PagePreparationStage.PresenterOpen",
       "text": "展示器打开"
     },
     {
-      "key": "enum.MUI.Navigation.NavigationPreparationStage.PresenterOpenAsync",
+      "key": "enum.MUI.Pages.PagePreparationStage.PresenterOpenAsync",
       "text": "展示器异步打开"
     },
     {
-      "key": "enum.MUI.Navigation.NavigationPreparationStage.RequiredDependencies",
+      "key": "enum.MUI.Pages.PagePreparationStage.RequiredDependencies",
       "text": "必需依赖"
     },
     {
-      "key": "enum.MUI.Navigation.NavigationPreparationStage.ResourceCreation",
+      "key": "enum.MUI.Pages.PagePreparationStage.ResourceCreation",
       "text": "创建资源"
     },
     {
-      "key": "enum.MUI.Navigation.NavigationTraceKind.BatchCloseItem",
+      "key": "enum.MUI.Pages.PageTraceKind.BatchCloseItem",
       "text": "批量关闭条目"
     },
     {
-      "key": "enum.MUI.Navigation.NavigationTraceKind.Lifecycle",
+      "key": "enum.MUI.Pages.PageTraceKind.Lifecycle",
       "text": "生命周期"
     },
     {
-      "key": "enum.MUI.Navigation.NavigationTraceKind.OperationFinished",
+      "key": "enum.MUI.Pages.PageTraceKind.OperationFinished",
       "text": "操作完成"
     },
     {
-      "key": "enum.MUI.Navigation.NavigationTraceKind.OperationStageFinished",
+      "key": "enum.MUI.Pages.PageTraceKind.OperationStageFinished",
       "text": "操作阶段完成"
     },
     {
-      "key": "enum.MUI.Navigation.NavigationTraceKind.OperationStageStarted",
+      "key": "enum.MUI.Pages.PageTraceKind.OperationStageStarted",
       "text": "操作阶段开始"
     },
     {
-      "key": "enum.MUI.Navigation.NavigationTraceKind.OperationStarted",
+      "key": "enum.MUI.Pages.PageTraceKind.OperationStarted",
       "text": "操作开始"
     },
     {
-      "key": "enum.MUI.Navigation.NavigationTraceKind.PreparationFinished",
+      "key": "enum.MUI.Pages.PageTraceKind.PreparationFinished",
       "text": "准备完成"
     },
     {
-      "key": "enum.MUI.Navigation.NavigationTraceKind.PreparationStarted",
+      "key": "enum.MUI.Pages.PageTraceKind.PreparationStarted",
       "text": "准备开始"
     },
     {
-      "key": "enum.MUI.Navigation.OpenRejection.Busy",
+      "key": "enum.MUI.Pages.OpenRejection.Busy",
       "text": "繁忙"
     },
     {
-      "key": "enum.MUI.Navigation.OpenRejection.CleanupCapacity",
+      "key": "enum.MUI.Pages.OpenRejection.CleanupCapacity",
       "text": "清理容量不足"
     },
     {
-      "key": "enum.MUI.Navigation.OpenRejection.CloseDecisionTimedOut",
+      "key": "enum.MUI.Pages.OpenRejection.CloseDecisionTimedOut",
       "text": "关闭决议超时"
     },
     {
-      "key": "enum.MUI.Navigation.OpenRejection.CloseDenied",
+      "key": "enum.MUI.Pages.OpenRejection.CloseDenied",
       "text": "关闭被拒绝"
     },
     {
-      "key": "enum.MUI.Navigation.OpenRejection.ConfirmationUnavailable",
+      "key": "enum.MUI.Pages.OpenRejection.ConfirmationUnavailable",
       "text": "确认服务不可用"
     },
     {
-      "key": "enum.MUI.Navigation.OpenRejection.ConflictingData",
+      "key": "enum.MUI.Pages.OpenRejection.ConflictingData",
       "text": "数据冲突"
     },
     {
-      "key": "enum.MUI.Navigation.OpenRejection.DependencyCycle",
+      "key": "enum.MUI.Pages.OpenRejection.DependencyCycle",
       "text": "依赖环"
     },
     {
-      "key": "enum.MUI.Navigation.OpenRejection.DependencyLimit",
+      "key": "enum.MUI.Pages.OpenRejection.DependencyLimit",
       "text": "超过依赖上限"
     },
     {
-      "key": "enum.MUI.Navigation.OpenRejection.DependencyOrderConflict",
+      "key": "enum.MUI.Pages.OpenRejection.DependencyOrderConflict",
       "text": "依赖顺序冲突"
     },
     {
-      "key": "enum.MUI.Navigation.OpenRejection.InstanceLimit",
+      "key": "enum.MUI.Pages.OpenRejection.InstanceLimit",
       "text": "实例上限"
     },
     {
-      "key": "enum.MUI.Navigation.OpenRejection.None",
+      "key": "enum.MUI.Pages.OpenRejection.None",
       "text": "无"
     },
     {
-      "key": "enum.MUI.Navigation.OpenRejection.Reentrant",
+      "key": "enum.MUI.Pages.OpenRejection.Reentrant",
       "text": "重入"
     },
     {
-      "key": "enum.MUI.Navigation.OpenRejection.Superseded",
+      "key": "enum.MUI.Pages.OpenRejection.Superseded",
       "text": "已被替代"
     },
     {
-      "key": "enum.MUI.Navigation.OpenStatus.ActivationFailed",
+      "key": "enum.MUI.Pages.OpenStatus.ActivationFailed",
       "text": "激活失败"
     },
     {
-      "key": "enum.MUI.Navigation.OpenStatus.CancelledBeforeCommit",
+      "key": "enum.MUI.Pages.OpenStatus.CancelledBeforeCommit",
       "text": "提交前取消"
     },
     {
-      "key": "enum.MUI.Navigation.OpenStatus.ClosedBeforeReady",
+      "key": "enum.MUI.Pages.OpenStatus.ClosedBeforeReady",
       "text": "就绪前关闭"
     },
     {
-      "key": "enum.MUI.Navigation.OpenStatus.HostClosed",
+      "key": "enum.MUI.Pages.OpenStatus.HostClosed",
       "text": "宿主已关闭"
     },
     {
-      "key": "enum.MUI.Navigation.OpenStatus.PreparationFailed",
+      "key": "enum.MUI.Pages.OpenStatus.PreparationFailed",
       "text": "准备失败"
     },
     {
-      "key": "enum.MUI.Navigation.OpenStatus.Rejected",
+      "key": "enum.MUI.Pages.OpenStatus.Rejected",
       "text": "被拒绝"
     },
     {
-      "key": "enum.MUI.Navigation.OpenStatus.Succeeded",
+      "key": "enum.MUI.Pages.OpenStatus.Succeeded",
       "text": "成功"
     },
     {
-      "key": "enum.MUI.Navigation.OverflowPolicy.CloseOldest",
+      "key": "enum.MUI.Pages.OverflowPolicy.CloseOldest",
       "text": "关闭最早页面"
     },
     {
-      "key": "enum.MUI.Navigation.OverflowPolicy.Reject",
+      "key": "enum.MUI.Pages.OverflowPolicy.Reject",
       "text": "拒绝打开"
     },
     {
-      "key": "enum.MUI.Navigation.PostOpenStatus.Accepted",
+      "key": "enum.MUI.Pages.PostOpenStatus.Accepted",
       "text": "已接纳"
     },
     {
-      "key": "enum.MUI.Navigation.PostOpenStatus.Busy",
+      "key": "enum.MUI.Pages.PostOpenStatus.Busy",
       "text": "繁忙"
     },
     {
-      "key": "enum.MUI.Navigation.PostOpenStatus.HostClosed",
+      "key": "enum.MUI.Pages.PostOpenStatus.HostClosed",
       "text": "宿主已关闭"
     },
     {
-      "key": "enum.MUI.Navigation.PreloadStatus.Cancelled",
+      "key": "enum.MUI.Pages.PreloadStatus.Cancelled",
       "text": "已取消"
     },
     {
-      "key": "enum.MUI.Navigation.PreloadStatus.CapacityExceeded",
+      "key": "enum.MUI.Pages.PreloadStatus.CapacityExceeded",
       "text": "超过容量"
     },
     {
-      "key": "enum.MUI.Navigation.PreloadStatus.Failed",
+      "key": "enum.MUI.Pages.PreloadStatus.Failed",
       "text": "失败"
     },
     {
-      "key": "enum.MUI.Navigation.PreloadStatus.HostClosed",
+      "key": "enum.MUI.Pages.PreloadStatus.HostClosed",
       "text": "宿主已关闭"
     },
     {
-      "key": "enum.MUI.Navigation.PreloadStatus.InactiveContentClearing",
+      "key": "enum.MUI.Pages.PreloadStatus.InactiveContentClearing",
       "text": "未激活内容清理中"
     },
     {
-      "key": "enum.MUI.Navigation.PreloadStatus.Ready",
+      "key": "enum.MUI.Pages.PreloadStatus.Ready",
       "text": "已就绪"
     },
     {
-      "key": "enum.MUI.Navigation.PreloadStatus.Reentrant",
+      "key": "enum.MUI.Pages.PreloadStatus.Reentrant",
       "text": "重入"
     },
     {
-      "key": "enum.MUI.Navigation.PreloadStatus.Superseded",
+      "key": "enum.MUI.Pages.PreloadStatus.Superseded",
       "text": "已被替代"
     },
     {
-      "key": "enum.MUI.Navigation.PreloadStatus.Unsupported",
+      "key": "enum.MUI.Pages.PreloadStatus.Unsupported",
       "text": "不支持"
     },
     {
-      "key": "enum.MUI.Navigation.PreloadStatus.WaitCancelled",
+      "key": "enum.MUI.Pages.PreloadStatus.WaitCancelled",
       "text": "等待已取消"
     },
     {
-      "key": "enum.MUI.Navigation.ReplaceRejection.Busy",
+      "key": "enum.MUI.Pages.ReplaceRejection.Busy",
       "text": "繁忙"
     },
     {
-      "key": "enum.MUI.Navigation.ReplaceRejection.CleanupCapacity",
+      "key": "enum.MUI.Pages.ReplaceRejection.CleanupCapacity",
       "text": "清理容量不足"
     },
     {
-      "key": "enum.MUI.Navigation.ReplaceRejection.CloseDecisionTimedOut",
+      "key": "enum.MUI.Pages.ReplaceRejection.CloseDecisionTimedOut",
       "text": "关闭决议超时"
     },
     {
-      "key": "enum.MUI.Navigation.ReplaceRejection.CloseDenied",
+      "key": "enum.MUI.Pages.ReplaceRejection.CloseDenied",
       "text": "关闭被拒绝"
     },
     {
-      "key": "enum.MUI.Navigation.ReplaceRejection.ConfirmationUnavailable",
+      "key": "enum.MUI.Pages.ReplaceRejection.ConfirmationUnavailable",
       "text": "确认服务不可用"
     },
     {
-      "key": "enum.MUI.Navigation.ReplaceRejection.ConflictingData",
+      "key": "enum.MUI.Pages.ReplaceRejection.ConflictingData",
       "text": "数据冲突"
     },
     {
-      "key": "enum.MUI.Navigation.ReplaceRejection.DependencyCycle",
+      "key": "enum.MUI.Pages.ReplaceRejection.DependencyCycle",
       "text": "依赖环"
     },
     {
-      "key": "enum.MUI.Navigation.ReplaceRejection.DependencyLimit",
+      "key": "enum.MUI.Pages.ReplaceRejection.DependencyLimit",
       "text": "超过依赖上限"
     },
     {
-      "key": "enum.MUI.Navigation.ReplaceRejection.DependencyOrderConflict",
+      "key": "enum.MUI.Pages.ReplaceRejection.DependencyOrderConflict",
       "text": "依赖顺序冲突"
     },
     {
-      "key": "enum.MUI.Navigation.ReplaceRejection.InstanceLimit",
+      "key": "enum.MUI.Pages.ReplaceRejection.InstanceLimit",
       "text": "实例上限"
     },
     {
-      "key": "enum.MUI.Navigation.ReplaceRejection.None",
+      "key": "enum.MUI.Pages.ReplaceRejection.None",
       "text": "无"
     },
     {
-      "key": "enum.MUI.Navigation.ReplaceRejection.Reentrant",
+      "key": "enum.MUI.Pages.ReplaceRejection.Reentrant",
       "text": "重入"
     },
     {
-      "key": "enum.MUI.Navigation.ReplaceRejection.SourceUnavailable",
+      "key": "enum.MUI.Pages.ReplaceRejection.SourceUnavailable",
       "text": "源不可用"
     },
     {
-      "key": "enum.MUI.Navigation.ReplaceRejection.Superseded",
+      "key": "enum.MUI.Pages.ReplaceRejection.Superseded",
       "text": "已被替代"
     },
     {
-      "key": "enum.MUI.Navigation.ReplaceStatus.CancelledBeforeCommit",
+      "key": "enum.MUI.Pages.ReplaceStatus.CancelledBeforeCommit",
       "text": "提交前取消"
     },
     {
-      "key": "enum.MUI.Navigation.ReplaceStatus.Committed",
+      "key": "enum.MUI.Pages.ReplaceStatus.Committed",
       "text": "已提交"
     },
     {
-      "key": "enum.MUI.Navigation.ReplaceStatus.PreparationFailed",
+      "key": "enum.MUI.Pages.ReplaceStatus.PreparationFailed",
       "text": "准备失败"
     },
     {
-      "key": "enum.MUI.Navigation.ReplaceStatus.Rejected",
+      "key": "enum.MUI.Pages.ReplaceStatus.Rejected",
       "text": "被拒绝"
     },
     {
-      "key": "enum.MUI.Navigation.TickPausePolicy.Covered",
+      "key": "enum.MUI.Pages.TickPausePolicy.Covered",
       "text": "被覆盖"
     },
     {
-      "key": "enum.MUI.Navigation.TickPausePolicy.Hidden",
+      "key": "enum.MUI.Pages.TickPausePolicy.Hidden",
       "text": "隐藏"
     },
     {
-      "key": "enum.MUI.Navigation.TickPausePolicy.None",
+      "key": "enum.MUI.Pages.TickPausePolicy.None",
       "text": "不暂停"
     },
     {
-      "key": "enum.MUI.Navigation.ViewCacheMode.KeepAlive",
+      "key": "enum.MUI.Pages.ViewCacheMode.KeepAlive",
       "text": "长期缓存（容量不足可回收）"
     },
     {
-      "key": "enum.MUI.Navigation.ViewCacheMode.None",
+      "key": "enum.MUI.Pages.ViewCacheMode.None",
       "text": "不缓存"
     },
     {
-      "key": "enum.MUI.Navigation.ViewCacheMode.Timed",
+      "key": "enum.MUI.Pages.ViewCacheMode.Timed",
       "text": "限时保留"
     },
     {
-      "key": "enum.MUI.Navigation.ViewOperationFlags.CleanupTimedOut",
+      "key": "enum.MUI.Pages.PageOperationFlags.CleanupTimedOut",
       "text": "清理超时"
     },
     {
-      "key": "enum.MUI.Navigation.ViewOperationFlags.CloseRequested",
+      "key": "enum.MUI.Pages.PageOperationFlags.CloseRequested",
       "text": "已请求关闭"
     },
     {
-      "key": "enum.MUI.Navigation.ViewOperationFlags.Closing",
+      "key": "enum.MUI.Pages.PageOperationFlags.Closing",
       "text": "关闭中"
     },
     {
-      "key": "enum.MUI.Navigation.ViewOperationFlags.DependencyExit",
+      "key": "enum.MUI.Pages.PageOperationFlags.DependencyExit",
       "text": "依赖退出"
     },
     {
-      "key": "enum.MUI.Navigation.ViewOperationFlags.Entering",
+      "key": "enum.MUI.Pages.PageOperationFlags.Entering",
       "text": "进入中"
     },
     {
-      "key": "enum.MUI.Navigation.ViewOperationFlags.ExecutingCommand",
+      "key": "enum.MUI.Pages.PageOperationFlags.ExecutingCommand",
       "text": "命令执行中"
     },
     {
-      "key": "enum.MUI.Navigation.ViewOperationFlags.Exiting",
+      "key": "enum.MUI.Pages.PageOperationFlags.Exiting",
       "text": "退出中"
     },
     {
-      "key": "enum.MUI.Navigation.ViewOperationFlags.None",
+      "key": "enum.MUI.Pages.PageOperationFlags.None",
       "text": "无"
     },
     {
-      "key": "enum.MUI.Navigation.ViewOperationFlags.Preparing",
+      "key": "enum.MUI.Pages.PageOperationFlags.Preparing",
       "text": "准备中"
     },
     {
-      "key": "enum.MUI.Navigation.ViewOperationFlags.Rebinding",
+      "key": "enum.MUI.Pages.PageOperationFlags.Rebinding",
       "text": "换绑中"
     },
     {
-      "key": "enum.MUI.Navigation.ViewOperationFlags.UpdatingArgs",
+      "key": "enum.MUI.Pages.PageOperationFlags.UpdatingArgs",
       "text": "参数更新中"
     },
     {
-      "key": "enum.MUI.Navigation.ViewReadinessStatus.ActivationFailed",
+      "key": "enum.MUI.Pages.PageReadinessStatus.ActivationFailed",
       "text": "激活失败"
     },
     {
-      "key": "enum.MUI.Navigation.ViewReadinessStatus.ClosedBeforeReady",
+      "key": "enum.MUI.Pages.PageReadinessStatus.ClosedBeforeReady",
       "text": "就绪前关闭"
     },
     {
-      "key": "enum.MUI.Navigation.ViewReadinessStatus.Pending",
+      "key": "enum.MUI.Pages.PageReadinessStatus.Pending",
       "text": "等待中"
     },
     {
-      "key": "enum.MUI.Navigation.ViewReadinessStatus.Ready",
+      "key": "enum.MUI.Pages.PageReadinessStatus.Ready",
       "text": "已就绪"
     },
     {
-      "key": "enum.MUI.Navigation.ViewReadinessStatus.Transitioning",
+      "key": "enum.MUI.Pages.PageReadinessStatus.Transitioning",
       "text": "转场中"
     },
     {
-      "key": "enum.MUI.Navigation.ViewReadinessStatus.WaitCancelled",
+      "key": "enum.MUI.Pages.PageReadinessStatus.WaitCancelled",
       "text": "等待已取消"
     },
     {
-      "key": "enum.MUI.Navigation.ViewResultStatus.Completed",
+      "key": "enum.MUI.Pages.PageResultStatus.Completed",
       "text": "已完成"
     },
     {
-      "key": "enum.MUI.Navigation.ViewResultStatus.Dismissed",
+      "key": "enum.MUI.Pages.PageResultStatus.Dismissed",
       "text": "已关闭"
     },
     {
-      "key": "enum.MUI.Navigation.ViewResultStatus.Faulted",
+      "key": "enum.MUI.Pages.PageResultStatus.Faulted",
       "text": "故障"
     },
     {
-      "key": "enum.MUI.Navigation.ViewResultStatus.Pending",
+      "key": "enum.MUI.Pages.PageResultStatus.Pending",
       "text": "等待中"
     },
     {
-      "key": "enum.MUI.Navigation.ViewState.Closing",
+      "key": "enum.MUI.Pages.ViewState.Closing",
       "text": "关闭中"
     },
     {
-      "key": "enum.MUI.Navigation.ViewState.Destroyed",
+      "key": "enum.MUI.Pages.ViewState.Destroyed",
       "text": "已销毁"
     },
     {
-      "key": "enum.MUI.Navigation.ViewState.Failed",
+      "key": "enum.MUI.Pages.ViewState.Failed",
       "text": "失败"
     },
     {
-      "key": "enum.MUI.Navigation.ViewState.Open",
+      "key": "enum.MUI.Pages.ViewState.Open",
       "text": "已打开"
     },
     {
-      "key": "enum.MUI.Navigation.ViewState.Opening",
+      "key": "enum.MUI.Pages.ViewState.Opening",
       "text": "打开中"
     },
     {
-      "key": "enum.MUI.Navigation.ViewState.Unknown",
+      "key": "enum.MUI.Pages.ViewState.Unknown",
       "text": "未知"
     },
     {
-      "key": "enum.MUI.Navigation.ViewState.UnknownOrExpired",
+      "key": "enum.MUI.Pages.ViewState.UnknownOrExpired",
       "text": "未知或已过期"
     },
     {
-      "key": "enum.MUI.Navigation.ViewTransitionStatus.Completed",
+      "key": "enum.MUI.Pages.PageTransitionStatus.Completed",
       "text": "已完成"
     },
     {
-      "key": "enum.MUI.Navigation.ViewTransitionStatus.Failed",
+      "key": "enum.MUI.Pages.PageTransitionStatus.Failed",
       "text": "失败"
     },
     {
-      "key": "enum.MUI.Navigation.ViewTransitionStatus.Interrupted",
+      "key": "enum.MUI.Pages.PageTransitionStatus.Interrupted",
       "text": "被中断"
     },
     {
-      "key": "enum.MUI.Navigation.ViewTransitionStatus.Pending",
+      "key": "enum.MUI.Pages.PageTransitionStatus.Pending",
       "text": "等待中"
     },
     {
@@ -3400,7 +3412,7 @@
       "text": "重入"
     },
     {
-      "key": "enum.MUI.RebindRejection.RouteMismatch",
+      "key": "enum.MUI.RebindRejection.PageDefinitionMismatch",
       "text": "路由不匹配"
     },
     {
@@ -4432,27 +4444,27 @@
       "text": "停止并清除"
     },
     {
-      "key": "uxml.RouteGraphWindow.0821a708a2",
+      "key": "uxml.PageGraphWindow.0821a708a2",
       "text": "返回根节点"
     },
     {
-      "key": "uxml.RouteGraphWindow.292e56a328",
+      "key": "uxml.PageGraphWindow.292e56a328",
       "text": "仅校验静态声明；运行时参数冲突、资源可用性及跨根共享组合仍需运行验证。快照不会自动更新，请由项目入口重新采集。"
     },
     {
-      "key": "uxml.RouteGraphWindow.3ed65533d7",
-      "text": "尚未提供路由。项目编辑器入口可调用 MUI.Navigation.Editor.RouteGraphWindow.Show(rootRoute)。同步共享示例组件也提供“查看路由依赖图”右键菜单。"
+      "key": "uxml.PageGraphWindow.3ed65533d7",
+      "text": "尚未提供路由。项目编辑器入口可调用 MUI.Pages.Editor.PageGraphWindow.Show(rootRoute)。同步共享示例组件也提供“查看路由依赖图”右键菜单。"
     },
     {
-      "key": "uxml.RouteGraphWindow.76cf5fe77a",
+      "key": "uxml.PageGraphWindow.76cf5fe77a",
       "text": "清空快照"
     },
     {
-      "key": "uxml.RouteGraphWindow.9da1918cdc",
+      "key": "uxml.PageGraphWindow.9da1918cdc",
       "text": "复制报告"
     },
     {
-      "key": "uxml.RouteGraphWindow.f3f451ef88",
+      "key": "uxml.PageGraphWindow.f3f451ef88",
       "text": "校验根"
     },
     {
@@ -4728,7 +4740,7 @@
       "text": "重入"
     },
     {
-      "key": "trace.token.RouteMismatch",
+      "key": "trace.token.PageDefinitionMismatch",
       "text": "路由不匹配"
     },
     {
@@ -5049,7 +5061,7 @@
     },
     {
       "key": "settings.presets.help",
-      "text": "生效顺序：页面默认规则 → 预设 → 页面专属设置。页面专属设置在 CreateRoute 或 ResolvePolicy 的 overrides 参数中配置。明确指定预设的页面不受“未指定时使用”影响。"
+      "text": "生效顺序：页面默认规则 → 预设 → 页面专属设置。页面专属设置在 CreateDefinition 或 ResolvePolicy 的 overrides 参数中配置。明确指定预设的页面不受“未指定时使用”影响。"
     },
     {
       "key": "settings.presets.add",
@@ -5308,67 +5320,67 @@
       "text": "{0} · {1} · {2}"
     },
     {
-      "key": "enum.MUI.Navigation.DependencyMissingPolicy.AutoOpen",
+      "key": "enum.MUI.Pages.DependencyMissingPolicy.AutoOpen",
       "text": "自动打开"
     },
     {
-      "key": "enum.MUI.Navigation.DependencyMissingPolicy.RequireOpen",
+      "key": "enum.MUI.Pages.DependencyMissingPolicy.RequireOpen",
       "text": "必须已打开"
     },
     {
-      "key": "enum.MUI.Navigation.DependencyMissingPolicy.Skip",
+      "key": "enum.MUI.Pages.DependencyMissingPolicy.Skip",
       "text": "缺失时跳过"
     },
     {
-      "key": "enum.MUI.Navigation.DependencyResolutionKind.Pending",
+      "key": "enum.MUI.Pages.DependencyResolutionKind.Pending",
       "text": "待处理"
     },
     {
-      "key": "enum.MUI.Navigation.DependencyResolutionKind.AutoOpened",
+      "key": "enum.MUI.Pages.DependencyResolutionKind.AutoOpened",
       "text": "自动打开"
     },
     {
-      "key": "enum.MUI.Navigation.DependencyResolutionKind.Reused",
+      "key": "enum.MUI.Pages.DependencyResolutionKind.Reused",
       "text": "共享复用"
     },
     {
-      "key": "enum.MUI.Navigation.DependencyResolutionKind.Skipped",
+      "key": "enum.MUI.Pages.DependencyResolutionKind.Skipped",
       "text": "缺失跳过"
     },
     {
-      "key": "enum.MUI.Navigation.DependencyResolutionKind.Degraded",
+      "key": "enum.MUI.Pages.DependencyResolutionKind.Degraded",
       "text": "失败降级"
     },
     {
-      "key": "enum.MUI.Navigation.ViewTickStatus.NotEvaluated",
+      "key": "enum.MUI.Pages.PageTickStatus.NotEvaluated",
       "text": "尚未检查"
     },
     {
-      "key": "enum.MUI.Navigation.ViewTickStatus.Eligible",
+      "key": "enum.MUI.Pages.PageTickStatus.Eligible",
       "text": "允许更新"
     },
     {
-      "key": "enum.MUI.Navigation.ViewTickStatus.Inactive",
+      "key": "enum.MUI.Pages.PageTickStatus.Inactive",
       "text": "未激活"
     },
     {
-      "key": "enum.MUI.Navigation.ViewTickStatus.Rebinding",
+      "key": "enum.MUI.Pages.PageTickStatus.Rebinding",
       "text": "重新绑定中"
     },
     {
-      "key": "enum.MUI.Navigation.ViewTickStatus.Entering",
+      "key": "enum.MUI.Pages.PageTickStatus.Entering",
       "text": "入场中"
     },
     {
-      "key": "enum.MUI.Navigation.ViewTickStatus.Covered",
+      "key": "enum.MUI.Pages.PageTickStatus.Covered",
       "text": "被覆盖，暂停"
     },
     {
-      "key": "enum.MUI.Navigation.ViewTickStatus.Hidden",
+      "key": "enum.MUI.Pages.PageTickStatus.Hidden",
       "text": "隐藏，暂停"
     },
     {
-      "key": "enum.MUI.Navigation.ViewTickStatus.HostShutdown",
+      "key": "enum.MUI.Pages.PageTickStatus.HostShutdown",
       "text": "宿主已关闭"
     },
     {
@@ -5380,83 +5392,83 @@
       "text": "隐藏并停用内容节点"
     },
     {
-      "key": "enum.MUI.Navigation.ViewCacheDecision.Retained",
+      "key": "enum.MUI.Pages.PageCacheDecision.Retained",
       "text": "进入缓存"
     },
     {
-      "key": "enum.MUI.Navigation.ViewCacheDecision.Reused",
+      "key": "enum.MUI.Pages.PageCacheDecision.Reused",
       "text": "缓存命中"
     },
     {
-      "key": "enum.MUI.Navigation.ViewCacheDecision.Disabled",
+      "key": "enum.MUI.Pages.PageCacheDecision.Disabled",
       "text": "未启用缓存"
     },
     {
-      "key": "enum.MUI.Navigation.ViewCacheDecision.Unsupported",
+      "key": "enum.MUI.Pages.PageCacheDecision.Unsupported",
       "text": "View 或凭证不支持缓存"
     },
     {
-      "key": "enum.MUI.Navigation.ViewCacheDecision.AbnormalClose",
+      "key": "enum.MUI.Pages.PageCacheDecision.AbnormalClose",
       "text": "非正常关闭，不缓存"
     },
     {
-      "key": "enum.MUI.Navigation.ViewCacheDecision.CleanupIncomplete",
+      "key": "enum.MUI.Pages.PageCacheDecision.CleanupIncomplete",
       "text": "清理未完成，不缓存"
     },
     {
-      "key": "enum.MUI.Navigation.ViewCacheDecision.ResetFailed",
+      "key": "enum.MUI.Pages.PageCacheDecision.ResetFailed",
       "text": "缓存重置或释放失败"
     },
     {
-      "key": "enum.MUI.Navigation.ViewCacheDecision.CapacityDisabled",
+      "key": "enum.MUI.Pages.PageCacheDecision.CapacityDisabled",
       "text": "缓存容量为零"
     },
     {
-      "key": "enum.MUI.Navigation.ViewCacheDecision.HostUnavailable",
+      "key": "enum.MUI.Pages.PageCacheDecision.HostUnavailable",
       "text": "宿主退出或清理中"
     },
     {
-      "key": "enum.MUI.Navigation.ViewCacheDecision.Incompatible",
+      "key": "enum.MUI.Pages.PageCacheDecision.Incompatible",
       "text": "资源代际或状态不兼容"
     },
     {
-      "key": "enum.MUI.Navigation.ViewCacheDecision.EstimateRequired",
+      "key": "enum.MUI.Pages.PageCacheDecision.EstimateRequired",
       "text": "缺少资源大小估算"
     },
     {
-      "key": "enum.MUI.Navigation.ViewCacheDecision.BudgetExceeded",
+      "key": "enum.MUI.Pages.PageCacheDecision.BudgetExceeded",
       "text": "超出缓存预算"
     },
     {
-      "key": "enum.MUI.Navigation.ViewCacheDecision.RetirementPending",
+      "key": "enum.MUI.Pages.PageCacheDecision.RetirementPending",
       "text": "等待淘汰资源释放"
     },
     {
-      "key": "enum.MUI.Navigation.ViewCacheDecision.EvictedForCapacity",
+      "key": "enum.MUI.Pages.PageCacheDecision.EvictedForCapacity",
       "text": "容量或预算淘汰"
     },
     {
-      "key": "enum.MUI.Navigation.ViewCacheDecision.Expired",
+      "key": "enum.MUI.Pages.PageCacheDecision.Expired",
       "text": "缓存已过期"
     },
     {
-      "key": "enum.MUI.Navigation.ViewCacheDecision.Destroyed",
+      "key": "enum.MUI.Pages.PageCacheDecision.Destroyed",
       "text": "View 已销毁"
     },
     {
-      "key": "enum.MUI.Navigation.ViewCacheDecision.Cleared",
+      "key": "enum.MUI.Pages.PageCacheDecision.Cleared",
       "text": "主动清理"
     },
     {
-      "key": "enum.MUI.Navigation.OpenRejection.DependencyMissing",
+      "key": "enum.MUI.Pages.OpenRejection.DependencyMissing",
       "text": "依赖未打开"
     },
     {
-      "key": "enum.MUI.Navigation.ReplaceRejection.DependencyMissing",
+      "key": "enum.MUI.Pages.ReplaceRejection.DependencyMissing",
       "text": "依赖未打开"
     },
     {
-      "key": "enum.MUI.Navigation.ViewCacheDecision.ReuseFailed",
+      "key": "enum.MUI.Pages.PageCacheDecision.ReuseFailed",
       "text": "缓存复用准备失败"
     },
     {
@@ -5544,11 +5556,11 @@
       "text": "页面排序跨度"
     },
     {
-      "key": "enum.MUI.Navigation.OpenRejection.RenderOrderCapacity",
+      "key": "enum.MUI.Pages.OpenRejection.RenderOrderCapacity",
       "text": "宿主排序空间不足"
     },
     {
-      "key": "enum.MUI.Navigation.ReplaceRejection.RenderOrderCapacity",
+      "key": "enum.MUI.Pages.ReplaceRejection.RenderOrderCapacity",
       "text": "宿主排序空间不足"
     },
     {
@@ -5560,23 +5572,23 @@
       "text": "所属页面离开时"
     },
     {
-      "key": "enum.MUI.Navigation.PageRole.Independent",
+      "key": "enum.MUI.Pages.PageRole.Independent",
       "text": "独立界面"
     },
     {
-      "key": "enum.MUI.Navigation.PageRole.Main",
+      "key": "enum.MUI.Pages.PageRole.Main",
       "text": "主页面"
     },
     {
-      "key": "enum.MUI.Navigation.PageRole.Overlay",
+      "key": "enum.MUI.Pages.PageRole.Overlay",
       "text": "附属界面"
     },
     {
-      "key": "enum.MUI.Navigation.OwnerDeparture.Close",
+      "key": "enum.MUI.Pages.OwnerDeparture.Close",
       "text": "关闭"
     },
     {
-      "key": "enum.MUI.Navigation.OwnerDeparture.Hide",
+      "key": "enum.MUI.Pages.OwnerDeparture.Hide",
       "text": "隐藏并保留"
     },
     {
@@ -5917,7 +5929,7 @@
     },
     {
       "key": "wizard.nextStepsBody",
-      "text": "1. 编辑 Prefab，为绑定控件配置 Element。\n\n2. 在 ViewModel 中补充状态与命令，并确认所属程序集的生成绑定已初始化。\n\n3. 初始化 UIHost，通过 Page.CreateRoute() 创建路由，再调用 Navigator.OpenAsync。全局 MUISettings 自动生效。\n\nResources 下的 Prefab 可直接加载；其他目录需接入项目资源加载器。"
+      "text": "1. 编辑 Prefab，在 View Inspector 中配置控件绑定。新建 UGUI/TMP 模板已配置标题和关闭按钮的自动绑定。\n\n2. 在 ViewModel 中补充状态与命令，并确认所属程序集的生成绑定已初始化。\n\n3. 初始化 UIHost，通过 ViewModelDefinition.CreateDefinition() 创建路由，再调用 PageManager.OpenAsync。全局 MUISettings 自动生效。\n\nResources 下的 Prefab 可直接加载；其他目录需接入项目资源加载器。"
     },
     {
       "key": "wizard.existingResourceNote",
@@ -6097,7 +6109,7 @@
     },
     {
       "key": "wizard.logicMode2",
-      "text": "接收打开参数或返回操作结果"
+      "text": "接收打开参数"
     },
     {
       "key": "wizard.logicDescription0",
@@ -6105,11 +6117,11 @@
     },
     {
       "key": "wizard.logicDescription1",
-      "text": "适合需要读取业务数据的页面。额外生成 Presenter，提供打开页面时的逻辑入口，再由你把数据写入 ViewModel。"
+      "text": "适合需要读取业务数据的页面。生成 Presenter 打开入口；需要等待加载时可改为 Task 或 ValueTask，并在完成后更新 ViewModel。"
     },
     {
       "key": "wizard.logicDescription2",
-      "text": "适合不同打开条件或需要取回结果的页面。生成 Args（打开参数）、Result（完成结果）和 Presenter（接收参数并处理业务）。"
+      "text": "生成带打开入口的 Presenter。直接在方法中声明参数，编译器自动生成 Args 和调用入口。默认不返回业务结果；需要时在 UIPage 中指定结果类型。"
     },
     {
       "key": "wizard.logicExample0",
@@ -6121,7 +6133,7 @@
     },
     {
       "key": "wizard.logicExample2",
-      "text": "例如：传入“只选材料” → 玩家选中铁矿 → 点击确定后返回道具 ID。取消关闭不算完成结果。"
+      "text": "例如：传入背包页签或道具 ID，打开时定位对应内容。需要返回选择结果时，再声明 long 或业务结果类型。"
     },
     {
       "key": "wizard.logicFiles",
@@ -6129,7 +6141,7 @@
     },
     {
       "key": "wizard.logicScaffoldNote",
-      "text": "这里只生成代码骨架，数据加载、参数字段和返回逻辑仍需补充。不确定时可先选第一项，后续再扩展。"
+      "text": "这里只生成代码骨架，数据加载、入口参数和返回逻辑仍需补充。不确定时可先选第一项，后续再扩展。"
     },
     {
       "key": "settings.directories",
@@ -6541,7 +6553,7 @@
     },
     {
       "key": "viewPanel.binding.unmatched",
-      "text": "未找到此 Prefab 对应的 ViewModel 契约。请等待代码编译完成；旧页面可在 [ViewContract] 中设置 PrefabAssetGuid 建立关联。场景中的独立 View 需先保存为 Prefab。结构校验仍可使用。"
+      "text": "尚未关联可用的 ViewModel。请在上方选择关联类型；场景中的独立 View 需先保存为 Prefab。"
     },
     {
       "key": "viewPanel.binding.multiple",

@@ -15,7 +15,7 @@ namespace MUI.BasicExample.Editor
         {
             UIBuildValidation.RegisterCatalog("MUI.BasicExample", catalog =>
             {
-                var route = BasicPageViewModelRoute.Create(() => new BasicPageViewModel(), policy: MUISettings.ResolveGlobalPolicy());
+                var route = BasicPageViewModelDefinition.Create(() => new BasicPageViewModel(), policy: MUISettings.ResolveGlobalPolicy());
                 var prefabPath = AssetDatabase.GUIDToAssetPath(PrefabGuid);
                 var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
                 catalog.AddPage(route, prefab, BasicPageViewModelBindingFactory.Manifest);

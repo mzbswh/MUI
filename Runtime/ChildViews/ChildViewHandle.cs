@@ -645,7 +645,7 @@ namespace MUI.ChildViews
                 lifecycle.Destroy(errors);
             }
 
-            await ViewInstanceCleanup.RunAsync(instance, null, errors, () =>
+            await PageInstanceCleanup.RunAsync(instance, null, errors, () =>
             {
                 if (view is IChildTickHost tickHost)
                 {
@@ -653,7 +653,7 @@ namespace MUI.ChildViews
                 }
             });
 
-            await ViewInstanceCleanup.ReleaseViewResourceAsync(ownedResource, errors,
+            await PageInstanceCleanup.ReleaseViewResourceAsync(ownedResource, errors,
                 () => instanceScope.IsCleanupConfirmed && activationScope.IsCleanupConfirmed);
 
             CompleteRelease(errors);

@@ -31,12 +31,12 @@ namespace MUI.UGUI
                 throw new InvalidOperationException("UIHost 已登记共享输入。");
             }
 
-            if (navigator == null || navigator.IsShutdown || shutdown != null || destroyed)
+            if (pages == null || pages.IsShutdown || shutdown != null || destroyed)
             {
                 throw new InvalidOperationException("共享输入须在 UIHost 初始化后、退出前登记。");
             }
 
-            if (navigator.RenderOrder != null)
+            if (pages.RenderOrder != null)
             {
                 throw new InvalidOperationException("共享输入宿主目前要求单一根 Canvas 排序，不能与页面排序区间同时启用。");
             }
@@ -216,7 +216,7 @@ namespace MUI.UGUI
 
         private bool HasSharedInputContent()
         {
-            if (navigator == null || navigator.IsShutdown || shutdown != null || !isActiveAndEnabled)
+            if (pages == null || pages.IsShutdown || shutdown != null || !isActiveAndEnabled)
             {
                 return false;
             }
@@ -406,7 +406,7 @@ namespace MUI.UGUI
                             fallback = host;
                         }
 
-                        if (host.navigator.FocusedHandle.IsValid &&
+                        if (host.pages.FocusedHandle.IsValid &&
                             (focused == null || host.sharedInputPriority > focused.sharedInputPriority))
                         {
                             focused = host;
@@ -540,7 +540,7 @@ namespace MUI.UGUI
                 foreach (var host in hosts)
                 {
                     host.SuppressSharedRaycaster(!valid || !host.isActiveAndEnabled ||
-                        host.navigator == null || host.navigator.IsShutdown || host.shutdown != null ||
+                        host.pages == null || host.pages.IsShutdown || host.shutdown != null ||
                         (modal != null && modal != host));
                 }
 
@@ -582,7 +582,7 @@ namespace MUI.UGUI
                 UIHost modal = null;
                 foreach (var host in hosts)
                 {
-                    if (!host.isActiveAndEnabled || host.navigator == null || host.navigator.IsShutdown ||
+                    if (!host.isActiveAndEnabled || host.pages == null || host.pages.IsShutdown ||
                         host.shutdown != null || !host.HasSharedModalBarrier())
                     {
                         continue;

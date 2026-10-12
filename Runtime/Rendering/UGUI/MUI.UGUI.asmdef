@@ -5,7 +5,7 @@
     "MUI.Core",
     "MUI.Resources",
     "Unity.ugui",
-    "MUI.Navigation",
+    "MUI.Pages",
     "MUI.ChildViews"
   ],
   "autoReferenced": true

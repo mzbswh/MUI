@@ -1,5 +1,5 @@
 using System;
-using MUI.Navigation;
+using MUI.Pages;
 
 namespace MUI.UGUI
 {
@@ -76,10 +76,10 @@ namespace MUI.UGUI
         public float CloseTimeoutSeconds = 30;
         public float CloseDecisionTimeoutSeconds = 120;
 
-        internal RoutePolicyOverrides CreateOverrides(MUIPagePolicyFields fields, int layer)
+        internal PagePolicyOverrides CreateOverrides(MUIPagePolicyFields fields, int layer)
         {
             bool Has(MUIPagePolicyFields field) => (fields & field) != 0;
-            return new RoutePolicyOverrides
+            return new PagePolicyOverrides
             {
                 PageRole = Has(MUIPagePolicyFields.PageScope) ? (PageRole?)PageRole : null,
                 OwnerDeparture = Has(MUIPagePolicyFields.PageScope) ? (OwnerDeparture?)OwnerDeparture : null,

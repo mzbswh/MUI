@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using MUI.Navigation;
+using MUI.Pages;
 using MUI.Resources;
 using MUI.UGUI;
 using UnityEditor;
@@ -44,7 +44,7 @@ namespace MUI.Editor
                     Localization.MUIEditorInspector.DrawFields(serializedObject, entry.propertyPath + ".ResourceKey", entry.propertyPath + ".ResourceVersion");
                     DrawPagePrefabLink(entry);
                     PagePolicyControls.DrawPagePreset(serializedObject, entry, (MUISettings)target);
-                    RoutePolicy inherited = null;
+                    PagePolicy inherited = null;
                     try
                     {
                         var preset = entry.FindPropertyRelative("Preset").stringValue;

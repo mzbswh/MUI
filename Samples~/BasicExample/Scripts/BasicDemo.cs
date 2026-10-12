@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using MUI.Navigation;
+using MUI.Pages;
 using MUI.UGUI;
 using UnityEngine;
 
@@ -14,7 +14,7 @@ namespace MUI.BasicExample
         [SerializeField] private UnityEngine.UI.Button reopenButton = null;
         [SerializeField] private UnityEngine.UI.Text reopenLabel = null;
         private readonly LifetimeScope resultLifetime = new LifetimeScope();
-        private Route<BasicPageViewModel, Unit, int> route;
+        private PageDefinition<BasicPageViewModel, Unit, int> route;
         private Task shutdown;
         private bool initialized;
         private bool pageRunning;
@@ -34,7 +34,7 @@ namespace MUI.BasicExample
 
                 reopenButton.gameObject.SetActive(false);
                 Generated.BasicBindings.Initialize();
-                route = BasicPageViewModelRoute.Create(() => new BasicPageViewModel(), policy: host.ResolvePolicy());
+                route = BasicPageViewModelDefinition.Create(() => new BasicPageViewModel(), policy: host.ResolvePolicy());
                 host.Initialize(configureDefaultView: ConfigurePage);
 
                 initialized = true;
@@ -77,7 +77,7 @@ namespace MUI.BasicExample
             var label = "Reopen";
             try
             {
-                var outcome = await host.Navigator.OpenAsync(route, Unit.Value, resultLifetime.Token);
+                var outcome = await host.Pages.OpenAsync(route, Unit.Value, resultLifetime.Token);
                 if (!outcome.IsSuccess)
                 {
                     Debug.LogWarning($"Open did not complete: {outcome.Status} ({outcome.Rejection}).");
@@ -104,7 +104,7 @@ namespace MUI.BasicExample
             {
                 pageRunning = false;
                 if (offerReopen && initialized && !stopping && host != null &&
-                    !host.Navigator.IsShutdown && reopenButton != null && reopenLabel != null)
+                    !host.Pages.IsShutdown && reopenButton != null && reopenLabel != null)
                 {
                     reopenLabel.text = label;
                     reopenButton.gameObject.SetActive(true);

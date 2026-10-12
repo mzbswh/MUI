@@ -4,7 +4,7 @@
   "references": [
     "MUI.BasicExample",
     "MUI.Core",
-    "MUI.Navigation",
+    "MUI.Pages",
     "MUI.Resources",
     "MUI.UGUI",
     "MUI.Editor",

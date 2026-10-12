@@ -1,5 +1,5 @@
 using System;
-using MUI.Navigation;
+using MUI.Pages;
 using UnityEngine;
 
 namespace MUI.UGUI
@@ -34,7 +34,7 @@ namespace MUI.UGUI
             }
         }
 
-        public static RoutePolicy ResolveGlobalPolicy(string preset = null, string layer = null, RoutePolicyOverrides overrides = null)
+        public static PagePolicy ResolveGlobalPolicy(string preset = null, string layer = null, PagePolicyOverrides overrides = null)
         {
             var configuration = Global;
             return configuration == null ? ResolveBuiltInPolicy(preset, layer, overrides)

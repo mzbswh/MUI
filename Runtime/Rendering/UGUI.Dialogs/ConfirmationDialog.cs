@@ -1,5 +1,5 @@
 using MUI.Dialogs;
-using MUI.Navigation;
+using MUI.Pages;
 using MUI.Resources;
 
 namespace MUI.UGUI
@@ -25,22 +25,22 @@ namespace MUI.UGUI
         });
 
         /// <summary>默认创建单实例模态路由；可显式传入已解析的项目策略。</summary>
-        public static Route<ConfirmationViewModel, CloseConfirmation, bool> CreateRoute(
-            ViewResource resource, string key = "mui.confirmation", int layer = 1000, RoutePolicy policy = null)
+        public static PageDefinition<ConfirmationViewModel, CloseConfirmation, bool> CreateDefinition(
+            ViewResource resource, string key = "mui.confirmation", int layer = 1000, PagePolicy policy = null)
         {
-            return new Route<ConfirmationViewModel, CloseConfirmation, bool>(
+            return new PageDefinition<ConfirmationViewModel, CloseConfirmation, bool>(
                 key, resource,
                 () => new ConfirmationViewModel(),
                 model => new ConfirmationPresenter(),
                 Create,
-                policy ?? new RoutePolicy(layer: layer, allowMultiple: true, maxInstances: 1,
+                policy ?? new PagePolicy(layer: layer, allowMultiple: true, maxInstances: 1,
                     coverage: CoveragePolicy.BlockInput, modal: true, pageRole: PageRole.Independent));
         }
 
         /// <summary>创建本次界面的绑定上下文；生命周期由界面实例管理。</summary>
         public static BindingContext<ConfirmationViewModel> Create(IView view, ConfirmationViewModel model) => new Context(view, model);
 
-        /// <summary>显式注册绑定工厂；直接使用 CreateRoute 时已提供绑定工厂。</summary>
+        /// <summary>显式注册绑定工厂；直接使用 CreateDefinition 时已提供绑定工厂。</summary>
         public static void Register() => BindingRegistry.Register<ConfirmationViewModel>(Create, Manifest);
 
         private static BindingEntry TextEntry(string property, string name) => new BindingEntry(property, name, typeof(TextElement), nameof(TextElement.Content), BindingMode.OneWay);

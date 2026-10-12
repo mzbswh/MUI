@@ -21,7 +21,7 @@ namespace MUI.Editor
             get; internal set;
         }
 
-        public int RouteCount
+        public int DefinitionCount
         {
             get; internal set;
         }
@@ -62,7 +62,7 @@ namespace MUI.Editor
                 IsValid ? L.Get("editor.UIBuildValidationReport.passed") :
                 L.Format("editor.UIBuildValidationReport.failed", issues.Count + (IsTruncated ? "+" : ""));
             text.Append(title).Append("：").AppendLine(status);
-            text.AppendLine(L.Format("editor.UIBuildValidationReport.counts", CatalogCount, PageCount, RouteCount));
+            text.AppendLine(L.Format("editor.UIBuildValidationReport.counts", CatalogCount, PageCount, DefinitionCount));
             if (CatalogCount == 0)
             {
                 text.AppendLine(L.Get("editor.UIBuildValidationReport.0dbf27f994"));

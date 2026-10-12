@@ -1,0 +1,24 @@
+using System;
+using System.Threading;
+
+namespace MUI.Pages
+{
+    public sealed partial class PageManager
+    {
+        /// <summary>立即启动标准异步打开流程，返回请求控制对象，不提前暴露 PageHandle。</summary>
+        public OpenRequest<TResult> BeginOpen<TViewModel, TArgs, TResult>(PageDefinition<TViewModel, TArgs, TResult> route,
+            TArgs args,
+            CancellationToken cancellationToken = default,
+            TViewModel assignedViewModel = null, PageOwner owner = default)
+            where TViewModel : ViewModel
+        {
+            AssertThread();
+            if (route == null)
+            {
+                throw new ArgumentNullException(nameof(route));
+            }
+
+            return new OpenRequest<TResult>(token => OpenAsync(route, args, token, assignedViewModel, owner), cancellationToken);
+        }
+    }
+}

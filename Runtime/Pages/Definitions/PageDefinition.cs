@@ -1,0 +1,122 @@
+using System;
+using System.Collections.Generic;
+using MUI.Resources;
+
+namespace MUI.Pages
+{
+    /// <summary>不可变身份、创建配置与策略；缓存只复用兼容的 View 凭证。</summary>
+    public abstract class PageDefinition
+    {
+        protected PageDefinition(string key, ViewResource resource, PagePolicy policy,
+                    long? estimatedRetainedBytes = null)
+        {
+            if (string.IsNullOrWhiteSpace(key))
+            {
+                throw new ArgumentException("PageDefinition key is required.", nameof(key));
+            }
+
+            if (estimatedRetainedBytes.HasValue && estimatedRetainedBytes.Value < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(estimatedRetainedBytes));
+            }
+
+            EstimatedRetainedBytes = estimatedRetainedBytes;
+            Key = key;
+            Resource = resource ?? throw new ArgumentNullException(nameof(resource));
+            Policy = (policy ?? PagePolicy.Default).ForResource(resource);
+        }
+
+        /// <summary>只读的依赖描述，不执行参数工厂；供导航注册及编辑器图校验使用。</summary>
+        public virtual IReadOnlyList<PageDependencyDescriptor> DependencyDescriptors => Array.Empty<PageDependencyDescriptor>();
+
+        /// <summary>单实例停用后保留内容的保守字节估算；null 表示未知，不包含活动业务内存。</summary>
+        public long? EstimatedRetainedBytes
+        {
+            get;
+        }
+
+        public string Key
+        {
+            get;
+        }
+
+        public ViewResource Resource
+        {
+            get;
+        }
+
+        public PagePolicy Policy
+        {
+            get;
+        }
+    }
+
+    public sealed class PageDefinition<TViewModel, TArgs, TResult> : PageDefinition where TViewModel : ViewModel
+    {
+        public PageDefinition(string key,
+                    ViewResource resource,
+                    Func<TViewModel> viewModelFactory,
+                    Func<TViewModel, Presenter<TViewModel, TArgs, TResult>> presenterFactory = null,
+                    Func<IView, TViewModel, BindingContext<TViewModel>> bindingFactory = null,
+                    PagePolicy policy = null,
+                    Func<TArgs, TArgs, bool> argsEqual = null,
+                    long? estimatedRetainedBytes = null,
+                    IReadOnlyList<PageDependency<TArgs>> dependencies = null) : base(key,
+                    resource,
+                    policy,
+                    estimatedRetainedBytes)
+        {
+            var copiedDependencies = new PageDependency<TArgs>[dependencies == null ? 0 : dependencies.Count];
+            if (copiedDependencies.Length > 64)
+            {
+                throw new ArgumentException("每个页面定义最多声明 64 个直接依赖。", nameof(dependencies));
+            }
+            for (var i = 0; i < copiedDependencies.Length; ++i)
+            {
+                copiedDependencies[i] = dependencies[i] ?? throw new ArgumentException("依赖声明不能为空。", nameof(dependencies));
+            }
+            Dependencies = Array.AsReadOnly(copiedDependencies);
+            var descriptors = new PageDependencyDescriptor[copiedDependencies.Length];
+            for (var i = 0; i < descriptors.Length; ++i)
+            {
+                descriptors[i] = new PageDependencyDescriptor(copiedDependencies[i].Target, copiedDependencies[i].Placement, copiedDependencies[i].IsRequired, copiedDependencies[i].MissingPolicy);
+            }
+            DependencyDescriptors = Array.AsReadOnly(descriptors);
+            ModelFactory = viewModelFactory ?? throw new ArgumentNullException(nameof(viewModelFactory));
+            PresenterFactory = presenterFactory ?? (model => new EmptyPresenter<TViewModel, TArgs, TResult>());
+            BindingFactory = bindingFactory ?? BindingRegistry.CreateExact<TViewModel>;
+            ArgsEqual = argsEqual ?? System.Collections.Generic.EqualityComparer<TArgs>.Default.Equals;
+        }
+
+        /// <summary>按声明顺序准备的必需依赖；构造时复制，不允许外部修改页面定义配置。</summary>
+        public IReadOnlyList<PageDependency<TArgs>> Dependencies
+        {
+            get;
+        }
+
+        public override IReadOnlyList<PageDependencyDescriptor> DependencyDescriptors
+        {
+            get;
+        }
+
+        internal Func<TViewModel> ModelFactory
+        {
+            get;
+        }
+
+        internal Func<TViewModel, Presenter<TViewModel, TArgs, TResult>> PresenterFactory
+        {
+            get;
+        }
+
+        internal Func<IView, TViewModel, BindingContext<TViewModel>> BindingFactory
+        {
+            get;
+        }
+
+        internal Func<TArgs, TArgs, bool> ArgsEqual
+        {
+            get;
+        }
+    }
+}

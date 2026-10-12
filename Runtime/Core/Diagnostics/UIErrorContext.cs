@@ -5,11 +5,11 @@ namespace MUI
     /// <summary>异常发生位置的值快照，不持有宿主、View、模型、参数或资源。</summary>
     public readonly struct UIErrorContext
     {
-        public UIErrorContext(Guid hostId, long viewId, string routeKey, string operation, string phase)
+        public UIErrorContext(Guid hostId, long viewId, string pageKey, string operation, string phase)
         {
             HostId = hostId;
             ViewId = viewId;
-            RouteKey = Limit(routeKey);
+            PageKey = Limit(pageKey);
             Operation = Limit(operation);
             Phase = Limit(phase);
         }
@@ -25,7 +25,7 @@ namespace MUI
             get;
         }
 
-        public string RouteKey
+        public string PageKey
         {
             get;
         }
@@ -40,7 +40,7 @@ namespace MUI
             get;
         }
 
-        public bool IsEmpty => HostId == Guid.Empty && ViewId == 0 && RouteKey == null &&
+        public bool IsEmpty => HostId == Guid.Empty && ViewId == 0 && PageKey == null &&
             Operation == null && Phase == null;
 
         internal UIErrorContext WithFallback(UIErrorContext fallback)
@@ -49,7 +49,7 @@ namespace MUI
             return new UIErrorContext(
                 HostId != Guid.Empty ? HostId : fallback.HostId,
                 ViewId != 0 ? ViewId : sameHost ? fallback.ViewId : 0,
-                RouteKey ?? (sameHost ? fallback.RouteKey : null),
+                PageKey ?? (sameHost ? fallback.PageKey : null),
                 Operation ?? fallback.Operation,
                 Phase ?? fallback.Phase);
         }
@@ -57,6 +57,6 @@ namespace MUI
         private static string Limit(string value) => string.IsNullOrEmpty(value) ? null :
             value.Length <= 256 ? value : value.Substring(0, 256);
 
-        public override string ToString() => $"host={HostId:N}; view={ViewId}; route={RouteKey}; operation={Operation}; phase={Phase}";
+        public override string ToString() => $"host={HostId:N}; view={ViewId}; route={PageKey}; operation={Operation}; phase={Phase}";
     }
 }

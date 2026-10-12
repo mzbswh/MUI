@@ -4,6 +4,18 @@
   "fallbackLanguageId": "zh-CN",
   "entries": [
     {
+      "key": "settings.development",
+      "text": "Development Tools"
+    },
+    {
+      "key": "property.outputCompilerGeneratedSources",
+      "text": "Output generated sources for IDE"
+    },
+    {
+      "key": "settings.outputCompilerGeneratedSources.help",
+      "text": "Enabled by default. Writes compiler-generated sources to Library and synchronizes IDE projects for completion and navigation. When disabled, MUI stops configuring source output and the IDE runs the generator itself. Automatic bindings and Unity compilation remain enabled."
+    },
+    {
       "key": "editor.ConfirmationDialogWizard.355c93a223",
       "text": "Select a new Prefab path."
     },
@@ -757,7 +769,7 @@
     },
     {
       "key": "editor.PageWizard.275da80635",
-      "text": "Page.CreateRoute(host.Settings). Add a completion command for typed results in project code."
+      "text": "ViewModelDefinition.CreateDefinition(host.Settings). Add a completion command for typed results in project code."
     },
     {
       "key": "editor.PageWizard.2ed479b29e",
@@ -765,7 +777,7 @@
     },
     {
       "key": "editor.PageWizard.3715f68b64",
-      "text": "Route policy"
+      "text": "PageDefinition policy"
     },
     {
       "key": "editor.PageWizard.38e702fab3",
@@ -797,7 +809,7 @@
     },
     {
       "key": "editor.PageWizard.593bb3ad77",
-      "text": "Create a page directory, Prefab and editable source. The target assembly requires MUI.Core, MUI.Resources, MUI.Navigation, MUI.UGUI and the binding generator; TMP also requires MUI.TMP. Place the Prefab under a UIHost Canvas and register its resource key with the provider or host catalog. Page lifecycles use asynchronous APIs; local preparation can complete immediately."
+      "text": "Create a page directory, Prefab and editable source. The target assembly requires MUI.Core, MUI.Resources, MUI.Pages, MUI.UGUI and the binding generator; TMP also requires MUI.TMP. Place the Prefab under a UIHost Canvas and register its resource key with the provider or host catalog. Page lifecycles use asynchronous APIs; local preparation can complete immediately."
     },
     {
       "key": "editor.PageWizard.5a814a8beb",
@@ -805,7 +817,7 @@
     },
     {
       "key": "editor.PageWizard.7fe8b9bce7",
-      "text": "Routes read global settings when created. Existing routes retain their resolved policies."
+      "text": "Definitions read global settings when created. Existing routes retain their resolved policies."
     },
     {
       "key": "editor.PageWizard.89b4e4e0de",
@@ -924,155 +936,155 @@
       "text": "Create page"
     },
     {
-      "key": "editor.RouteGraphSnapshot.01c47b74d0",
+      "key": "editor.PageGraphSnapshot.01c47b74d0",
       "text": "Not captured"
     },
     {
-      "key": "editor.RouteGraphSnapshot.158410a533",
+      "key": "editor.PageGraphSnapshot.158410a533",
       "text": "Captured: {0}; statically valid: {1}; total nodes: {2}; truncated: {3}"
     },
     {
-      "key": "editor.RouteGraphSnapshot.51cb866ffa",
+      "key": "editor.PageGraphSnapshot.51cb866ffa",
       "text": "Invalid target"
     },
     {
-      "key": "editor.RouteGraphSnapshot.537352400c",
+      "key": "editor.PageGraphSnapshot.537352400c",
       "text": "Optional"
     },
     {
-      "key": "editor.RouteGraphSnapshot.726b6750c3",
+      "key": "editor.PageGraphSnapshot.726b6750c3",
       "text": "Multiple={0}, limit={1}, focus={2}, cache={3}"
     },
     {
-      "key": "editor.RouteGraphSnapshot.92707d3318",
+      "key": "editor.PageGraphSnapshot.92707d3318",
       "text": "Required"
     },
     {
-      "key": "editor.RouteGraphSnapshot.9cc9fa8b20",
+      "key": "editor.PageGraphSnapshot.9cc9fa8b20",
       "text": "MUI route dependency graph: {0}"
     },
     {
-      "key": "editor.RouteGraphSnapshot.9d4ce01625",
+      "key": "editor.PageGraphSnapshot.9d4ce01625",
       "text": "#{0} {1} | Layer={2} | {3}"
     },
     {
-      "key": "editor.RouteGraphSnapshot.b375d3caee",
+      "key": "editor.PageGraphSnapshot.b375d3caee",
       "text": "This report does not verify runtime arguments, resource availability or sharing across roots."
     },
     {
-      "key": "editor.RouteGraphSnapshot.c4d58b520a",
+      "key": "editor.PageGraphSnapshot.c4d58b520a",
       "text": "Error {0} / {1}: {2}"
     },
     {
-      "key": "editor.RouteGraphWindow.0133cebb0b",
+      "key": "editor.PageGraphWindow.0133cebb0b",
       "text": "Dependency graph template is missing: "
     },
     {
-      "key": "editor.RouteGraphWindow.Details.01c47b74d0",
+      "key": "editor.PageGraphWindow.Details.01c47b74d0",
       "text": "Not captured"
     },
     {
-      "key": "editor.RouteGraphWindow.Details.273b96485f",
+      "key": "editor.PageGraphWindow.Details.273b96485f",
       "text": "Invalid placement: "
     },
     {
-      "key": "editor.RouteGraphWindow.Details.2d40633e66",
+      "key": "editor.PageGraphWindow.Details.2d40633e66",
       "text": "Parent owners (pointing to this route)"
     },
     {
-      "key": "editor.RouteGraphWindow.Details.404b2b7b9c",
+      "key": "editor.PageGraphWindow.Details.404b2b7b9c",
       "text": "No parent owners in this root's reachable graph."
     },
     {
-      "key": "editor.RouteGraphWindow.Details.40e06e6a94",
+      "key": "editor.PageGraphWindow.Details.40e06e6a94",
       "text": "Display across layers follows Layer order"
     },
     {
-      "key": "editor.RouteGraphWindow.Details.4804324f1f",
+      "key": "editor.PageGraphWindow.Details.4804324f1f",
       "text": "No direct dependencies."
     },
     {
-      "key": "editor.RouteGraphWindow.Details.5853629b17",
+      "key": "editor.PageGraphWindow.Details.5853629b17",
       "text": "Required; failure closes the parent chain"
     },
     {
-      "key": "editor.RouteGraphWindow.Details.5e80d84deb",
+      "key": "editor.PageGraphWindow.Details.5e80d84deb",
       "text": "Layer: {0}"
     },
     {
-      "key": "editor.RouteGraphWindow.Details.655f0f0b1a",
+      "key": "editor.PageGraphWindow.Details.655f0f0b1a",
       "text": "Resource: {0}"
     },
     {
-      "key": "editor.RouteGraphWindow.Details.695a39529f",
+      "key": "editor.PageGraphWindow.Details.695a39529f",
       "text": "Direct dependencies (from this route)"
     },
     {
-      "key": "editor.RouteGraphWindow.Details.76f5a111c9",
+      "key": "editor.PageGraphWindow.Details.76f5a111c9",
       "text": "Static issues in this graph"
     },
     {
-      "key": "editor.RouteGraphWindow.Details.7cbe752ca7",
+      "key": "editor.PageGraphWindow.Details.7cbe752ca7",
       "text": "After parent"
     },
     {
-      "key": "editor.RouteGraphWindow.Details.840cc3e250",
+      "key": "editor.PageGraphWindow.Details.840cc3e250",
       "text": "Parent owners → current route → direct dependencies. Click a relation to navigate; numbered entries distinguish definitions with the same key."
     },
     {
-      "key": "editor.RouteGraphWindow.Details.936ac0c9d9",
+      "key": "editor.PageGraphWindow.Details.936ac0c9d9",
       "text": "This snapshot is truncated and relations may be incomplete. The copied report includes captured relations and truncation markers."
     },
     {
-      "key": "editor.RouteGraphWindow.Details.9b73c23f45",
+      "key": "editor.PageGraphWindow.Details.9b73c23f45",
       "text": "{0} relations; showing the first {1}. Copy the report to inspect other captured relations."
     },
     {
-      "key": "editor.RouteGraphWindow.Details.a4c1e252ea",
+      "key": "editor.PageGraphWindow.Details.a4c1e252ea",
       "text": "Before parent"
     },
     {
-      "key": "editor.RouteGraphWindow.Details.d3fc914f82",
+      "key": "editor.PageGraphWindow.Details.d3fc914f82",
       "text": "Same-layer dependencies constrain order"
     },
     {
-      "key": "editor.RouteGraphWindow.Details.d5adb4d085",
+      "key": "editor.PageGraphWindow.Details.d5adb4d085",
       "text": "Optional; missing dependencies allow degraded operation"
     },
     {
-      "key": "editor.RouteGraphWindow.Details.efbcfd92f1",
+      "key": "editor.PageGraphWindow.Details.efbcfd92f1",
       "text": "No static declaration errors found; runtime arguments and resources still require verification."
     },
     {
-      "key": "editor.RouteGraphWindow.a55f3f74c9",
+      "key": "editor.PageGraphWindow.a55f3f74c9",
       "text": " · Snapshot or issue list is truncated; this is not the complete graph"
     },
     {
-      "key": "editor.RouteGraphWindow.a5db00d95d",
+      "key": "editor.PageGraphWindow.a5db00d95d",
       "text": "Static validation passed"
     },
     {
-      "key": "editor.RouteGraphWindow.afa6c08140",
+      "key": "editor.PageGraphWindow.afa6c08140",
       "text": "#{0} {1}\nLayer {2}"
     },
     {
-      "key": "editor.RouteGraphWindow.be20609b83",
-      "text": "MUI Route Dependencies"
+      "key": "editor.PageGraphWindow.be20609b83",
+      "text": "MUI PageDefinition Dependencies"
     },
     {
-      "key": "editor.RouteGraphWindow.ce2152f7d4",
+      "key": "editor.PageGraphWindow.ce2152f7d4",
       "text": "Static errors found"
     },
     {
-      "key": "editor.RouteGraphWindow.dd7478c175",
+      "key": "editor.PageGraphWindow.dd7478c175",
       "text": "{0} · Nodes {1}/{2} · Edges {3} · Issues {4} · {5}"
     },
     {
-      "key": "editor.RouteGraphWindow.efe8e45d2f",
+      "key": "editor.PageGraphWindow.efe8e45d2f",
       "text": "No route metadata captured."
     },
     {
-      "key": "editor.RouteGraphWindow.fbc36492c3",
+      "key": "editor.PageGraphWindow.fbc36492c3",
       "text": "Provide 1 to 32 route roots."
     },
     {
@@ -1277,7 +1289,7 @@
     },
     {
       "key": "editor.UIBuildValidationReport.counts",
-      "text": "Registered catalogs: {0} | Pages checked: {1} | Routes: {2}"
+      "text": "Registered catalogs: {0} | Pages checked: {1} | Definitions: {2}"
     },
     {
       "key": "editor.UIBuildValidationReport.0dbf27f994",
@@ -2217,7 +2229,7 @@
     },
     {
       "key": "editor.ViewInspector.e32a3bfa20",
-      "text": "No generated manifests found. Compile a partial ViewModel with ViewContract or Bind attributes."
+      "text": "No generated manifests found. Compile a partial ViewModel with UIPage, UIWidget or Bind attributes."
     },
     {
       "key": "editor.ViewInspector.f9d933d15c",
@@ -2360,8 +2372,8 @@
       "text": "Reentrant"
     },
     {
-      "key": "enum.MUI.ArgsUpdateRejection.RouteMismatch",
-      "text": "Route Mismatch"
+      "key": "enum.MUI.ArgsUpdateRejection.PageDefinitionMismatch",
+      "text": "PageDefinition Mismatch"
     },
     {
       "key": "enum.MUI.ArgsUpdateRejection.SourceUnavailable",
@@ -2624,723 +2636,723 @@
       "text": "Update"
     },
     {
-      "key": "enum.MUI.Navigation.BackBehavior.Block",
+      "key": "enum.MUI.Pages.BackBehavior.Block",
       "text": "Block"
     },
     {
-      "key": "enum.MUI.Navigation.BackBehavior.Close",
+      "key": "enum.MUI.Pages.BackBehavior.Close",
       "text": "Close"
     },
     {
-      "key": "enum.MUI.Navigation.BackBehavior.HandleByPresenter",
+      "key": "enum.MUI.Pages.BackBehavior.HandleByPresenter",
       "text": "Handle By Presenter"
     },
     {
-      "key": "enum.MUI.Navigation.BackBehavior.Ignore",
+      "key": "enum.MUI.Pages.BackBehavior.Ignore",
       "text": "Ignore"
     },
     {
-      "key": "enum.MUI.Navigation.BackResponse.Close",
+      "key": "enum.MUI.Pages.BackResponse.Close",
       "text": "Close"
     },
     {
-      "key": "enum.MUI.Navigation.BackResponse.Handled",
+      "key": "enum.MUI.Pages.BackResponse.Handled",
       "text": "Handled"
     },
     {
-      "key": "enum.MUI.Navigation.BackResponse.Ignore",
+      "key": "enum.MUI.Pages.BackResponse.Ignore",
       "text": "Ignore"
     },
     {
-      "key": "enum.MUI.Navigation.BatchCloseStatus.Busy",
+      "key": "enum.MUI.Pages.BatchCloseStatus.Busy",
       "text": "Busy"
     },
     {
-      "key": "enum.MUI.Navigation.BatchCloseStatus.Completed",
+      "key": "enum.MUI.Pages.BatchCloseStatus.Completed",
       "text": "Completed"
     },
     {
-      "key": "enum.MUI.Navigation.BatchCloseStatus.Reentrant",
+      "key": "enum.MUI.Pages.BatchCloseStatus.Reentrant",
       "text": "Reentrant"
     },
     {
-      "key": "enum.MUI.Navigation.BatchCloseStatus.WaitCancelled",
+      "key": "enum.MUI.Pages.BatchCloseStatus.WaitCancelled",
       "text": "Wait Cancelled"
     },
     {
-      "key": "enum.MUI.Navigation.CleanupStatus.Complete",
+      "key": "enum.MUI.Pages.CleanupStatus.Complete",
       "text": "Complete"
     },
     {
-      "key": "enum.MUI.Navigation.CleanupStatus.Failed",
+      "key": "enum.MUI.Pages.CleanupStatus.Failed",
       "text": "Failed"
     },
     {
-      "key": "enum.MUI.Navigation.CleanupStatus.NotRequired",
+      "key": "enum.MUI.Pages.CleanupStatus.NotRequired",
       "text": "Not Required"
     },
     {
-      "key": "enum.MUI.Navigation.CleanupStatus.Pending",
+      "key": "enum.MUI.Pages.CleanupStatus.Pending",
       "text": "Pending"
     },
     {
-      "key": "enum.MUI.Navigation.CloseDecisionKind.Allow",
+      "key": "enum.MUI.Pages.CloseDecisionKind.Allow",
       "text": "Allow"
     },
     {
-      "key": "enum.MUI.Navigation.CloseDecisionKind.Deny",
+      "key": "enum.MUI.Pages.CloseDecisionKind.Deny",
       "text": "Deny"
     },
     {
-      "key": "enum.MUI.Navigation.CloseDecisionKind.NeedsConfirmation",
+      "key": "enum.MUI.Pages.CloseDecisionKind.NeedsConfirmation",
       "text": "Needs Confirmation"
     },
     {
-      "key": "enum.MUI.Navigation.CloseRequestIntent.Complete",
+      "key": "enum.MUI.Pages.CloseRequestIntent.Complete",
       "text": "Complete"
     },
     {
-      "key": "enum.MUI.Navigation.CloseRequestIntent.Dismiss",
+      "key": "enum.MUI.Pages.CloseRequestIntent.Dismiss",
       "text": "Dismiss"
     },
     {
-      "key": "enum.MUI.Navigation.CloseRequestIntent.Replace",
+      "key": "enum.MUI.Pages.CloseRequestIntent.Replace",
       "text": "Replace"
     },
     {
-      "key": "enum.MUI.Navigation.CloseStatus.AlreadyClosed",
+      "key": "enum.MUI.Pages.CloseStatus.AlreadyClosed",
       "text": "Already Closed"
     },
     {
-      "key": "enum.MUI.Navigation.CloseStatus.AlreadyClosing",
+      "key": "enum.MUI.Pages.CloseStatus.AlreadyClosing",
       "text": "Already Closing"
     },
     {
-      "key": "enum.MUI.Navigation.CloseStatus.Blocked",
+      "key": "enum.MUI.Pages.CloseStatus.Blocked",
       "text": "Blocked"
     },
     {
-      "key": "enum.MUI.Navigation.CloseStatus.Busy",
+      "key": "enum.MUI.Pages.CloseStatus.Busy",
       "text": "Busy"
     },
     {
-      "key": "enum.MUI.Navigation.CloseStatus.Closed",
+      "key": "enum.MUI.Pages.CloseStatus.Closed",
       "text": "Closed"
     },
     {
-      "key": "enum.MUI.Navigation.CloseStatus.ClosedWithCleanupPending",
+      "key": "enum.MUI.Pages.CloseStatus.ClosedWithCleanupPending",
       "text": "Closed With Cleanup Pending"
     },
     {
-      "key": "enum.MUI.Navigation.CloseStatus.ConfirmationUnavailable",
+      "key": "enum.MUI.Pages.CloseStatus.ConfirmationUnavailable",
       "text": "Confirmation Unavailable"
     },
     {
-      "key": "enum.MUI.Navigation.CloseStatus.Denied",
+      "key": "enum.MUI.Pages.CloseStatus.Denied",
       "text": "Denied"
     },
     {
-      "key": "enum.MUI.Navigation.CloseStatus.Failed",
+      "key": "enum.MUI.Pages.CloseStatus.Failed",
       "text": "Failed"
     },
     {
-      "key": "enum.MUI.Navigation.CloseStatus.Handled",
+      "key": "enum.MUI.Pages.CloseStatus.Handled",
       "text": "Handled"
     },
     {
-      "key": "enum.MUI.Navigation.CloseStatus.InUse",
+      "key": "enum.MUI.Pages.CloseStatus.InUse",
       "text": "In Use"
     },
     {
-      "key": "enum.MUI.Navigation.CloseStatus.NotFound",
+      "key": "enum.MUI.Pages.CloseStatus.NotFound",
       "text": "Not Found"
     },
     {
-      "key": "enum.MUI.Navigation.CloseStatus.Reentrant",
+      "key": "enum.MUI.Pages.CloseStatus.Reentrant",
       "text": "Reentrant"
     },
     {
-      "key": "enum.MUI.Navigation.CloseStatus.Superseded",
+      "key": "enum.MUI.Pages.CloseStatus.Superseded",
       "text": "Superseded"
     },
     {
-      "key": "enum.MUI.Navigation.CloseStatus.UnknownOrExpired",
+      "key": "enum.MUI.Pages.CloseStatus.UnknownOrExpired",
       "text": "Unknown Or Expired"
     },
     {
-      "key": "enum.MUI.Navigation.CloseStatus.WaitCancelled",
+      "key": "enum.MUI.Pages.CloseStatus.WaitCancelled",
       "text": "Wait Cancelled"
     },
     {
-      "key": "enum.MUI.Navigation.CoveragePolicy.BlockInput",
+      "key": "enum.MUI.Pages.CoveragePolicy.BlockInput",
       "text": "Block Input"
     },
     {
-      "key": "enum.MUI.Navigation.CoveragePolicy.Hide",
+      "key": "enum.MUI.Pages.CoveragePolicy.Hide",
       "text": "Hide"
     },
     {
-      "key": "enum.MUI.Navigation.CoveragePolicy.None",
+      "key": "enum.MUI.Pages.CoveragePolicy.None",
       "text": "None"
     },
     {
-      "key": "enum.MUI.Navigation.DependencyFailureStage.Preparation",
+      "key": "enum.MUI.Pages.DependencyFailureStage.Preparation",
       "text": "Preparation"
     },
     {
-      "key": "enum.MUI.Navigation.DependencyFailureStage.RuntimeExit",
+      "key": "enum.MUI.Pages.DependencyFailureStage.RuntimeExit",
       "text": "Runtime Exit"
     },
     {
-      "key": "enum.MUI.Navigation.DependencyPlacement.AttachedAfter",
+      "key": "enum.MUI.Pages.DependencyPlacement.AttachedAfter",
       "text": "Attached After"
     },
     {
-      "key": "enum.MUI.Navigation.DependencyPlacement.RequiredBefore",
+      "key": "enum.MUI.Pages.DependencyPlacement.RequiredBefore",
       "text": "Required Before"
     },
     {
-      "key": "enum.MUI.Navigation.DismissReason.ArgsUpdateFailed",
+      "key": "enum.MUI.Pages.DismissReason.ArgsUpdateFailed",
       "text": "Args Update Failed"
     },
     {
-      "key": "enum.MUI.Navigation.DismissReason.Back",
+      "key": "enum.MUI.Pages.DismissReason.Back",
       "text": "Back"
     },
     {
-      "key": "enum.MUI.Navigation.DismissReason.Closed",
+      "key": "enum.MUI.Pages.DismissReason.Closed",
       "text": "Closed"
     },
     {
-      "key": "enum.MUI.Navigation.DismissReason.Forced",
+      "key": "enum.MUI.Pages.DismissReason.Forced",
       "text": "Forced"
     },
     {
-      "key": "enum.MUI.Navigation.DismissReason.HostShutdown",
+      "key": "enum.MUI.Pages.DismissReason.HostShutdown",
       "text": "Host Shutdown"
     },
     {
-      "key": "enum.MUI.Navigation.DismissReason.OpenCancelled",
+      "key": "enum.MUI.Pages.DismissReason.OpenCancelled",
       "text": "Open Cancelled"
     },
     {
-      "key": "enum.MUI.Navigation.DismissReason.OpenFailed",
+      "key": "enum.MUI.Pages.DismissReason.OpenFailed",
       "text": "Open Failed"
     },
     {
-      "key": "enum.MUI.Navigation.DismissReason.RebindFailed",
+      "key": "enum.MUI.Pages.DismissReason.RebindFailed",
       "text": "Rebind Failed"
     },
     {
-      "key": "enum.MUI.Navigation.DismissReason.Replaced",
+      "key": "enum.MUI.Pages.DismissReason.Replaced",
       "text": "Replaced"
     },
     {
-      "key": "enum.MUI.Navigation.ExistingInstancePolicy.Reject",
+      "key": "enum.MUI.Pages.ExistingInstancePolicy.Reject",
       "text": "Reject"
     },
     {
-      "key": "enum.MUI.Navigation.ExistingInstancePolicy.ReturnReady",
+      "key": "enum.MUI.Pages.ExistingInstancePolicy.ReturnReady",
       "text": "Return Ready"
     },
     {
-      "key": "enum.MUI.Navigation.ExplicitOwnershipReleaseStatus.AlreadyReleased",
+      "key": "enum.MUI.Pages.ExplicitOwnershipReleaseStatus.AlreadyReleased",
       "text": "Already Released"
     },
     {
-      "key": "enum.MUI.Navigation.ExplicitOwnershipReleaseStatus.Pending",
+      "key": "enum.MUI.Pages.ExplicitOwnershipReleaseStatus.Pending",
       "text": "Pending"
     },
     {
-      "key": "enum.MUI.Navigation.ExplicitOwnershipReleaseStatus.Rejected",
+      "key": "enum.MUI.Pages.ExplicitOwnershipReleaseStatus.Rejected",
       "text": "Rejected"
     },
     {
-      "key": "enum.MUI.Navigation.ExplicitOwnershipReleaseStatus.Released",
+      "key": "enum.MUI.Pages.ExplicitOwnershipReleaseStatus.Released",
       "text": "Released"
     },
     {
-      "key": "enum.MUI.Navigation.FocusPolicy.None",
+      "key": "enum.MUI.Pages.FocusPolicy.None",
       "text": "None"
     },
     {
-      "key": "enum.MUI.Navigation.NavigationEventKind.ArgsUpdateFinished",
+      "key": "enum.MUI.Pages.PageEventKind.ArgsUpdateFinished",
       "text": "Args Update Finished"
     },
     {
-      "key": "enum.MUI.Navigation.NavigationEventKind.CloseCleanupPending",
+      "key": "enum.MUI.Pages.PageEventKind.CloseCleanupPending",
       "text": "Close Cleanup Pending"
     },
     {
-      "key": "enum.MUI.Navigation.NavigationEventKind.CloseCommitted",
+      "key": "enum.MUI.Pages.PageEventKind.CloseCommitted",
       "text": "Close Committed"
     },
     {
-      "key": "enum.MUI.Navigation.NavigationEventKind.Closed",
+      "key": "enum.MUI.Pages.PageEventKind.Closed",
       "text": "Closed"
     },
     {
-      "key": "enum.MUI.Navigation.NavigationEventKind.DependencyDegraded",
+      "key": "enum.MUI.Pages.PageEventKind.DependencyDegraded",
       "text": "Dependency Degraded"
     },
     {
-      "key": "enum.MUI.Navigation.NavigationEventKind.ExplicitOwnershipReleased",
+      "key": "enum.MUI.Pages.PageEventKind.ExplicitOwnershipReleased",
       "text": "Explicit Ownership Released"
     },
     {
-      "key": "enum.MUI.Navigation.NavigationEventKind.OpenCommitted",
+      "key": "enum.MUI.Pages.PageEventKind.OpenCommitted",
       "text": "Open Committed"
     },
     {
-      "key": "enum.MUI.Navigation.NavigationEventKind.ViewModelRebindFinished",
+      "key": "enum.MUI.Pages.PageEventKind.ViewModelRebindFinished",
       "text": "View Model Rebind Finished"
     },
     {
-      "key": "enum.MUI.Navigation.NavigationOperationStage.EnterTransition",
+      "key": "enum.MUI.Pages.PageOperationStage.EnterTransition",
       "text": "Enter Transition"
     },
     {
-      "key": "enum.MUI.Navigation.NavigationOperationStage.ExitTransition",
+      "key": "enum.MUI.Pages.PageOperationStage.ExitTransition",
       "text": "Exit Transition"
     },
     {
-      "key": "enum.MUI.Navigation.NavigationOperationStage.InstanceCleanup",
+      "key": "enum.MUI.Pages.PageOperationStage.InstanceCleanup",
       "text": "Instance Cleanup"
     },
     {
-      "key": "enum.MUI.Navigation.NavigationOperationStage.ViewResourceRelease",
+      "key": "enum.MUI.Pages.PageOperationStage.ViewResourceRelease",
       "text": "View Resource Release"
     },
     {
-      "key": "enum.MUI.Navigation.NavigationPreparationStage.ActivationPreparation",
+      "key": "enum.MUI.Pages.PagePreparationStage.ActivationPreparation",
       "text": "Activation Preparation"
     },
     {
-      "key": "enum.MUI.Navigation.NavigationPreparationStage.AttachedDependencies",
+      "key": "enum.MUI.Pages.PagePreparationStage.AttachedDependencies",
       "text": "Attached Dependencies"
     },
     {
-      "key": "enum.MUI.Navigation.NavigationPreparationStage.Binding",
+      "key": "enum.MUI.Pages.PagePreparationStage.Binding",
       "text": "Binding"
     },
     {
-      "key": "enum.MUI.Navigation.NavigationPreparationStage.ModelCreation",
+      "key": "enum.MUI.Pages.PagePreparationStage.ModelCreation",
       "text": "Model Creation"
     },
     {
-      "key": "enum.MUI.Navigation.NavigationPreparationStage.PresenterCreate",
+      "key": "enum.MUI.Pages.PagePreparationStage.PresenterCreate",
       "text": "Presenter Create"
     },
     {
-      "key": "enum.MUI.Navigation.NavigationPreparationStage.PresenterOpen",
+      "key": "enum.MUI.Pages.PagePreparationStage.PresenterOpen",
       "text": "Presenter Open"
     },
     {
-      "key": "enum.MUI.Navigation.NavigationPreparationStage.PresenterOpenAsync",
+      "key": "enum.MUI.Pages.PagePreparationStage.PresenterOpenAsync",
       "text": "Presenter Open Async"
     },
     {
-      "key": "enum.MUI.Navigation.NavigationPreparationStage.RequiredDependencies",
+      "key": "enum.MUI.Pages.PagePreparationStage.RequiredDependencies",
       "text": "Required Dependencies"
     },
     {
-      "key": "enum.MUI.Navigation.NavigationPreparationStage.ResourceCreation",
+      "key": "enum.MUI.Pages.PagePreparationStage.ResourceCreation",
       "text": "Resource Creation"
     },
     {
-      "key": "enum.MUI.Navigation.NavigationTraceKind.BatchCloseItem",
+      "key": "enum.MUI.Pages.PageTraceKind.BatchCloseItem",
       "text": "Batch Close Item"
     },
     {
-      "key": "enum.MUI.Navigation.NavigationTraceKind.Lifecycle",
+      "key": "enum.MUI.Pages.PageTraceKind.Lifecycle",
       "text": "Lifecycle"
     },
     {
-      "key": "enum.MUI.Navigation.NavigationTraceKind.OperationFinished",
+      "key": "enum.MUI.Pages.PageTraceKind.OperationFinished",
       "text": "Operation Finished"
     },
     {
-      "key": "enum.MUI.Navigation.NavigationTraceKind.OperationStageFinished",
+      "key": "enum.MUI.Pages.PageTraceKind.OperationStageFinished",
       "text": "Operation Stage Finished"
     },
     {
-      "key": "enum.MUI.Navigation.NavigationTraceKind.OperationStageStarted",
+      "key": "enum.MUI.Pages.PageTraceKind.OperationStageStarted",
       "text": "Operation Stage Started"
     },
     {
-      "key": "enum.MUI.Navigation.NavigationTraceKind.OperationStarted",
+      "key": "enum.MUI.Pages.PageTraceKind.OperationStarted",
       "text": "Operation Started"
     },
     {
-      "key": "enum.MUI.Navigation.NavigationTraceKind.PreparationFinished",
+      "key": "enum.MUI.Pages.PageTraceKind.PreparationFinished",
       "text": "Preparation Finished"
     },
     {
-      "key": "enum.MUI.Navigation.NavigationTraceKind.PreparationStarted",
+      "key": "enum.MUI.Pages.PageTraceKind.PreparationStarted",
       "text": "Preparation Started"
     },
     {
-      "key": "enum.MUI.Navigation.OpenRejection.Busy",
+      "key": "enum.MUI.Pages.OpenRejection.Busy",
       "text": "Busy"
     },
     {
-      "key": "enum.MUI.Navigation.OpenRejection.CleanupCapacity",
+      "key": "enum.MUI.Pages.OpenRejection.CleanupCapacity",
       "text": "Cleanup Capacity"
     },
     {
-      "key": "enum.MUI.Navigation.OpenRejection.CloseDecisionTimedOut",
+      "key": "enum.MUI.Pages.OpenRejection.CloseDecisionTimedOut",
       "text": "Close Decision Timed Out"
     },
     {
-      "key": "enum.MUI.Navigation.OpenRejection.CloseDenied",
+      "key": "enum.MUI.Pages.OpenRejection.CloseDenied",
       "text": "Close Denied"
     },
     {
-      "key": "enum.MUI.Navigation.OpenRejection.ConfirmationUnavailable",
+      "key": "enum.MUI.Pages.OpenRejection.ConfirmationUnavailable",
       "text": "Confirmation Unavailable"
     },
     {
-      "key": "enum.MUI.Navigation.OpenRejection.ConflictingData",
+      "key": "enum.MUI.Pages.OpenRejection.ConflictingData",
       "text": "Conflicting Data"
     },
     {
-      "key": "enum.MUI.Navigation.OpenRejection.DependencyCycle",
+      "key": "enum.MUI.Pages.OpenRejection.DependencyCycle",
       "text": "Dependency Cycle"
     },
     {
-      "key": "enum.MUI.Navigation.OpenRejection.DependencyLimit",
+      "key": "enum.MUI.Pages.OpenRejection.DependencyLimit",
       "text": "Dependency Limit"
     },
     {
-      "key": "enum.MUI.Navigation.OpenRejection.DependencyOrderConflict",
+      "key": "enum.MUI.Pages.OpenRejection.DependencyOrderConflict",
       "text": "Dependency Order Conflict"
     },
     {
-      "key": "enum.MUI.Navigation.OpenRejection.InstanceLimit",
+      "key": "enum.MUI.Pages.OpenRejection.InstanceLimit",
       "text": "Instance Limit"
     },
     {
-      "key": "enum.MUI.Navigation.OpenRejection.None",
+      "key": "enum.MUI.Pages.OpenRejection.None",
       "text": "None"
     },
     {
-      "key": "enum.MUI.Navigation.OpenRejection.Reentrant",
+      "key": "enum.MUI.Pages.OpenRejection.Reentrant",
       "text": "Reentrant"
     },
     {
-      "key": "enum.MUI.Navigation.OpenRejection.Superseded",
+      "key": "enum.MUI.Pages.OpenRejection.Superseded",
       "text": "Superseded"
     },
     {
-      "key": "enum.MUI.Navigation.OpenStatus.ActivationFailed",
+      "key": "enum.MUI.Pages.OpenStatus.ActivationFailed",
       "text": "Activation Failed"
     },
     {
-      "key": "enum.MUI.Navigation.OpenStatus.CancelledBeforeCommit",
+      "key": "enum.MUI.Pages.OpenStatus.CancelledBeforeCommit",
       "text": "Cancelled Before Commit"
     },
     {
-      "key": "enum.MUI.Navigation.OpenStatus.ClosedBeforeReady",
+      "key": "enum.MUI.Pages.OpenStatus.ClosedBeforeReady",
       "text": "Closed Before Ready"
     },
     {
-      "key": "enum.MUI.Navigation.OpenStatus.HostClosed",
+      "key": "enum.MUI.Pages.OpenStatus.HostClosed",
       "text": "Host Closed"
     },
     {
-      "key": "enum.MUI.Navigation.OpenStatus.PreparationFailed",
+      "key": "enum.MUI.Pages.OpenStatus.PreparationFailed",
       "text": "Preparation Failed"
     },
     {
-      "key": "enum.MUI.Navigation.OpenStatus.Rejected",
+      "key": "enum.MUI.Pages.OpenStatus.Rejected",
       "text": "Rejected"
     },
     {
-      "key": "enum.MUI.Navigation.OpenStatus.Succeeded",
+      "key": "enum.MUI.Pages.OpenStatus.Succeeded",
       "text": "Succeeded"
     },
     {
-      "key": "enum.MUI.Navigation.OverflowPolicy.CloseOldest",
+      "key": "enum.MUI.Pages.OverflowPolicy.CloseOldest",
       "text": "Close Oldest"
     },
     {
-      "key": "enum.MUI.Navigation.OverflowPolicy.Reject",
+      "key": "enum.MUI.Pages.OverflowPolicy.Reject",
       "text": "Reject"
     },
     {
-      "key": "enum.MUI.Navigation.PostOpenStatus.Accepted",
+      "key": "enum.MUI.Pages.PostOpenStatus.Accepted",
       "text": "Accepted"
     },
     {
-      "key": "enum.MUI.Navigation.PostOpenStatus.Busy",
+      "key": "enum.MUI.Pages.PostOpenStatus.Busy",
       "text": "Busy"
     },
     {
-      "key": "enum.MUI.Navigation.PostOpenStatus.HostClosed",
+      "key": "enum.MUI.Pages.PostOpenStatus.HostClosed",
       "text": "Host Closed"
     },
     {
-      "key": "enum.MUI.Navigation.PreloadStatus.Cancelled",
+      "key": "enum.MUI.Pages.PreloadStatus.Cancelled",
       "text": "Cancelled"
     },
     {
-      "key": "enum.MUI.Navigation.PreloadStatus.CapacityExceeded",
+      "key": "enum.MUI.Pages.PreloadStatus.CapacityExceeded",
       "text": "Capacity Exceeded"
     },
     {
-      "key": "enum.MUI.Navigation.PreloadStatus.Failed",
+      "key": "enum.MUI.Pages.PreloadStatus.Failed",
       "text": "Failed"
     },
     {
-      "key": "enum.MUI.Navigation.PreloadStatus.HostClosed",
+      "key": "enum.MUI.Pages.PreloadStatus.HostClosed",
       "text": "Host Closed"
     },
     {
-      "key": "enum.MUI.Navigation.PreloadStatus.InactiveContentClearing",
+      "key": "enum.MUI.Pages.PreloadStatus.InactiveContentClearing",
       "text": "Inactive Content Clearing"
     },
     {
-      "key": "enum.MUI.Navigation.PreloadStatus.Ready",
+      "key": "enum.MUI.Pages.PreloadStatus.Ready",
       "text": "Ready"
     },
     {
-      "key": "enum.MUI.Navigation.PreloadStatus.Reentrant",
+      "key": "enum.MUI.Pages.PreloadStatus.Reentrant",
       "text": "Reentrant"
     },
     {
-      "key": "enum.MUI.Navigation.PreloadStatus.Superseded",
+      "key": "enum.MUI.Pages.PreloadStatus.Superseded",
       "text": "Superseded"
     },
     {
-      "key": "enum.MUI.Navigation.PreloadStatus.Unsupported",
+      "key": "enum.MUI.Pages.PreloadStatus.Unsupported",
       "text": "Unsupported"
     },
     {
-      "key": "enum.MUI.Navigation.PreloadStatus.WaitCancelled",
+      "key": "enum.MUI.Pages.PreloadStatus.WaitCancelled",
       "text": "Wait Cancelled"
     },
     {
-      "key": "enum.MUI.Navigation.ReplaceRejection.Busy",
+      "key": "enum.MUI.Pages.ReplaceRejection.Busy",
       "text": "Busy"
     },
     {
-      "key": "enum.MUI.Navigation.ReplaceRejection.CleanupCapacity",
+      "key": "enum.MUI.Pages.ReplaceRejection.CleanupCapacity",
       "text": "Cleanup Capacity"
     },
     {
-      "key": "enum.MUI.Navigation.ReplaceRejection.CloseDecisionTimedOut",
+      "key": "enum.MUI.Pages.ReplaceRejection.CloseDecisionTimedOut",
       "text": "Close Decision Timed Out"
     },
     {
-      "key": "enum.MUI.Navigation.ReplaceRejection.CloseDenied",
+      "key": "enum.MUI.Pages.ReplaceRejection.CloseDenied",
       "text": "Close Denied"
     },
     {
-      "key": "enum.MUI.Navigation.ReplaceRejection.ConfirmationUnavailable",
+      "key": "enum.MUI.Pages.ReplaceRejection.ConfirmationUnavailable",
       "text": "Confirmation Unavailable"
     },
     {
-      "key": "enum.MUI.Navigation.ReplaceRejection.ConflictingData",
+      "key": "enum.MUI.Pages.ReplaceRejection.ConflictingData",
       "text": "Conflicting Data"
     },
     {
-      "key": "enum.MUI.Navigation.ReplaceRejection.DependencyCycle",
+      "key": "enum.MUI.Pages.ReplaceRejection.DependencyCycle",
       "text": "Dependency Cycle"
     },
     {
-      "key": "enum.MUI.Navigation.ReplaceRejection.DependencyLimit",
+      "key": "enum.MUI.Pages.ReplaceRejection.DependencyLimit",
       "text": "Dependency Limit"
     },
     {
-      "key": "enum.MUI.Navigation.ReplaceRejection.DependencyOrderConflict",
+      "key": "enum.MUI.Pages.ReplaceRejection.DependencyOrderConflict",
       "text": "Dependency Order Conflict"
     },
     {
-      "key": "enum.MUI.Navigation.ReplaceRejection.InstanceLimit",
+      "key": "enum.MUI.Pages.ReplaceRejection.InstanceLimit",
       "text": "Instance Limit"
     },
     {
-      "key": "enum.MUI.Navigation.ReplaceRejection.None",
+      "key": "enum.MUI.Pages.ReplaceRejection.None",
       "text": "None"
     },
     {
-      "key": "enum.MUI.Navigation.ReplaceRejection.Reentrant",
+      "key": "enum.MUI.Pages.ReplaceRejection.Reentrant",
       "text": "Reentrant"
     },
     {
-      "key": "enum.MUI.Navigation.ReplaceRejection.SourceUnavailable",
+      "key": "enum.MUI.Pages.ReplaceRejection.SourceUnavailable",
       "text": "Source Unavailable"
     },
     {
-      "key": "enum.MUI.Navigation.ReplaceRejection.Superseded",
+      "key": "enum.MUI.Pages.ReplaceRejection.Superseded",
       "text": "Superseded"
     },
     {
-      "key": "enum.MUI.Navigation.ReplaceStatus.CancelledBeforeCommit",
+      "key": "enum.MUI.Pages.ReplaceStatus.CancelledBeforeCommit",
       "text": "Cancelled Before Commit"
     },
     {
-      "key": "enum.MUI.Navigation.ReplaceStatus.Committed",
+      "key": "enum.MUI.Pages.ReplaceStatus.Committed",
       "text": "Committed"
     },
     {
-      "key": "enum.MUI.Navigation.ReplaceStatus.PreparationFailed",
+      "key": "enum.MUI.Pages.ReplaceStatus.PreparationFailed",
       "text": "Preparation Failed"
     },
     {
-      "key": "enum.MUI.Navigation.ReplaceStatus.Rejected",
+      "key": "enum.MUI.Pages.ReplaceStatus.Rejected",
       "text": "Rejected"
     },
     {
-      "key": "enum.MUI.Navigation.TickPausePolicy.Covered",
+      "key": "enum.MUI.Pages.TickPausePolicy.Covered",
       "text": "Covered"
     },
     {
-      "key": "enum.MUI.Navigation.TickPausePolicy.Hidden",
+      "key": "enum.MUI.Pages.TickPausePolicy.Hidden",
       "text": "Hidden"
     },
     {
-      "key": "enum.MUI.Navigation.TickPausePolicy.None",
+      "key": "enum.MUI.Pages.TickPausePolicy.None",
       "text": "None"
     },
     {
-      "key": "enum.MUI.Navigation.ViewCacheMode.KeepAlive",
+      "key": "enum.MUI.Pages.ViewCacheMode.KeepAlive",
       "text": "Long-term cache (evictable at capacity)"
     },
     {
-      "key": "enum.MUI.Navigation.ViewCacheMode.None",
+      "key": "enum.MUI.Pages.ViewCacheMode.None",
       "text": "None"
     },
     {
-      "key": "enum.MUI.Navigation.ViewCacheMode.Timed",
+      "key": "enum.MUI.Pages.ViewCacheMode.Timed",
       "text": "Timed"
     },
     {
-      "key": "enum.MUI.Navigation.ViewOperationFlags.CleanupTimedOut",
+      "key": "enum.MUI.Pages.PageOperationFlags.CleanupTimedOut",
       "text": "Cleanup Timed Out"
     },
     {
-      "key": "enum.MUI.Navigation.ViewOperationFlags.CloseRequested",
+      "key": "enum.MUI.Pages.PageOperationFlags.CloseRequested",
       "text": "Close Requested"
     },
     {
-      "key": "enum.MUI.Navigation.ViewOperationFlags.Closing",
+      "key": "enum.MUI.Pages.PageOperationFlags.Closing",
       "text": "Closing"
     },
     {
-      "key": "enum.MUI.Navigation.ViewOperationFlags.DependencyExit",
+      "key": "enum.MUI.Pages.PageOperationFlags.DependencyExit",
       "text": "Dependency Exit"
     },
     {
-      "key": "enum.MUI.Navigation.ViewOperationFlags.Entering",
+      "key": "enum.MUI.Pages.PageOperationFlags.Entering",
       "text": "Entering"
     },
     {
-      "key": "enum.MUI.Navigation.ViewOperationFlags.ExecutingCommand",
+      "key": "enum.MUI.Pages.PageOperationFlags.ExecutingCommand",
       "text": "Executing Command"
     },
     {
-      "key": "enum.MUI.Navigation.ViewOperationFlags.Exiting",
+      "key": "enum.MUI.Pages.PageOperationFlags.Exiting",
       "text": "Exiting"
     },
     {
-      "key": "enum.MUI.Navigation.ViewOperationFlags.None",
+      "key": "enum.MUI.Pages.PageOperationFlags.None",
       "text": "None"
     },
     {
-      "key": "enum.MUI.Navigation.ViewOperationFlags.Preparing",
+      "key": "enum.MUI.Pages.PageOperationFlags.Preparing",
       "text": "Preparing"
     },
     {
-      "key": "enum.MUI.Navigation.ViewOperationFlags.Rebinding",
+      "key": "enum.MUI.Pages.PageOperationFlags.Rebinding",
       "text": "Rebinding"
     },
     {
-      "key": "enum.MUI.Navigation.ViewOperationFlags.UpdatingArgs",
+      "key": "enum.MUI.Pages.PageOperationFlags.UpdatingArgs",
       "text": "Updating Args"
     },
     {
-      "key": "enum.MUI.Navigation.ViewReadinessStatus.ActivationFailed",
+      "key": "enum.MUI.Pages.PageReadinessStatus.ActivationFailed",
       "text": "Activation Failed"
     },
     {
-      "key": "enum.MUI.Navigation.ViewReadinessStatus.ClosedBeforeReady",
+      "key": "enum.MUI.Pages.PageReadinessStatus.ClosedBeforeReady",
       "text": "Closed Before Ready"
     },
     {
-      "key": "enum.MUI.Navigation.ViewReadinessStatus.Pending",
+      "key": "enum.MUI.Pages.PageReadinessStatus.Pending",
       "text": "Pending"
     },
     {
-      "key": "enum.MUI.Navigation.ViewReadinessStatus.Ready",
+      "key": "enum.MUI.Pages.PageReadinessStatus.Ready",
       "text": "Ready"
     },
     {
-      "key": "enum.MUI.Navigation.ViewReadinessStatus.Transitioning",
+      "key": "enum.MUI.Pages.PageReadinessStatus.Transitioning",
       "text": "Transitioning"
     },
     {
-      "key": "enum.MUI.Navigation.ViewReadinessStatus.WaitCancelled",
+      "key": "enum.MUI.Pages.PageReadinessStatus.WaitCancelled",
       "text": "Wait Cancelled"
     },
     {
-      "key": "enum.MUI.Navigation.ViewResultStatus.Completed",
+      "key": "enum.MUI.Pages.PageResultStatus.Completed",
       "text": "Completed"
     },
     {
-      "key": "enum.MUI.Navigation.ViewResultStatus.Dismissed",
+      "key": "enum.MUI.Pages.PageResultStatus.Dismissed",
       "text": "Dismissed"
     },
     {
-      "key": "enum.MUI.Navigation.ViewResultStatus.Faulted",
+      "key": "enum.MUI.Pages.PageResultStatus.Faulted",
       "text": "Faulted"
     },
     {
-      "key": "enum.MUI.Navigation.ViewResultStatus.Pending",
+      "key": "enum.MUI.Pages.PageResultStatus.Pending",
       "text": "Pending"
     },
     {
-      "key": "enum.MUI.Navigation.ViewState.Closing",
+      "key": "enum.MUI.Pages.ViewState.Closing",
       "text": "Closing"
     },
     {
-      "key": "enum.MUI.Navigation.ViewState.Destroyed",
+      "key": "enum.MUI.Pages.ViewState.Destroyed",
       "text": "Destroyed"
     },
     {
-      "key": "enum.MUI.Navigation.ViewState.Failed",
+      "key": "enum.MUI.Pages.ViewState.Failed",
       "text": "Failed"
     },
     {
-      "key": "enum.MUI.Navigation.ViewState.Open",
+      "key": "enum.MUI.Pages.ViewState.Open",
       "text": "Open"
     },
     {
-      "key": "enum.MUI.Navigation.ViewState.Opening",
+      "key": "enum.MUI.Pages.ViewState.Opening",
       "text": "Opening"
     },
     {
-      "key": "enum.MUI.Navigation.ViewState.Unknown",
+      "key": "enum.MUI.Pages.ViewState.Unknown",
       "text": "Unknown"
     },
     {
-      "key": "enum.MUI.Navigation.ViewState.UnknownOrExpired",
+      "key": "enum.MUI.Pages.ViewState.UnknownOrExpired",
       "text": "Unknown Or Expired"
     },
     {
-      "key": "enum.MUI.Navigation.ViewTransitionStatus.Completed",
+      "key": "enum.MUI.Pages.PageTransitionStatus.Completed",
       "text": "Completed"
     },
     {
-      "key": "enum.MUI.Navigation.ViewTransitionStatus.Failed",
+      "key": "enum.MUI.Pages.PageTransitionStatus.Failed",
       "text": "Failed"
     },
     {
-      "key": "enum.MUI.Navigation.ViewTransitionStatus.Interrupted",
+      "key": "enum.MUI.Pages.PageTransitionStatus.Interrupted",
       "text": "Interrupted"
     },
     {
-      "key": "enum.MUI.Navigation.ViewTransitionStatus.Pending",
+      "key": "enum.MUI.Pages.PageTransitionStatus.Pending",
       "text": "Pending"
     },
     {
@@ -3400,8 +3412,8 @@
       "text": "Reentrant"
     },
     {
-      "key": "enum.MUI.RebindRejection.RouteMismatch",
-      "text": "Route Mismatch"
+      "key": "enum.MUI.RebindRejection.PageDefinitionMismatch",
+      "text": "PageDefinition Mismatch"
     },
     {
       "key": "enum.MUI.RebindRejection.SourceUnavailable",
@@ -4432,27 +4444,27 @@
       "text": "Stop and clear"
     },
     {
-      "key": "uxml.RouteGraphWindow.0821a708a2",
+      "key": "uxml.PageGraphWindow.0821a708a2",
       "text": "Go to root"
     },
     {
-      "key": "uxml.RouteGraphWindow.292e56a328",
+      "key": "uxml.PageGraphWindow.292e56a328",
       "text": "Only static declarations are validated. Runtime argument conflicts, resource availability and sharing across roots require runtime verification. Snapshots do not refresh automatically; capture again from the project entry point."
     },
     {
-      "key": "uxml.RouteGraphWindow.3ed65533d7",
-      "text": "No routes supplied. Project editor code can call MUI.Navigation.Editor.RouteGraphWindow.Show(rootRoute). The shared dependency sample also offers a context menu to inspect the graph."
+      "key": "uxml.PageGraphWindow.3ed65533d7",
+      "text": "No routes supplied. Project editor code can call MUI.Pages.Editor.PageGraphWindow.Show(rootRoute). The shared dependency sample also offers a context menu to inspect the graph."
     },
     {
-      "key": "uxml.RouteGraphWindow.76cf5fe77a",
+      "key": "uxml.PageGraphWindow.76cf5fe77a",
       "text": "Clear snapshot"
     },
     {
-      "key": "uxml.RouteGraphWindow.9da1918cdc",
+      "key": "uxml.PageGraphWindow.9da1918cdc",
       "text": "Copy report"
     },
     {
-      "key": "uxml.RouteGraphWindow.f3f451ef88",
+      "key": "uxml.PageGraphWindow.f3f451ef88",
       "text": "Validation root"
     },
     {
@@ -4497,7 +4509,7 @@
     },
     {
       "key": "trace.hint",
-      "text": "Times are milliseconds since the first retained event, not operation durations. Route keys and exception type names are limited to 256 characters."
+      "text": "Times are milliseconds since the first retained event, not operation durations. PageDefinition keys and exception type names are limited to 256 characters."
     },
     {
       "key": "trace.version",
@@ -4505,7 +4517,7 @@
     },
     {
       "key": "trace.route",
-      "text": "Route"
+      "text": "PageDefinition"
     },
     {
       "key": "trace.reason",
@@ -4641,7 +4653,7 @@
     },
     {
       "key": "diagnostic.graph.conflictingKey",
-      "text": "Route key {0} refers to multiple different definitions.",
+      "text": "PageDefinition key {0} refers to multiple different definitions.",
       "source": "路由键 {0} 对应多个不同定义。"
     },
     {
@@ -4728,8 +4740,8 @@
       "text": "Reentrant"
     },
     {
-      "key": "trace.token.RouteMismatch",
-      "text": "Route Mismatch"
+      "key": "trace.token.PageDefinitionMismatch",
+      "text": "PageDefinition Mismatch"
     },
     {
       "key": "trace.token.SourceUnavailable",
@@ -4949,7 +4961,7 @@
     },
     {
       "key": "trace.token.导航器退出完成",
-      "text": "Navigator shutdown completed"
+      "text": "PageManager shutdown completed"
     },
     {
       "key": "trace.token.目标",
@@ -5049,7 +5061,7 @@
     },
     {
       "key": "settings.presets.help",
-      "text": "Resolution order: page defaults → preset → page overrides. Configure page overrides using the overrides argument of CreateRoute or ResolvePolicy. Pages with an explicit preset do not use the fallback selection."
+      "text": "Resolution order: page defaults → preset → page overrides. Configure page overrides using the overrides argument of CreateDefinition or ResolvePolicy. Pages with an explicit preset do not use the fallback selection."
     },
     {
       "key": "settings.presets.add",
@@ -5308,67 +5320,67 @@
       "text": "{0} · {1} · {2}"
     },
     {
-      "key": "enum.MUI.Navigation.DependencyMissingPolicy.AutoOpen",
+      "key": "enum.MUI.Pages.DependencyMissingPolicy.AutoOpen",
       "text": "Auto open"
     },
     {
-      "key": "enum.MUI.Navigation.DependencyMissingPolicy.RequireOpen",
+      "key": "enum.MUI.Pages.DependencyMissingPolicy.RequireOpen",
       "text": "Require open"
     },
     {
-      "key": "enum.MUI.Navigation.DependencyMissingPolicy.Skip",
+      "key": "enum.MUI.Pages.DependencyMissingPolicy.Skip",
       "text": "Skip if missing"
     },
     {
-      "key": "enum.MUI.Navigation.DependencyResolutionKind.Pending",
+      "key": "enum.MUI.Pages.DependencyResolutionKind.Pending",
       "text": "Pending"
     },
     {
-      "key": "enum.MUI.Navigation.DependencyResolutionKind.AutoOpened",
+      "key": "enum.MUI.Pages.DependencyResolutionKind.AutoOpened",
       "text": "Auto opened"
     },
     {
-      "key": "enum.MUI.Navigation.DependencyResolutionKind.Reused",
+      "key": "enum.MUI.Pages.DependencyResolutionKind.Reused",
       "text": "Reused"
     },
     {
-      "key": "enum.MUI.Navigation.DependencyResolutionKind.Skipped",
+      "key": "enum.MUI.Pages.DependencyResolutionKind.Skipped",
       "text": "Skipped"
     },
     {
-      "key": "enum.MUI.Navigation.DependencyResolutionKind.Degraded",
+      "key": "enum.MUI.Pages.DependencyResolutionKind.Degraded",
       "text": "Degraded"
     },
     {
-      "key": "enum.MUI.Navigation.ViewTickStatus.NotEvaluated",
+      "key": "enum.MUI.Pages.PageTickStatus.NotEvaluated",
       "text": "Not evaluated"
     },
     {
-      "key": "enum.MUI.Navigation.ViewTickStatus.Eligible",
+      "key": "enum.MUI.Pages.PageTickStatus.Eligible",
       "text": "Eligible"
     },
     {
-      "key": "enum.MUI.Navigation.ViewTickStatus.Inactive",
+      "key": "enum.MUI.Pages.PageTickStatus.Inactive",
       "text": "Inactive"
     },
     {
-      "key": "enum.MUI.Navigation.ViewTickStatus.Rebinding",
+      "key": "enum.MUI.Pages.PageTickStatus.Rebinding",
       "text": "Rebinding"
     },
     {
-      "key": "enum.MUI.Navigation.ViewTickStatus.Entering",
+      "key": "enum.MUI.Pages.PageTickStatus.Entering",
       "text": "Entering"
     },
     {
-      "key": "enum.MUI.Navigation.ViewTickStatus.Covered",
+      "key": "enum.MUI.Pages.PageTickStatus.Covered",
       "text": "Paused: covered"
     },
     {
-      "key": "enum.MUI.Navigation.ViewTickStatus.Hidden",
+      "key": "enum.MUI.Pages.PageTickStatus.Hidden",
       "text": "Paused: hidden"
     },
     {
-      "key": "enum.MUI.Navigation.ViewTickStatus.HostShutdown",
+      "key": "enum.MUI.Pages.PageTickStatus.HostShutdown",
       "text": "Host shut down"
     },
     {
@@ -5380,83 +5392,83 @@
       "text": "Hide and deactivate content"
     },
     {
-      "key": "enum.MUI.Navigation.ViewCacheDecision.Retained",
+      "key": "enum.MUI.Pages.PageCacheDecision.Retained",
       "text": "Retained"
     },
     {
-      "key": "enum.MUI.Navigation.ViewCacheDecision.Reused",
+      "key": "enum.MUI.Pages.PageCacheDecision.Reused",
       "text": "Reused"
     },
     {
-      "key": "enum.MUI.Navigation.ViewCacheDecision.Disabled",
+      "key": "enum.MUI.Pages.PageCacheDecision.Disabled",
       "text": "Caching disabled"
     },
     {
-      "key": "enum.MUI.Navigation.ViewCacheDecision.Unsupported",
+      "key": "enum.MUI.Pages.PageCacheDecision.Unsupported",
       "text": "Unsupported View or acquisition"
     },
     {
-      "key": "enum.MUI.Navigation.ViewCacheDecision.AbnormalClose",
+      "key": "enum.MUI.Pages.PageCacheDecision.AbnormalClose",
       "text": "Abnormal close"
     },
     {
-      "key": "enum.MUI.Navigation.ViewCacheDecision.CleanupIncomplete",
+      "key": "enum.MUI.Pages.PageCacheDecision.CleanupIncomplete",
       "text": "Cleanup incomplete"
     },
     {
-      "key": "enum.MUI.Navigation.ViewCacheDecision.ResetFailed",
+      "key": "enum.MUI.Pages.PageCacheDecision.ResetFailed",
       "text": "Reset or release failed"
     },
     {
-      "key": "enum.MUI.Navigation.ViewCacheDecision.CapacityDisabled",
+      "key": "enum.MUI.Pages.PageCacheDecision.CapacityDisabled",
       "text": "Zero cache capacity"
     },
     {
-      "key": "enum.MUI.Navigation.ViewCacheDecision.HostUnavailable",
+      "key": "enum.MUI.Pages.PageCacheDecision.HostUnavailable",
       "text": "Host unavailable"
     },
     {
-      "key": "enum.MUI.Navigation.ViewCacheDecision.Incompatible",
+      "key": "enum.MUI.Pages.PageCacheDecision.Incompatible",
       "text": "Incompatible generation or state"
     },
     {
-      "key": "enum.MUI.Navigation.ViewCacheDecision.EstimateRequired",
+      "key": "enum.MUI.Pages.PageCacheDecision.EstimateRequired",
       "text": "Size estimate required"
     },
     {
-      "key": "enum.MUI.Navigation.ViewCacheDecision.BudgetExceeded",
+      "key": "enum.MUI.Pages.PageCacheDecision.BudgetExceeded",
       "text": "Budget exceeded"
     },
     {
-      "key": "enum.MUI.Navigation.ViewCacheDecision.RetirementPending",
+      "key": "enum.MUI.Pages.PageCacheDecision.RetirementPending",
       "text": "Retirement pending"
     },
     {
-      "key": "enum.MUI.Navigation.ViewCacheDecision.EvictedForCapacity",
+      "key": "enum.MUI.Pages.PageCacheDecision.EvictedForCapacity",
       "text": "Capacity or budget eviction"
     },
     {
-      "key": "enum.MUI.Navigation.ViewCacheDecision.Expired",
+      "key": "enum.MUI.Pages.PageCacheDecision.Expired",
       "text": "Expired"
     },
     {
-      "key": "enum.MUI.Navigation.ViewCacheDecision.Destroyed",
+      "key": "enum.MUI.Pages.PageCacheDecision.Destroyed",
       "text": "View destroyed"
     },
     {
-      "key": "enum.MUI.Navigation.ViewCacheDecision.Cleared",
+      "key": "enum.MUI.Pages.PageCacheDecision.Cleared",
       "text": "Explicit clearing"
     },
     {
-      "key": "enum.MUI.Navigation.OpenRejection.DependencyMissing",
+      "key": "enum.MUI.Pages.OpenRejection.DependencyMissing",
       "text": "Dependency not open"
     },
     {
-      "key": "enum.MUI.Navigation.ReplaceRejection.DependencyMissing",
+      "key": "enum.MUI.Pages.ReplaceRejection.DependencyMissing",
       "text": "Dependency not open"
     },
     {
-      "key": "enum.MUI.Navigation.ViewCacheDecision.ReuseFailed",
+      "key": "enum.MUI.Pages.PageCacheDecision.ReuseFailed",
       "text": "Reuse preparation failed"
     },
     {
@@ -5544,11 +5556,11 @@
       "text": "Page order span"
     },
     {
-      "key": "enum.MUI.Navigation.OpenRejection.RenderOrderCapacity",
+      "key": "enum.MUI.Pages.OpenRejection.RenderOrderCapacity",
       "text": "Host order capacity exceeded"
     },
     {
-      "key": "enum.MUI.Navigation.ReplaceRejection.RenderOrderCapacity",
+      "key": "enum.MUI.Pages.ReplaceRejection.RenderOrderCapacity",
       "text": "Host order capacity exceeded"
     },
     {
@@ -5560,23 +5572,23 @@
       "text": "When owner leaves"
     },
     {
-      "key": "enum.MUI.Navigation.PageRole.Independent",
+      "key": "enum.MUI.Pages.PageRole.Independent",
       "text": "Independent"
     },
     {
-      "key": "enum.MUI.Navigation.PageRole.Main",
+      "key": "enum.MUI.Pages.PageRole.Main",
       "text": "Main page"
     },
     {
-      "key": "enum.MUI.Navigation.PageRole.Overlay",
+      "key": "enum.MUI.Pages.PageRole.Overlay",
       "text": "Owned overlay"
     },
     {
-      "key": "enum.MUI.Navigation.OwnerDeparture.Close",
+      "key": "enum.MUI.Pages.OwnerDeparture.Close",
       "text": "Close"
     },
     {
-      "key": "enum.MUI.Navigation.OwnerDeparture.Hide",
+      "key": "enum.MUI.Pages.OwnerDeparture.Hide",
       "text": "Hide and retain"
     },
     {
@@ -5917,7 +5929,7 @@
     },
     {
       "key": "wizard.nextStepsBody",
-      "text": "1. Edit the Prefab and configure Elements for bound controls.\n\n2. Add ViewModel state and commands, and initialize the assembly’s generated bindings.\n\n3. Initialize UIHost, call Page.CreateRoute(), then Navigator.OpenAsync. Global MUISettings apply automatically.\n\nPrefabs under Resources load directly; other directories require a project resource loader."
+      "text": "1. Edit the Prefab and configure control bindings in the View Inspector. New UGUI/TMP templates already configure automatic title and close-button bindings.\n\n2. Add ViewModel state and commands, and initialize the assembly’s generated bindings.\n\n3. Initialize UIHost, call ViewModelDefinition.CreateDefinition(), then PageManager.OpenAsync. Global MUISettings apply automatically.\n\nPrefabs under Resources load directly; other directories require a project resource loader."
     },
     {
       "key": "wizard.existingResourceNote",
@@ -6097,7 +6109,7 @@
     },
     {
       "key": "wizard.logicMode2",
-      "text": "Accept opening arguments or return a result"
+      "text": "Accept opening arguments"
     },
     {
       "key": "wizard.logicDescription0",
@@ -6105,11 +6117,11 @@
     },
     {
       "key": "wizard.logicDescription1",
-      "text": "For pages that read business data. Generates a Presenter with an opening hook where you can load data and update the ViewModel."
+      "text": "Generates a Presenter opening entry. Use Task or ValueTask when loading requires awaiting, then update the ViewModel."
     },
     {
       "key": "wizard.logicDescription2",
-      "text": "For pages with opening arguments or results. Generates Args for input, Result for completion, and Presenter to receive arguments and handle logic."
+      "text": "Generates a Presenter opening entry. Declare parameters on the method; the compiler generates Args and page calls. No business result by default; specify a result type in UIPage when needed."
     },
     {
       "key": "wizard.logicExample0",
@@ -6121,7 +6133,7 @@
     },
     {
       "key": "wizard.logicExample2",
-      "text": "Example: pass a materials-only filter → select iron ore → confirm to return its item ID. Canceling does not complete a result."
+      "text": "Example: pass an inventory tab or item ID to select content on opening. Declare long or a business result type only when a selection must be returned."
     },
     {
       "key": "wizard.logicFiles",
@@ -6129,7 +6141,7 @@
     },
     {
       "key": "wizard.logicScaffoldNote",
-      "text": "Only scaffolding is generated. Add data loading, argument fields and result logic yourself. If unsure, start with the first option and extend later."
+      "text": "Only scaffolding is generated. Add data loading, entry parameters and result logic yourself. If unsure, start with the first option and extend later."
     },
     {
       "key": "settings.directories",
@@ -6541,7 +6553,7 @@
     },
     {
       "key": "viewPanel.binding.unmatched",
-      "text": "No matching ViewModel contract for this prefab. Wait for compilation, or set PrefabAssetGuid on [ViewContract] for an existing page. Save standalone scene Views as prefabs first. Structure validation remains available."
+      "text": "No valid ViewModel association. Select the model above; save standalone scene Views as prefabs first."
     },
     {
       "key": "viewPanel.binding.multiple",

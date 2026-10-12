@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 namespace MUI
 {
     /// <summary>父子视图共用的实例资源清理。Presenter 销毁回调应在调用前完成。</summary>
-    internal static class ViewInstanceCleanup
+    internal static class PageInstanceCleanup
     {
         /// <summary>
         /// 先排空实例资源，再分别移除宿主监听，最后归还视图资源。
@@ -57,11 +57,11 @@ namespace MUI
                 {
                     if (dependenciesConfirmed == null || dependenciesConfirmed())
                     {
-                        await CleanupRegistry.ReleaseAsync(viewResource, "ViewInstance.ViewResource");
+                        await CleanupRegistry.ReleaseAsync(viewResource, "PageInstance.ViewResource");
                     }
                     else
                     {
-                        var acquisition = CleanupRegistry.GetResponsibility(viewResource, "ViewInstance.ViewResource");
+                        var acquisition = CleanupRegistry.GetResponsibility(viewResource, "PageInstance.ViewResource");
                         var deferred = new CleanupResponsibility(async () =>
                         {
                             if (!dependenciesConfirmed())
@@ -78,7 +78,7 @@ namespace MUI
                                 throw state.Failure ?? new InvalidOperationException("View acquisition cleanup is unconfirmed.");
                             }
                             await acquisition.DisposeAsync();
-                        }, "ViewInstance.DependencyRelease", true, System.Threading.Thread.CurrentThread.ManagedThreadId);
+                        }, "PageInstance.DependencyRelease", true, System.Threading.Thread.CurrentThread.ManagedThreadId);
                         await deferred.DisposeAsync();
                     }
                 }

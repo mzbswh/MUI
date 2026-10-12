@@ -18,14 +18,14 @@ The UIHost Inspector shows read-only global Settings, View Root, a short status 
 
 | File | Responsibility |
 | --- | --- |
-| `Scripts/BasicPageViewModel.cs` | Declares the title binding, `Done(42)` command, View contract and typed Route. This page does not need a Presenter. |
+| `Scripts/BasicPageViewModel.cs` | Declares the title binding, `Done(42)` command, View contract and typed PageDefinition. This page does not need a Presenter. |
 | `Resources/BasicView.prefab` | Contains the View and named title/button Elements. |
 | `Scripts/BasicExampleModule.cs` | Declares the generated registration module. |
 | `Scripts/BasicDemo.cs` | Registers bindings, resolves the configured policy, initializes UIHost's default provider and calls `OpenAsync`. |
 | `BasicMUISettings.asset` | Defines the sample's named layers, default rules and presets. |
 | `Basic.unity` | Connects the configuration asset, view root and scene reopen button. |
 
-The generator creates `BasicPageViewModelBindingFactory`, `BasicPageViewModelRoute`, the command property and `Generated.BasicBindings`; do not edit generated files or manually maintain their subscriptions. The `void` command uses the same asynchronous command contract as commands that await work. Resident Prefabs and immediate commands do not add a waiting frame.
+The generator creates `BasicPageViewModelBindingFactory`, `BasicPageViewModelDefinition`, the command property and `Generated.BasicBindings`; do not edit generated files or manually maintain their subscriptions. The `void` command uses the same asynchronous command contract as commands that await work. Resident Prefabs and immediate commands do not add a waiting frame.
 
 The title binds through `ITextElement.Content`. Legacy `TextElement` and the optional `TMPTextElement` implement this same contract, so replacing the title backend does not require changing the ViewModel or generated binding.
 

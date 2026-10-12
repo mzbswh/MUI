@@ -7,7 +7,7 @@ namespace MUI.Samples.Navigation
     /// 共用图形属性的生成绑定示例；Icon、Preview、Label 分别适配图片、纹理和旧版文字。
     /// 三个控件在绑定前分别配置适用的材质加载器与生命周期。
     /// </summary>
-    [ViewContract("GraphicResource")]
+    [UIWidget("GraphicResource")]
     public partial class GraphicResourceViewModel : ViewModel
     {
         [ObservableProperty]

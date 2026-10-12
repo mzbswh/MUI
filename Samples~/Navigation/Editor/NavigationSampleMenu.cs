@@ -105,8 +105,8 @@ namespace MUI.Samples.Navigation.Editor
             }
 
             OpenNavigationScene(lifecycleTrace);
-            SessionState.SetBool("MUI.NavigationPreview", true);
-            SessionState.SetFloat("MUI.NavigationPreviewStart", (float)EditorApplication.timeSinceStartup);
+            SessionState.SetBool("MUI.PagesPreview", true);
+            SessionState.SetFloat("MUI.PagesPreviewStart", (float)EditorApplication.timeSinceStartup);
             // 在进入运行模式前订阅，兼容关闭域重载的编辑器配置。
             ResumePreview();
             EditorApplication.isPlaying = true;
@@ -115,12 +115,12 @@ namespace MUI.Samples.Navigation.Editor
         [InitializeOnLoadMethod]
         private static void ResumePreview()
         {
-            if (!SessionState.GetBool("MUI.NavigationPreview", false))
+            if (!SessionState.GetBool("MUI.PagesPreview", false))
             {
                 return;
             }
 
-            deadline = SessionState.GetFloat("MUI.NavigationPreviewStart", 0) + 45;
+            deadline = SessionState.GetFloat("MUI.PagesPreviewStart", 0) + 45;
             stopAt = 0;
             failed = false;
             completed = false;
@@ -154,7 +154,7 @@ namespace MUI.Samples.Navigation.Editor
                 return;
             }
 
-            SessionState.SetBool("MUI.NavigationPreview", false);
+            SessionState.SetBool("MUI.PagesPreview", false);
             EditorApplication.update -= UpdatePreview;
             Application.logMessageReceived -= OnLog;
             var timedOut = !completed;

@@ -98,37 +98,20 @@ namespace MUI.Editor
         private bool MatchesCurrentPrefab(BindingManifest manifest)
         {
             var view = (View)target;
-            // 只关联 Prefab 根 View，不能把页面契约误认给内部嵌套 View。
-            var source = EditorUtility.IsPersistent(view) ? view : PrefabUtility.GetCorrespondingObjectFromSource(view);
-            string path;
-            if (source != null)
+            if (view == null || string.IsNullOrEmpty(view.AutoBindingsMetadata)) return false;
+            try
             {
-                if (source.transform.parent != null) return false;
-                path = AssetDatabase.GetAssetPath(source);
+                var metadata = System.Xml.Linq.XElement.Parse(System.Text.Encoding.UTF8.GetString(Convert.FromBase64String(view.AutoBindingsMetadata)));
+                return (string)metadata.Attribute("model") == manifest.ViewModelType.FullName &&
+                    (string)metadata.Attribute("assembly") == manifest.ViewModelType.Assembly.GetName().Name;
             }
-            else
-            {
-                var stage = UnityEditor.SceneManagement.PrefabStageUtility.GetPrefabStage(view.gameObject);
-                if (stage == null || stage.prefabContentsRoot != view.gameObject) return false;
-                path = stage.assetPath;
-            }
-            if (string.IsNullOrEmpty(path)) return false;
-            var model = manifest.ViewModelType;
-            var contract = model.GetCustomAttribute<ViewContractAttribute>();
-            var guid = contract == null ? null : contract.PrefabAssetGuid;
-            if (!string.IsNullOrEmpty(guid))
-                return string.Equals(guid, AssetDatabase.AssetPathToGUID(path), StringComparison.OrdinalIgnoreCase);
-            const string marker = "/Resources/";
-            var start = path.LastIndexOf(marker, StringComparison.Ordinal);
-            if (start < 0 || contract == null) return false;
-            var key = path.Substring(start + marker.Length);
-            key = key.Substring(0, key.Length - System.IO.Path.GetExtension(key).Length);
-            return string.Equals(contract.ResourceKey, key, StringComparison.Ordinal);
+            catch (Exception) { return false; }
         }
 
         private void DrawBindings()
         {
             if (this == null || !inspectorReady || target == null || manifests == null) return;
+            DrawModelAssociation();
             if (selected >= manifests.Count) selected = -1;
             if (displayedLanguage != L.LanguageId)
             {

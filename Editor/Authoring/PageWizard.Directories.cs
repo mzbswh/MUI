@@ -25,11 +25,33 @@ namespace MUI.Editor
             }
         }
 
+        private bool UsesAutomaticPageBindings => existingPrefab == null &&
+            typeof(NativeControl).IsAssignableFrom(PageTextBackend.Find(textBackendId).ElementType);
+
         private IReadOnlyDictionary<string, string> CreatePageSources() => PageSourceTemplate.Create(
             pageName, targetNamespace, presetName, ReceivesInput, createPresenter, typedContracts,
             PageTextBackend.Find(textBackendId).ElementType,
             existingPrefab == null ? "Title" : titleElementName,
-            existingPrefab == null ? "Close" : closeElementName, AssetDatabase.AssetPathToGUID(PrefabPath), PageResourceKey);
+            existingPrefab == null ? "Close" : closeElementName, PageResourceKey, UsesAutomaticPageBindings, settings == null ? "Default" : settings.DefaultPreset);
+
+        private void SaveExistingPageAssociation(string path, string assemblyName)
+        {
+            var root = PrefabUtility.LoadPrefabContents(path);
+            try
+            {
+                var view = root.GetComponent<View>();
+                if (view == null) throw new InvalidOperationException("Prefab 根节点没有 View。");
+                var metadata = string.IsNullOrEmpty(view.AutoBindingsMetadata) ? new System.Xml.Linq.XElement("bindings") :
+                    System.Xml.Linq.XElement.Parse(System.Text.Encoding.UTF8.GetString(Convert.FromBase64String(view.AutoBindingsMetadata)));
+                metadata.SetAttributeValue("assembly", assemblyName);
+                metadata.SetAttributeValue("model", targetNamespace + "." + pageName + "ViewModel");
+                var serialized = new SerializedObject(view);
+                serialized.FindProperty("muiAutoBindings").stringValue = Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(metadata.ToString(System.Xml.Linq.SaveOptions.DisableFormatting)));
+                serialized.ApplyModifiedPropertiesWithoutUndo();
+                if (PrefabUtility.SaveAsPrefabAsset(root, path) == null) throw new IOException("保存 Prefab 关联失败：" + path);
+            }
+            finally { PrefabUtility.UnloadPrefabContents(root); }
+        }
 
         private static bool PathOccupied(string path) => File.Exists(path) || Directory.Exists(path) ||
             File.Exists(path + ".meta") || AssetDatabase.LoadMainAssetAtPath(path) != null;

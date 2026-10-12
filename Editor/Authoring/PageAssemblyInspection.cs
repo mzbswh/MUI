@@ -143,7 +143,7 @@ namespace MUI.Editor
             }
             var required = new HashSet<string>(StringComparer.Ordinal)
             {
-                "MUI.Core", "MUI.Resources", "MUI.Navigation", "MUI.UGUI", titleElementType.Assembly.GetName().Name
+                "MUI.Core", "MUI.Resources", "MUI.Pages", "MUI.UGUI", titleElementType.Assembly.GetName().Name
             };
             var errors = new List<string>();
             foreach (var name in required)

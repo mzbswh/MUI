@@ -112,6 +112,14 @@ namespace MUI.Editor
             runtime.Add(automaticUpdate);
             root.Add(runtime);
 
+            var development = Section("settings.development", "development", false);
+            var generatedSources = new PropertyField(serializedObject.FindProperty("outputCompilerGeneratedSources"), L.Get("property.outputCompilerGeneratedSources"));
+            L.Track(generatedSources, () => generatedSources.label = L.Get("property.outputCompilerGeneratedSources"));
+            Tooltip(generatedSources, "settings.outputCompilerGeneratedSources.help");
+            development.Add(generatedSources);
+            development.Add(MUIEditorControls.Text("settings.outputCompilerGeneratedSources.help", "mui-note"));
+            root.Add(development);
+
             var capacities = Section("settings.capacities", "capacities", false);
             capacities.Add(new IMGUIContainer(() => DrawSettingsFields(
                 "cacheCapacity", "queueCapacity", "preloadCapacity", "cleanupCapacity", "terminalCapacity")));
@@ -158,6 +166,7 @@ namespace MUI.Editor
             {
                 return;
             }
+            CompilerGeneratedSources.RequestApplySettings();
             RefreshStatus();
             if (rebuildScheduled || (layerCount == serializedObject.FindProperty("layers").arraySize &&
                 presetCount == serializedObject.FindProperty("presets").arraySize))

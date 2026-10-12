@@ -5,7 +5,7 @@
     "MUI.Core",
     "MUI.Resources",
     "MUI.Samples.ResourceIntegration",
-    "MUI.Navigation",
+    "MUI.Pages",
     "MUI.ChildViews",
     "MUI.Themes",
     "MUI.UGUI",

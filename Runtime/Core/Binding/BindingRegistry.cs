@@ -101,7 +101,7 @@ namespace MUI
         }
 
         /// <summary>
-        /// 按声明的模型类型创建强类型绑定，用于顶层 Route。
+        /// 按声明的模型类型创建强类型绑定，用于顶层 PageDefinition。
         /// 不回退基类或选择派生类，避免泛型 BindingContext 的无效转换。
         /// </summary>
         public static BindingContext<TViewModel> CreateExact<TViewModel>(IView view, TViewModel model)

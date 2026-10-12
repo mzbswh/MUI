@@ -34,6 +34,7 @@ namespace MUI.Generators
                 return;
             }
 
+            context = AddOpenEntries(context, ref candidates);
             context = AddPrefabBindings(context, ref candidates);
             var seen = new HashSet<INamedTypeSymbol>(SymbolEqualityComparer.Default);
             var generated = new List<string>();
@@ -62,7 +63,7 @@ namespace MUI.Generators
                     {
                         generated.Add(result);
                     }
-                    GenerateRoute(context, type, candidates);
+                    GeneratePageDefinition(context, type, candidates);
                 }
                 catch (ContractException error)
                 {
@@ -89,8 +90,8 @@ namespace MUI.Generators
 
         private static bool Relevant(INamedTypeSymbol type)
         {
-            return Attribute(type, "MUI.ViewContractAttribute") != null ||
-                Attribute(type, "MUI.Navigation.ViewRouteAttribute") != null || type.GetMembers().Any(member =>
+            return Attribute(type, "MUI.UIWidgetAttribute") != null ||
+                Attribute(type, "MUI.UIPageAttribute") != null || type.GetMembers().Any(member =>
                 Attribute(member, "MUI.ObservablePropertyAttribute") != null ||
                 Attribute(member, "MUI.OnChangedAttribute") != null ||
                 Attribute(member, "MUI.NotifyPropertyChangedForAttribute") != null ||
@@ -122,12 +123,20 @@ namespace MUI.Generators
                 }
             }
 
-            var contract = Attribute(type, "MUI.ViewContractAttribute");
-            var resourceKey = contract == null ? null : contract.ConstructorArguments[0].Value as string;
-            if (contract != null && string.IsNullOrWhiteSpace(resourceKey))
+            var page = Attribute(type, "MUI.UIPageAttribute");
+            var widget = Attribute(type, "MUI.UIWidgetAttribute");
+            if (page != null && widget != null) Fail(type, "UIPage 和 UIWidget 不能同时声明。");
+            var contract = page ?? widget;
+            var resourceKey = contract == null ? null : DefaultViewResourceKey(type.Name);
+            if (page != null)
             {
-                Fail(type, "ViewContract 必须指定非空资源键。");
+                foreach (var option in page.NamedArguments)
+                    if (option.Key == "ResourceKey") resourceKey = option.Value.Value as string;
             }
+            else if (widget != null && widget.ConstructorArguments.Length != 0)
+                resourceKey = widget.ConstructorArguments[0].Value as string;
+            if (contract != null && string.IsNullOrWhiteSpace(resourceKey))
+                Fail(type, "UIPage / UIWidget 的资源键不能为空。");
 
             var changeHandlers = CollectChangeHandlers(type);
             ValidateDependentNotifications(type);
@@ -408,7 +417,7 @@ namespace MUI.Generators
                 .Append("        protected override void BuildBindings(global::MUI.BindingBuilder<").Append(TypeName(type)).Append("> builder)\n        {\n").Append(bindings).Append("        }\n    }\n\n")
                 .Append("    [global::MUI.BindingFactory(typeof(").Append(TypeName(type.Arity == 0 ? type : type.ConstructUnboundGenericType())).Append("))]\n")
                 .Append("    ").Append(accessibility).Append(" static class ").Append(factoryName).Append(typeParameters).Append(constraints).Append("\n    {\n")
-                .Append("        /// <summary>来自当前模型 ViewContract 的资源键；未声明契约时为 null。</summary>\n")
+                .Append("        /// <summary>来自当前模型 UIPage / UIWidget 的资源键；未声明契约时为 null。</summary>\n")
                 .Append("        public const string ResourceKey = ").Append(resourceKey == null ? "null" : Literal(resourceKey)).Append(";\n\n")
                 .Append("        public static global::MUI.BindingManifest Manifest\n        {\n            get;\n        } = new global::MUI.BindingManifest(typeof(").Append(TypeName(type)).Append("),\n")
                 .Append("            new global::MUI.BindingEntry[]\n            {\n").Append(manifest).Append("            });\n")
@@ -421,6 +430,12 @@ namespace MUI.Generators
         }
 
         private static string TypeName(ITypeSymbol symbol) => symbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+
+        private static string DefaultViewResourceKey(string name)
+        {
+            if (name.EndsWith("ViewModel", StringComparison.Ordinal)) name = name.Substring(0, name.Length - "ViewModel".Length);
+            return name.EndsWith("View", StringComparison.Ordinal) ? name : name + "View";
+        }
 
         private static string Literal(string value) => SymbolDisplay.FormatLiteral(value, true);
 

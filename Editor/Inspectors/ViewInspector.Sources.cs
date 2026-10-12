@@ -34,6 +34,7 @@ namespace MUI.Editor
         {
             if (this == null || target == null) return;
             serializedObject.Update();
+            InitializeInspectorState();
             ClearBindingTargets();
             results = null;
             nativeBindingMessage = "已撤销 / 重做绑定配置；需要时重新生成绑定。";
@@ -175,8 +176,14 @@ namespace MUI.Editor
                     path = CompilerGeneratedSources.Find(path);
                     if (path == null)
                     {
-                        CompilerGeneratedSources.Enable();
-                        sourceOpenError = "已启用编译器源码输出并请求重新编译。请等待编译完成后再次点击源码；若仍未生成，请检查 Console 编译错误。";
+                        if (!CompilerGeneratedSources.OutputEnabled)
+                        {
+                            MUIProjectSettings.OpenOrCreate();
+                            sourceOpenError = "请在 MUI 全局设置的开发工具中开启“输出生成源码供 IDE 使用”。";
+                            return;
+                        }
+                        CompilerGeneratedSources.Regenerate();
+                        sourceOpenError = "已请求重新生成源码。请等待编译完成后再次点击源码；若仍未生成，请检查 Console 编译错误。";
                         return;
                     }
                     UnityEditorInternal.InternalEditorUtility.OpenFileAtLineExternal(path, Math.Max(1, entry.SourceLine));

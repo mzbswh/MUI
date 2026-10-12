@@ -3,8 +3,7 @@ using MUI.UGUI;
 namespace MUI.Samples.Navigation
 {
     /// <summary>导航示例共享契约：标题与确认按钮，供本地和延迟提供方共用。</summary>
-    [ViewContract("NavigationPage")]
-    [MUI.Navigation.ViewRoute(typeof(string), typeof(int), Key = "demo.navigation-page")]
+    [UIPage(typeof(string), typeof(int), Key = "demo.navigation-page", ResourceKey = "NavigationPage")]
     public partial class NavigationPageViewModel : ViewModel
     {
         [ObservableProperty]

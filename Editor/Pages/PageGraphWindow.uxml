@@ -1,0 +1,21 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements">
+    <ui:Style src="PageGraphWindow.uss" />
+    <ui:VisualElement class="route-graph-root">
+        <ui:VisualElement class="route-graph-toolbar">
+            <ui:DropdownField name="roots" label="@uxml.PageGraphWindow.f3f451ef88" class="route-graph-roots" />
+            <ui:Button name="rootButton" text="@uxml.PageGraphWindow.0821a708a2" />
+            <ui:Button name="copyButton" text="@uxml.PageGraphWindow.9da1918cdc" />
+            <ui:Button name="clearButton" text="@uxml.PageGraphWindow.76cf5fe77a" />
+        </ui:VisualElement>
+        <ui:Label name="summary" class="route-graph-summary" />
+        <ui:HelpBox text="@uxml.PageGraphWindow.292e56a328" message-type="Info" />
+        <ui:Label name="empty" text="@uxml.PageGraphWindow.3ed65533d7" class="route-graph-empty" />
+        <ui:TwoPaneSplitView name="split" fixed-pane-index="0" fixed-pane-initial-dimension="280" orientation="Horizontal" class="route-graph-split">
+            <ui:VisualElement class="route-graph-sidebar">
+                <uie:ToolbarSearchField name="search" />
+                <ui:ListView name="nodes" selection-type="Single" fixed-item-height="44" class="route-graph-list" />
+            </ui:VisualElement>
+            <ui:ScrollView name="details" class="route-graph-details" />
+        </ui:TwoPaneSplitView>
+    </ui:VisualElement>
+</ui:UXML>

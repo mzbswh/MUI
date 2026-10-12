@@ -9,9 +9,9 @@
 | 设计验收场景 | 当前证据 | 验收结论 |
 | --- | --- | --- |
 | UPM 包与示例 | Unity Hub 官方 3D Built-In 模板新建 2022.3.62f3 工程，本地包安装及内置 Shader 检查通过；用户完成 Add package from disk，随后核对窗口、manifest 与 lock 的本地引用；八项 Sample 已经 Package Manager 窗口逐项导入，最新 254/254 文件与仓库一致，按依赖先导入 Resource Integration；Basic、Settings、Tabs、Navigation、RecyclingList、CommonPatterns 和 Dialogs/DragDrop 接入场景画面正常；Analyzer 与当前 Release 构建同步，八项 Sample 的 24 份生成源码前后一致，最终 11 个示例/可选程序集 Unity 编译加载有既有记录 | 已完成；最终示例操作与清理见最后批次记录，254/254 文件一致 |
-| 基础页面 | 无 Presenter 的生成绑定、Done(42)、返回与重开有 Player 键盘记录；最终新工程实际 Return 提交得到 42，Return 重开后 Escape 返回，再次 Return 重开，画面正常；Basic README 已逐项列出手写模型、Prefab、Route/注册、宿主配置和生成产物，页面不要求 Presenter | 已完成；用户实际 Done(42)/Reopen，原生 Return/Escape 有日志 |
+| 基础页面 | 无 Presenter 的生成绑定、Done(42)、返回与重开有 Player 键盘记录；最终新工程实际 Return 提交得到 42，Return 重开后 Escape 返回，再次 Return 重开，画面正常；Basic README 已逐项列出手写模型、Prefab、PageDefinition/注册、宿主配置和生成产物，页面不要求 Presenter | 已完成；用户实际 Done(42)/Reopen，原生 Return/Escape 有日志 |
 | 数据与控件 | 最终新工程的合并 Play/IL2CPP 批次验证公共 Legacy/TMP 控件及转换、资源槽和自定义 Element；最终嵌套路径与线程批次每后端 46 项通过；最新合并批次证明 InputGate 关门仍允许有效命令提交，换绑/关闭后的旧结果被拒绝，路径退订故障保留回调及旧拥有者且解绑失败 | 已完成；Settings 原生滑块/按钮及文本提交回调通过，换绑与线程证据已对应 |
-| 导航与模态 | 双后端记录覆盖关闭意图、许可失效、同 Navigator 确认框、队列满时关闭及 Shutdown、历史显示顺序；最终剩余条件批次通过单实例额度并发及迟到取消、同 Route Replace、Done/Back 两种结果竞争、提交后转场故障、隐藏/恢复绑定与 Tick，及真实 timeScale=0 的 UIHost 自动转场驱动；最终新工程官方输入模块通过共享/独立 EventSystem、焦点、同帧返回、模态进入/退出与关闭 Pointer、叠加屏障及排序冲突的 29 项检查 | 已完成；批量关闭、模态失败及退出期间四类输入补验通过 |
+| 导航与模态 | 双后端记录覆盖关闭意图、许可失效、同 PageManager 确认框、队列满时关闭及 Shutdown、历史显示顺序；最终剩余条件批次通过单实例额度并发及迟到取消、同 PageDefinition Replace、Done/Back 两种结果竞争、提交后转场故障、隐藏/恢复绑定与 Tick，及真实 timeScale=0 的 UIHost 自动转场驱动；最终新工程官方输入模块通过共享/独立 EventSystem、焦点、同帧返回、模态进入/退出与关闭 Pointer、叠加屏障及排序冲突的 29 项检查 | 已完成；批量关闭、模态失败及退出期间四类输入补验通过 |
 | 子视图与列表 | 静态嵌套、普通/虚拟列表换绑和固定槽位已有受控矩阵；原生组合面板的停用/恢复、活动与停用兄弟的父关闭、迟到准备及叶责任恢复在同一双后端批次通过 4/100；最终测量示例通过项目侧语言/主题服务同步刷新文本、字号、尺寸和输入资格，Editor 实际运行各阶段 Ready | 已完成；Tabs 选择/重试、奖励增删及字体恢复、最终复杂容器清理通过 |
 | 核心虚拟列表 | 焦点 11/22、合并容器 47/637、布局 14/102 均有 Play/IL2CPP 记录；环境批次验证实际坐标；当前 Runtime 的固定/测量双模板 100/1,000/10,000 项 IL2CPP 基线已刷新，共 3,600 帧、展示实例最多 11、单帧测量最多 4 | 已完成；官方输入模块横纵持续按住拖动的尺寸补偿通过；目标设备性能仅交付基线 |
 | 资源与退出 | 缓存 100 次复用、预加载 25/101、宿主 16/67、加载器 17/70 有双后端记录；环境 9/82 取得真实资源与场景证据；原生复杂组合退出及迟到/可重试故障恢复在 4/100 批次通过；高频 View Provider 已记录独立 .NET 与最终 Unity Editor Mono 获取/归还分配 | 已完成；最终奖励资源 15/15/0、DragDrop Shutdown、临时批次账本归零；外部后端遵守公开契约 |
@@ -52,18 +52,18 @@
 
 | 序号 / 原条件 | 结果与证据 |
 | --- | --- |
-| 1 导航 | 通过。慢准备、同 Navigator 确认、满队列 Busy/关闭/Shutdown、Done/Back 竞争、提交后转场失败：`mui-contract-closing-final-il2cpp-player-20261009.log`、`mui-navigation-remainder-final-il2cpp-player-2-20261009.log`。 |
+| 1 导航 | 通过。慢准备、同 PageManager 确认、满队列 Busy/关闭/Shutdown、Done/Back 竞争、提交后转场失败：`mui-contract-closing-final-il2cpp-player-20261009.log`、`mui-navigation-remainder-final-il2cpp-player-2-20261009.log`。 |
 | 2 命令与输入 | 通过。门控后已接纳结果有效，换绑/关闭旧结果失效；共享 EventSystem 唯一仲裁：上述 closing 日志及 `mui-shared-input-final-play-20261009.log`（29 项、reports=1 为排序冲突；19 条 Unity 多 EventSystem 警告另记）。 |
 | 3 清理 | 通过。百次复用、缓存单列/清空、失败责任、显式安全重试、取消 Shutdown 观察：`mui-cache-budget-final-il2cpp-player-20261009.log`、`mui-environment-final-il2cpp-player-20261009.log`、`mui-final-gaps-core-20261009.log`。 |
 | 4 列表 | 通过。100/1,000/10,000 项横纵/Grid、容量/并发、多模板、远定位/对齐、增量锚点、历史阅读：`mui-list-layout-batch-final-il2cpp-player-20261009.log`、`mui-list-closing-batch-final-il2cpp-player-20261009.log`。 |
 | 5 列表性能 | 通过设计规定的基线交付。固定/动态双模板六组共 3,600 帧，CPU P95/P99、GC 和测量次数区分记录：`docs/VIRTUAL-LIST-BASELINE.md`、`mui-composite-baseline-final-il2cpp-player-20261009.log`。目标预算未指定。 |
-| 6 接入成本 | 通过。Basic README 列出 ViewModel、Prefab、Route、宿主与生成产物，不要求 Presenter；最终用户 Done(42)/重开、原生键盘日志 `mui-basic-final-keyboard-20261009.log`。 |
+| 6 接入成本 | 通过。Basic README 列出 ViewModel、Prefab、PageDefinition、宿主与生成产物，不要求 Presenter；最终用户 Done(42)/重开、原生键盘日志 `mui-basic-final-keyboard-20261009.log`。 |
 | 7 绑定 | 通过。双后端初始化/编辑/转换、嵌套/null、换绑准备/故障提交、自定义 Element 与线程入口：`mui-final-contract-batch-il2cpp-player-20261009.log`、`mui-final-path-thread-il2cpp-player-20261009.log`、`mui-args-final-operation-il2cpp-player-20261009.log`。 |
 | 8 缓存与退出 | 通过。新身份/结果、订阅基线、在途不复用、清空归还、Shutdown 与共享服务：cache-budget、preload-consumer、environment 的最终 IL2CPP 日志。 |
 | 9 焦点与手势 | 通过。原控件/逻辑控件、失效回退、不抢新焦点、模态限制；拖拽 gate/cover/close 各一次取消且无业务 Drop：`mui-list-closing-batch-final-il2cpp-player-20261009.log`、`mui-shared-input-final-play-20261009.log`、`mui-final-gaps-native-play-20261009.log`。 |
 | 10 列表异常 | 通过。占位/显式重试、尺寸/布局诊断、修正上限、图片后续尺寸不重启定位、焦点失败取消：list-closing、list-layout 最终 IL2CPP 日志及 `mui-image-resize-play-20261009.log`（26 项）。 |
 | 11 结果与扩展 | 通过。拒绝/Busy 无异常、多等待者只报一次、抛错观察者隔离：`mui-final-gaps-core-20261009.log`。语言/主题资源、通知/加载、动态尺寸/门控：`mui-measured-services-play-20261009.log`、`mui-final-samples-first-play-20261009.log`。 |
-| 12 并发与守卫 | 通过。实例额度/迟到取消、同 Route Replace、关闭意图/许可代际、直接自等待：navigation-remainder、contract-closing、environment 最终 IL2CPP 日志（ProviderDirectSelfAwait）。 |
+| 12 并发与守卫 | 通过。实例额度/迟到取消、同 PageDefinition Replace、关闭意图/许可代际、直接自等待：navigation-remainder、contract-closing、environment 最终 IL2CPP 日志（ProviderDirectSelfAwait）。 |
 | 13 历史与生命周期 | 通过。覆盖保持句柄/绑定且暂停 Tick、恢复不重开、B 置顶后 C 前台；子停用/恢复/父关闭：`mui-navigation-remainder-final-il2cpp-player-2-20261009.log`、`mui-composite-baseline-final-il2cpp-player-20261009.log`。 |
 | 14 模态退出 | 通过。退出提交后新点击/滚轮/提交/Back 阻断，结束恢复；零时长、ForceClose、叠加与迟释放 Pointer：`mui-final-gaps-exit-inputs-play-20261009.log`、`mui-final-inputsystem-play-20261009.log`、`mui-shared-input-final-play-20261009.log`。原生退出采样失败移除画面/屏障并恢复下层命中：`mui-final-gaps-native-play-20261009.log`。 |
 | 15 加载器寿命 | 通过。父停止后凭证安全归还、不能延寿不缓存、当前注入、迟到/淘汰/Shutdown 不用失效后端：`mui-loader-lifetime-final-il2cpp-player-20261009.log`（17/70）。 |
@@ -152,7 +152,7 @@
 | --- | --- | --- |
 | 冲突关闭意图与重复确认 | Replace 期间 Close 为 Busy；Done 期间 Close/Back 为 Busy；各自 guardCalls=1；普通关闭期间 Done/Replace 为 Busy | `/private/tmp/mui-contract-closing-final-play-2-20261009.log` 与 `/private/tmp/mui-contract-closing-final-il2cpp-player-20261009.log` 的 replace-close、done-dismiss、duplicate-dismiss |
 | 许可代际与取消观察者 | 参数/换绑 Applied 后旧 Close/Replace 为 Superseded，旧页面保持 Open；取消一个观察者得到 WaitCancelled，共享关闭仍等待且最终 Closed | 同上日志的 dismiss-args、replace-args、dismiss-rebind、replace-rebind、duplicate-dismiss |
-| 队列满、迟到归还与同 Navigator 确认 | 满队列重复打开 Busy，其他页 Closed、Shutdown 推进，候选 CancelledBeforeCommit，取得/归还 2/2；确认页 Succeeded、原页 Closed | 同上日志的 capacity、confirmation |
+| 队列满、迟到归还与同 PageManager 确认 | 满队列重复打开 Busy，其他页 Closed、Shutdown 推进，候选 CancelledBeforeCommit，取得/归还 2/2；确认页 Succeeded、原页 Closed | 同上日志的 capacity、confirmation |
 | 命令准入与结果附着 | InputGate 关闭时已接纳命令 starts=1/writes=1；换绑后 oldWrites=0/newWrites=0；关闭后 oldWrites=0；最终 running=False 且凭证归还 | 同上日志的 command-gate、command-rebind、command-close |
 | 未知退订失败不误报完成 | unbindFailed=True、oldSubscribers=1、oldRemoveCalls=1、retainedFailures=1；未知回调未重放 | 同上日志的 path-detach；观察源码 `/private/tmp/mui-navigation-closing-20261009/MuiClosingTrace.cs` |
 | 历史与显示顺序分别维护 | A/B/C 历史保持 1,2,3，B 前台后关闭，剩余历史 1,3、焦点归 C，A 仍 Open | 同上日志的 history；更细的覆盖/Tick 与额度条件在 `/private/tmp/mui-navigation-remainder-final-il2cpp-player-2-20261009.log`，10 组/87 项、failures=0 |
@@ -199,19 +199,19 @@
 
 ### 2026-10-09 剩余导航条件合并收尾
 
-- 使用临时公开 API 观察核对本轮开始列出的导航缺口，复现普通实例满额返回 InstanceLimit 而设计要求 Busy 的差距。Navigator 接纳只将 InstanceLimit 用作显式 CloseOldest 的内部信号；默认满额、准备中无可替换旧页及溢出替换的额度拒绝向普通 Open 调用方统一返回 Busy。不新增 Provider 获取，不改变显式溢出替换的守卫流程。修改 Navigator.cs、Navigator.Open.cs、Navigator.Overflow.cs，保留现有枚举值及 Navigator 名称。
-- 最终协议观察通过 10 组、87 项检查、failures=0/reports=1，唯一报告为主动注入的退出采样异常。队列容量 8 下，Reject/ReturnReady 两种单实例策略只接纳一份准备，其他页面可打开；取消后迟到凭证归还，实例额度恢复，已有就绪实例按声明复用或 Busy。相同 Route 的 Replace 借用旧页名额、并发替换 Busy、取消后重试及关闭后重开均成功，候选各有独立 Presenter；Done/Back 两种先后顺序各发布一次不可变结果；提交后的退出故障结束视觉保留且不能复活旧句柄。隐藏页继续模型通知和绑定，默认暂停 Tick；返回恢复不重复 OnOpen，InputGate 关闭时可见 Tick 继续。CloseOldest 保留正常守卫，只有准备中实例时不启动第二份获取。
-- 同一 Unity 批次另验证实际 Time.timeScale=0、Time.deltaTime=0 时，UIHost 的自动帧驱动完成非零时长进入/退出，不手动调用 Navigator.Tick；Editor 经过 1519 帧、Player 经过 1577 帧，取得/归还各 1，进入/退出均 Completed。协议 View 并非原生控件，此证据只证明导航、绑定和引擎帧时钟契约，不代替多宿主或 Pointer 的实体交互。
+- 使用临时公开 API 观察核对本轮开始列出的导航缺口，复现普通实例满额返回 InstanceLimit 而设计要求 Busy 的差距。PageManager 接纳只将 InstanceLimit 用作显式 CloseOldest 的内部信号；默认满额、准备中无可替换旧页及溢出替换的额度拒绝向普通 Open 调用方统一返回 Busy。不新增 Provider 获取，不改变显式溢出替换的守卫流程。修改 PageManager.cs、PageManager.Open.cs、PageManager.Overflow.cs，保留现有枚举值及 PageManager 名称。
+- 最终协议观察通过 10 组、87 项检查、failures=0/reports=1，唯一报告为主动注入的退出采样异常。队列容量 8 下，Reject/ReturnReady 两种单实例策略只接纳一份准备，其他页面可打开；取消后迟到凭证归还，实例额度恢复，已有就绪实例按声明复用或 Busy。相同 PageDefinition 的 Replace 借用旧页名额、并发替换 Busy、取消后重试及关闭后重开均成功，候选各有独立 Presenter；Done/Back 两种先后顺序各发布一次不可变结果；提交后的退出故障结束视觉保留且不能复活旧句柄。隐藏页继续模型通知和绑定，默认暂停 Tick；返回恢复不重复 OnOpen，InputGate 关闭时可见 Tick 继续。CloseOldest 保留正常守卫，只有准备中实例时不启动第二份获取。
+- 同一 Unity 批次另验证实际 Time.timeScale=0、Time.deltaTime=0 时，UIHost 的自动帧驱动完成非零时长进入/退出，不手动调用 PageManager.Tick；Editor 经过 1519 帧、Player 经过 1577 帧，取得/归还各 1，进入/退出均 Completed。协议 View 并非原生控件，此证据只证明导航、绑定和引擎帧时钟契约，不代替多宿主或 Pointer 的实体交互。
 - 最终 Editor 日志 `/private/tmp/mui-navigation-remainder-final-play-2-20261009.log`；macOS IL2CPP Development/High stripping 构建 Succeeded/errors=0/warnings=0，日志 `/private/tmp/mui-navigation-remainder-final-il2cpp-build-2-20261009.log`；Player 同批通过，日志 `/private/tmp/mui-navigation-remainder-final-il2cpp-player-2-20261009.log`，产物 `/private/tmp/mui-navigation-remainder-il2cpp-20261009.app`。三个进程均退出 0。223 个相关源码 SHA-256 记录在 `/private/tmp/mui-navigation-remainder-source-20261009.json`，运行后复核无变化。Player 退出日志含 allocator 统计与 MemoryLeaks 遥测，未据此作完整内存验收结论。
 - 最终 614 个 C# 源码的成员布局、控制流与空白检查通过，日志 `/private/tmp/mui-navigation-remainder-final-style-2-20261009.log`；git diff --check 通过。本批关闭顶部导航行原列出的剩余协议条件；实体示例/Editor 操作、复杂组合容器退出和最终性能/交付核对仍保留。没有新增仓库测试或自动提交；已通过条件不继续扩展任意故障矩阵。
 
 ### 2026-10-09 关闭意图、许可代际与通知清理合并批次
 
-- 临时公开 API 观察复现三项真实缺口：Replace 守卫等待期间普通 Close 再次调用同页守卫（calls=2）；Done 决议中的 Close/Back 合并观察不同意图；路径替换退订抛错后旧拥有者被清空，最终解绑成功而旧订阅仍存在（retainedFailures=0）。源码修复共用 ViewInstance 上的关闭意图记录，冲突返回 Busy；CloseApproval 同时比较业务守卫版本与页面提交版本，确认期间的参数更新/换绑可成功提交并使旧许可 Superseded。路径保留失败拥有者和原异常，失效监听不再派发；BindingSession 将失败订阅/最终回调接入同一 CleanupRegistry，保留实际回调与所属身份，不隐式执行未知 remove/finalizer。
-- 最终合并观察包含 15 组协议路径的实际输出，正常路径凭证取得/归还相等、宿主未确认责任归零：Replace/Close 与 Done/Close/Back 的冲突立即 Busy、反向普通关闭中的 Done/Replace Busy；参数和绑定提交使 Close/Replace 许可失效且旧页面仍 Open；普通关闭共享一次守卫、取消一个观察者不取消其他等待；ForceClose 后迟到守卫不能重新提交；队列上限 1 时其他页关闭和 Shutdown 可推进，迟到候选归还；已就绪单实例复用不增加获取；A/B/C 的历史不因 B 置顶而改写，关闭 B 后 C 获得焦点；同 Navigator 打开确认框正常完成；关门期间有效保存结果仍提交，换绑/关闭后的旧结果没有写入。满队列的重复打开记录不能代替非满队列的实例额度并发验收，历史焦点观察不证明覆盖后的 Tick/激活次数。
+- 临时公开 API 观察复现三项真实缺口：Replace 守卫等待期间普通 Close 再次调用同页守卫（calls=2）；Done 决议中的 Close/Back 合并观察不同意图；路径替换退订抛错后旧拥有者被清空，最终解绑成功而旧订阅仍存在（retainedFailures=0）。源码修复共用 PageInstance 上的关闭意图记录，冲突返回 Busy；CloseApproval 同时比较业务守卫版本与页面提交版本，确认期间的参数更新/换绑可成功提交并使旧许可 Superseded。路径保留失败拥有者和原异常，失效监听不再派发；BindingSession 将失败订阅/最终回调接入同一 CleanupRegistry，保留实际回调与所属身份，不隐式执行未知 remove/finalizer。
+- 最终合并观察包含 15 组协议路径的实际输出，正常路径凭证取得/归还相等、宿主未确认责任归零：Replace/Close 与 Done/Close/Back 的冲突立即 Busy、反向普通关闭中的 Done/Replace Busy；参数和绑定提交使 Close/Replace 许可失效且旧页面仍 Open；普通关闭共享一次守卫、取消一个观察者不取消其他等待；ForceClose 后迟到守卫不能重新提交；队列上限 1 时其他页关闭和 Shutdown 可推进，迟到候选归还；已就绪单实例复用不增加获取；A/B/C 的历史不因 B 置顶而改写，关闭 B 后 C 获得焦点；同 PageManager 打开确认框正常完成；关门期间有效保存结果仍提交，换绑/关闭后的旧结果没有写入。满队列的重复打开记录不能代替非满队列的实例额度并发验收，历史焦点观察不证明覆盖后的 Tick/激活次数。
 - 路径故障观察明确得到 unbindFailed=True、oldSubscribers=1、oldRemoveCalls=1、retainedFailures=1：未知退订继续持有责任，不通过重复解绑重放回调，不把未确认订阅报告为已归还。该组及导航组使用实际框架和协议 View，不能作为物理输入或原生页面画面证据。另在同一运行中复用既有原生父子换绑 7 组/预期 reports=2，及嵌套清理 126 项、外部/通知/最终回调清理 54 项断言，均通过；未知故障按原契约持续保留，不要求整批账本清零。
 - 最终 Editor 日志 `/private/tmp/mui-contract-closing-final-play-2-20261009.log`；同一批 macOS IL2CPP Development/High stripping 构建 Succeeded/errors=0/warnings=0，Player 取得同样记录及原生/清理回归通过。构建与运行日志 `/private/tmp/mui-contract-closing-final-il2cpp-build-20261009.log`、`/private/tmp/mui-contract-closing-final-il2cpp-player-20261009.log`，产物 `/private/tmp/mui-contract-closing-il2cpp-20261009.app`。三个进程退出码均为 0；Player 仍有 13 条 allocator 退出提示，不宣称干净退出。614 个源码规范检查通过，日志 `/private/tmp/mui-contract-closing-final-style-20261009.log`；本批 10 个源码的 SHA-256 记录 `/private/tmp/mui-contract-closing-source-20261009.json`。临时观察仅在 `/private/tmp` 和独立工程，没有仓库测试或自动提交。
-- 关闭本批已匹配的意图、许可、命令结果和退订故障条件；S2 的其余确定性条件仍按顶部清单核对，S1 的真实示例/Editor 输入与 S3 的最终交付仍未完成。Navigator 名称保留，其职责是页面导航，UIHost 负责组装与驱动；不因命名询问新增全仓库重命名。
+- 关闭本批已匹配的意图、许可、命令结果和退订故障条件；S2 的其余确定性条件仍按顶部清单核对，S1 的真实示例/Editor 输入与 S3 的最终交付仍未完成。PageManager 名称保留，其职责是页面导航，UIHost 负责组装与驱动；不因命名询问新增全仓库重命名。
 
 ### 2026-10-09 收尾批次固定与最终 Sample 刷新
 
@@ -229,9 +229,9 @@
 
 ### 2026-10-09 Editor 与三类页面向导合并收尾批次
 
-- 源码审查确认两项真实缺口：PagePreset 只有 FullScreen/Popup，且导入/保存增量调度未接入。向导增加 Notice，使用现有 RoutePolicy 的 layer=200、coverage=None、takesFocus=false、enterHistory=false、backBehavior=Ignore；生成纯文本无射线目标 Prefab，不生成关闭按钮/命令，业务通过句柄显式关闭。已有提示 Prefab 必须无 Selectable、无射线目标，缓存校验键加入预设，避免切换预设后沿用旧结果；默认两份业务源码且无需 Presenter，不覆盖原目录。
+- 源码审查确认两项真实缺口：PagePreset 只有 FullScreen/Popup，且导入/保存增量调度未接入。向导增加 Notice，使用现有 PagePolicy 的 layer=200、coverage=None、takesFocus=false、enterHistory=false、backBehavior=Ignore；生成纯文本无射线目标 Prefab，不生成关闭按钮/命令，业务通过句柄显式关闭。已有提示 Prefab 必须无 Selectable、无射线目标，缓存校验键加入预设，避免切换预设后沿用旧结果；默认两份业务源码且无需 Presenter，不覆盖原目录。
 - 新增 UIIncrementalValidation 与 UIValidationAssetPostprocessor。导入回调只收集合并路径，Editor 空闲后重新采集目录，按当前 Prefab 依赖筛选受影响目录，再复用完整目录校验规则。脚本/程序集变化、域重载及移动/删除使用完整重采集；编译、导入和 Play Mode 暂停执行，SessionState 保留域重载后的待检查标记。最多 2,048 个待检查路径，达到上限转完整检查；不写资产、不保留路由/模型/Prefab 缓存，也不重复输出未变化报告。手动与构建检查不依赖该队列或旧结果。
-- 独立工程同一 Editor 会话通过 41 项断言：向导实际创建三类 Prefab/源码、拒绝覆盖、不要求 Presenter；生成 Manifest 与 Prefab 契约及源码行号匹配；两次 Prefab 保存只触发一次增量采集；错误报告定位 Prefab，构建前检查重新读取当前错误并抛 BuildFailedException；修复保存后检查及构建前校验恢复；真正修改脚本触发编译/域重载，待检查标记保留并完成补跑。随后同一会话进入 Play Mode，通过公开 Navigator/PrefabViewProvider 运行三类生成页面，验证标题绑定、弹窗模态焦点、提示不抢焦点/返回/射线、生成关闭命令、提示显式关闭及最终原生 View 全归还（其中运行观察 17 项断言）。
+- 独立工程同一 Editor 会话通过 41 项断言：向导实际创建三类 Prefab/源码、拒绝覆盖、不要求 Presenter；生成 Manifest 与 Prefab 契约及源码行号匹配；两次 Prefab 保存只触发一次增量采集；错误报告定位 Prefab，构建前检查重新读取当前错误并抛 BuildFailedException；修复保存后检查及构建前校验恢复；真正修改脚本触发编译/域重载，待检查标记保留并完成补跑。随后同一会话进入 Play Mode，通过公开 PageManager/PrefabViewProvider 运行三类生成页面，验证标题绑定、弹窗模态焦点、提示不抢焦点/返回/射线、生成关闭命令、提示显式关闭及最终原生 View 全归还（其中运行观察 17 项断言）。
 - 最终日志 `/private/tmp/mui-editor-closing-final-play-2-20261009.log`，Editor 退出码 0。首轮临时入口试图在第一次向导创建触发编译后立刻创建第二类页面，被已有忙碌保护拒绝；修正仅在临时入口内，通过同一 Editor 会话等待实际编译后继续创建，未削弱向导保护。离线 MUI.Editor/依赖编译 0 warnings/0 errors，日志 `/private/tmp/mui-editor-closing-build-20261009.log`；614 个 C# 文件规范检查通过，日志 `/private/tmp/mui-editor-closing-style-20261009.log`。本批修改属于 Editor，不重复构建无关 Player；布局 Player 的运行记录见下节。临时脚本仅在独立工程及 `/private/tmp`，未新增仓库测试，未自动提交。
 - 本批关闭上述两项实现缺口及已观察条件；Inspector 实际画面/跳转、移动/删除和 Play Mode 队列补跑尚未取得最终运行证据，保留在固定清单，不用此批代表全部 Editor 交付。实体输入、示例交互、场景/持久宿主和最终性能等其他剩余条件继续保留。
 
@@ -263,7 +263,7 @@
 - 公开 UIHost + 真实 Texture 驱动复现四项冲突：提供方部分释放后抛错无宿主责任记录；恢复后的预加载查询为 0 而导航快照仍为 1；历史清理错误永久阻止提供方释放；宿主销毁后既无延后提供方释放入口，也看不到在途异步提供方清理。日志 `/private/tmp/mui-host-ownership-runtime-reproduction-play-20261009.log`，首轮 6 组有 4 组失败。临时驱动此前将责任值快照与 null 比较的编译错误单独修正，不能作为包源码故障证据。
 - UIHost.ProviderCleanup 将宿主拥有的提供方交给独立于原生组件的持有对象，复用 CleanupResponsibility/Registry。正常和兜底退出共享首次任务，清理按实际导航依赖确认，排除自身责任而不依赖 HasCleanupFailure 历史标记。未确认资源继续持有提供方；允许的叶责任显式恢复后，外层只执行尚未开始的最终释放或检查提供方已确认结果。未知同步/异步提供方只尝试一次并保存不可重试回调，提供方责任属性抛错/null 仍执行一次真实清理；内部叶确认不能代替未知外层 callback。预加载数量快照同步使用稳定确认值，不从诊断启动维护。
 - 提供方源属性与释放阶段的首次补充矩阵暴露阶段上下文未保留；现从明确 UIHost.Shutdown/ProviderRelease 宿主值上下文启动责任，属性只读一次，后台恢复被线程约束拒绝。Core 的既有直接清理自等待判断提取为内部只读资格，UIHost 在提供方 callback 内直接等待自身 Shutdown 时立即返回失败；不是通用 Task 环检测。源码兼容 C# 8，不使用新的条件表达式转换语法。
-- 原生 View 观察覆盖只销毁宿主组件、销毁整个宿主层级、宿主销毁时 View 真实归还等待。退出撤销输入并确定 HostShutdown 业务结果，原生 View 实际归还后才释放提供方，重复观察不再次归还。共享提供方仍可由另一 Navigator 使用。随后补充迟到凭证尚未交付阶段，复现独立账本为零，日志 `/private/tmp/mui-host-pending-ownership-reproduction-play-20261009.log`；现退出接纳时启动提供方责任并等待导航任务，整个等待阶段持续在账本中，历史导航失败仍保留于首次宿主结果。
+- 原生 View 观察覆盖只销毁宿主组件、销毁整个宿主层级、宿主销毁时 View 真实归还等待。退出撤销输入并确定 HostShutdown 业务结果，原生 View 实际归还后才释放提供方，重复观察不再次归还。共享提供方仍可由另一 PageManager 使用。随后补充迟到凭证尚未交付阶段，复现独立账本为零，日志 `/private/tmp/mui-host-pending-ownership-reproduction-play-20261009.log`；现退出接纳时启动提供方责任并等待导航任务，整个等待阶段持续在账本中，历史导航失败仍保留于首次宿主结果。
 - 最终临时驱动 `/private/tmp/mui-host-ownership-20261009/MuiHostOwnershipObservation.cs` 的 Play Mode 通过 16 组、67 项断言，failures=0/reports=12（预期注入错误）；日志 `/private/tmp/mui-host-pending-owner-fixed-play-20261009.log`。覆盖未知同步/异步部分释放、清理历史已恢复、组件销毁后叶及外层恢复、迟到预加载、预取消 Shutdown 等待、共享后端、安全提供方叶恢复、责任属性抛错/null 的成功/失败真实归还、线程拒绝、直接自等待及三类原生 View 销毁。未知失败责任保留至进程结束，不强制销毁或重放 callback。
 - 最终 macOS IL2CPP Development/High stripping 同样通过 16/67/0/12，构建 Succeeded/errors=0/warnings=0，Editor、构建及 Player 退出码均为 0。日志 `/private/tmp/mui-host-pending-owner-final-il2cpp-build-20261009.log`、`/private/tmp/mui-host-pending-owner-final-il2cpp-player-20261009.log`；产物 `/private/tmp/mui-host-ownership-il2cpp-20261009.app`。退出仍有 13 条 allocator 提示，未归因，不报告干净退出或完整内存验收。首轮 16/66 Player 早于等待阶段登记修复，不替代最终源码证据。
 - 最终预加载 Play Mode 回归通过 25 组、101 项断言、reports=0，日志 `/private/tmp/mui-host-final-preload-regression-play-20261009.log`，Editor 退出码 0。Navigation 及依赖构建 0 warnings/0 errors，日志 `/private/tmp/mui-host-pending-owner-final-build-20261009.log`；612 个源码成员布局/大括号/空白检查通过，日志 `/private/tmp/mui-host-pending-owner-style-20261009.log`。新增 UIHost.ProviderCleanup meta GUID 唯一，git diff --check 通过。未新增仓库测试，未自动提交。证据仍以受控提供方与独立桌面 Unity 工程为范围；完整场景切换/持久宿主、共享后端借用期与父加载器寿命、复杂子容器及八项示例真实交互等继续保留，完整设计目标未完成。
@@ -273,7 +273,7 @@
 - 原生 Texture 驱动复现叶凭证显式恢复后仍占一个预留，账本还留框架的未知释放回调；日志 `/private/tmp/mui-preload-recovery-reproduction-play-20261009.log`。批次现在直接 Own 持有凭证的 PreloadReservation，公开同一叶责任，不在其外另包未知 OnDisposeAsync 回调。额度只观察已捕获的责任，确认后在准入或维护移出记录；首次清理结果和历史错误保持原值，未知部分归还不根据原生对象消失确认。
 - 凭证责任属性抛错或返回 null 时，回退责任保留对象和一次真实归还入口；实际归还成功恢复容量，失败不以内部叶恢复替代未知外层确认。迟到归还失败登记到原批次，ResourceLoadException 回滚任务保留稳定未知责任。Clear 捕获接纳时已在途批次，再发起当前批次失效，避免取消回调内联完成使旧任务漏出快照；后来接纳的请求继续属于新批次。
 - 共享原请求取消导致其他消费者获取失效已通过公开 API 复现；第一版 `/private/tmp/mui-preload-ownership-matrix-play-20261009.log` 仅该组失败。PreloadEntry 独立登记每个消费者，最后一个消费者取消才停止底层准备；Ready 提交与最后取消在短临界区仲裁，锁内不执行项目回调。已放弃请求的新合并观察者仍能取消自己的等待，Ready 后取消不撤销批次驻留。
-- 最新 Unregister 调整在 .NET Standard 2.1 编译被拒绝；改为 DisposeAsync 后仍复现后台项目回调等待五秒时 UI 同步阻塞，日志 `/private/tmp/mui-preload-background-cancellation-reproduction-play-20261009.log`。本机 Unity unityjit-macos/mscorlib.dll 的 IL 显示 CancellationTokenRegistration.DisposeAsync 直接调用同步 Dispose，摘录保存在 `/private/tmp/mui-unity-mscorlib-20261009.il`。最终由同一消费者登记先撤销资格、发布取消信号，再执行底层取消；回调接管状态与观察者释放用原子操作仲裁，登记释放等待回调收尾，不使用 Task.Run 包装框架工作。取消回调异常保留 Navigator.PreloadCancellation 未知责任及容量，独立凭证仍归还，Clear 不误报成功。
+- 最新 Unregister 调整在 .NET Standard 2.1 编译被拒绝；改为 DisposeAsync 后仍复现后台项目回调等待五秒时 UI 同步阻塞，日志 `/private/tmp/mui-preload-background-cancellation-reproduction-play-20261009.log`。本机 Unity unityjit-macos/mscorlib.dll 的 IL 显示 CancellationTokenRegistration.DisposeAsync 直接调用同步 Dispose，摘录保存在 `/private/tmp/mui-unity-mscorlib-20261009.il`。最终由同一消费者登记先撤销资格、发布取消信号，再执行底层取消；回调接管状态与观察者释放用原子操作仲裁，登记释放等待回调收尾，不使用 Task.Run 包装框架工作。取消回调异常保留 PageManager.PreloadCancellation 未知责任及容量，独立凭证仍归还，Clear 不误报成功。
 - 临时驱动 `/private/tmp/mui-preload-ownership-20261009/MuiPreloadOwnershipObservation.cs` 的最终 Play Mode 通过 25 组、101 项断言，failures=0/reports=0；日志 `/private/tmp/mui-preload-consumer-final-play-20261009.log`。覆盖安全额度恢复、多叶分别恢复、慢归还、重复快照清除、版本切换、迟到失败、身份和责任属性故障、未知部分归还、回滚成功/失败、共享原调用及观察者分别取消、最后消费者取消、后台慢取消、有/无交付凭证的取消异常、Ready/预取消请求、普通加载失败重新获取及共享后端在宿主退出后继续使用。后台项目回调门控仍等待时，UI 约 11 ms 发布取消；迟到凭证与清除仍等待原取消收尾，未确认责任保留，不强制销毁或重放未知 callback。
 - 最终 macOS IL2CPP Development/High stripping Player 同样通过 25/101/0/0，后台取消约 10 ms 发布；构建 Succeeded/errors=0/warnings=0，Editor、构建与 Player 退出码均为 0。日志 `/private/tmp/mui-preload-consumer-final-il2cpp-build-20261009.log`、`/private/tmp/mui-preload-consumer-final-il2cpp-player-20261009.log`；产物 `/private/tmp/mui-preload-ownership-il2cpp-20261009.app`。Player 退出仍有 16 条 allocator 提示，未归因，不报告干净退出或完整内存验收。此前 24 组 Player 早于已放弃请求观察者修复，不作为最终源码验收。
 - TickCache 接入预加载归还维护后，既有原生缓存驱动 Play Mode 回归通过 1,085 项断言、100 次复用、configurations=107/textureReturns=106/reports=2；日志 `/private/tmp/mui-preload-final-cache-regression-play-20261009.log`，Editor 退出码 0。Navigation 及依赖构建 0 warnings/0 errors，日志 `/private/tmp/mui-preload-final-navigation-build-20261009.log`；611 个源码成员布局、大括号与空白检查通过，日志 `/private/tmp/mui-preload-final-consumer-style-20261009.log`。两个新增 meta GUID 各唯一。未新增仓库测试，未自动提交；这批受控预加载凭证证据不替代真实加载后端、宿主意外销毁、完整复杂容器交错或目标设备性能验收。
@@ -290,7 +290,7 @@
 ### 2026-10-09 参数收尾结果与全仓库源码规范
 
 - 受控 Core 驱动复现提交许可归还失败后，候选归还成功将 `ArgsUpdateCleanup.Failed` 覆盖为 `Complete`。许可回调现在由不可安全重试的稳定 CleanupResponsibility 持有，失败登记到本次激活；候选成功仅确认自身，不改写已有失败。登记失败仍保存原错及登记错误，继续独立收尾和结果发布。提交后的参数不回滚。
-- 临时驱动 `/private/tmp/mui-args-cleanup-20261008/Program.cs` 使用当前 Core 源码及单线程 SynchronizationContext，通过 11 组、104 项断言；日志 `/private/tmp/mui-args-cleanup-matrix-core-threaded-20261009.log`。覆盖立即完成、准备/提交许可接纳/提交异常、许可与候选组合清理失败、接纳后取消、忽略取消的迟到候选、慢归还及责任登记失败。未知许可与候选回调不重放，未确认责任保留。这是内部 IArgsUpdateHost 注入证据；真实 Navigator 的许可回调只归还 SemaphoreSlim，尚未证明公开业务 API 可触发该许可异常。
+- 临时驱动 `/private/tmp/mui-args-cleanup-20261008/Program.cs` 使用当前 Core 源码及单线程 SynchronizationContext，通过 11 组、104 项断言；日志 `/private/tmp/mui-args-cleanup-matrix-core-threaded-20261009.log`。覆盖立即完成、准备/提交许可接纳/提交异常、许可与候选组合清理失败、接纳后取消、忽略取消的迟到候选、慢归还及责任登记失败。未知许可与候选回调不重放，未确认责任保留。这是内部 IArgsUpdateHost 注入证据；真实 PageManager 的许可回调只归还 SemaphoreSlim，尚未证明公开业务 API 可触发该许可异常。
 - 当前源码的原生操作矩阵 Play Mode 和 macOS IL2CPP Development/High stripping 均通过 40 组、586 项断言，failed=0/reports=86（预期注入故障）。日志 `/private/tmp/mui-args-final-operation-regression-play-20261008.log`、`/private/tmp/mui-args-final-operation-il2cpp-build-20261009.log`、`/private/tmp/mui-args-final-operation-il2cpp-player-20261009.log`；构建 Succeeded/errors=0/warnings=0，Editor、构建及 Player 退出码均为 0。Player 退出仍有 13 条 allocator 提示及预期未知清理故障，不报告干净退出或完整内存验收。
 - 全仓库规范审查先确认 16 项成员布局和 7 处控制流大括号，再对仅包含项目源码的临时副本核对空白；另整理 6 个文件的属性及示例异常分支格式。字段及初始化器顺序保持原值，生成器仅删除空行，不变更产物语义。最终 `python3 Tools~/format-code.py --check --braces` 实际检查 609 个 C# 源文件，成员布局/人工冲突/控制流违规均为 0，空白检查通过；日志 `/private/tmp/mui-source-style-final-check-20261009.log`。最初直接对仓库根执行 folder 检查包含 ExampleProject~/Library 第三方缓存；目录形式的 include 又未展开，不能用那两次输出作为源码验收证据。
 - 本轮未新增仓库测试、未自动提交。缓存版本/预算/过期、宿主销毁、复杂交错、异步焦点、多模板布局、实体输入、八项示例真实交互及性能等完成标准继续保留，不能以规范检查通过代替这些运行验收。
@@ -313,7 +313,7 @@
 - 核对 main 与桌面 FUI 的自定义控件入口后，发现目标第 2 节要求的 CreateProperty、Track、TrackCleanup 缺失；原 Element 清理抛错仍清空回调，重复 Dispose 静默返回。真实 UGUI 驱动在正常释放与初始化失败回滚两条路径均复现责任丢失，日志 `/private/tmp/mui-element-cleanup-reproduction-play-20261008.log`。
 - Element 的属性、同步资源及原生监听复用最终 LifetimeScope，提供稳定 CleanupResponsibility，不新增清理调度器。初次逆序释放并继续独立项，未知失败保留回调；容器显式恢复只确认叶责任，不重放未知副作用。重复同步/异步释放保持首次结果，同步入口仅读取已完成任务而不阻塞主线程。初始化重入拒绝，初始化中结束控件后不宣告成功；已确认恢复的控件在 OnDestroy 中不重复报告历史失败。
 - ElementProperty 使用公开属性通知名，初值不调用原生赋值，相等值不通知；比较器执行后再次检查活性，属性回调结束控件后不发送迟到通知。最终释放解除值、比较器和回调引用。Track 仅登记成功时接管同步资源并拒绝重复身份，晚登记不转移持有权。Documentation~/index.md 补充自定义 Slider、生成双向绑定、输入门控及最终资源与激活资源的登记说明。
-- 最终 Play Mode 通过 9 组、38 项断言，reports=0；日志 `/private/tmp/mui-element-property-initialization-final-play-20261008.log`。覆盖未知失败保留、明确幂等叶责任恢复、重复释放结果、线程拒绝、属性/比较器重入、初始化递归与初始化内结束。真实 Slider 通过包内生成器及 Navigator/BorrowedViewProvider 验证模型投影、原生事件反向更新、门控不积压、换绑退订和最终资源释放；此证据不证明物理鼠标/键盘或输入法行为。两项未知故障根节点在退出 Play 时仍由默认错误出口报告，不能称无错误退出。
+- 最终 Play Mode 通过 9 组、38 项断言，reports=0；日志 `/private/tmp/mui-element-property-initialization-final-play-20261008.log`。覆盖未知失败保留、明确幂等叶责任恢复、重复释放结果、线程拒绝、属性/比较器重入、初始化递归与初始化内结束。真实 Slider 通过包内生成器及 PageManager/BorrowedViewProvider 验证模型投影、原生事件反向更新、门控不积压、换绑退订和最终资源释放；此证据不证明物理鼠标/键盘或输入法行为。两项未知故障根节点在退出 Play 时仍由默认错误出口报告，不能称无错误退出。
 - macOS IL2CPP Development/High stripping Player 同样通过 9 组、38 项断言，reports=0；构建 Succeeded/errors=0/warnings=0，构建及 Player 退出码为 0。日志 `/private/tmp/mui-element-property-final-il2cpp-build-20261008.log` 与 `/private/tmp/mui-element-property-final-il2cpp-player-20261008.log`，产物 `/private/tmp/mui-element-cleanup-il2cpp-20261008.app`。退出仍报告两项预期未知清理故障及 13 条 `IL2CPP Free after allocator was destroyed` 提示，不报告干净退出或完整内存验收。
 - 本轮最终基类下现有列表 Play Mode 回归通过 43 组、593 项断言，reports=46（预期注入故障），日志 `/private/tmp/mui-element-list-regression-play-20261008.log`。Navigation 及依赖离线构建 0 warnings/0 errors；当前 10 个改动 C# 文件成员布局、大括号及空白检查无违规，新 meta GUID 唯一。未新增仓库测试，未自动提交。
 - 本项记录时外层 View 最终清理尚未提供稳定责任；相关 Prefab 提前销毁及列表最终 Element 失败路径已由上方“View、原生节点与提供方最终归还”记录的后续实现及验收补齐。本项 Element 责任本身不证明外层路径安全。完整缓存、异步焦点、布局多模板、八项示例真实交互、性能和全仓库规范验收继续保留，完整目标未完成。
@@ -388,7 +388,7 @@
 - LifetimeScope 增加 IsCleanupConfirmed，首次 DisposeAsync 结果仍共享且不变。失败登记保留对应责任的状态读取；安全重试后只确认真实已完成的责任，不重新执行父作用域清理。未跟踪的操作回滚及取消回调错误继续按未知处理。Own 在登记时取得稳定记录，确认查询不重新调用项目的责任属性。
 - ViewModelOwnership 原先在调用模型释放前清空持有引用，模型抛错会失去实际持有者。本轮保存 ownedModel 与释放记录直到确认，工厂模型及退役模型的释放接入账本；只实现同步或普通异步释放的模型仍不可自动重试。外层显式重试只核对已处理的叶责任并清除剩余引用，不重复调用未知模型。外部借用模型保持借用。
 - ResourceSlot 的清空回调登记为内部幂等步骤，完成清空后不重复执行原生 setter。资源归还故障把同一凭证责任交给作用域确认；ElementResourceOwner 使用自身责任，槽的叶责任确认后才解除剩余控件持有。首次槽错误及计数保持历史原值。后端回滚没有可查询责任时仍按未知保留，不由此推断归还完成。
-- 顶层及子视图的最终 View 凭证归还检查实例与激活作用域；依赖不明则保留 ViewInstance.DependencyRelease 到独立账本，不提前交回池或销毁。显式重试检查依赖及原凭证状态，不自行重试后端。Navigator 清理容量补计移出 entries 后仍有责任的页面，同页多个记录合并为一个名额；无页面身份记录逐项保守计入。
+- 顶层及子视图的最终 View 凭证归还检查实例与激活作用域；依赖不明则保留 PageInstance.DependencyRelease 到独立账本，不提前交回池或销毁。显式重试检查依赖及原凭证状态，不自行重试后端。PageManager 清理容量补计移出 entries 后仍有责任的页面，同页多个记录合并为一个名额；无页面身份记录逐项保守计入。
 - 临时 Core 驱动通过 50 项断言，追加父子作用域失败后叶责任重试确认、父首错任务不变、未知回滚/取消回调不能确认，以及正常释放只执行一次。日志 `/private/tmp/mui-cleanup-dependencies-core-20261008.log`，入口仍为 `/private/tmp/mui-cleanup-acceptance-20261008/Program.cs`，没有新增仓库测试。
 - 提交前修正 Own 的条件 lambda 写法以兼容 C# 8；最终源码的 Core 50 项断言再次通过，MUI.UGUI 离线构建及其 Core/Resources/Navigation/ChildViews 依赖均为 0 错误、0 警告。此前同一清理场景的 macOS IL2CPP 构建成功、0 错误、0 警告，日志 `/private/tmp/mui-dependency-cleanup-il2cpp-build-20261008.log`；随后执行该产物通过 515 项断言与 100 次开关、获取/归还 100/100、frame=1，退出码 0，日志 `/private/tmp/mui-dependency-cleanup-il2cpp-player-20261008.log`。退出有 13 条 allocator 提示，不报告干净退出；该产物构建早于缓存重构，不作为新缓存行为证据。
 - 独立桌面工程的 Play Mode 通过 515 项断言，涵盖纹理/模型部分归还失败、父视图持续保留、过早外层重试拒绝、叶责任与外层持有者逐层显式确认、后端实际归还仅一次、原关闭失败不变，以及清理容量为 1 的拒绝与恢复。日志 `/private/tmp/mui-dependency-cleanup-play-20261008.log`，入口 `/private/tmp/MuiDependencyCleanupObservation.cs`。
@@ -400,7 +400,7 @@
 - BindingSession 保存导航准备时的值身份；前向、反向、路径拥有者通知、命令刷新、首次来源提交、就绪、退订及最终清理附加自己的阶段。同一页面的调用链保留当前导航操作名，独立通知使用 Binding/Command/Resource，其他宿主不能替换归属或操作。异步命令在 Execute 调用链保存身份；绑定故障保留传播且按原异常去重报告，不把转换拒绝变成故障。保存的上下文只包含有界字符串和值，不另外维护 View 所有权映射。
 - ViewResourceContext 保存激活身份，晚于导航的首次资源键配置沿用该值；资源槽分别为 Load、Assignment、Release 和 Rollback 提供阶段，资源拥有者的通知使用 Notification。加载取消更新 Cancelled 且不写异常日志。原生 setter 的不确定结果继续冻结槽并保留新旧凭证，不以诊断接入改变归还规则。
 - CleanupResponsibility 构造时保存备用身份；首次归还在有明确宿主时使用实际归还所有者，支持合法移交及缓存接管，宿主级 ViewId=0 不混入原页面编号。账本发布后身份稳定，重试不能改写它。CleanupRegistry 增加宿主计数和有界采集；Guid.Empty 只匹配无宿主责任。计数与采集集合在同一次账本锁内选择，逐项快照在锁外读取，避免账本锁/责任锁互相等待。
-- NavigationSnapshot 增加 HostId、UnconfirmedCleanupCount、CleanupResponsibilities 和截断提示；HasCleanupFailure 明确表示历史失败，原 HasUnconfirmedCleanup 沿用其历史语义。UIHost Inspector 展示数量、责任 Id/拥有者/状态/尝试/重试资格/位置/错误。该 Inspector 接入已通过 Unity 编译，尚不作为面板视觉和实体操作验收证据。
+- PageSnapshot 增加 HostId、UnconfirmedCleanupCount、CleanupResponsibilities 和截断提示；HasCleanupFailure 明确表示历史失败。UIHost Inspector 展示数量、责任 Id/拥有者/状态/尝试/重试资格/位置/错误。该 Inspector 接入已通过 Unity 编译，尚不作为面板视觉和实体操作验收证据。
 - 临时 Core 驱动通过 40 项断言，追加所有权移交后的宿主/句柄/操作/阶段、没有当前上下文时的登记身份回退、宿主筛选、重试归属稳定及调用链恢复。入口 `/private/tmp/mui-cleanup-acceptance-20261008/Program.cs`，日志 `/private/tmp/mui-cleanup-diagnostics-acceptance-20261008.log`；未新增仓库测试。
 - 独立桌面工程的 Play Mode 通过 54 项断言、13 个注入故障各报告一次，frame=3；关闭追踪未启用。覆盖导航完成后在另一宿主上下文内触发绑定、转换/路径 getter/反向 setter/CanExecute 故障、跨异步命令、延后首次资源配置、通知/加载/回滚/归还故障、加载取消不报告、宿主隔离、有界快照、部分归还重试及历史关闭结果保留。原生 RawImage dirty callback 抛错后，新旧凭证保留至目标清空，各归还一次且最终责任清零。入口 `/private/tmp/MuiLiveDiagnosticsObservation.cs`，日志 `/private/tmp/mui-live-diagnostics-play-20261008.log`。该驱动使用原生 UnityEvent 与属性调用，不证明物理输入或全部 Samples 视觉验收。
 - 同一场景的 macOS IL2CPP Development/High stripping 构建 Succeeded/errors=0/warnings=0；Player 通过相同 54 项断言、13 项故障单次报告，frame=3，退出码 0。产物 `/private/tmp/mui-live-diagnostics-il2cpp-20261008.app`，日志 `/private/tmp/mui-live-diagnostics-il2cpp-build-20261008.log` 和 `/private/tmp/mui-live-diagnostics-il2cpp-player-20261008.log`。退出仍有 13 条 allocator 提示，不报告干净退出或全部生命周期验收完成。
@@ -432,7 +432,7 @@
 ### 2026-10-08 父页与静态子视图换绑矩阵
 
 - 通过官方 Sample.FindByPackage/Import API 重导入全部八个 Sample，刷新 Settings 校验及 Navigation 命名。日志 `/private/tmp/mui-current-samples-import-20261008.log`；不作为 GUI Add package from disk 或八个示例完整交互验收的证据。
-- 临时桌面场景使用实际 Navigator、View、NestedViewElement、BindingContext 和主线程受控准备目标，完成七组观察：同帧本地换绑与 null 隐藏/恢复；嵌套准备失败保留旧 UI 并允许重试；忽略取消的迟到候选仅释放不提交；候选外部等待不阻塞同 Navigator 的其他页面关闭；父关闭期间不接管迟到候选；准备回调内换绑明确拒绝 Reentrant；嵌套提交已改写目标后抛错时故障关闭父页。七组 Play Mode 均通过，日志 `/private/tmp/mui-rebind-matrix-play-20261008.log`。
+- 临时桌面场景使用实际 PageManager、View、NestedViewElement、BindingContext 和主线程受控准备目标，完成七组观察：同帧本地换绑与 null 隐藏/恢复；嵌套准备失败保留旧 UI 并允许重试；忽略取消的迟到候选仅释放不提交；候选外部等待不阻塞同 PageManager 的其他页面关闭；父关闭期间不接管迟到候选；准备回调内换绑明确拒绝 Reentrant；嵌套提交已改写目标后抛错时故障关闭父页。七组 Play Mode 均通过，日志 `/private/tmp/mui-rebind-matrix-play-20261008.log`。
 - 候选准备期间原父/子模型与输入保留，失败后旧子模型继续更新文字，候选模型不写旧 UI；成功后旧模型通知不再写子控件。原工厂父模型释放一次，借用的新父模型及所有子模型不被页面误释放；候选 Prepared/Committed/Disposed 与取消或提交结果匹配。关闭与原生节点清理由父所有者完成。两项有意注入故障各报告一次，均携带 host/view/route/operation 及 RebindPreparation 或 RebindCommit 阶段。
 - 同一七组场景构建 macOS arm64/x64 IL2CPP Development/High stripping、960×640 Player；BuildReport Succeeded/errors=0/warnings=0，运行退出码 0，cases=7/reports=2。构建日志 `/private/tmp/mui-rebind-matrix-il2cpp-build-20261008.log`，运行日志 `/private/tmp/mui-rebind-matrix-il2cpp-player-20261008.log`。退出仍有 13 条 allocator 提示，不报告干净退出。
 - 观察源码为 `/private/tmp/MuiRebindMatrixObservation.cs` 与 `/private/tmp/MuiRebindMatrixObservationMenu.cs`，未作为仓库测试发布。首轮把 Child.Text 作为 Property 的通知属性名，导致 null 回退观察失败；该 API 不解析路径，改为 Child 绑定及转换器处理 null 后通过。该结果仅证明静态子 View 与现有转换器路径，不证明设计目标要求的可声明嵌套属性路径、回退值和 null 反向写入门控；已将其明确列入当前设计冲突。
@@ -473,7 +473,7 @@
 - 桌面工程中同一 CommonControlsModel 通过包内生成器生成绑定与两项命令，分别用于 Legacy/TMP 页面。Play Mode 两种后端均记录 initial=Initial/nativeChanges=0、草稿期间模型仍为 Initial、结束后 Draft/events=1、逐次编辑后 Live；模型回写原生 events=0；用户下拉选择 Choice=2/events=1，模型设置索引不增加事件；门控关闭后的草稿及结束通知没有回写或新增事件。日志 `/private/tmp/mui-common-controls-observation-20261008.log`。这是原生属性/UnityEvent 路径，非物理输入或输入法验证。
 - 主 Editor、TMP 和 Basic Editor 依赖离线编译成功，0 警告、0 错误；14 个相关文件的成员布局及大括号检查通过。新增契约后，Runtime、Editor、Analyzer 与 Samples 的 709 个 meta 无非法、重复或缺失。
 - 在桌面工程构建三场景 IL2CPP Development Player，High 托管裁剪、macOS arm64/x64 通用产物，960×640，实际 Metal 设备 Apple M4 Pro。TMP 首跑因 Essentials 未完成落盘出现两次 TMP_Settings 空引用；改用官方导入 API 并等待设置/字体都可加载后重建。最终 BuildReport errors=0/warnings=0，Clang 命令行警告仍在日志中，不宣称整个构建日志无警告。
-- 最终 Player 实际运行固定槽位、原生列表和 Legacy/TMP 公共生成绑定，结果与上述 Play Mode 一致；固定槽位父关闭资源 held=0、模板节点清除而借用节点保留；单项失败占位及重试清除正常；各场景显式等待 Navigator.ShutdownAsync 后结束。Player 退出码 0，最终运行日志无 NullReferenceException/未处理业务异常；退出仍有 11 条 IL2CPP Free after allocator was destroyed，原因未确认，不能报告干净退出或全部验收通过。产物 `/private/tmp/mui-current-contracts-il2cpp-20261008.app`；日志 `/private/tmp/mui-current-contracts-il2cpp-rebuild-20261008.log`、`/private/tmp/mui-current-contracts-il2cpp-player-final-20261008.log`。这项验证通过公开 API、原生 Move 和 UnityEvent 驱动，不替代物理输入或全部 Samples 视觉验收。
+- 最终 Player 实际运行固定槽位、原生列表和 Legacy/TMP 公共生成绑定，结果与上述 Play Mode 一致；固定槽位父关闭资源 held=0、模板节点清除而借用节点保留；单项失败占位及重试清除正常；各场景显式等待 PageManager.ShutdownAsync 后结束。Player 退出码 0，最终运行日志无 NullReferenceException/未处理业务异常；退出仍有 11 条 IL2CPP Free after allocator was destroyed，原因未确认，不能报告干净退出或全部验收通过。产物 `/private/tmp/mui-current-contracts-il2cpp-20261008.app`；日志 `/private/tmp/mui-current-contracts-il2cpp-rebuild-20261008.log`、`/private/tmp/mui-current-contracts-il2cpp-player-final-20261008.log`。这项验证通过公开 API、原生 Move 和 UnityEvent 驱动，不替代物理输入或全部 Samples 视觉验收。
 - 未新增仓库测试文件或提交，完整目标仍在执行。
 
 - 退出提示对照：另建 `/private/tmp/mui-il2cpp-baseline-20261008` 空白 Unity 2022.3.62f3 工程，不安装 MUI，只在第 5 帧 Application.Quit。相同 IL2CPP/High/Development、960×640 配置的空白 Player 退出码 0，运行记录 MUI loaded=False，仍有 13 条 IL2CPP Free after allocator was destroyed。日志 `/private/tmp/mui-empty-il2cpp-baseline-player-20261008.log`。证明该提示不要求 MUI 代码参与；未确定 Unity/IL2CPP 内部原因，也不能据提示条数比较实际内存或确认框架资源是否归还。
@@ -535,14 +535,14 @@
 
 ### 2026-10-08 绑定换绑入口统一
 
-- 删除 `BindingContext<TViewModel>` 绕过页面所有者的直接 `RebindAsync`，以及仅供该入口使用的回滚和代际状态。该入口先解绑再尝试恢复旧会话，无法遵守候选准备与故障关闭契约；现在由 Navigator 或 ChildViewHandle 协调换绑。静态嵌套子视图的隔离准备仍未完成。
+- 删除 `BindingContext<TViewModel>` 绕过页面所有者的直接 `RebindAsync`，以及仅供该入口使用的回滚和代际状态。该入口先解绑再尝试恢复旧会话，无法遵守候选准备与故障关闭契约；现在由 PageManager 或 ChildViewHandle 协调换绑。静态嵌套子视图的隔离准备仍未完成。
 - `MUI.Samples.Navigation.csproj`、`MUI.Editor.csproj` 和 `MUI.Samples.Dialogs.csproj` 使用 Unity 2022.3.62f3 程序集引用离线编译通过，均为 0 警告、0 错误；未进行本轮 Unity Editor 或 Player 运行验收，未新增测试文件或提交。
 
 ### 2026-09-30 候选准备、资源状态与包边界继续收敛
 
 - 换绑新增可选隔离候选准备接口，旧绑定在短提交中同步停止订阅；导航队列不再跨候选准备、旧命令清理和子视图等待持有。参数更新同样在准备时释放队列、提交前复核资格，且与换绑从受理时互斥；页面关闭取消参数操作时也会取消其提交队列等待。子视图准备仍无法在当前 View 写入前完成隔离，失败仍会故障关闭。
 - 四种资源键控件公开请求键、显示键、状态、失败和冻结信息的快照；旧请求迟到不改写最新状态，失败保留原显示。虚拟列表测得无效动态尺寸时缓存有效估算值并报告条目错误，避免整表停用和逐帧重测；独立 EventSystem 的返回事件保留实际来源供同帧去重。上述行为尚无本轮 Unity Play Mode 证据。
-- 翻译实现从 Runtime 移入 Resource Integration 示例，包清单的旧同步示例描述已校正。`MUI.Navigation.csproj`、`MUI.Samples.ResourceIntegration.csproj`、`MUI.Samples.Navigation.csproj` 和 `MUI.Editor.csproj` Release 编译均为 0 警告、0 错误；后面三项使用 Unity 2022.3.62f3 的程序集引用，覆盖生成器、Core、Resources、Navigation、ChildViews、uGUI、主 Editor 及相关示例。此结果不代替新建本地 UPM 项目、Editor 交互或 Player 验收。格式检查仍报告 39 个既有文件的成员布局问题，本轮涉及文件不在该名单中；未新增测试文件，未提交。
+- 翻译实现从 Runtime 移入 Resource Integration 示例，包清单的旧同步示例描述已校正。`MUI.Pages.csproj`、`MUI.Samples.ResourceIntegration.csproj`、`MUI.Samples.Navigation.csproj` 和 `MUI.Editor.csproj` Release 编译均为 0 警告、0 错误；后面三项使用 Unity 2022.3.62f3 的程序集引用，覆盖生成器、Core、Resources、Navigation、ChildViews、uGUI、主 Editor 及相关示例。此结果不代替新建本地 UPM 项目、Editor 交互或 Player 验收。格式检查仍报告 39 个既有文件的成员布局问题，本轮涉及文件不在该名单中；未新增测试文件，未提交。
 
 ### 2026-09-30 换绑候选创建提前
 
@@ -585,8 +585,8 @@
 
 ### 2026-09-30 导航生命周期模式移除
 
-- 删除 INavigator / Navigator、内部 ViewInstance / ViewContent 和 NavigationSnapshot 的模式属性与模式构造参数。导航直接创建默认 LifetimeScope，预加载、请求计数、清理、转场及守卫不再按同步模式分流；同步模式检查辅助文件改为 Navigator.Failures。
-- 更新 UIHost Inspector 与依赖示例的快照展示。Navigation 示例 Editor 和主 Editor 编译通过；Unity 2022.3.62f3 重导入后反射确认 Navigator 与 NavigationSnapshot 均不存在 Mode，编译结束。
+- 删除 IPageManager / PageManager、内部 PageInstance / ViewContent 和 PageSnapshot 的模式属性与模式构造参数。导航直接创建默认 LifetimeScope，预加载、请求计数、清理、转场及守卫不再按同步模式分流；同步模式检查辅助文件改为 PageManager.Failures。
+- 更新 UIHost Inspector 与依赖示例的快照展示。Navigation 示例 Editor 和主 Editor 编译通过；Unity 2022.3.62f3 重导入后反射确认 PageManager 与 PageSnapshot 均不存在 Mode，编译结束。
 - 本次验证编译及加载后的公开契约，未重新执行运行矩阵。LifetimeScope 本身和 DragDrop、自动化等可选模块仍有同步模式使用，整体目标未完成。
 
 ### 2026-09-30 绑定会话解绑统一
@@ -597,20 +597,20 @@
 
 ### 2026-09-30 Core 清理与模型所有权统一
 
-- 删除无调用方的 ViewPresenterLifecycle.Synchronous、ViewActivationCleanup.Synchronous、ViewInstanceCleanup.Synchronous 和 ViewModelOwnership.Synchronous。模型所有权只实现 IAsyncDisposable，先发布共享清理任务再调用业务释放；移除同步兼容状态和重复结果存储。业务模型仅实现 IDisposable 时仍由统一异步流程直接调用其 Dispose。
+- 删除无调用方的 ViewPresenterLifecycle.Synchronous、ViewActivationCleanup.Synchronous、PageInstanceCleanup.Synchronous 和 ViewModelOwnership.Synchronous。模型所有权只实现 IAsyncDisposable，先发布共享清理任务再调用业务释放；移除同步兼容状态和重复结果存储。业务模型仅实现 IDisposable 时仍由统一异步流程直接调用其 Dispose。
 - Navigation 示例及依赖编译 0 警告、0 错误。Unity 2022.3.62f3 对真实 ViewModelOwnership 和示例异步模型验证：未完成释放的重复等待共享同一任务，释放计数为 1，借用模型释放计数为 0，所有权对象不再实现 IDisposable。
 - 本轮只验证模型所有权释放契约，未完成全部 Core 生命周期迁移；LifetimeScope、绑定会话及可选模块中的同步模式仍需处理。未新增测试文件或提交。
 
 ### 2026-09-30 路由同步配置移除
 
-- 删除 PreparationMode、Route.Preparation、SupportsSynchronousLifecycle 及相应构造参数和 ViewRouteAttribute 属性。移除内容创建阶段针对同步路由的限制，立即完成与异步完成使用相同路由。
+- 删除 PreparationMode、PageDefinition.Preparation、SupportsSynchronousLifecycle 及相应构造参数和 页面声明属性。移除内容创建阶段针对同步路由的限制，立即完成与异步完成使用相同路由。
 - 生成器路由工厂不再生成准备模式参数和同步能力标记；更新随包交付的 Release 生成器 DLL。页面向导移除同步生命周期选项，路由图移除准备模式与同步能力展示，相关示例已迁移。
 - Release 生成器、Navigation 示例 Editor 及主 Editor 编译均 0 警告、0 错误。Unity 2022.3.62f3 重导入 Navigation 后确认旧枚举与属性不存在，实际生成工厂参数只包含 modelFactory、presenterFactory、policy、argsEqual、dependencies、key、resource、estimatedRetainedBytes，编译已结束。
 - 本次验证生成代码和 Editor 编译，未执行向导生成页面或完整运行矩阵。Core 层 LifetimeMode 和同步生命周期契约仍待处理，目标未完成。
 
 ### 2026-09-30 内部关闭与依赖释放收敛
 
-- 删除 Navigator.Close.Synchronous、ViewInstance.Synchronous、ViewContent.Synchronous；移除同步依赖释放、同步父链收敛和已无调用方的同步依赖回滚检查。所有实例和内容释放都进入已有异步清理实现。
+- 删除 PageManager.Close.Synchronous、PageInstance.Synchronous、ViewContent.Synchronous；移除同步依赖释放、同步父链收敛和已无调用方的同步依赖回滚检查。所有实例和内容释放都进入已有异步清理实现。
 - 移除同步关闭完成存储及其延迟 Task 适配，Closing 与 CleanupCompletion 各自只读取统一任务；删除仅用于同步释放准入的回调深度和能力检查。
 - Navigation 示例及依赖编译 0 警告、0 错误。Unity 2022.3.62f3 再次运行 CloseAsync / CompleteAsync / BackAsync 与延迟归还流程，缓存复用、等待释放、额度归还、失效禁止重新缓存均为 True，随后退出播放。
 - 共享依赖关闭矩阵尚未运行验证。LifetimeMode、路由同步标记及 Core 层同步生命周期契约仍需继续收敛；本轮未新增测试文件或提交。
@@ -630,7 +630,7 @@
 
 ### 2026-09-30 导航获取与退出统一
 
-- 删除 `Navigator.CreateSynchronous`、同步 `Open` / `Replace`、同步候选及依赖准备实现；`PostOpen` 仅派发统一异步事务。导航构造只接受 `IViewProvider`，缓存版本也从同一提供方取得。
+- 删除 `PageManager.CreateSynchronous`、同步 `Open` / `Replace`、同步候选及依赖准备实现；`PostOpen` 仅派发统一异步事务。导航构造只接受 `IViewProvider`，缓存版本也从同一提供方取得。
 - 删除 `ISynchronousViewProvider`、`SyncCreateAvailability`、`ISynchronousViewLease` 和内部同步凭证接管路径。删除同步 `Shutdown` 与 `IDisposable`，宿主退出和 `ShutdownAsync` 共用已有异步清理任务。
 - Navigation 示例及依赖编译 0 警告、0 错误。Unity 2022.3.62f3 反射确认上述同步公开入口不存在；实际打开及参数失败流程记录 `preparation=PreparationFailed, retained=True, commit=CommitFailed, faulted=True, noRollback=True, state=Failed`，退出后验收对象已销毁。控制台连接未返回普通日志，结果由 Editor 日志核对。
 - 尚未完成：同步关闭/缓存入口、内部同步释放实现、LifetimeMode 与路由同步能力标记；本次不宣称整体导航协议清理完成。未新增测试或提交。
@@ -670,10 +670,10 @@
 - Back 使用实际显示顺序，返回行为与历史登记解耦；进入及退出中的模态屏障消费返回输入。
 - Close、ForceClose、Complete、Back 和批量关闭通过独立提交信号返回；内部回滚及 Shutdown 仍等待真实清理。页面业务结果在关闭提交固定，清理或转场失败不覆盖原结果；Back 输入恢复仍由视觉退出驱动。转场示例显式等待清理。
 - 类型化句柄提供独立且可重复观察的进入/退出等待，区分完成、打断与失败；取消等待不修改动画。视觉退出收尾避免重复执行；转场示例通过异步打开及独立阶段等待演示。
-- 重复打开默认拒绝；`ExistingInstancePolicy.ReturnReady` 显式返回兼容的就绪实例，不置顶或重排历史。关闭提交释放 Route 额度，未结束的视觉退出和清理继续占用独立清理容量；依赖和 Replace 使用相同的额度口径。
+- 重复打开默认拒绝；`ExistingInstancePolicy.ReturnReady` 显式返回兼容的就绪实例，不置顶或重排历史。关闭提交释放 PageDefinition 额度，未结束的视觉退出和清理继续占用独立清理容量；依赖和 Replace 使用相同的额度口径。
 - Open/Replace 登记候选后释放队列许可，异步准备和确认不占执行权；重新取得许可后校验并提交，失败候选的等待清理也在队列外执行。其他操作的队列与直接自等待规则仍需逐项核对。
 - `IViewProvider.AcquireAsync` 和可选 `IPreloadViewProvider.PreloadAsync` 使用 Task；异步后端不再被要求实现同步创建或能力查询。提供本地/异步委托适配器，Prefab 提供方支持统一预加载；导航、子视图、挂载装饰器和相关示例已迁移获取入口。异步宿主的旧同步 Open/Prepare 不再启动资源获取，应使用异步入口；独立同步宿主与其示例尚待删除或迁移。
-- Basic Example 改为无 Presenter 的 ViewModel/生成绑定/Route，使用异步宿主、打开和显式退出清理。业务结果发布后等待视觉退出才恢复场景重开按钮，README 区分手写文件与生成产物。
+- Basic Example 改为无 Presenter 的 ViewModel/生成绑定/PageDefinition，使用异步宿主、打开和显式退出清理。业务结果发布后等待视觉退出才恢复场景重开按钮，README 区分手写文件与生成产物。
 - 生成器对 void、Task、ValueTask 命令统一生成 AsyncCommand；立即完成的业务委托不再生成第二套同步命令。AsyncCommand 提供同步委托接入，继续使用同一来源、取消和并发规则。旧同步宿主示例尚未迁移，不能据其通过编译推断仍能运行。
 - 清理虚拟列表分页配置残留、Editor 校验和失效示例说明；去掉移除调用后重复的代际检查，保留事件重入保护。
 - 设计补充参数更新失败、共享依赖与预加载身份、合并请求取消、位置快照兼容性和 Canvas 坐标约定；这些约定仍需对照实现核验，不作为已经实现的证据。
@@ -703,10 +703,10 @@
 
 ## 已完成的验证
 
-- `dotnet build Tools~/Build/MUI.Navigation.csproj --no-restore --nologo -m:1 -p:NuGetAudit=false`：上述导航修改后编译成功，0 警告、0 错误；包含 Core、Resources 和 Navigation，不覆盖 Unity 渲染、Editor、生成器或 Player。
+- `dotnet build Tools~/Build/MUI.Pages.csproj --no-restore --nologo -m:1 -p:NuGetAudit=false`：上述导航修改后编译成功，0 警告、0 错误；包含 Core、Resources 和 Navigation，不覆盖 Unity 渲染、Editor、生成器或 Player。
 - Provider 获取与预加载迁移后，`MUI.Samples.Navigation.csproj` 使用本机 Unity 2022.3.62f3 的 Managed 引用及 `ExampleProject~/Library/ScriptAssemblies/UnityEngine.UI.dll` 离线编译成功，0 警告、0 错误；覆盖 Core、Resources、Navigation、ChildViews、uGUI、Localization、ResourceIntegration、生成器和导航示例。该引用工程只用于开发期编译，不替代桌面空白项目验收。
 - 使用相同引用构建 `MUI.Samples.Tabs.csproj` 成功，0 警告、0 错误，补充覆盖 Tabs、uGUI Tabs 与版本化 Provider 示例。
-- 无 Presenter 的 Basic Example 和 `MUI.BasicExample.Editor.csproj` 编译成功，0 警告、0 错误；生成产物确认 Route 使用 Unit 参数且不自动创建 Presenter，Confirm 命令生成为 AsyncCommand。该项尚未证明实际点击、结果和退出场景行为。
+- 无 Presenter 的 Basic Example 和 `MUI.BasicExample.Editor.csproj` 编译成功，0 警告、0 错误；生成产物确认 PageDefinition 使用 Unit 参数且不自动创建 Presenter，Confirm 命令生成为 AsyncCommand。该项尚未证明实际点击、结果和退出场景行为。
 - 命令生成迁移后 Release 生成器编译成功，已更新 `Analyzers/MUI.Generators.dll`，并核对其 SHA256 与 Release 产物一致；现有 RoslynAnalyzer 导入标签保持有效。
 
 - 移除分页、分组与树形模型及导航演示依赖后，使用上述 Unity 引用重新构建 `MUI.Samples.Navigation.csproj` 成功，0 警告、0 错误。首次检查发现激活清理中的分页退订残留，修正后重建通过；本次仍为离线编译。
@@ -737,7 +737,7 @@
 - 随后用同一版本真实 Editor 编译导入后的示例，生成 MUI.BasicExample.dll 与 MUI.BasicExample.Editor.dll，打开 `Assets/Samples/MUI/0.1.0/Basic Example/Basic.unity` 并执行现有 UIBuildValidation.Validate。报告“目录 1，页面 1，路由 1”，IsValid 为 true，进程退出码 0；日志 `/private/tmp/mui-basic-validation.log`。这证明当前包与 Basic 示例的 Editor 编译、场景打开及目录/Prefab/绑定声明校验通过，不证明 PlayMode、真实 Done 点击、重开、视觉退出或 Player 已验收。
 
 - Basic 示例首次在独立 macOS IL2CPP Player（Unity 2022.3.62f3，Development，High 托管裁剪，arm64/x64 通用产物）运行，真实键盘提交 Done 返回 42 时发现清理异常：BindingContext.EndSessionAsync 继承命令的 Lifetime 操作标记，误判为等待自身销毁。已在导航关闭清理启动处隔离操作调用链；原操作仍登记并被清理等待，Lifetime 对业务直接自等待的保护保留。
-- 修复后 MUI.Navigation.csproj 编译成功，0 警告、0 错误；IL2CPP 重新构建成功，BuildReport 为 0 错误、0 警告（`/private/tmp/mui-basic-il2cpp-fixed.log`）。通过 CUA 实际键盘 Down/Return 完成两次 Done，并在中间用 Return 重开；画面观察到 Basic 页面和 `42: Reopen`，运行日志含两次 `Page result: Completed, value=42`，退出后未发现 Exception 行。Player 路径为桌面验收工程的 `Builds/Basic-IL2CPP.app`，日志位于 `~/Library/Logs/DefaultCompany/MUI-Design-Acceptance/Player.log`。
+- 修复后 MUI.Pages.csproj 编译成功，0 警告、0 错误；IL2CPP 重新构建成功，BuildReport 为 0 错误、0 警告（`/private/tmp/mui-basic-il2cpp-fixed.log`）。通过 CUA 实际键盘 Down/Return 完成两次 Done，并在中间用 Return 重开；画面观察到 Basic 页面和 `42: Reopen`，运行日志含两次 `Page result: Completed, value=42`，退出后未发现 Exception 行。Player 路径为桌面验收工程的 `Builds/Basic-IL2CPP.app`，日志位于 `~/Library/Logs/DefaultCompany/MUI-Design-Acceptance/Player.log`。
 - 本项覆盖 Basic 的 IL2CPP 编译、裁剪后启动、键盘提交、结果与重开回归。全屏坐标点击被 CUA 的 noWindowsAvailable 阻断，鼠标路径未通过；尚不覆盖 100 次循环、资源计数、虚拟列表、其他示例或全部 IL2CPP 泛型组合。首次失败构建/运行不能计为通过，以上通过结论仅对应修复后重建版本。
 
 - 独立验收工程已通过 UPM API 安装 MCP for Unity 9.6.6，固定 Git 提交 `73eb27aeccfa8e0676eaf3304136e9b85953d913`。仅验收工程依赖此工具，MUI 框架包不增加 MCP 依赖。编辑器使用绝对路径启动并由 MCP 再次确认 Unity 2022.3.62f3、非 batch 模式；会话锁定 `MUI-Design-Acceptance@91dc4e67`，与同时运行的 fun-slg 隔离。
@@ -815,9 +815,9 @@
 - 核心资源加载契约收敛：删除零实现、零调用方的 ISynchronousResourceLoader 及 meta；LocalRecyclingListDemo 字体和 Sprite 凭证改用 ResourceLease。Navigation 及其依赖使用 Unity 2022.3.62f3 引用构建通过，0 警告、0 错误；Unity Sample API 重新导入 Navigation 返回 true。Console 仍保留上一轮三条主动注入的 DemoLoadException，本轮无新增运行覆盖。同步资源异常仍被 Prefab 工厂和旧导航回滚使用，尚未删除；未新增测试文件、未提交。
 - 共享依赖示例迁移为 LocalDependenciesDemo，三份 partial 与 meta 保留 GUID，路由图上下文菜单同步更新。Initialize / OpenAsync / ReleaseExplicitOwnershipAsync / CloseAsync / ForceCloseAsync / RebindAsync / UpdateArgsAsync / ShutdownAsync 替代同步入口；参数候选改为 IArgsUpdatePresenter / IPreparedArgsUpdate，菜单通过统一异常观察与防重入包装执行，父关闭等待 Pending 清理后报告拥有者状态。Navigation 构建通过，0 警告、0 错误；Unity Sample API 重导入成功，Console 仍为此前三条主动加载失败记录。共享/可选依赖完整运行路径未验收；未新增测试文件、未提交。
 
-- UIHost 删除独立同步初始化、退出、非活动内容清理入口和对应状态；返回输入统一走 BackAsync 并保持视觉结束前防重入，OnDestroy 共用异步退出。Navigation 及其依赖使用 Unity 2022.3.62f3 引用构建通过，0 警告、0 错误；现有 Editor 反射确认旧 InitializeSynchronous / Shutdown 不存在、ShutdownAsync 存在。Console 仍为此前三条主动加载失败记录，本轮未新增完整导航运行覆盖；核心 Navigator 和 Prefab 同步分支仍待收敛。未新增测试、未提交。
+- UIHost 删除独立同步初始化、退出、非活动内容清理入口和对应状态；返回输入统一走 BackAsync 并保持视觉结束前防重入，OnDestroy 共用异步退出。Navigation 及其依赖使用 Unity 2022.3.62f3 引用构建通过，0 警告、0 错误；现有 Editor 反射确认旧 InitializeSynchronous / Shutdown 不存在、ShutdownAsync 存在。Console 仍为此前三条主动加载失败记录，本轮未新增完整导航运行覆盖；核心 PageManager 和 Prefab 同步分支仍待收敛。未新增测试、未提交。
 
-- PrefabViewProvider 移除独立同步创建、预加载及能力查询，目录查询共用 GetPrefab；PrefabViewFactory 返回统一 ViewLease。归还现在等待 Destroy 的原生实例实际消失，清理失败仍沿凭证报告。Navigation 及依赖使用 Unity 2022.3.62f3 引用构建通过，0 警告、0 错误。Unity 2022.3.62f3 Play Mode 临时代码验证本地获取立即完成、释放等待帧末销毁、重复释放及独立预加载归还；日志 `/private/tmp/mui-editor-shader-recovery.log` 记录 immediate=True、waitsForDestroy=True、destroyed=True。Console error 为空，已退出 Play；未新增测试文件、未提交。工厂失败回滚异常与核心 Navigator 的旧同步协议仍待收敛，此项不代表完整导航或视觉验收。
+- PrefabViewProvider 移除独立同步创建、预加载及能力查询，目录查询共用 GetPrefab；PrefabViewFactory 返回统一 ViewLease。归还现在等待 Destroy 的原生实例实际消失，清理失败仍沿凭证报告。Navigation 及依赖使用 Unity 2022.3.62f3 引用构建通过，0 警告、0 错误。Unity 2022.3.62f3 Play Mode 临时代码验证本地获取立即完成、释放等待帧末销毁、重复释放及独立预加载归还；日志 `/private/tmp/mui-editor-shader-recovery.log` 记录 immediate=True、waitsForDestroy=True、destroyed=True。Console error 为空，已退出 Play；未新增测试文件、未提交。工厂失败回滚异常与核心 PageManager 的旧同步协议仍待收敛，此项不代表完整导航或视觉验收。
 
 - 修复 NestedViewElement 在同步关闭/绑定回调之后才发布 PendingChange 的问题：执行前发布本轮完成源，回调只完成本轮任务；过期请求不再读取或覆盖新请求，保留立即失败参与父级回滚及取消状态。Navigation 及依赖使用 Unity 2022.3.62f3 引用构建通过，0 警告、0 错误。现有 Editor Play Mode 临时代码在绑定回调读取 PendingChange 并注入失败，日志 `/private/tmp/mui-editor-shader-recovery.log` 记录 callbackPending=True、sameTask=True、faulted=True；Console error 为空，已退出 Play。此验证覆盖信号发布及失败传播，不代替完整重入关闭/恢复交互验收。未新增测试文件、未提交。
 
@@ -829,9 +829,9 @@
 - 根据设计第 85 行纠正遗漏的命名迁移：ViewLease / IViewLease 改为 AcquiredView / IAcquiredView，ResourceLease / IResourceLease 改为 AcquiredResource / IAcquiredResource；文件及 meta 同步改名保留 GUID，更新运行时、示例和文档调用方，不留旧名兼容别名。Editor 已加载新类型，确认旧 ViewLease 不存在。独立同步分支及其 Synchronous*Lease 尚未删除，预加载命名尚待整体核对。
 - 上述事务删除和命名更新后完整重跑 MUI.Samples.Navigation.csproj，Unity 2022.3.62f3 引用构建成功，0 警告、0 错误。重命名发生前已启动的旧构建曾因混用旧资源程序集失败，更新后完整重跑已排除该错误；未新增测试文件、未提交。
 
-- 删除独立同步预加载账本、Navigator.Preload / ClearPreloads、同步 Provider 与预加载凭证契约，清除同步缓存维护和退出中的相应调用。Navigation 及依赖使用 Unity 2022.3.62f3 引用构建成功，0 警告、0 错误；本轮预加载运行验收尚未执行，已退出 Play。未新增测试文件、未提交。
+- 删除独立同步预加载账本、PageManager.Preload / ClearPreloads、同步 Provider 与预加载凭证契约，清除同步缓存维护和退出中的相应调用。Navigation 及依赖使用 Unity 2022.3.62f3 引用构建成功，0 警告、0 错误；本轮预加载运行验收尚未执行，已退出 Play。未新增测试文件、未提交。
 
-- 按目标第 3 节修复参数提交异常：删除 IPreparedArgsUpdate.Rollback 及业务候选的恢复快照，提交异常不再反向写回参数；在候选异步清理前触发故障关闭，结果使用 ViewFaulted，更新导航/子视图清理记录、诊断和示例。Unity 2022.3.62f3 Play Mode 通过实际 Navigator + BorrowedViewProvider + LocalThingPresenter 验证：preparation=PreparationFailed、retained=True、commit=CommitFailed、faulted=True、noRollback=True、state=Failed。该路径等待实际清理后取得终态；仍需覆盖子视图、慢候选及输入原生事件。Console 包含一条注入的准备异常、两条同一次提交异常，重复报告已登记为目标第 7 节缺口。Navigation 及依赖编译通过，0 警告、0 错误，已退出 Play；未新增测试文件、未提交。
+- 按目标第 3 节修复参数提交异常：删除 IPreparedArgsUpdate.Rollback 及业务候选的恢复快照，提交异常不再反向写回参数；在候选异步清理前触发故障关闭，结果使用 ViewFaulted，更新导航/子视图清理记录、诊断和示例。Unity 2022.3.62f3 Play Mode 通过实际 PageManager + BorrowedViewProvider + LocalThingPresenter 验证：preparation=PreparationFailed、retained=True、commit=CommitFailed、faulted=True、noRollback=True、state=Failed。该路径等待实际清理后取得终态；仍需覆盖子视图、慢候选及输入原生事件。Console 包含一条注入的准备异常、两条同一次提交异常，重复报告已登记为目标第 7 节缺口。Navigation 及依赖编译通过，0 警告、0 错误，已退出 Play；未新增测试文件、未提交。
 
 - 按第 7 节接入稳定异常标识与报告去重：UIErrors 使用异常弱键保存 Guid 与原子报告状态，查询不触发输出；聚合按实际原因分别报告，单项聚合复用原因标识。操作结果、子视图变更、生命周期事件、导航追踪公开 DiagnosticId，文本追踪同时输出标识。Unity 2022.3.62f3 Play Mode 重跑参数失败导航路径：totalReports=2（准备与提交各一次）、wrapperId=True、traceMatches=5；Console 正好两条注入异常。16 个并发报告者及另一新异常共报告 2 次，抛错观察者不破坏分发；嵌套混合聚合报告 2 个不同原因，没有因已报原因丢失新异常。已退出 Play，编辑器加载新结果属性；最终 Navigation 及依赖编译通过，0 警告、0 错误。尚未完成全部包装异常、宿主/阶段诊断上下文与 Player 验收。未新增测试文件、未提交。
 
@@ -900,7 +900,7 @@
 
 - 最终 615 个 C# 文件通过成员布局/语法/大括号检查，0 文件待调整/0 人工冲突/0 大括号违规；日志 `/private/tmp/mui-final-handoff-style-20261009.log`。人工核对 uGUI/Editor/Sample 的 ?. 接收者均为普通托管对象或委托，没有 UnityEngine.Object 条件访问；Unity 对象继续显式 == null。
 - 根文件齐全；600 个 meta 无缺失/非法/重复 GUID；41 个程序集（29 个 Runtime/Editor、12 个 Sample）边界保持 Core/Resources/Navigation 无 Unity 引用，Runtime 无 Editor/Sample 依赖，Editor 平台隔离，TMP/Input System 按需启用。八项导入文件 254/254 一致；manifest/lock 保持本地 MUI 0.1.0；Analyzer SHA-256 为 d5dc8324970e10b2960413cc0382b5fef447f8dc80e311893da06eb5f38b44c7。报告 `/private/tmp/mui-final-handoff-audit-20261009.json`。
-- 注释继续说明准备/提交、代际、依赖释放、失败保留与原生退出边界；Navigator 表达页面导航协调，UIHost 负责 Unity 装配与帧驱动，保留名称。LifetimeScope、AcquiredView/AcquiredResource、Extent 与公开异步契约命名一致；Core/Resources/Navigation/uGUI/Editor 分层及可选适配、资源后端/自定义 Element 扩展入口保持明确，未引入第二套同步或通用恢复系统。
+- 注释继续说明准备/提交、代际、依赖释放、失败保留与原生退出边界；PageManager 表达页面导航协调，UIHost 负责 Unity 装配与帧驱动，保留名称。LifetimeScope、AcquiredView/AcquiredResource、Extent 与公开异步契约命名一致；Core/Resources/Navigation/uGUI/Editor 分层及可选适配、资源后端/自定义 Element 扩展入口保持明确，未引入第二套同步或通用恢复系统。
 - 原设计九类场景与 20 条确定性条件全部闭合，S1/S2/S3 完成。必要 IL2CPP 运行及性能基线对应当前源码；目标设备预算与未归因 allocator 提示按上方边界如实保留。恢复 Basic 公开场景，临时路径残留为 0；报告 `/private/tmp/mui-final-handoff-cleanup-20261009.json`。未自动提交或推送。
 
 - 最终刷新后实际窗口为 Basic，Play 已停止，Console 0 警告/0 错误，无粉色缺失 Shader；最后刷新/编译日志 `mui-final-handoff-editor-20261009.log` 未见 C# 编译错误。Documentation 与 Changelog 同步最终验收状态；Sample 的历史开发状态附明确的最终记录入口。

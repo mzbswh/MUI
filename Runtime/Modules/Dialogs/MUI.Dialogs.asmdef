@@ -1,7 +1,7 @@
 {
   "name": "MUI.Dialogs",
   "rootNamespace": "MUI.Dialogs",
-  "references": ["MUI.Core", "MUI.Navigation"],
+  "references": ["MUI.Core", "MUI.Pages"],
   "autoReferenced": true,
   "noEngineReferences": true
 }

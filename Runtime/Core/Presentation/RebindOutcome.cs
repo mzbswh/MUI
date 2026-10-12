@@ -24,7 +24,7 @@ namespace MUI
         Reentrant,
         Busy,
         SourceUnavailable,
-        RouteMismatch,
+        PageDefinitionMismatch,
         InputControlUnsupported,
         /// <summary>旧绑定不支持在换绑提交时同步切断订阅。</summary>
         BindingDetachUnsupported,

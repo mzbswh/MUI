@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using MUI.Navigation;
+using MUI.Pages;
 using UnityEngine;
 using L = MUI.Editor.Localization.MUIEditorLocalization;
 
@@ -10,13 +10,13 @@ namespace MUI.Editor
     public sealed class UIBuildCatalog
     {
         private readonly List<Page> pages = new List<Page>();
-        private readonly HashSet<Route> routes = new HashSet<Route>();
+        private readonly HashSet<PageDefinition> routes = new HashSet<PageDefinition>();
         private bool sealedCatalog;
 
         internal IReadOnlyList<Page> Pages => pages;
 
         /// <summary>显式提供生成工厂的 Manifest，类型必须与路由模型一致；依赖页面也须登记。</summary>
-        public void AddPage<TViewModel, TArgs, TResult>(Route<TViewModel, TArgs, TResult> route,
+        public void AddPage<TViewModel, TArgs, TResult>(PageDefinition<TViewModel, TArgs, TResult> route,
             GameObject prefab, BindingManifest manifest) where TViewModel : ViewModel
         {
             if (sealedCatalog)
@@ -39,7 +39,7 @@ namespace MUI.Editor
             {
                 throw new InvalidOperationException(L.Get("editor.UIBuildCatalog.b403f3aa8b") + route.Key);
             }
-            pages.Add(new Page { Route = route, Prefab = prefab, Manifest = manifest });
+            pages.Add(new Page { Definition = route, Prefab = prefab, Manifest = manifest });
         }
 
         internal void Seal() => sealedCatalog = true;
@@ -53,7 +53,7 @@ namespace MUI.Editor
 
         internal sealed class Page
         {
-            internal Route Route;
+            internal PageDefinition Definition;
             internal GameObject Prefab;
             internal BindingManifest Manifest;
         }

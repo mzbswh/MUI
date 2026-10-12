@@ -1,18 +1,18 @@
 using System.Threading;
 using System.Threading.Tasks;
-using MUI.Navigation;
+using MUI.Pages;
 using UnityEngine;
 
 namespace MUI.Samples.Navigation
 {
     public sealed class AsyncPagePresenter : PagePresenter, IAsyncOpenPresenter<PageArgs>, IAsyncClosePresenter
     {
-        private readonly Navigator navigator;
-        private readonly Route<PageViewModel, PageArgs, int> otherRoute;
+        private readonly PageManager pages;
+        private readonly PageDefinition<PageViewModel, PageArgs, int> otherRoute;
 
-        public AsyncPagePresenter(Navigator navigator, Route<PageViewModel, PageArgs, int> otherRoute)
+        public AsyncPagePresenter(PageManager pages, PageDefinition<PageViewModel, PageArgs, int> otherRoute)
         {
-            this.navigator = navigator;
+            this.pages = pages;
             this.otherRoute = otherRoute;
         }
 
@@ -20,7 +20,7 @@ namespace MUI.Samples.Navigation
         {
             Debug.Log("MUI Navigation OnOpenAsync begin");
             await Task.Delay(100, cancellationToken);
-            var nested = await navigator.OpenAsync(otherRoute, new PageArgs("Should be rejected", 0));
+            var nested = await pages.OpenAsync(otherRoute, new PageArgs("Should be rejected", 0));
             Debug.Log("MUI Navigation nested open: " + nested.Rejection);
             Context.Apply(() => ViewModel.Title = args.Title + " (ready)");
             Debug.Log("MUI Navigation OnOpenAsync ready");

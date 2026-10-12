@@ -3,7 +3,7 @@ using MUI.UGUI;
 namespace MUI.Samples.Navigation
 {
     /// <summary>独立字体资源绑定示例，加载器由项目在 View 激活前配置。</summary>
-    [ViewContract("FontResourceView")]
+    [UIWidget("FontResourceView")]
     public partial class FontResourceViewModel : ViewModel
     {
         [ObservableProperty]

@@ -60,7 +60,7 @@ namespace MUI.UGUI
                 }
             }
 
-            // 激活由 ViewInstance 或项目持有。最终控件清理不能先解除在途资源仍使用的原生引用。
+            // 激活由 PageInstance 或项目持有。最终控件清理不能先解除在途资源仍使用的原生引用。
             if (nativeDestroyed && !activationCleanupConfirmed())
             {
                 var completion = activeActivation == null ? null : activeActivation.DisposalCompletion;

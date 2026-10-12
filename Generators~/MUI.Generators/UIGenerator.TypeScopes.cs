@@ -22,7 +22,7 @@ namespace MUI.Generators
             foreach (var parameter in model.TypeParameters)
             {
                 if (parameter.Name == model.Name + "BindingContext" || parameter.Name == model.Name + "BindingFactory" ||
-                    parameter.Name == model.Name + "Route" || parameter.Name == "Manifest" || parameter.Name == "ResourceKey" ||
+                    parameter.Name == model.Name + "PageDefinition" || parameter.Name == "Manifest" || parameter.Name == "ResourceKey" ||
                     parameter.Name == "Create" || parameter.Name == "Register" || parameter.Name == "Key" || parameter.Name == "Resource")
                 {
                     Fail(parameter, "类型参数名称与生成工厂的类型或成员冲突，请为该类型参数换名。");
@@ -103,7 +103,7 @@ namespace MUI.Generators
             "global::" + (model.ContainingNamespace.IsGlobalNamespace ? "" :
                 model.ContainingNamespace.ToDisplayString() + ".") + name;
 
-        /// <summary>模型、绑定和路由使用相同外层声明，使访问规则及生成类型位置保持一致。</summary>
+        /// <summary>模型、绑定和页面定义使用相同外层声明，使访问规则及生成类型位置保持一致。</summary>
         private static string WrapTypeScope(INamedTypeSymbol model, StringBuilder body)
         {
             var parents = new Stack<INamedTypeSymbol>();

@@ -2,7 +2,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Collections.Generic;
-using MUI.Navigation;
+using MUI.Pages;
 using MUI.Resources;
 using MUI.UGUI;
 using UnityEngine;
@@ -17,15 +17,15 @@ namespace MUI.Samples.Navigation
         [SerializeField] private GameObject pagePrefab = null;
         [SerializeField] private GameObject dependencyPrefab = null;
         [SerializeField] private DependencyPlacement sharedPlacement = DependencyPlacement.RequiredBefore;
-        private Route<ThingItemViewModel, string, Unit> sharedRoute;
-        private Route<NavigationPageViewModel, string, int> firstRoute;
-        private Route<NavigationPageViewModel, string, int> secondRoute;
-        private Route<NavigationPageViewModel, string, int> conflictingRoute;
-        private Route<NavigationPageViewModel, string, int> independentRoute;
-        private ViewHandle<int> independent;
-        private ViewHandle<int> first;
-        private ViewHandle<int> second;
-        private ViewHandle shared;
+        private PageDefinition<ThingItemViewModel, string, Unit> sharedRoute;
+        private PageDefinition<NavigationPageViewModel, string, int> firstRoute;
+        private PageDefinition<NavigationPageViewModel, string, int> secondRoute;
+        private PageDefinition<NavigationPageViewModel, string, int> conflictingRoute;
+        private PageDefinition<NavigationPageViewModel, string, int> independentRoute;
+        private PageHandle<int> independent;
+        private PageHandle<int> first;
+        private PageHandle<int> second;
+        private PageHandle shared;
         private bool initialized;
         private int sharedCreated;
         private bool running;
@@ -57,26 +57,26 @@ namespace MUI.Samples.Navigation
                     throw;
                 }
                 initialized = true;
-                sharedRoute = new Route<ThingItemViewModel, string, Unit>("demo.shared-status", item,
+                sharedRoute = new PageDefinition<ThingItemViewModel, string, Unit>("demo.shared-status", item,
                     () => new ThingItemViewModel { Label = $"共享状态，第 {++sharedCreated} 次创建" },
                     bindingFactory: ThingItemViewModelBindingFactory.Create,
                     policy: ResolveDependencyPolicy());
-                var dependencies = new[] { RouteDependency<string>.Required(sharedRoute,
+                var dependencies = new[] { PageDependency<string>.Required(sharedRoute,
                     title => title == DependencyChangeTitle ? "other" : "default", sharedPlacement) };
                 firstRoute = CreatePage("demo.shared.first", "第一个父页面", page, dependencies);
                 secondRoute = CreatePage("demo.shared.second", "第二个父页面", page, dependencies);
                 conflictingRoute = CreatePage("demo.shared.conflicting", "参数冲突的父页面", page,
-                    new[] { RouteDependency<string>.Required(sharedRoute, _ => "other", sharedPlacement) });
+                    new[] { PageDependency<string>.Required(sharedRoute, _ => "other", sharedPlacement) });
                 // 不同业务上下文使用显式路由变体，共用 Prefab，但不共用正在服务其他父页面的实例。
-                var independentDependency = new Route<ThingItemViewModel, string, Unit>(
+                var independentDependency = new PageDefinition<ThingItemViewModel, string, Unit>(
                     "demo.independent-status", item,
                     () => new ThingItemViewModel { Label = "独立上下文：other" },
                     bindingFactory: ThingItemViewModelBindingFactory.Create,
                     policy: ResolveDependencyPolicy());
                 independentRoute = CreatePage("demo.independent.parent", "独立参数的父页面", page,
-                    new[] { RouteDependency<string>.Required(independentDependency, _ => "other", sharedPlacement) });
+                    new[] { PageDependency<string>.Required(independentDependency, _ => "other", sharedPlacement) });
                 InitializeOptionalRoutes(page, item);
-                host.Navigator.LifecycleChanged += OnDependencyLifecycleChanged;
+                host.Pages.LifecycleChanged += OnDependencyLifecycleChanged;
                 OpenBoth();
             }
             catch (Exception error)
@@ -85,16 +85,16 @@ namespace MUI.Samples.Navigation
             }
         }
 
-        private RoutePolicy ResolveDependencyPolicy() => host.ResolvePolicy("Background", overrides: new RoutePolicyOverrides
+        private PagePolicy ResolveDependencyPolicy() => host.ResolvePolicy("Background", overrides: new PagePolicyOverrides
         {
             Layer = host.ResolvePolicy().Layer,
             AllowMultiple = false,
             ExistingInstance = ExistingInstancePolicy.Reject
         });
 
-        private Route<NavigationPageViewModel, string, int> CreatePage(string key, string title,
-                    ViewResource resource, IReadOnlyList<RouteDependency<string>> dependencies) =>
-                    new Route<NavigationPageViewModel, string, int>(key, resource,
+        private PageDefinition<NavigationPageViewModel, string, int> CreatePage(string key, string title,
+                    ViewResource resource, IReadOnlyList<PageDependency<string>> dependencies) =>
+                    new PageDefinition<NavigationPageViewModel, string, int>(key, resource,
                         () => new NavigationPageViewModel { Title = title },
                         presenterFactory: _ => new PagePresenter(),
                         bindingFactory: NavigationPageViewModelBindingFactory.Create,
@@ -108,13 +108,13 @@ namespace MUI.Samples.Navigation
             {
                 return;
             }
-            foreach (Route route in new Route[] { firstRoute, secondRoute, conflictingRoute, independentRoute })
+            foreach (PageDefinition route in new PageDefinition[] { firstRoute, secondRoute, conflictingRoute, independentRoute })
             {
-                var validation = RouteGraphValidator.Validate(route);
-                Debug.Log($"路由图={route.Key}，有效={validation.IsValid}，路由数={validation.RouteCount}");
+                var validation = PageGraphValidator.Validate(route);
+                Debug.Log($"路由图={route.Key}，有效={validation.IsValid}，路由数={validation.DefinitionCount}");
                 foreach (var issue in validation.Issues)
                 {
-                    Debug.LogWarning($"{issue.RouteKey}: {issue.Rejection}，{issue.Message}");
+                    Debug.LogWarning($"{issue.PageKey}: {issue.Rejection}，{issue.Message}");
                 }
             }
         }
@@ -128,7 +128,7 @@ namespace MUI.Samples.Navigation
             {
                 return;
             }
-            var a = await host.Navigator.OpenAsync(firstRoute, "第一个父页面");
+            var a = await host.Pages.OpenAsync(firstRoute, "第一个父页面");
             if (!a.IsSuccess)
             {
                 Debug.LogWarning($"第一个父页面打开失败：{a.Status}/{a.Rejection}");
@@ -139,13 +139,13 @@ namespace MUI.Samples.Navigation
             {
                 return;
             }
-            var b = await host.Navigator.OpenAsync(secondRoute, "第二个父页面");
+            var b = await host.Pages.OpenAsync(secondRoute, "第二个父页面");
             second = b.Handle;
             if (!initialized || host == null)
             {
                 return;
             }
-            var dependencies = host.Navigator.GetDependencies(first.Identity);
+            var dependencies = host.Pages.GetDependencies(first.Identity);
             shared = dependencies.Count == 0 ? default : dependencies[0];
             Debug.Log($"父页面打开={a.Status}/{b.Status}，共享创建次数={sharedCreated}");
             ReportOwners();
@@ -158,7 +158,7 @@ namespace MUI.Samples.Navigation
         {
             if (initialized && host != null)
             {
-                var result = await host.Navigator.OpenAsync(sharedRoute, "default");
+                var result = await host.Pages.OpenAsync(sharedRoute, "default");
                 if (result.IsSuccess)
                 {
                     shared = result.Handle.Identity;
@@ -175,7 +175,7 @@ namespace MUI.Samples.Navigation
         {
             if (initialized && host != null)
             {
-                var result = await host.Navigator.ReleaseExplicitOwnershipAsync(shared);
+                var result = await host.Pages.ReleaseExplicitOwnershipAsync(shared);
                 Debug.Log($"显式持有撤销={result.Status}，已撤销={result.IsReleased}，涉及关闭={result.CloseOutcome.HasValue}");
                 ReportOwners();
             }
@@ -188,7 +188,7 @@ namespace MUI.Samples.Navigation
         {
             if (initialized && host != null)
             {
-                var result = await host.Navigator.OpenAsync(conflictingRoute, "依赖参数冲突的父页面");
+                var result = await host.Pages.OpenAsync(conflictingRoute, "依赖参数冲突的父页面");
                 Debug.Log($"冲突页面打开={result.Status}，拒绝={result.Rejection}，清理={result.Cleanup}");
                 ReportOwners();
             }
@@ -201,7 +201,7 @@ namespace MUI.Samples.Navigation
         {
             if (initialized && host != null)
             {
-                Debug.Log($"共享依赖关闭={(await host.Navigator.CloseAsync(shared)).Status}，有父拥有者时应为 InUse");
+                Debug.Log($"共享依赖关闭={(await host.Pages.CloseAsync(shared)).Status}，有父拥有者时应为 InUse");
             }
         }
 
@@ -212,8 +212,8 @@ namespace MUI.Samples.Navigation
         {
             if (initialized && host != null)
             {
-                Debug.Log($"共享依赖强制关闭={(await host.Navigator.ForceCloseAsync(shared)).Status}");
-                Debug.Log($"父页面状态={host.Navigator.GetState(first.Identity)}/{host.Navigator.GetState(second.Identity)}");
+                Debug.Log($"共享依赖强制关闭={(await host.Pages.ForceCloseAsync(shared)).Status}");
+                Debug.Log($"父页面状态={host.Pages.GetState(first.Identity)}/{host.Pages.GetState(second.Identity)}");
                 ReportOwners();
             }
         }
@@ -228,7 +228,7 @@ namespace MUI.Samples.Navigation
         {
             if (initialized && host != null && first.IsValid)
             {
-                var result = await host.Navigator.UpdateArgsAsync(first.Identity, firstRoute, title);
+                var result = await host.Pages.UpdateArgsAsync(first.Identity, firstRoute, title);
                 Debug.Log($"父参数更新={result.Status}，拒绝={result.Rejection}，共享创建次数={sharedCreated}");
                 ReportOwners();
             }
@@ -244,11 +244,11 @@ namespace MUI.Samples.Navigation
                 return;
             }
 
-            var opened = await host.Navigator.OpenAsync(independentRoute, "独立参数的父页面");
+            var opened = await host.Pages.OpenAsync(independentRoute, "独立参数的父页面");
             if (opened.IsSuccess)
             {
                 independent = opened.Handle;
-                var dependencies = host.Navigator.GetDependencies(independent.Identity);
+                var dependencies = host.Pages.GetDependencies(independent.Identity);
                 var dependency = dependencies.Count == 0 ? default : dependencies[0];
                 Debug.Log($"独立变体={opened.Status}，独立依赖={dependency}，原共享依赖={shared}");
             }
@@ -269,7 +269,7 @@ namespace MUI.Samples.Navigation
         {
             if (initialized && host != null && first.IsValid)
             {
-                var result = await host.Navigator.RebindAsync(first.Identity, firstRoute,
+                var result = await host.Pages.RebindAsync(first.Identity, firstRoute,
                     new NavigationPageViewModel { Title = "换绑后的父页面" });
                 Debug.Log($"父页面换绑={result.Status}，拒绝={result.Rejection}，共享创建次数={sharedCreated}");
                 ReportOwners();
@@ -283,7 +283,7 @@ namespace MUI.Samples.Navigation
         {
             if (initialized && host != null)
             {
-                var result = await host.Navigator.RebindAsync(shared, sharedRoute,
+                var result = await host.Pages.RebindAsync(shared, sharedRoute,
                     new ThingItemViewModel { Label = "替换共享模型" });
                 Debug.Log($"依赖换绑={result.Status}，拒绝={result.Rejection}");
             }
@@ -295,14 +295,14 @@ namespace MUI.Samples.Navigation
         [ContextMenu("本地关闭第二个父页面")]
         public void CloseSecond() => Run(() => CloseParentAsync(second));
 
-        private async Task CloseParentAsync(ViewHandle<int> parent)
+        private async Task CloseParentAsync(PageHandle<int> parent)
         {
             if (initialized && host != null && parent.IsValid)
             {
-                var closed = await host.Navigator.CloseAsync(parent);
+                var closed = await host.Pages.CloseAsync(parent);
                 if (closed.Cleanup == CleanupStatus.Pending)
                 {
-                    closed = await host.Navigator.WaitForCleanupAsync(parent.Identity);
+                    closed = await host.Pages.WaitForCleanupAsync(parent.Identity);
                 }
                 Debug.Log($"父页面关闭={closed.Status}，清理={closed.Cleanup}");
                 ReportOwners();
@@ -337,7 +337,7 @@ namespace MUI.Samples.Navigation
                 return;
             }
             ReportOptionalParents();
-            Debug.Log($"共享父拥有者数={host.Navigator.GetOwners(shared).Count}，显式持有={host.Navigator.HasExplicitOwnership(shared)}，共享状态={host.Navigator.GetState(shared)}");
+            Debug.Log($"共享父拥有者数={host.Pages.GetOwners(shared).Count}，显式持有={host.Pages.HasExplicitOwnership(shared)}，共享状态={host.Pages.GetState(shared)}");
         }
 
         private async void OnDestroy()
@@ -346,7 +346,7 @@ namespace MUI.Samples.Navigation
             {
                 try
                 {
-                    host.Navigator.LifecycleChanged -= OnDependencyLifecycleChanged;
+                    host.Pages.LifecycleChanged -= OnDependencyLifecycleChanged;
                     initialized = false;
                     await host.ShutdownAsync();
                 }

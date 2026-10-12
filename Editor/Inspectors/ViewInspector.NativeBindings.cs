@@ -279,7 +279,7 @@ namespace MUI.Editor
                     if (GUILayout.Button(new GUIContent(L.Get("bindingRow.locate"), L.Get("bindingRow.locate.help")), EditorStyles.miniButton, GUILayout.Width(44)) && row.Target != null)
                         EditorGUIUtility.PingObject(row.Target.gameObject);
                     var canOpenSource = row.Entry != null && !string.IsNullOrEmpty(row.Entry.SourcePath);
-                    var sourceHelp = row.Entry == null ? "此控件还没有代码声明；选择属性并生成绑定后可查看生成成员。" : IsAutoBinding(row.Entry) ? "打开编译器直接输出的生成源码；首次使用会启用输出并重新编译。文件位于 Library，请勿手动修改。" : string.IsNullOrEmpty(row.Entry.SourcePath) ? "没有可定位的源码信息。" : "打开绑定声明：" + row.Entry.SourcePath + ":" + row.Entry.SourceLine;
+                    var sourceHelp = row.Entry == null ? "此控件还没有代码声明；选择属性并生成绑定后可查看生成成员。" : IsAutoBinding(row.Entry) ? "打开编译器输出的生成源码；由全局设置中的“输出生成源码供 IDE 使用”控制。文件位于 Library，请勿手动修改。" : string.IsNullOrEmpty(row.Entry.SourcePath) ? "没有可定位的源码信息。" : "打开绑定声明：" + row.Entry.SourcePath + ":" + row.Entry.SourceLine;
                     if (BindingActionButton(L.Get("bindingRow.source"), sourceHelp, 44, canOpenSource)) OpenBindingSource(row.Entry);
                     using (new EditorGUI.DisabledScope(row.IsElementBinding))
                         if (GUILayout.Button(new GUIContent("×", L.Get("nativeRules.removeOne.help")), EditorStyles.miniButton, GUILayout.Width(22)))
@@ -414,7 +414,6 @@ namespace MUI.Editor
                     if (!saved) throw new IOException("Cannot save binding metadata: " + prefabPath);
                 }
                 else PrefabUtility.ApplyObjectOverride(view, prefabPath, InteractionMode.UserAction);
-                // 只移除带本页生成标记的旧文件，业务源码不改写。
                 UnityEditor.Compilation.CompilationPipeline.RequestScriptCompilation(UnityEditor.Compilation.RequestScriptCompilationOptions.CleanBuildCache);
                 var hint = CompilerGeneratedSources.AssemblyPrefix(manifests[selected].ViewModelType.Assembly.GetName().Name) + "_" + string.Concat(manifests[selected].ViewModelType.FullName.Select(c => char.IsLetterOrDigit(c) ? c.ToString() : "_" + ((int)c).ToString("X4")));
                 var validation = ViewContractValidator.ValidateStructure(view);

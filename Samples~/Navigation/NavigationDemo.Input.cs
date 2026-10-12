@@ -1,6 +1,6 @@
 using System;
 using System.Threading.Tasks;
-using MUI.Navigation;
+using MUI.Pages;
 using MUI.Resources;
 using MUI.UGUI;
 using UnityEngine;
@@ -10,14 +10,14 @@ namespace MUI.Samples.Navigation
 {
     public sealed partial class NavigationDemo
     {
-        private async Task DemonstrateInputAsync(Navigator navigator, ViewResource resource,
+        private async Task DemonstrateInputAsync(PageManager pages, ViewResource resource,
                     Func<IView, PageViewModel, BindingContext<PageViewModel>> binding)
         {
             var presenter = new InputDemoPresenter();
-            var route = new Route<PageViewModel, PageArgs, int>("input.demo", resource,
+            var route = new PageDefinition<PageViewModel, PageArgs, int>("input.demo", resource,
                 () => new PageViewModel(), _ => presenter, binding,
                 host.ResolvePolicy("Popup"));
-            var opened = await navigator.OpenAsync(route, new PageArgs("Two input blockers", 7));
+            var opened = await pages.OpenAsync(route, new PageArgs("Two input blockers", 7));
             if (!opened.IsSuccess)
             {
                 throw new InvalidOperationException("Input demo failed.", opened.Error);
@@ -29,17 +29,17 @@ namespace MUI.Samples.Navigation
             Debug.Log($"输入快照：View 资格={inputSnapshot.ViewInputEnabled}，限制={inputSnapshot.Restrictions}，局部阻挡={inputSnapshot.InputGate.BlockerCount}，已收录原因={inputSnapshot.InputGate.Reasons.Count}，截断={inputSnapshot.InputGate.IsTruncated}");
             var confirm = view.GetElement<ButtonElement>("Confirm").GetComponent<Button>();
             confirm.onClick.Invoke();
-            Debug.Log($"MUI Input blocked: count={input.BlockerCount}; enabled={view.IsInputEnabled}; state={navigator.GetState(opened.Handle.Identity)}; back={(await navigator.BackAsync()).Status}");
+            Debug.Log($"MUI Input blocked: count={input.BlockerCount}; enabled={view.IsInputEnabled}; state={pages.GetState(opened.Handle.Identity)}; back={(await pages.BackAsync()).Status}");
             presenter.ExerciseTransientBlocks();
             Debug.Log($"MUI Input transient ownership: context={presenter.OwnedCount}; gate={input.BlockerCount}");
             presenter.ReleaseFirst();
             presenter.ReleaseFirst();
             confirm.onClick.Invoke();
-            Debug.Log($"MUI Input partial release: count={input.BlockerCount}; enabled={view.IsInputEnabled}; state={navigator.GetState(opened.Handle.Identity)}");
+            Debug.Log($"MUI Input partial release: count={input.BlockerCount}; enabled={view.IsInputEnabled}; state={pages.GetState(opened.Handle.Identity)}");
             presenter.ReleaseSecond();
             Debug.Log($"MUI Input all released: count={input.BlockerCount}; enabled={view.IsInputEnabled}");
             presenter.BlockUntilClose();
-            await navigator.CloseAsync(opened.Handle);
+            await pages.CloseAsync(opened.Handle);
             Debug.Log($"MUI Input lifetime released: count={input.BlockerCount}; gateOpen={input.IsOpen}");
             var releasedGate = input.CaptureSnapshot();
             Debug.Log($"已释放门控快照：已释放={releasedGate.IsDisposed}，允许输入={releasedGate.IsOpen}，阻挡数={releasedGate.BlockerCount}");

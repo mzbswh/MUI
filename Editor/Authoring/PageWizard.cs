@@ -2,8 +2,9 @@ using System;
 using System.IO;
 using System.Collections.Generic;
 using System.Text;
+using System.Xml.Linq;
 using MUI.UGUI;
-using MUI.Navigation;
+using MUI.Pages;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -26,6 +27,7 @@ namespace MUI.Editor
         private string message;
         private string displayedLanguage;
         private Vector2 scroll;
+        private bool creationQueued;
 
         [MenuItem("Tools/MUI/页面向导 (Page Wizard)", false, 1)]
         private static void Open()
@@ -42,20 +44,25 @@ namespace MUI.Editor
         private GUIStyle cardStyle;
         private GUIStyle noteStyle;
         private GUIStyle policyValueStyle;
+        private bool stylesUseDarkSkin;
 
         private static GUIContent Hint(string labelKey, string hintKey) =>
             new GUIContent(L.Get(labelKey), L.Get("wizard." + hintKey));
 
         private void EnsureStyles()
         {
-            if (headingStyle != null) return;
-            headingStyle = new GUIStyle(EditorStyles.boldLabel) { fontSize = 20 };
+            if (headingStyle != null && stylesUseDarkSkin == EditorGUIUtility.isProSkin) return;
+            stylesUseDarkSkin = EditorGUIUtility.isProSkin;
+            var textColor = stylesUseDarkSkin ? new Color(0.82f, 0.82f, 0.82f) : new Color(0.12f, 0.12f, 0.12f);
+            headingStyle = new GUIStyle(EditorStyles.boldLabel) { fontSize = 20, wordWrap = true };
+            headingStyle.normal.textColor = textColor;
             cardStyle = new GUIStyle(EditorStyles.helpBox)
             {
                 padding = new RectOffset(16, 16, 14, 14),
                 margin = new RectOffset(0, 0, 8, 8)
             };
-            noteStyle = new GUIStyle(EditorStyles.wordWrappedLabel) { fontSize = 12 };
+            noteStyle = new GUIStyle(EditorStyles.label) { fontSize = 12, wordWrap = true, stretchWidth = true };
+            noteStyle.normal.textColor = textColor;
             policyValueStyle = new GUIStyle(noteStyle) { fontStyle = FontStyle.Bold };
         }
 
@@ -71,7 +78,7 @@ namespace MUI.Editor
             }
             titleContent.text = L.Get("editor.PageWizard.5a814a8beb");
             var oldLabelWidth = EditorGUIUtility.labelWidth;
-            EditorGUIUtility.labelWidth = 180;
+            EditorGUIUtility.labelWidth = Mathf.Clamp(position.width * 0.35f, 100, 180);
             try
             {
                 using (new EditorGUILayout.VerticalScope())
@@ -80,7 +87,7 @@ namespace MUI.Editor
                     using (new EditorGUILayout.HorizontalScope())
                     {
                         GUILayout.Space(20);
-                        using (new EditorGUILayout.VerticalScope())
+                        using (new EditorGUILayout.VerticalScope(GUILayout.Width(Mathf.Max(1, position.width - 40))))
                         {
                             GUILayout.Label(L.Get("wizard.title"), headingStyle);
                             GUILayout.Space(5);
@@ -101,11 +108,14 @@ namespace MUI.Editor
                         GUILayout.Space(20);
                     }
                     GUILayout.Space(10);
-                    scroll = EditorGUILayout.BeginScrollView(scroll);
+                    scroll.x = 0;
+                    scroll = GUILayout.BeginScrollView(scroll, false, false, GUIStyle.none, GUI.skin.verticalScrollbar);
                     using (new EditorGUILayout.HorizontalScope())
                     {
                         GUILayout.Space(20);
-                        using (new EditorGUILayout.VerticalScope())
+                        // 固定内容宽度，避免长路径和中文说明撑大滚动区域。
+                        // 预留垂直滚动条空间，停靠到窄面板时也只需纵向滚动。
+                        using (new EditorGUILayout.VerticalScope(GUILayout.Width(Mathf.Max(1, position.width - 60))))
                         {
                             if (step == 0) DrawIdentity();
                             else if (step == 1) DrawBehavior();
@@ -114,7 +124,7 @@ namespace MUI.Editor
                         }
                         GUILayout.Space(20);
                     }
-                    EditorGUILayout.EndScrollView();
+                    GUILayout.EndScrollView();
                     DrawFooter();
                 }
             }
@@ -126,7 +136,8 @@ namespace MUI.Editor
             step = next;
             scroll = Vector2.zero;
             message = null;
-            GUI.FocusControl(null);
+            if (Event.current != null) GUI.FocusControl(null);
+            Repaint();
         }
 
         private void DrawIdentity()
@@ -199,9 +210,8 @@ namespace MUI.Editor
                 GUILayout.Label(L.Get("wizard.logicExample" + mode), noteStyle);
                 GUILayout.Space(12);
                 GUILayout.Label(L.Get("wizard.logicFiles"), EditorStyles.boldLabel);
-                GUILayout.Label(pageName + "ViewModel.cs  +  " + pageName + "Page.cs", noteStyle);
+                GUILayout.Label(pageName + "ViewModel.cs", noteStyle);
                 if (createPresenter) GUILayout.Label("+ " + pageName + "Presenter.cs", noteStyle);
-                if (typedContracts) GUILayout.Label("+ " + pageName + "Args.cs  +  " + pageName + "Result.cs", noteStyle);
                 GUILayout.Space(8);
                 GUILayout.Label(L.Get("wizard.logicScaffoldNote"), noteStyle);
             }
@@ -277,7 +287,7 @@ namespace MUI.Editor
         {
             using (new EditorGUILayout.VerticalScope(cardStyle))
             {
-                var busy = EditorApplication.isPlayingOrWillChangePlaymode || EditorApplication.isCompiling;
+                var busy = creationQueued || EditorApplication.isPlayingOrWillChangePlaymode || EditorApplication.isCompiling;
                 var error = step == 3 ? null : ValidateDestination(includePolicy: step != 0);
                 if (error == null && step == 2) error = InspectAssembly().Error;
                 if (!string.IsNullOrEmpty(message)) EditorGUILayout.HelpBox(L.Diagnostic(message), MessageType.Error);
@@ -299,7 +309,7 @@ namespace MUI.Editor
                         {
                             if (GUILayout.Button(Hint(step == 2 ? "editor.PageWizard.f6f87e2c80" : "wizard.next", step == 2 ? "createHint" : "nextHint"), GUILayout.Width(160), GUILayout.Height(32)))
                             {
-                                if (step == 2) Create();
+                                if (step == 2) QueueCreation();
                                 else ChangeStep(step + 1);
                             }
                         }
@@ -341,14 +351,29 @@ namespace MUI.Editor
             }
             var conflict = DirectoryConflict(ScriptDirectory) ?? (existingPrefab == null ? DirectoryConflict(PrefabDirectory) : null);
             if (conflict != null) return L.Format("wizard.pathOccupied", conflict);
-            var names = new List<string> { pageName + "ViewModel.cs", pageName + "Page.cs" };
+            var names = new List<string> { pageName + "ViewModel.cs" };
             if (createPresenter) names.Add(pageName + "Presenter.cs");
-            if (typedContracts) { names.Add(pageName + "Args.cs"); names.Add(pageName + "Result.cs"); }
             foreach (var name in names)
                 if (PathOccupied(ScriptDirectory + "/" + name)) return L.Format("wizard.pathOccupied", ScriptDirectory + "/" + name);
             if (existingPrefab == null && PathOccupied(PrefabPath)) return L.Format("wizard.pathOccupied", PrefabPath);
 
             return null;
+        }
+
+        private void QueueCreation()
+        {
+            if (creationQueued) return;
+            creationQueued = true;
+            // 场景切换和资源刷新必须在当前 IMGUI 布局作用域全部结束后执行。
+            EditorApplication.delayCall += CreateDeferred;
+        }
+
+        private void CreateDeferred()
+        {
+            creationQueued = false;
+            if (this == null || step != 2) return;
+            try { Create(); }
+            finally { if (this != null) Repaint(); }
         }
 
         private void Create()
@@ -389,9 +414,9 @@ namespace MUI.Editor
                 {
                     if (PathOccupied(prefabPath)) throw new IOException(L.Format("wizard.pathOccupied", prefabPath));
                     createdFiles.Add(prefabPath);
-                    SavePrefab(prefabPath);
+                    SavePrefab(prefabPath, inspection.AssemblyName);
                 }
-                sources = CreatePageSources(); // Prefab 保存后写入实际 GUID。
+                sources = CreatePageSources();
                 foreach (var file in sources)
                 {
                     using (var stream = new FileStream(ScriptDirectory + "/" + file.Key, FileMode.CreateNew, FileAccess.Write))
@@ -404,6 +429,7 @@ namespace MUI.Editor
                     }
                 }
 
+                if (existingPrefab != null) SaveExistingPageAssociation(prefabPath, inspection.AssemblyName);
                 createdScriptDirectory = ScriptDirectory;
                 createdPrefabPath = prefabPath;
                 ChangeStep(3);
@@ -418,12 +444,14 @@ namespace MUI.Editor
             }
             finally
             {
+                // 先保存同步请求，Refresh 触发编译/域重载后仍能恢复；失败回滚也同步删除结果。
+                CompilerGeneratedSources.RequestProjectSync();
                 AssetDatabase.AllowAutoRefresh();
                 AssetDatabase.Refresh();
             }
         }
 
-        private void SavePrefab(string path)
+        private void SavePrefab(string path, string assemblyName)
         {
             var scene = EditorSceneManager.NewPreviewScene();
             GameObject root = null;
@@ -448,7 +476,8 @@ namespace MUI.Editor
                 content.transform.SetParent(rect, false);
                 var contentRect = (RectTransform)content.transform;
                 Stretch(contentRect);
-                var serializedView = new SerializedObject(root.GetComponent<View>());
+                var view = root.GetComponent<View>();
+                var serializedView = new SerializedObject(view);
                 serializedView.FindProperty("hiddenMode").enumValueIndex = (int)ViewHiddenMode.DeactivateContent;
                 serializedView.FindProperty("hiddenContentRoot").objectReferenceValue = content;
                 serializedView.FindProperty("useGlobalModalBackdrop").boolValue = true;
@@ -459,7 +488,7 @@ namespace MUI.Editor
                 var backend = PageTextBackend.Find(textBackendId);
                 var title = backend.CreateText("Title", contentRect, pageName);
                 if (typeof(NativeControl).IsAssignableFrom(backend.ElementType))
-                    AddNativeBinding(root.GetComponent<View>(), "Title", title);
+                    AddNativeBinding(view, "Title", title);
                 else title.gameObject.AddComponent(backend.ElementType);
                 title.rectTransform.anchorMin = new Vector2(0, 1);
                 title.rectTransform.anchorMax = Vector2.one;
@@ -478,7 +507,16 @@ namespace MUI.Editor
                 }
                 else
                 {
-                    CreateCloseButton(contentRect, backend);
+                    CreateCloseButton(view, contentRect, backend);
+                }
+                if (UsesAutomaticPageBindings) SaveAutomaticPageBindings(view, assemblyName);
+                else
+                {
+                    var association = new XElement("bindings", new XAttribute("assembly", assemblyName),
+                        new XAttribute("model", targetNamespace + "." + pageName + "ViewModel"));
+                    var associationView = new SerializedObject(view);
+                    associationView.FindProperty("muiAutoBindings").stringValue = Convert.ToBase64String(Encoding.UTF8.GetBytes(association.ToString(SaveOptions.DisableFormatting)));
+                    associationView.ApplyModifiedPropertiesWithoutUndo();
                 }
                 root.SetActive(true);
                 if (PrefabUtility.SaveAsPrefabAsset(root, path) == null)
@@ -497,7 +535,7 @@ namespace MUI.Editor
             }
         }
 
-        private static void CreateCloseButton(RectTransform rect, PageTextBackend backend)
+        private static void CreateCloseButton(View view, RectTransform rect, PageTextBackend backend)
         {
             var close = new GameObject("Close", typeof(RectTransform), typeof(Image), typeof(Button));
             close.transform.SetParent(rect, false);
@@ -508,7 +546,7 @@ namespace MUI.Editor
             closeRect.sizeDelta = new Vector2(80, 48);
             close.GetComponent<Button>().targetGraphic = close.GetComponent<Image>();
             if (typeof(NativeControl).IsAssignableFrom(backend.ElementType))
-                AddNativeBinding(rect.GetComponentInParent<View>(), "Close", close.GetComponent<Button>());
+                AddNativeBinding(view, "Close", close.GetComponent<Button>());
             else close.AddComponent<ButtonElement>();
             // 默认模板使用基础字体包含的关闭符号；语义名称独立保留，字体和语言由项目配置。
             var label = backend.CreateText("Label", closeRect, "×");
@@ -524,6 +562,39 @@ namespace MUI.Editor
             row.FindPropertyRelative("Name").stringValue = name;
             row.FindPropertyRelative("Target").objectReferenceValue = target;
             serialized.ApplyModifiedPropertiesWithoutUndo();
+        }
+
+        private void SaveAutomaticPageBindings(View view, string assemblyName)
+        {
+            var metadata = new XElement("bindings", new XAttribute("assembly", assemblyName),
+                new XAttribute("model", targetNamespace + "." + pageName + "ViewModel"));
+            var serialized = new SerializedObject(view);
+            var selections = serialized.FindProperty("autoBindingSelections");
+            selections.arraySize = ReceivesInput ? 2 : 1;
+            AddSelection(0, "Title", "Content", "Title", typeof(ITextElement), false);
+            metadata.Element("binding").SetAttributeValue("initial", pageName);
+            if (ReceivesInput) AddSelection(1, "Close", "Clicked", "CloseCommand", typeof(IButtonElement), true);
+            serialized.FindProperty("muiAutoBindings").stringValue = Convert.ToBase64String(
+                Encoding.UTF8.GetBytes(metadata.ToString(SaveOptions.DisableFormatting)));
+            serialized.ApplyModifiedPropertiesWithoutUndo();
+
+            void AddSelection(int index, string control, string property, string source, Type contract, bool command)
+            {
+                metadata.Add(new XElement("binding", new XAttribute("name", control),
+                    new XAttribute("contract", contract.FullName), new XAttribute("source", source),
+                    new XAttribute("property", property), new XAttribute("mode", "OneWay"),
+                    new XAttribute("command", command ? "true" : "false")));
+                var selection = selections.GetArrayElementAtIndex(index);
+                selection.FindPropertyRelative("Control").stringValue = control;
+                var properties = selection.FindPropertyRelative("Properties");
+                properties.arraySize = 1;
+                var choice = properties.GetArrayElementAtIndex(0);
+                choice.FindPropertyRelative("Property").stringValue = property;
+                choice.FindPropertyRelative("Source").stringValue = source;
+                choice.FindPropertyRelative("Mode").intValue = (int)BindingMode.OneWay;
+                choice.FindPropertyRelative("Native").boolValue = false;
+                choice.FindPropertyRelative("Extension").stringValue = string.Empty;
+            }
         }
 
         private static void Stretch(RectTransform rect)

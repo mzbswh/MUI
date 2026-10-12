@@ -1,0 +1,154 @@
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+
+namespace MUI.Pages
+{
+    public sealed partial class PageManager
+    {
+        private Task inactiveContentClearing;
+
+        /// <summary>正在取消预加载并释放非活动缓存；期间不接纳新预加载或关闭缓存。</summary>
+        public bool IsClearingInactiveContent
+        {
+            get
+            {
+                AssertThread();
+                return inactiveContentClearing != null && !inactiveContentClearing.IsCompleted;
+            }
+        }
+
+        /// <summary>
+        /// 先请求结束预加载，再释放停用页面缓存，等待全部相关回收。
+        /// 活动页面、业务任务与导航历史保持有效；重复请求共用当前回收任务。
+        /// </summary>
+        private ValueTask ClearInactiveContentAsyncUntraced()
+        {
+            AssertThread();
+            if (IsReentrant || IsSourceCommandRunning || HasCloseEvaluation)
+            {
+                throw new InvalidOperationException("不能在导航回调中等待闲置内容清理。");
+            }
+
+            if (IsShutdown)
+            {
+                return ShutdownAsyncUntraced();
+            }
+
+            if (inactiveContentClearing != null && !inactiveContentClearing.IsCompleted)
+            {
+                return new ValueTask(inactiveContentClearing);
+            }
+
+            var completion = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+            inactiveContentClearing = completion.Task;
+            _ = ClearInactiveContentCoreAsync(completion);
+            return new ValueTask(inactiveContentClearing);
+        }
+
+        private async Task ClearInactiveContentCoreAsync(TaskCompletionSource<bool> completion)
+        {
+            try
+            {
+                var errors = new List<Exception>();
+                // 两类 UI 内容独立发起清理，一类失败不跳过另一类。
+                Task preloads = null;
+                Task cache = null;
+                try
+                {
+                    preloads = ClearPreloadSnapshotAsync();
+                }
+                catch (Exception error)
+                {
+                    errors.Add(error);
+                }
+                try
+                {
+                    cache = BeginCacheClear();
+                }
+                catch (Exception error)
+                {
+                    errors.Add(error);
+                }
+                if (preloads != null)
+                {
+                    try
+                    {
+                        await preloads;
+                    }
+                    catch (Exception error)
+                    {
+                        errors.Add(error);
+                    }
+                }
+                if (cache != null)
+                {
+                    try
+                    {
+                        await cache;
+                    }
+                    catch (Exception error)
+                    {
+                        errors.Add(error);
+                    }
+                }
+                if (errors.Count != 0)
+                {
+                    throw new AggregateException("UI 闲置内容清理失败。", errors);
+                }
+                completion.TrySetResult(true);
+            }
+            catch (Exception error)
+            {
+                completion.TrySetException(error);
+            }
+        }
+
+        private async Task ClearPreloadSnapshotAsync()
+        {
+            var errors = new List<Exception>();
+            // 接纳时捕获已移出目录的批次；取消回调可能使其内联结束，也不能丢失这次观察。
+            var pending = new HashSet<Task>(preloadClearings);
+            try
+            {
+                pending.Add(StartPreloadClear());
+            }
+            catch (Exception error)
+            {
+                errors.Add(error);
+            }
+
+            foreach (var cleanup in pending)
+            {
+                try
+                {
+                    await cleanup;
+                }
+                catch (Exception error)
+                {
+                    errors.Add(error);
+                }
+            }
+
+            if (errors.Count != 0)
+            {
+                throw new AggregateException("UI 预加载清理失败。", errors);
+            }
+        }
+
+        private static bool ContainsCleanupError(Exception container, Exception target) =>
+            ReferenceEquals(container, target) || (container is AggregateException aggregate &&
+                System.Linq.Enumerable.Any(aggregate.InnerExceptions, nested => ContainsCleanupError(nested, target)));
+
+        private bool IsRecordedInactiveCleanup(Exception error)
+        {
+            if (cacheReleaseErrors.Contains(error) || preloadCleanupErrors.Contains(error))
+            {
+                return true;
+            }
+
+            return error is AggregateException aggregate && aggregate.InnerExceptions.Count != 0 &&
+                System.Linq.Enumerable.All(aggregate.InnerExceptions, IsRecordedInactiveCleanup);
+        }
+    }
+}

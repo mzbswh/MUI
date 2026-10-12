@@ -6,7 +6,7 @@ namespace MUI.UGUI
 {
     /// <summary>
     /// 合并同一 EventSystem 同帧的返回输入，防止局部 Cancel 和宿主 Back 重复派发。
-    /// 仅用于输入适配；直接调用 Navigator 不受影响。所有入口须在 Unity 主线程调用。
+    /// 仅用于输入适配；直接调用 PageManager 不受影响。所有入口须在 Unity 主线程调用。
     /// </summary>
     public static class BackInputConsumption
     {

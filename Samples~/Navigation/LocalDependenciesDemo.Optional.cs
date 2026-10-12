@@ -1,8 +1,9 @@
+using MUI.Pages.Diagnostics;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Collections.Generic;
-using MUI.Navigation;
+using MUI.Pages;
 using MUI.Resources;
 using UnityEngine;
 
@@ -10,35 +11,35 @@ namespace MUI.Samples.Navigation
 {
     public sealed partial class LocalDependenciesDemo
     {
-        private Route<NavigationPageViewModel, string, int> optionalRoute;
-        private Route<NavigationPageViewModel, string, int> optionalFailureRoute;
-        private ViewHandle<int> optionalParent;
-        private ViewHandle<int> optionalFailureParent;
+        private PageDefinition<NavigationPageViewModel, string, int> optionalRoute;
+        private PageDefinition<NavigationPageViewModel, string, int> optionalFailureRoute;
+        private PageHandle<int> optionalParent;
+        private PageHandle<int> optionalFailureParent;
 
         /// <summary>供项目编辑器显式采集静态声明，不创建界面；未初始化时返回空集合。</summary>
-        public IReadOnlyList<Route> GetDiagnosticRoutes()
+        public IReadOnlyList<PageDefinition> GetDiagnosticRoutes()
         {
             if (!initialized || optionalRoute == null || optionalFailureRoute == null)
             {
-                return Array.Empty<Route>();
+                return Array.Empty<PageDefinition>();
             }
-            return new Route[] { firstRoute, secondRoute, conflictingRoute, optionalRoute, optionalFailureRoute };
+            return new PageDefinition[] { firstRoute, secondRoute, conflictingRoute, optionalRoute, optionalFailureRoute };
         }
 
         private void InitializeOptionalRoutes(ViewResource page, ViewResource item)
         {
-            var failing = new Route<ThingItemViewModel, Unit, Unit>("demo.shared.optional-failure", item,
+            var failing = new PageDefinition<ThingItemViewModel, Unit, Unit>("demo.shared.optional-failure", item,
                 () => new ThingItemViewModel { Label = "准备失败的可选界面" },
                 presenterFactory: _ => new FailingOptionalPresenter(),
                 bindingFactory: ThingItemViewModelBindingFactory.Create,
                 policy: ResolveDependencyPolicy());
             optionalRoute = CreatePage("demo.shared.optional-parent", "允许共享依赖退出的父页面", page,
-                new[] { RouteDependency<string>.Optional(sharedRoute, _ => "default", sharedPlacement) });
+                new[] { PageDependency<string>.Optional(sharedRoute, _ => "default", sharedPlacement) });
             optionalFailureRoute = CreatePage("demo.shared.optional-failure-parent", "可选准备失败仍保留的父页面", page,
                 new[]
                 {
-                    RouteDependency<string>.Required(sharedRoute, _ => "default", sharedPlacement),
-                    RouteDependency<string>.Optional(failing, DependencyPlacement.AttachedAfter)
+                    PageDependency<string>.Required(sharedRoute, _ => "default", sharedPlacement),
+                    PageDependency<string>.Optional(failing, DependencyPlacement.AttachedAfter)
                 });
         }
 
@@ -51,9 +52,9 @@ namespace MUI.Samples.Navigation
             {
                 return;
             }
-            var optional = await host.Navigator.OpenAsync(optionalRoute, "依赖强制退出后仍保留此父页面");
+            var optional = await host.Pages.OpenAsync(optionalRoute, "依赖强制退出后仍保留此父页面");
             optionalParent = optional.Handle;
-            var failed = await host.Navigator.OpenAsync(optionalFailureRoute, "可选准备失败，必需兄弟依赖仍保留");
+            var failed = await host.Pages.OpenAsync(optionalFailureRoute, "可选准备失败，必需兄弟依赖仍保留");
             optionalFailureParent = failed.Handle;
             Debug.Log($"可选依赖示例：共享父打开={optional.Status}，准备失败父打开={failed.Status}");
             if (failed.Handle.IsValid)
@@ -70,18 +71,18 @@ namespace MUI.Samples.Navigation
         {
             if (initialized && host != null && optionalFailureParent.IsValid)
             {
-                var result = await host.Navigator.UpdateArgsAsync(optionalFailureParent.Identity, optionalFailureRoute, "已更新标题，保持可选依赖缺席");
+                var result = await host.Pages.UpdateArgsAsync(optionalFailureParent.Identity, optionalFailureRoute, "已更新标题，保持可选依赖缺席");
                 Debug.Log($"已降级父参数更新={result.Status}");
                 ReportOptionalParents();
             }
         }
 
-        private void OnDependencyLifecycleChanged(NavigationEvent change)
+        private void OnDependencyLifecycleChanged(PageEvent change)
         {
-            if (change.Kind == NavigationEventKind.DependencyDegraded && change.DependencyFailure.HasValue)
+            if (change.Kind == PageEventKind.DependencyDegraded && change.DependencyFailure.HasValue)
             {
                 var failure = change.DependencyFailure.Value;
-                Debug.LogWarning($"父页面 {change.Route.Key} 降级：依赖={failure.Target.Key}，阶段={failure.Stage}，原因={failure.Error.Message}");
+                Debug.LogWarning($"父页面 {change.Definition.Key} 降级：依赖={failure.Target.Key}，阶段={failure.Stage}，原因={failure.Error.Message}");
             }
         }
 
@@ -91,7 +92,7 @@ namespace MUI.Samples.Navigation
             {
                 if (handle.IsValid)
                 {
-                    Debug.Log($"可选示例父状态={host.Navigator.GetState(handle.Identity)}，当前依赖数={host.Navigator.GetDependencies(handle.Identity).Count}，降级数={host.Navigator.GetDependencyFailures(handle.Identity).Count}");
+                    Debug.Log($"可选示例父状态={host.Pages.GetState(handle.Identity)}，当前依赖数={host.Pages.GetDependencies(handle.Identity).Count}，降级数={host.Pages.GetDependencyFailures(handle.Identity).Count}");
                 }
             }
         }

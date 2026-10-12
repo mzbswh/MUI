@@ -1,7 +1,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using MUI.Navigation;
+using MUI.Pages;
 using MUI.Resources;
 using MUI.UGUI;
 using UnityEngine;
@@ -10,12 +10,12 @@ namespace MUI.Samples.Navigation
 {
     public sealed partial class AsynchronousDependenciesDemo
     {
-        private Route<ThingItemViewModel, Unit, Unit> CreateDependency(string key, ViewResource resource,
+        private PageDefinition<ThingItemViewModel, Unit, Unit> CreateDependency(string key, ViewResource resource,
                     bool fail, int prepareDelay, int cleanupDelay) =>
-                    new Route<ThingItemViewModel, Unit, Unit>(key, resource, () => new ThingItemViewModel(),
+                    new PageDefinition<ThingItemViewModel, Unit, Unit>(key, resource, () => new ThingItemViewModel(),
                         presenterFactory: _ => new DependencyPresenter(fail, prepareDelay, cleanupDelay),
                         bindingFactory: ThingItemViewModelBindingFactory.Create,
-                        policy: host.ResolvePolicy("Background", overrides: new RoutePolicyOverrides
+                        policy: host.ResolvePolicy("Background", overrides: new PagePolicyOverrides
                         {
                             Layer = host.ResolvePolicy().Layer,
                             AllowMultiple = false,

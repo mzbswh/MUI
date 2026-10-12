@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using MUI.Navigation;
+using MUI.Pages;
 using UnityEngine;
 
 namespace MUI.UGUI
@@ -20,6 +20,7 @@ namespace MUI.UGUI
         [SerializeField] private RectTransform defaultModalBackdropPrefab = null;
         [SerializeField] private Color defaultModalBackdropColor = new Color(0, 0, 0, 0.45f);
         [SerializeField] private bool automaticFramePump = true;
+        [SerializeField] private bool outputCompilerGeneratedSources = true;
         [SerializeField, Min(0)] private int cacheCapacity = 16;
         [SerializeField, Min(1)] private int queueCapacity = 64;
         [SerializeField, Min(1)] private int preloadCapacity = 32;
@@ -40,6 +41,8 @@ namespace MUI.UGUI
         public Color DefaultModalBackdropColor => defaultModalBackdropColor;
 
         public bool AutomaticFramePump => automaticFramePump;
+
+        public bool OutputCompilerGeneratedSources => outputCompilerGeneratedSources;
 
         public int CacheCapacity => cacheCapacity;
 
@@ -87,7 +90,7 @@ namespace MUI.UGUI
         }
 
         /// <summary>复制项目默认、预设及页面覆盖，返回不再引用配置资产的运行策略。</summary>
-        public RoutePolicy ResolvePolicy(string preset = null, string layer = null, RoutePolicyOverrides overrides = null)
+        public PagePolicy ResolvePolicy(string preset = null, string layer = null, PagePolicyOverrides overrides = null)
         {
             RequireValid();
             var policy = Resolve(layers, defaultRules, presets, preset ?? defaultPreset, layer, overrides, name);
@@ -95,7 +98,7 @@ namespace MUI.UGUI
             return AttachPagePolicies(policy, preset ?? defaultPreset, layer, overrides);
         }
 
-        private void RequireRenderSpan(RoutePolicy policy)
+        private void RequireRenderSpan(PagePolicy policy)
         {
             var sorting = CreateRenderOrderOptions();
             if (policy.RenderOrderSpan > sorting.Maximum - sorting.Minimum + 1)
@@ -213,11 +216,11 @@ namespace MUI.UGUI
         }
 
         /// <summary>未绑定资产时沿用内置预设；不创建或自动查找 ScriptableObject。</summary>
-        public static RoutePolicy ResolveBuiltInPolicy(string preset = null, string layer = null, RoutePolicyOverrides overrides = null)
+        public static PagePolicy ResolveBuiltInPolicy(string preset = null, string layer = null, PagePolicyOverrides overrides = null)
             => Resolve(CreateLayers(), new MUIPagePolicyValues(), CreatePresets(), preset ?? "Default", layer, overrides, "内置默认");
 
-        private static RoutePolicy Resolve(IReadOnlyList<MUILayer> layers, MUIPagePolicyValues defaults,
-            IReadOnlyList<MUIPagePolicy> presets, string preset, string layer, RoutePolicyOverrides overrides, string configuration)
+        private static PagePolicy Resolve(IReadOnlyList<MUILayer> layers, MUIPagePolicyValues defaults,
+            IReadOnlyList<MUIPagePolicy> presets, string preset, string layer, PagePolicyOverrides overrides, string configuration)
         {
             if (layer != null && overrides != null && overrides.Layer.HasValue)
             {
@@ -244,7 +247,7 @@ namespace MUI.UGUI
             var resolvedLayer = layer == null ? policy.Layer : FindLayer(layers, layer).Order;
             if (layer != null)
             {
-                policy = new RoutePolicyOverrides { Layer = resolvedLayer }.Apply(policy);
+                policy = new PagePolicyOverrides { Layer = resolvedLayer }.Apply(policy);
             }
             if (overrides != null)
             {
@@ -259,16 +262,16 @@ namespace MUI.UGUI
                     break;
                 }
             }
-            return new RoutePolicyOverrides().Apply(policy, layerName, preset, configuration);
+            return new PagePolicyOverrides().Apply(policy, layerName, preset, configuration);
         }
 
-        private static RoutePolicy ResolveDefaults(IReadOnlyList<MUILayer> layers, MUIPagePolicyValues defaults)
+        private static PagePolicy ResolveDefaults(IReadOnlyList<MUILayer> layers, MUIPagePolicyValues defaults)
         {
             if (defaults == null)
             {
                 throw new InvalidOperationException("默认规则不能为空。");
             }
-            return defaults.CreateOverrides(MUIPagePolicyFields.All, FindLayer(layers, defaults.Layer).Order).Apply(RoutePolicy.Default);
+            return defaults.CreateOverrides(MUIPagePolicyFields.All, FindLayer(layers, defaults.Layer).Order).Apply(PagePolicy.Default);
         }
 
         private static MUILayer FindLayer(IReadOnlyList<MUILayer> layers, string name)

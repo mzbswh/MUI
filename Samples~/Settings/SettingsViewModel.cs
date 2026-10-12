@@ -3,7 +3,7 @@ using MUI.UGUI;
 
 namespace MUI.Samples.Settings
 {
-    [ViewContract("SettingsView")]
+    [UIWidget("SettingsView")]
     public partial class SettingsViewModel : ViewModel
     {
         [ObservableProperty]

@@ -1,6 +1,6 @@
 using System;
 using System.Linq;
-using MUI.Navigation;
+using MUI.Pages;
 using MUI.UGUI;
 using UnityEditor;
 using UnityEditor.UIElements;
@@ -40,10 +40,10 @@ namespace MUI.Editor
                 validationText = () => report.ExportText();
                 RefreshValidationReport();
             }));
-            Bind("startTrace", () => RunTrace(navigator => navigator.StartLifecycleTrace(
+            Bind("startTrace", () => RunTrace(pages => pages.StartLifecycleTrace(
                 rootVisualElement.Q<IntegerField>("traceCapacity").value)));
-            Bind("stopTrace", () => RunTrace(navigator => navigator.StopLifecycleTrace()));
-            Bind("clearTrace", () => RunTrace(navigator => navigator.StopLifecycleTrace(clear: true)));
+            Bind("stopTrace", () => RunTrace(pages => pages.StopLifecycleTrace()));
+            Bind("clearTrace", () => RunTrace(pages => pages.StopLifecycleTrace(clear: true)));
             Bind("captureTrace", () => RunTrace(_ => { }));
             Bind("copyTrace", () =>
             {
@@ -135,14 +135,14 @@ namespace MUI.Editor
             validationReport.text = validationText == null ? L.Get("dashboard.validation.help") : validationText();
         }
 
-        private void RunTrace(Action<Navigator> action) => Run(() =>
+        private void RunTrace(Action<PageManager> action) => Run(() =>
         {
             if (!Application.isPlaying || selectedHost == null || !selectedHost.IsInitialized)
             {
                 throw new InvalidOperationException(L.Get("editor.MUIDashboard.Configuration.d4116b321f"));
             }
-            action(selectedHost.Navigator);
-            trace = selectedHost.Navigator.CaptureLifecycleTrace();
+            action(selectedHost.Pages);
+            trace = selectedHost.Pages.CaptureLifecycleTrace();
             ShowTrace();
             UpdateActions();
         });

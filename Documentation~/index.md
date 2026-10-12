@@ -10,7 +10,7 @@ Core 不引用 Unity；Resources、Navigation 与 ChildViews 分别定义资源�
 
 导入 Basic Example 并打开 Basic.unity。BasicPageViewModel 声明标题绑定与 Confirm 命令，BasicView.prefab 包含名为 Title 和 Confirm 的 Element。导入的 BasicMUISettings 可作为项目唯一全局配置；页面资源标识 BasicView 直接对应 Resources/BasicView.prefab，无需在 UIHost 登记。BasicExampleModule 声明生成注册入口，BasicDemo 负责注册、解析配置策略、初始化 UIHost 的默认提供方并调用 OpenAsync。
 
-普通页面不要求 Presenter；需要跨服务协调时再引入。不要手写或编辑生成的绑定订阅、命令属性和 Route 接线。若看不到生成类型，先检查 Console 中的声明诊断，以及包内 Analyzers 的 RoslynAnalyzer 导入标签。
+普通页面不要求 Presenter；需要跨服务协调时再引入。不要手写或编辑生成的绑定订阅、命令属性和 PageDefinition 接线。若看不到生成类型，先检查 Console 中的声明诊断，以及包内 Analyzers 的 RoslynAnalyzer 导入标签。
 
 ## 项目 UI 配置
 
@@ -18,7 +18,7 @@ Core 不引用 Unity；Resources、Navigation 与 ChildViews 分别定义资源�
 
 编辑器自动将唯一配置登记到 Player 的 Preloaded Assets，保留其他预加载资产；构建前再次检查唯一性、配置有效性并同步引用，Player 与 Editor 使用同一资产。配置不会启动宿主，仍需项目显式调用 `Initialize()`。旧 UIHost 的局部配置引用不再生效，Settings 读取全局配置。
 
-Layers 为命名层级。排序值越大越靠上，同层按导航顺序排列；拥有者与依赖约束仍参与最终显示顺序。命名层映射为 `RoutePolicy.Layer`，页面仍挂在同一宿主根节点，不会自动创建独立 Canvas。内置层级与预设如下：
+Layers 为命名层级。排序值越大越靠上，同层按导航顺序排列；拥有者与依赖约束仍参与最终显示顺序。命名层映射为 `PagePolicy.Layer`，页面仍挂在同一宿主根节点，不会自动创建独立 Canvas。内置层级与预设如下：
 
 | 预设 | 层级 | 默认行为 |
 | --- | --- | --- |
@@ -37,25 +37,25 @@ ReceivesInput=false 会禁用页面输入及自身射线阻挡，也不获取焦
 创建路由时显式解析策略：
 
 ```csharp
-var popupPolicy = host.ResolvePolicy("Popup", overrides: new RoutePolicyOverrides
+var popupPolicy = host.ResolvePolicy("Popup", overrides: new PagePolicyOverrides
 {
     CacheMode = ViewCacheMode.KeepAlive
 });
-var route = InventoryViewModelRoute.Create(
+var route = InventoryViewModelDefinition.Create(
     () => new InventoryViewModel(), policy: popupPolicy);
 ```
 
-代码中的 `RoutePolicyOverrides` 每个字段分别覆盖，`null` 表示继承，`false` 和 `0` 是显式值。优先级从低到高为项目默认 → 所选预设 → Inspector 本页覆盖 → 代码／项目配置表覆盖。也可传入 `layer: "Popup"` 选择命名层；不能同时传入命名层和 `overrides.Layer` 数值层。
+代码中的 `PagePolicyOverrides` 每个字段分别覆盖，`null` 表示继承，`false` 和 `0` 是显式值。优先级从低到高为项目默认 → 所选预设 → Inspector 本页覆盖 → 代码／项目配置表覆盖。也可传入 `layer: "Popup"` 选择命名层；不能同时传入命名层和 `overrides.Layer` 数值层。
 
 在页面 Prefab 根 View 的「界面配置 → 页面策略」中点击「配置当前页面」，即可选择预设并按组覆盖层级、页面角色、遮挡、输入、焦点、模态、返回、实例、Tick、缓存、排序跨度及阶段超时。未勾选的组显示继承值；清除本页规则可恢复代码所选预设。配置保存在全局 `MUISettings` 资产，按 `ViewResource.Key + Version` 关联，不要求运行前加载 Prefab；生成契约使用版本 `1`，共享该资源标识的路由共享本页规则。页面预设留空时继承代码预设，Inspector 此时按全局默认预设预览。
 
 配置资产 Inspector 的「页面专属规则」提供集中筛选、编辑、删除和 Prefab 关联入口，与 View Inspector 共用规则编辑控件。关联以 Prefab GUID 保存，不把 Prefab 引用带入运行时加载依赖。新规则及重新打开 View 配置的旧规则会补齐关联；也可在集中列表手动关联。捕获到关联 Prefab（或其父文件夹）的删除事件且 GUID 对应资产已不存在时，编辑器在导入结束后移除规则并保存配置。移动／重命名只更新关联路径；仅标记为按 Resources 路径生成的资源标识会随路径更新，代码契约标识保持不变。新标识冲突或移出 Resources 时保留原标识并在列表提示。未关联的代码／配置表规则、没有确认删除事件的缺失关联不会自动清理，可手动删除或解除关联；规则编辑和删除支持撤销。
 
-`host.ResolvePolicy`、`MUISettings.ResolveGlobalPolicy` 和 `settings.ResolvePolicy` 会复制页面规则。`Route` 构造时按资源选择最终策略，因此运行时导航和构建目录检查读取相同的 `route.Policy`。已有路由不会随资产编辑改变，需要重新创建路由。直接传入 `new RoutePolicy(...)` 表示项目完全控制策略，不自动合并 Inspector 配置。
+`host.ResolvePolicy`、`MUISettings.ResolveGlobalPolicy` 和 `settings.ResolvePolicy` 会复制页面规则。`PageDefinition` 构造时按资源选择最终策略，因此运行时导航和构建目录检查读取相同的 `route.Policy`。已有路由不会随资产编辑改变，需要重新创建路由。直接传入 `new PagePolicy(...)` 表示项目完全控制策略，不自动合并 Inspector 配置。
 
-项目也可以使用配置表，将表数据转换成 `RoutePolicyOverrides` 后传给上述解析方法，或者对返回策略调用 `overrides.Apply(policy)`；代码覆盖会在本页覆盖之后应用。资源加载器、打开参数、Presenter 业务数据仍由项目代码配置，不存入页面规则。
+项目也可以使用配置表，将表数据转换成 `PagePolicyOverrides` 后传给上述解析方法，或者对返回策略调用 `overrides.Apply(policy)`；代码覆盖会在本页覆盖之后应用。资源加载器、打开参数、Presenter 业务数据仍由项目代码配置，不存入页面规则。
 
-策略在创建 Route 时复制为不可变对象。编辑资产后，新建路由使用新规则；既有路由及其活动页面保持原策略。直接使用 `new RoutePolicy(...)` 或生成的 Route.Create 而未传入解析策略的旧代码，不会自动套用资产；其默认角色与内置配置统一为 Main。需要独立叠加的页面应显式指定 PageRole.Independent。UIHost.Initialize 的缓存、清理、终态记录、排队请求与预加载容量参数省略时继承资产，显式参数优先；初始化后修改资产不会调整导航器容量。这些可选容量参数现为 `int?`，普通调用仍可传入 `int`，已有方法组委托需对应调整并重新编译。
+策略在创建 PageDefinition 时复制为不可变对象。编辑资产后，新建路由使用新规则；既有路由及其活动页面保持原策略。直接使用 `new PagePolicy(...)` 或生成的 PageDefinition.Create 而未传入解析策略的旧代码，不会自动套用资产；其默认角色与内置配置统一为 Main。需要独立叠加的页面应显式指定 PageRole.Independent。UIHost.Initialize 的缓存、清理、终态记录、排队请求与预加载容量参数省略时继承资产，显式参数优先；初始化后修改资产不会调整导航器容量。这些可选容量参数现为 `int?`，普通调用仍可传入 `int`，已有方法组委托需对应调整并重新编译。
 
 ## MUI 调试窗口
 
@@ -93,7 +93,7 @@ UIHost Inspector 只提供只读全局 Settings、View Root、简短状态及 Da
 
 ## 异步完成点
 
-Route 实例额度已满时，普通 `OpenAsync` 返回 `OpenRejection.Busy`，不启动新的 Provider 获取。单实例配置 `ReturnReady` 只复用参数与指定模型兼容的就绪页面；准备中的实例仍返回 Busy。显式 `CloseOldest` 通过旧页面的关闭守卫执行替换；同 Route 的 `ReplaceAsync` 借用源实例额度，同一源句柄的并发替换返回 Busy。
+PageDefinition 实例额度已满时，普通 `OpenAsync` 返回 `OpenRejection.Busy`，不启动新的 Provider 获取。单实例配置 `ReturnReady` 只复用参数与指定模型兼容的就绪页面；准备中的实例仍返回 Busy。显式 `CloseOldest` 通过旧页面的关闭守卫执行替换；同 PageDefinition 的 `ReplaceAsync` 借用源实例额度，同一源句柄的并发替换返回 Busy。
 
 同一激活只接纳一个关闭意图。普通 `CloseAsync`/`BackAsync` 可合并等待同一决议；正在确认 Done 或 Replace 时，另一关闭意图返回 `CloseStatus.Busy` 或 `ReplaceRejection.Busy`，不再打开第二个确认框。每次 Complete/Replace 调用是独立请求；需要多个观察者时由调用方一次转换为 Task 并共享该任务，不比较业务结果值。确认期间的参数更新或换绑成功提交使旧许可失效，本次关闭返回 Superseded，更新后的页面保留。
 
@@ -258,7 +258,7 @@ CanExecute 可读取当前 ViewModel；模型属性通知和命令执行状态�
 
 同一控件事件不能同时由 ViewModel 和 Presenter 命令接管，生成器报告 MUI001；运行时会话还会检查真实 Element 上的事件和属性写入冲突。基类 Presenter 的命令沿用继承绑定，不重复订阅。`CommandManifest` 提供当前 Presenter（含基类）的命令清单，模型工厂的 Manifest 仍只描述模型绑定。
 
-使用 Prefab 自动绑定时，明确选择（ViewRoute.PresenterType）或唯一匹配的 Presenter 手写命令优先于同目标的自动命令。多个 Presenter 候选无法确定时不会猜测；请明确指定类型或移除该目标的自动命令声明。Presenter 仍须由路由/子视图工厂选用；仅声明类不会替换手动路由的 Presenter。自定义绑定上下文应继承 `BindingContext<TViewModel>` 才能接入实例命令，直接继承非泛型基类的上下文会明确报错。
+使用 Prefab 自动绑定时，明确选择（UIPage.PresenterType）或唯一匹配的 Presenter 手写命令优先于同目标的自动命令。多个 Presenter 候选无法确定时不会猜测；请明确指定类型或移除该目标的自动命令声明。Presenter 仍须由路由/子视图工厂选用；仅声明类不会替换手动路由的 Presenter。自定义绑定上下文应继承 `BindingContext<TViewModel>` 才能接入实例命令，直接继承非泛型基类的上下文会明确报错。
 
 Navigation 示例的 Confirm 现位于 PagePresenter，Close 仍位于 PageViewModelBase，展示两种命令在同一页面共存。
 
@@ -288,13 +288,13 @@ ImageElement.Sprite、RawImageElement.Texture、TextElement.Font 和 GraphicElem
 
 ## 预加载与容量
 
-调用 `await navigator.PreloadAsync(route, cancellationToken)` 准备资源，不创建页面、绑定模型或接纳输入。同一资源身份与提供方内容版本合并底层准备，`ReusedReservation` 表示复用了预留，并不表示资源已经就绪。失败后新请求可以重新获取；版本变化使旧候选失效，迟到凭证由旧请求归还。
+调用 `await pages.PreloadAsync(route, cancellationToken)` 准备资源，不创建页面、绑定模型或接纳输入。同一资源身份与提供方内容版本合并底层准备，`ReusedReservation` 表示复用了预留，并不表示资源已经就绪。失败后新请求可以重新获取；版本变化使旧候选失效，迟到凭证由旧请求归还。
 
 每个调用方独立持有准备资格。首次请求取消返回 `Cancelled`，合并观察者取消自己的等待返回 `WaitCancelled`；单个消费者取消不停止其余消费者的获取，只有最后一个消费者在驻留提交前取消才请求底层停止。`Ready` 后资源由批次作用域持有，原调用方再取消不释放驻留。后台取消时，UI 等待不因解除取消登记而同步等待项目回调；已经启动的底层取消仍由原准备跟踪到结束。
 
 `PreloadReservationCount` 包含准备中、驻留、等待实际归还和未确认失败的预留。迟到凭证不发布为 Ready，但归还完成前仍占容量。凭证明确支持安全重试时，叶责任显式确认后恢复额度；读取数量与诊断只观察已捕获的责任，不访问项目责任属性或重放清理。首次清除失败及历史错误保持原值，未知部分归还不能仅凭原生对象消失释放额度。项目取消回调抛错同样保留未知责任及容量，不自动重放回调。
 
-`await navigator.ClearPreloadsAsync()` 使接纳时的预加载失效，并等待当时已在途清除与相关迟到凭证归还；后来接纳的预加载属于新批次。重复调用继续等待其各自接纳时的在途批次，实际归还失败会使等待失败。`ClearInactiveContentAsync()` 同时清理页面缓存，并在这次闲置内容清除结束前拒绝新预加载；`ShutdownAsync()` 停止新工作，等待本宿主持有的资源，不销毁项目共享提供方。
+`await pages.ClearPreloadsAsync()` 使接纳时的预加载失效，并等待当时已在途清除与相关迟到凭证归还；后来接纳的预加载属于新批次。重复调用继续等待其各自接纳时的在途批次，实际归还失败会使等待失败。`ClearInactiveContentAsync()` 同时清理页面缓存，并在这次闲置内容清除结束前拒绝新预加载；`ShutdownAsync()` 停止新工作，等待本宿主持有的资源，不销毁项目共享提供方。
 
 ## 清理责任与显式重试
 
@@ -302,7 +302,7 @@ ImageElement.Sprite、RawImageElement.Texture、TextElement.Font 和 GraphicElem
 
 `CleanupResponsibility` 记录归还责任的稳定 Id、拥有者标签、状态、错误、诊断上下文与尝试次数。状态区分未启动的 Retained、在途 Pending、失败或归还状态不明的 Failed，以及已确认的 Completed。`CleanupRegistry.CaptureSnapshot(maxEntries)` 按上限读取在途或失败记录，`UnconfirmedCount` 返回总数；完成记录立即移出全局账本，不长期保存成功历史。账本独立于 UIHost 组件，场景或作用域结束后仍持有未确认责任及回调。
 
-`Navigator.CaptureSnapshot()` 提供稳定 `HostId`、`UnconfirmedCleanupCount` 和有界 `CleanupResponsibilities`；使用双参数重载可分别限制实例与责任采集数量，截断由 `CleanupResponsibilitiesTruncated` 标明。`HasCleanupFailure` 表示页面或缓存清理曾失败，旧属性 `HasUnconfirmedCleanup` 沿用此历史语义；显式重试成功后当前责任数量减少，历史失败及已交付的关闭结果保持原值。MUI Dashboard 分别显示这两类信息，不从快照启动重试。
+`PageManager.CaptureSnapshot()` 提供稳定 `HostId`、`UnconfirmedCleanupCount` 和有界 `CleanupResponsibilities`；使用双参数重载可分别限制实例与责任采集数量，截断由 `CleanupResponsibilitiesTruncated` 标明。`HasCleanupFailure` 表示页面或缓存清理曾失败；显式重试成功后当前责任数量减少，历史失败及已交付的关闭结果保持原值。MUI Dashboard 分别显示这两类信息，不从快照启动重试。
 
 组件销毁后可用保存的 HostId 调用 `CleanupRegistry.GetUnconfirmedCount(hostId)` 或 `CaptureSnapshot(hostId, maxEntries)` 查询当前责任；`Guid.Empty` 只查询没有宿主身份的责任，不是全部宿主的通配符。账本选择和每项状态读取不冻结异步完成，采集期间完成的项可能显示 Completed，下一次采集消失。责任登记保存值身份作备用；合法移交后首次归还采用实际所有者的上下文，公布到账本后不随重试改变归属。
 
@@ -312,7 +312,7 @@ ImageElement.Sprite、RawImageElement.Texture、TextElement.Font 和 GraphicElem
 
 重复 `DisposeAsync` 始终观察首次清理结果。显式重试成功不改写已经交付的关闭、Shutdown 或 LifetimeScope 失败任务，也不复活页面、作用域或输入；判断当前未完成责任使用账本快照。控件 Snapshot 的 CleanupFailure/Count 继续表示历史上已记录的错误。
 
-`LifetimeScope.IsCleanupConfirmed` 查询当前实际责任是否均已确认，区别于首次释放任务是否失败。子作用域和已登记凭证的安全重试可使确认状态变化；没有责任记录的回滚错误或取消回调异常仍按未知处理。视图归还前检查激活和实例作用域，未确认时在账本中保留 `ViewInstance.DependencyRelease`。项目先显式处理允许重试的叶责任，再重试控件/模型持有者和视图的剩余步骤；外层检查不自动重试未知后端。已移出导航实例列表的失败页面仍占一个清理名额，同页多个责任不重复计数；没有页面身份的责任逐项保守计入，确认归还后才恢复新请求准入。
+`LifetimeScope.IsCleanupConfirmed` 查询当前实际责任是否均已确认，区别于首次释放任务是否失败。子作用域和已登记凭证的安全重试可使确认状态变化；没有责任记录的回滚错误或取消回调异常仍按未知处理。视图归还前检查激活和实例作用域，未确认时在账本中保留 `PageInstance.DependencyRelease`。项目先显式处理允许重试的叶责任，再重试控件/模型持有者和视图的剩余步骤；外层检查不自动重试未知后端。已移出导航实例列表的失败页面仍占一个清理名额，同页多个责任不重复计数；没有页面身份的责任逐项保守计入，确认归还后才恢复新请求准入。
 
 `LifetimeScope.OnDisposeAsync` 也可显式声明回调的幂等重试、拥有者标签和释放线程。未声明能力的普通清理回调、外部自定义凭证和同步清理按不可安全重试处理，失败仍保留对象与回调。自定义凭证若自己管理责任，应实现 `ICleanupResponsibilitySource` 并让释放入口更新该记录，框架不会再为它建立第二份归还责任。
 
@@ -348,7 +348,7 @@ UIHost 的 `ownsProvider: true` 将提供方最终释放交给宿主；默认资
 
 渲染器通过 `ICacheableView.ResetForCache()` 清除旧模型引用、焦点、输入与资源上下文；凭证通过 `ICacheableViewAcquisition` 显式保证必要后端依赖能延长至实际归还，并通过 `PrepareForReuse()` 注入当前配置。`AcquiredView` 默认 `supportsCaching: false`，项目后端满足此保证才显式启用。UGUI View 和 PrefabViewProvider 已支持；Prefab 的配置回调在缓存命中后再次执行，须允许重复配置。Presenter 或模型不会跨关闭保留。缓存未接管任何旧实例的 LifetimeScope 或业务资源。
 
-构造 Navigator 时传入 `maxCachedEstimatedBytes` 后，Route 必须给出 `estimatedRetainedBytes` 才能进入缓存；未知估算和超出总预算的 View 直接归还。`ReservedCacheEstimatedBytes` 包含缓存目录、在途淘汰与未确认失败的估算额度；移出目录不提前归还额度。`FailedCacheEstimatedBytes` 仅反映当前未确认的失败额度，明确支持安全重试的凭证确认后恢复预算，首次清理错误及 `HasCleanupFailure` 保持原值。两项查询不启动清理、不重读项目责任属性；仅观察已捕获责任。原生节点消失不能代替未知部分归还的确认。
+构造 PageManager 时传入 `maxCachedEstimatedBytes` 后，PageDefinition 必须给出 `estimatedRetainedBytes` 才能进入缓存；未知估算和超出总预算的 View 直接归还。`ReservedCacheEstimatedBytes` 包含缓存目录、在途淘汰与未确认失败的估算额度；移出目录不提前归还额度。`FailedCacheEstimatedBytes` 仅反映当前未确认的失败额度，明确支持安全重试的凭证确认后恢复预算，首次清理错误及 `HasCleanupFailure` 保持原值。两项查询不启动清理、不重读项目责任属性；仅观察已捕获责任。原生节点消失不能代替未知部分归还的确认。
 
 自定义 UGUI Element 可覆盖 `OnResetForCache()`，解除自己保存的模型、参数和活动引用。此钩子在旧业务实例已清理、View 隐藏且不可交互时同步调用，不能启动新工作；抛错时整个 View 淘汰并执行最终释放。
 
@@ -366,7 +366,11 @@ Unity 2022.3.62f3 的真实窗口 IL2CPP 观察已覆盖上述两种 Canvas 模�
 
 ## 页面向导与 Editor 校验
 
-`Tools/MUI/页面向导 (Page Wizard)` 从全局配置读取全部页面行为预设（包括自定义项），通过下拉框选择预设，下方仅显示当前选中项继承项目默认规则后的实际层级、遮挡、输入、焦点、模态及返回策略。无配置时读取框架内置预设列表。预设删除或改名后需重新选择，不能沿用失效名称生成代码。向导自动使用全局 MUISettings 预览策略；生成代码通过 `Page.CreateRoute()` 自动读取全局配置，也可传入 `Page.CreateRoute(overrides: overrides)` 覆盖该页面的具体行为。不接收输入的预设生成无关闭按钮和射线目标的 Prefab，由业务保存打开句柄并显式关闭；接收输入的预设生成关闭按钮。预设解析为现有 RoutePolicy，不引入运行时页面类型；默认只生成 ViewModel 与 Page 源码，不要求 Presenter。已有目录可复用，目标文件已存在时拒绝覆盖。
+`Tools/MUI/页面向导 (Page Wizard)` 从全局配置读取全部页面行为预设（包括自定义项），通过下拉框选择预设，下方仅显示当前选中项继承项目默认规则后的实际层级、遮挡、输入、焦点、模态及返回策略。无配置时读取框架内置预设列表。预设删除或改名后需重新选择，不能沿用失效名称生成代码。向导自动使用全局 MUISettings 预览策略；生成代码通过 `ViewModelDefinition.CreateDefinition()` 自动读取全局配置，也可传入 `ViewModelDefinition.CreateDefinition(overrides: overrides)` 覆盖该页面的具体行为。不接收输入的预设生成无关闭按钮和射线目标的 Prefab，由业务保存打开句柄并显式关闭；接收输入的预设生成关闭按钮。预设解析为现有 PagePolicy，不引入运行时页面类型；默认只生成 ViewModel 源码，不要求 Presenter。向导将预设记录在 `UIPage.PolicyPreset`，编译时由 Source Generator 生成 `ViewModelDefinition.CreateDefinition()`，不再创建独立的 `Page.cs`。已有目录可复用，目标文件已存在时拒绝覆盖。
+
+新建 UGUI/TMP 页面将标题和关闭按钮的自动绑定声明、初始标题及 Inspector 属性选择保存在 Prefab 中。编译器生成 `Title`、`CloseCommand` 和绑定代码；ViewModel 仅保留 `partial void OnClose(CommandContext context)` 的关闭逻辑，无输入页面不生成关闭命令。已有 Prefab 和自定义 Element 模板仍保留显式绑定，不改写已有资产。普通命名空间直接输出为 `Game.UI`，仅 C# 关键字段使用 `@` 转义。
+
+业务通过 `InventoryPage.OpenAsync(...)` 打开页面。引用 UGUI 时始终生成 `InventoryViewModelDefinition.CreateDefinition()`，省略 PolicyPreset 时读取项目默认预设；特殊页面可以显式指定预设。Create 为显式构造路由的底层 API，支持自定义工厂、策略和依赖。
 
 为不接收输入的预设向导新建的页面保留 View 根节点，将背景、标题和按钮放入拉伸的 `Content` 子节点，默认设置为“隐藏后如何处理 → 停用内容”。仅当页面完全不可见时停用 Content；可见但禁止交互、以及仍需显示的退出转场不会因此停用。重新显示时恢复框架先前停用的节点，不激活原本已停用的内容。已有 Prefab 和手动添加的 View 保留原有行为，不自动迁移。
 
@@ -378,7 +382,7 @@ Unity 2022.3.62f3 的真实窗口 IL2CPP 观察已覆盖上述两种 Canvas 模�
 
 Prefab 保存、导入及其依赖资产变化按路径合并，在 Editor 空闲后校验受影响目录，复用相同规则。脚本或程序集变化、资产删除/移动及域重载重新采集全部登记目录。编译、导入或 Play Mode 期间保留待检查标记，结束后补跑；队列最多保存 2,048 个路径，达到上限改为完整检查。检查不初始化业务模型、不写资产，也不触发递归导入；未变化的增量报告不重复输出。
 
-打开记录由框架自动维护：显式打开的页面加入 `Navigator.History`，关闭后移除，仅随父页面打开的依赖不单独记录。此列表用于查询和诊断，不保存页面状态，也不参与返回目标选择。原 `EnterHistory` / `enterHistory` 配置已移除，调用方无需再设置。
+打开记录由框架自动维护：显式打开的页面加入 `PageManager.History`，关闭后移除，仅随父页面打开的依赖不单独记录。此列表用于查询和诊断，不保存页面状态，也不参与返回目标选择。原 `EnterHistory` / `enterHistory` 配置已移除，调用方无需再设置。
 
 ### 页面生成目录
 
@@ -417,9 +421,9 @@ Resources 子目录中的 Prefab 自动生成对应资源键；例如 `Assets/Re
 
 ### Inspector 自动识别页面契约
 
-向导生成的 `[ViewContract]` 会记录 `PrefabAssetGuid`，检查器按 GUID 自动关联当前 Prefab 根节点的 ViewModel。唯一匹配时只读显示；多个匹配时仅列出该 Prefab 的候选契约。此关联不改变运行时资源加载或路由。
+向导把 ViewModel 完整类型名与程序集保存到 Prefab 的 View 关联元数据。View Inspector 提供类型选择，与自动绑定声明共用同一份元数据；没有绑定成员也可以单独保存关联。
 
-Prefab 通过 ViewModel 的 GUID 契约或 Resources 资源键匹配；自定义加载路径需在 ViewModel 声明 `[ViewContract("资源键", PrefabAssetGuid = "Prefab 的 GUID")]`。未匹配时只提供结构校验，不按对象名称或项目契约数量猜测。独立场景对象需要先保存为 Prefab；内部嵌套 View 不沿用外层页面契约。
+Inspector 只读取 Prefab 的显式 ViewModel 关联，不使用 GUID、Resources 路径或名称兜底。类型改名或程序集改变后会提示关联失效，需重新选择。动态资源加载和指定 ViewModel 实例仍由类型化路由及绑定契约决定，编辑器关联不会强制运行时实例类型。
 
 ### 原生控件绑定与代码双向声明
 
@@ -439,7 +443,7 @@ partial void OnClose(CommandContext context) => context.RequestClose();
 
 没有实现钩子时点击不执行业务操作；可直接手写 `[Command]` / `[BindCommand]` 接管该控件。已有手写绑定按目标属性或事件优先，包括转换器和路径；同一控件的其他属性仍可自动生成。重复控件名、成员名冲突和不支持的适配属性会报错。旧业务中的 UI/Controls 直接调用需要改成更新 ViewModel。
 
-在 View Inspector 展开控件后，点击“添加属性”搜索适配器的可绑定属性或事件。默认只列出已选项，可以编辑 ViewModel 名称、绑定方向，或移除不需要的属性。例如 Title 选择 text → Title、color → TitleColor、fontSize → TitleFontSize；类型沿用实际组件（Text.fontSize 为 int，TMP.fontSize 为 float）。旧的 Content 等选择在重新生成时迁移为原生属性，保留 ViewModel 成员名。代码声明单独显示并可定位源码。选择保存在 Prefab，支持 Undo；修改选择后点击“生成绑定”更新编译器文档。生成时读取文本、布尔值、int/float、Color 和 Vector2 的控件当前值作为初值；资源引用等其他类型仍需业务赋值。移除已生成成员后，业务中仍使用该成员的代码需要同步调整。
+在 View Inspector 展开控件后，点击“添加属性”搜索适配器的可绑定属性或事件。默认只列出已选项，可以编辑 ViewModel 名称、绑定方向，或移除不需要的属性。例如 Title 选择 text → Title、color → TitleColor、fontSize → TitleFontSize；类型沿用实际组件（Text.fontSize 为 int，TMP.fontSize 为 float）。属性名按当前声明精确匹配，不再自动改写旧属性别名。代码声明单独显示并可定位源码。选择保存在 Prefab，支持 Undo；修改选择后点击“生成绑定”更新编译器文档。生成时读取文本、布尔值、int/float、Color 和 Vector2 的控件当前值作为初值；资源引用等其他类型仍需业务赋值。移除已生成成员后，业务中仍使用该成员的代码需要同步调整。
 
 属性选择器列出原生组件的全部公开实例属性（含继承属性），支持按名称、属性类型和声明类型搜索，多个关键词用空格分隔；只读属性可选择为实时读取入口；索引器和弃用成员默认隐藏，可通过“显示不可用 / 已弃用属性”查看原因。仅选中的原生属性生成强类型属性包装，包装实例由框架缓存并随 View 释放，无需业务 new，也不使用运行时属性反射。全局命名规则可设置默认属性列表（逗号分隔，如 text, color），仅影响未保存选择的控件。
 
@@ -546,3 +550,145 @@ public static class GaugeBindingSetup
 组件选择器支持搜索类名、命名空间和程序集，多个空格分隔的词同时匹配；提供“全部 / 常用 / 已选”过滤。勾选立即写入配置并支持 Undo，弹窗保持打开，可连续多选。已选但找不到的类型仍保留显示，允许取消选择。
 
 规则可切换“前缀 / 后缀 / 包含 / 正则”。前缀、后缀、包含会移除匹配文本，继续尝试其他规则，例如 `Icon_Img` 使用后缀 `_Img` 得到 `Icon`。包含只移除当次首次出现的文本；同一位置多个规则匹配时取表达式字符串较长的规则，同长度按列表顺序。正则使用 `(?<name>...)` 捕获最终绑定名称，例如 `^UI_(?<name>.+)_Text$` 将 `UI_Title_Text` 映射为 `Title`，匹配后停止继续解析；正则采用 50ms 超时限制，错误或超时在 View 面板提示并阻止生成。旧规则默认继续使用前缀模式。
+
+### IDE 生成源码输出
+
+MUI 全局设置的“开发工具 → 输出生成源码供 IDE 使用”默认开启。编辑器自动配置生成源码输出，并在导入、编译及域重载结束后同步 IDE 工程；不再需要单独点击 Enable 菜单。关闭后移除 MUI 自己的输出参数，IDE 工程恢复使用 Source Generator，Unity 自动绑定与运行逻辑不变。切换开关自动应用；已有 Library 输出文件保留，但关闭后不再加入 IDE 工程。项目自行设置的其他输出目录和编译参数不会被删除。
+
+
+### 从多个异步打开入口生成参数
+
+页面可使用 `UIPage(PresenterType = typeof(...))` 启用自动参数契约并默认返回 Unit；需要业务结果时使用 `UIPage(typeof(TResult), PresenterType = typeof(...))`；双类型参数声明用于手写 Args。Presenter 为 partial class，无需手写基类或 Args：
+
+```csharp
+[UIPage(typeof(int), PresenterType = typeof(InventoryPresenter), ResourceKey = "UI/Inventory")]
+public partial class InventoryViewModel : ViewModel { }
+
+public partial class InventoryPresenter
+{
+    [OpenEntry("ByTab")]
+    private ValueTask OnOpenAsync(int tab, CancellationToken token)
+    {
+        // 无需等待时可立即完成；需要加载时改用 async ValueTask。
+        return default;
+    }
+
+    [OpenEntry("ByItem")]
+    private async ValueTask OnOpenAsync(long itemId, bool highlight = true,
+        CancellationToken token = default)
+    {
+        await LoadItemAsync(itemId, token); // 项目自己的业务加载方法
+    }
+}
+
+var route = InventoryViewModelDefinition.Create(() => new InventoryViewModel());
+await InventoryViewModelDefinition.OpenByTabAsync(pages, route, tab: 2);
+await InventoryViewModelDefinition.OpenByItemAsync(pages, route,
+    new OpenCallOptions(cancellationToken: token), itemId: 1001);
+```
+
+每个命名入口生成 `ArgsByXxx`、`OpenByXxxAsync`、`BeginOpenByXxx`。自动 Args 位于 `Presenter.OpenArgs`，各入口对应独立的只读数据分支。用于 ReplaceAsync、UpdateArgsAsync 等操作时，可调用 `ArgsByXxx(...)` 取得参数。路由策略、参数比较、参数更新协议和结果等待方式均保持原样；切换入口不会强制重开或绕过复用策略。
+
+入口支持 ValueTask、Task 和立即完成的 void，统一通过 IAsyncOpenPresenter 在 Context 建立后的异步准备阶段调用一次；导航等待其完成再提交打开。末尾 CancellationToken 为框架注入参数，不出现在生成 Args 或便捷调用的业务参数中。async void、泛型入口、ref/out/in、params 和开放泛型页面不受支持。入口名称必须唯一；同参数类型的不同入口可使用不同业务方法名。一个自动 Presenter 只对应一个页面契约和结果类型。
+
+页面向导生成 `[OpenEntry] private void OnOpen(...)`，只保留业务参数，不再额外创建 Args.cs。无参特性按业务参数签名生成 `CreateArgs(...)`、`OpenAsync(...)` 和 `BeginOpen(...)` 重载，同一 Presenter 可声明多个。内部 Args 分支名称由参数类型自动生成，建议通过 CreateArgs 获取参数而不依赖分支名称。命名入口可同时存在。末尾 CancellationToken 不参与签名区分；重复业务签名及省略可选参数造成的相同前缀歧义会产生编译诊断。其他重载选择遵循 C# 规则，例如传入 null 或 default 时可能需要显式指定类型。无需等待时使用 void；需要等待数据加载时改为 async ValueTask 或 async Task，可选声明末尾 CancellationToken，由框架注入。无论业务是否异步，框架均通过异步准备协议等待入口完成。
+
+
+`OpenEntry` 表示显示前的业务初始化，不是“已经显示”或“入场动画结束”的通知。执行顺序为资源加载 → 建立模型、绑定与 Context → 执行入口并等待完成 → 提交打开、显示界面并开始入场。入口抛出异常或异步准备取消时，走现有打开失败或取消清理流程，不提交成功打开。
+
+普通初始化不需要任务返回值或取消参数：
+
+```csharp
+[OpenEntry]
+private void OnOpen(string title)
+{
+    ViewModel.Title = title;
+}
+```
+
+若必须先取到数据再显示，将入口改为 `async Task` 或 `async ValueTask`，在方法内部 await 数据加载并写入 ViewModel；按需添加末尾 `CancellationToken` 参数以配合框架取消。仅仅使用异步导航 API，不要求业务方法也声明 async。
+
+
+同一页面的不同打开方式无需手动命名：
+
+```csharp
+[OpenEntry]
+private void OnOpen(int tab) { }
+
+[OpenEntry]
+private void OnOpen(long itemId, bool highlight) { }
+
+// 根据参数选择对应的业务入口。
+await InventoryViewModelDefinition.OpenAsync(pages, route, tab: 2);
+await InventoryViewModelDefinition.OpenAsync(pages, route, itemId: 1001L, highlight: true);
+```
+
+同类型同顺序的参数无法仅凭参数名称区分，例如 `OnOpen(int tab)` 和 `OnOpen(int itemId)`；这种情况仍需不同方法名和命名 OpenEntry。
+
+
+### 直接通过页面名打开
+
+引用 MUI.UGUI 后，路由声明同时生成业务页面入口。`InventoryViewModel` 和 `InventoryPageViewModel` 默认生成 `InventoryPage`；名称冲突时通过 `UIPage.PageName = "InventoryWindow"` 指定唯一入口名。底层 `InventoryViewModelDefinition` 工厂和显式导航 API 保留。
+
+启动时初始化一次 `UIHost`，普通业务调用不再传入宿主、导航器或路由，也不需要 Bind：
+
+```csharp
+// 启动阶段：完成项目注册后初始化场景中的唯一宿主。
+host.Initialize();
+
+// 业务阶段：多个无名 OpenEntry 仍按参数签名选择。
+await InventoryPage.OpenAsync(tab: 2);
+await InventoryPage.OpenAsync(itemId: 1001L, highlight: true);
+await InventoryPage.OpenAsync(new OpenCallOptions(cancellationToken: token), tab: 2);
+```
+
+无需构造依赖的页面自动创建并复用路由；声明 PolicyPreset 时读取全局页面预设。路由缓存和工厂属于本次 UIHost 生命周期，关闭或销毁宿主后释放，后续宿主重新创建。框架拒绝第二个尚未关闭的宿主；未初始化或已关闭时调用页面入口会明确报错。页面入口需在主线程调用。
+
+有服务依赖或自定义策略的页面，在宿主初始化后、该页面首次使用前配置一次工厂：
+
+```csharp
+InventoryPage.ConfigureDefinition(() => InventoryViewModelDefinition.Create(
+    modelFactory: () => new InventoryViewModel(),
+    presenterFactory: model => new InventoryPresenter(inventoryService)));
+
+// 后续仍只传业务参数。
+await InventoryPage.OpenAsync(tab: 2);
+```
+
+页面首次取用路由后不允许替换配置，避免同一页面的活动实例与新配置混用。缺少必要工厂时不会偷偷构造依赖，而是提示先 ConfigureDefinition。`BeginOpen(...)` 及 `CreateArgs(...)` 也可直接通过短页面入口调用。未引用 MUI.UGUI 的核心程序集继续使用显式路由 API，不引入 Unity 依赖。
+
+
+向导的“接收打开参数”只生成 ViewModel 和 Presenter，不生成占位 Result.cs；参数与结果互相独立。无结果页面默认声明：
+
+```csharp
+[UIPage(PresenterType = typeof(InventoryPresenter), ResourceKey = "UI/Inventory")]
+public partial class InventoryViewModel : ViewModel { }
+```
+
+需要业务结果时手动指定 `UIPage(typeof(long), PresenterType = typeof(...))`，或使用自定义多字段/多分支结果类型。双类型参数声明用于显式定义 Args 和 Result。此调整只影响新建页面，不删除已有项目的 Result 文件。
+
+
+新建页面不生成路由 Key，默认从 ViewModel 类型推导；所选预设等于项目默认预设时也不生成 PolicyPreset，特殊预设仍明确声明，确保向导预览与首次运行一致。已移除源码中的 PrefabAssetGuid 字段及读取，不提供旧字段兼容或自动迁移；旧声明需删除该命名参数，并在 Prefab Inspector 明确设置 ViewModel 关联。
+
+
+### 省略约定资源键
+
+`[UIPage]` 和 `[UIWidget]` 默认把模型类型名的 `ViewModel` 后缀去掉，再补 `View`（已有 View 后缀不重复）：InventoryViewModel → InventoryView。无需手写相同字符串。向导在实际资源键与约定一致时生成无参声明；Resources 子目录或自定义资源地址仍显式保留，例如 `[UIPage(ResourceKey = "UI/Inventory/InventoryView")]`，不会为了简写改变加载地址。
+
+显式空字符串或 null 仍属于无效声明，不等价于省略参数。Prefab 的 ViewModel 关联仍只从 Prefab 元数据读取，与资源键推导无关。反射读取契约的工具应使用 `contract.GetResourceKey(modelType)` 获取最终资源键；ResourceKey 属性表示显式设置值。重命名模型会改变默认键，需要固定地址时明确指定资源键。
+
+
+### 省略约定 Presenter
+
+自动参数页面只需声明 `[UIPage]`。生成器在相同命名空间或相同外层类型内，将 InventoryViewModel 匹配到 InventoryPresenter；不扫描其他作用域、不按相似名称猜测。需要返回结果时写 `[UIPage(typeof(long))]`。非约定命名可以显式设置 PresenterType。找不到约定 Presenter 或类型无效时产生编译诊断，不静默改用空 Presenter。向导的新页面使用该简写；无 Presenter 的纯展示页面仍显式声明 Unit 参数和结果。
+
+页面使用 `[UIPage]`，由导航管理打开、关闭和结果；子视图使用 `[UIWidget]`，由父界面管理绑定与释放，仅生成绑定，不生成导航入口。同一模型不能同时声明两者。Tab 内容、列表项等可组合视图使用 UIWidget，业务类名无需带 Widget 后缀。两种特性都位于 MUI 命名空间。
+
+
+### 页面管理模块
+
+`MUI.Pages` 统一管理 `[UIPage]` 页面，宿主通过 `UIHost.Current.Pages` 提供 `PageManager`。业务优先使用生成的 `InventoryPage.OpenAsync(...)`；通用关闭、返回和批量操作通过 `Pages` 调用。`[UIWidget]` 子视图继续由父界面管理。
+
+`PageDefinition<TViewModel, TArgs, TResult>` 描述页面资源、创建工厂、策略和依赖；`PageHandle<TResult>` 标识一次打开的实例；`PageResult<TResult>` 表达页面完成的业务结果。打开操作结果 `OpenOutcome<TResult>` 与业务结果分开。生成的 `InventoryViewModelDefinition.CreateDefinition()` 提供底层定义工厂，自定义依赖通过 `InventoryPage.ConfigureDefinition(...)` 配置。
+
+目录按职责划分为 Definitions、Handles、Operations、Lifecycle、Ownership 和 Diagnostics。常用公开类型位于 `MUI.Pages`；事件、快照和追踪类型位于 `MUI.Pages.Diagnostics`。`Internal` 下按打开、关闭、依赖、缓存、预加载和显示职责组织实现；PageManager 仍统一协调生命周期提交，不改变执行顺序。

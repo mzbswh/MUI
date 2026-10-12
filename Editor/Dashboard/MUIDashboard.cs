@@ -1,8 +1,9 @@
+using MUI.Pages.Diagnostics;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using MUI.Navigation;
+using MUI.Pages;
 using MUI.UGUI;
 using UnityEditor;
 using UnityEditor.SceneManagement;
@@ -20,10 +21,10 @@ namespace MUI.Editor
         [SerializeField] private MUISettings inspectedSettings = null;
         [SerializeField] private bool refreshAutomatically;
         private readonly List<UIHost> hosts = new List<UIHost>();
-        private readonly List<ViewInstanceSnapshot> pages = new List<ViewInstanceSnapshot>();
-        private NavigationSnapshot snapshot;
-        private NavigationTraceSnapshot trace;
-        private ViewHandle selectedHandle;
+        private readonly List<PageInstanceSnapshot> pages = new List<PageInstanceSnapshot>();
+        private PageSnapshot snapshot;
+        private PageTraceSnapshot trace;
+        private PageHandle selectedHandle;
         private string capturedAt;
         private string viewDiagnostics;
         private DropdownField hostChoices;
@@ -146,8 +147,8 @@ namespace MUI.Editor
             {
                 var item = pages[index];
                 var title = element.Q<Label>("route");
-                title.text = "#" + item.Handle.Id + "  " + item.RouteKey;
-                title.tooltip = item.RouteKey;
+                title.text = "#" + item.Handle.Id + "  " + item.PageKey;
+                title.tooltip = item.PageKey;
                 element.Q<Label>("metadata").text = L.Format("dashboard.page.meta", item.Layer, item.State, item.Focused);
             };
             pageList.selectionChanged += values =>
@@ -156,7 +157,7 @@ namespace MUI.Editor
                 {
                     return;
                 }
-                foreach (ViewInstanceSnapshot item in values)
+                foreach (PageInstanceSnapshot item in values)
                 {
                     if (selectedHandle != item.Handle)
                     {
@@ -271,8 +272,8 @@ namespace MUI.Editor
             Run(() =>
             {
                 var limit = rootVisualElement.Q<IntegerField>("snapshotLimit").value;
-                snapshot = selectedHost.Navigator.CaptureSnapshot(limit, limit);
-                trace = selectedHost.Navigator.CaptureLifecycleTrace();
+                snapshot = selectedHost.Pages.CaptureSnapshot(limit, limit);
+                trace = selectedHost.Pages.CaptureLifecycleTrace();
                 capturedAt = DateTime.Now.ToString("HH:mm:ss");
                 summary.text = L.Format("dashboard.summary", capturedAt, snapshot.TotalInstances, snapshot.Focused.Id,
                     snapshot.PendingRequestCount + snapshot.PostedRequestCount, snapshot.CachedViewCount);

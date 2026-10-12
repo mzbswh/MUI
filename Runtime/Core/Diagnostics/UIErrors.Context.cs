@@ -22,7 +22,7 @@ namespace MUI
             var current = CurrentContext;
             var sameOwner = owner.HostId != Guid.Empty && owner.HostId == current.HostId &&
                 owner.ViewId == current.ViewId;
-            return BeginContext(new UIErrorContext(owner.HostId, owner.ViewId, owner.RouteKey,
+            return BeginContext(new UIErrorContext(owner.HostId, owner.ViewId, owner.PageKey,
                 sameOwner ? current.Operation ?? operation : operation, phase));
         }
 

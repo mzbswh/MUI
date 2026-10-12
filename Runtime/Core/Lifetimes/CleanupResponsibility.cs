@@ -166,7 +166,7 @@ namespace MUI
                     // 合法移交或缓存接管后，以实际归还所有者为准；无宿主上下文时使用登记位置。
                     // 宿主级清理的 ViewId=0 是明确身份，不能混入原页面的句柄或路由。
                     var owner = current.HostId == Guid.Empty ? context : current;
-                    context = new UIErrorContext(owner.HostId, owner.ViewId, owner.RouteKey,
+                    context = new UIErrorContext(owner.HostId, owner.ViewId, owner.PageKey,
                         current.Operation ?? "Cleanup", current.Phase ?? "Release");
                 }
 

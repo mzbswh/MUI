@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using MUI.Navigation;
+using MUI.Pages;
 using MUI.UGUI;
 using UnityEditor;
 using UnityEngine;
@@ -11,13 +11,13 @@ namespace MUI.Editor
     public sealed partial class PageWizard
     {
         private readonly List<string> presetNames = new List<string>();
-        private RoutePolicy selectedPolicy;
+        private PagePolicy selectedPolicy;
         private string policyError;
         private bool ReceivesInput => selectedPolicy == null || selectedPolicy.ReceivesInput;
 
         private void OnInspectorUpdate() => Repaint();
 
-        private RoutePolicy ResolvePreset(string name) => settings == null
+        private PagePolicy ResolvePreset(string name) => settings == null
             ? MUISettings.ResolveBuiltInPolicy(name) : settings.ResolvePolicy(name);
 
         private void RefreshPolicy()

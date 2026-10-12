@@ -45,7 +45,15 @@ var route = InventoryViewModelRoute.Create(
     () => new InventoryViewModel(), policy: popupPolicy);
 ```
 
-代码中的 `RoutePolicyOverrides` 每个字段分别覆盖，`null` 表示继承，`false` 和 `0` 是显式值。优先级为页面覆盖 → 所选预设 → 项目默认 → 内置默认。也可传入 `layer: "Popup"` 选择命名层；不能同时传入命名层和 `overrides.Layer` 数值层。
+代码中的 `RoutePolicyOverrides` 每个字段分别覆盖，`null` 表示继承，`false` 和 `0` 是显式值。优先级从低到高为项目默认 → 所选预设 → Inspector 本页覆盖 → 代码／项目配置表覆盖。也可传入 `layer: "Popup"` 选择命名层；不能同时传入命名层和 `overrides.Layer` 数值层。
+
+在页面 Prefab 根 View 的「界面配置 → 页面策略」中点击「配置当前页面」，即可选择预设并按组覆盖层级、页面角色、遮挡、输入、焦点、模态、返回、实例、Tick、缓存、排序跨度及阶段超时。未勾选的组显示继承值；清除本页规则可恢复代码所选预设。配置保存在全局 `MUISettings` 资产，按 `ViewResource.Key + Version` 关联，不要求运行前加载 Prefab；生成契约使用版本 `1`，共享该资源标识的路由共享本页规则。页面预设留空时继承代码预设，Inspector 此时按全局默认预设预览。
+
+配置资产 Inspector 的「页面专属规则」提供集中筛选、编辑、删除和 Prefab 关联入口，与 View Inspector 共用规则编辑控件。关联以 Prefab GUID 保存，不把 Prefab 引用带入运行时加载依赖。新规则及重新打开 View 配置的旧规则会补齐关联；也可在集中列表手动关联。捕获到关联 Prefab（或其父文件夹）的删除事件且 GUID 对应资产已不存在时，编辑器在导入结束后移除规则并保存配置。移动／重命名只更新关联路径；仅标记为按 Resources 路径生成的资源标识会随路径更新，代码契约标识保持不变。新标识冲突或移出 Resources 时保留原标识并在列表提示。未关联的代码／配置表规则、没有确认删除事件的缺失关联不会自动清理，可手动删除或解除关联；规则编辑和删除支持撤销。
+
+`host.ResolvePolicy`、`MUISettings.ResolveGlobalPolicy` 和 `settings.ResolvePolicy` 会复制页面规则。`Route` 构造时按资源选择最终策略，因此运行时导航和构建目录检查读取相同的 `route.Policy`。已有路由不会随资产编辑改变，需要重新创建路由。直接传入 `new RoutePolicy(...)` 表示项目完全控制策略，不自动合并 Inspector 配置。
+
+项目也可以使用配置表，将表数据转换成 `RoutePolicyOverrides` 后传给上述解析方法，或者对返回策略调用 `overrides.Apply(policy)`；代码覆盖会在本页覆盖之后应用。资源加载器、打开参数、Presenter 业务数据仍由项目代码配置，不存入页面规则。
 
 策略在创建 Route 时复制为不可变对象。编辑资产后，新建路由使用新规则；既有路由及其活动页面保持原策略。直接使用 `new RoutePolicy(...)` 或生成的 Route.Create 而未传入解析策略的旧代码，不会自动套用资产；其默认角色与内置配置统一为 Main。需要独立叠加的页面应显式指定 PageRole.Independent。UIHost.Initialize 的缓存、清理、终态记录、排队请求与预加载容量参数省略时继承资产，显式参数优先；初始化后修改资产不会调整导航器容量。这些可选容量参数现为 `int?`，普通调用仍可传入 `int`，已有方法组委托需对应调整并重新编译。
 

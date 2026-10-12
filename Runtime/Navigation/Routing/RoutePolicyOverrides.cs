@@ -120,7 +120,7 @@ namespace MUI.Navigation
             {
                 throw new ArgumentException("Cache duration requires Timed mode.", nameof(CacheDuration));
             }
-            return new RoutePolicy(
+            var result = new RoutePolicy(
                 layer: Layer ?? source.Layer,
                 allowMultiple: AllowMultiple ?? source.AllowMultiple,
                 maxInstances: MaxInstances ?? source.MaxInstances,
@@ -144,6 +144,10 @@ namespace MUI.Navigation
                 renderOrderSpan: RenderOrderSpan ?? source.RenderOrderSpan,
                 pageRole: PageRole ?? source.PageRole, ownerDeparture: OwnerDeparture ?? source.OwnerDeparture,
                 receivesInput: ReceivesInput ?? source.ReceivesInput);
+            result.CopyResourcePolicies(source, this, layerName, presetName, configurationName);
+            return result;
         }
+
+        internal RoutePolicyOverrides Copy() => (RoutePolicyOverrides)MemberwiseClone();
     }
 }

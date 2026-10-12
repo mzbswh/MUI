@@ -23,7 +23,7 @@ namespace MUI.Navigation
             EstimatedRetainedBytes = estimatedRetainedBytes;
             Key = key;
             Resource = resource ?? throw new ArgumentNullException(nameof(resource));
-            Policy = policy ?? RoutePolicy.Default;
+            Policy = (policy ?? RoutePolicy.Default).ForResource(resource);
         }
 
         /// <summary>只读的依赖描述，不执行参数工厂；供导航注册及编辑器图校验使用。</summary>

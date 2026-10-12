@@ -90,24 +90,22 @@ namespace MUI.Editor
             try
             {
                 var report = UIBuildValidation.ValidateAffected(affected);
+                if (report.IsValid)
+                {
+                    previousReport = null;
+                    return;
+                }
                 if (report.CatalogCount == 0 || report.PageCount == 0 && report.Issues.Count == 0)
                 {
                     return;
                 }
-                var text = L.Get("editor.UIIncrementalValidation.06bf605b8a") + report.ExportText();
+                var text = report.ExportText(L.Get("editor.UIIncrementalValidation.06bf605b8a"));
                 if (text == previousReport)
                 {
                     return;
                 }
                 previousReport = text;
-                if (report.IsValid)
-                {
-                    Debug.Log(text);
-                }
-                else
-                {
-                    Debug.LogWarning(text);
-                }
+                Debug.LogWarning(text);
             }
             catch (Exception error)
             {

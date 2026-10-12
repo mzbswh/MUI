@@ -1345,7 +1345,7 @@
     },
     {
       "key": "editor.UIIncrementalValidation.06bf605b8a",
-      "text": "MUI incremental validation:\n"
+      "text": "MUI incremental validation"
     },
     {
       "key": "editor.ViewContractValidator.0961434628",
@@ -4021,7 +4021,7 @@
     },
     {
       "key": "property.defaultSelection",
-      "text": "Default Selection"
+      "text": "Default selected control"
     },
     {
       "key": "property.dismissButton",
@@ -4057,7 +4057,7 @@
     },
     {
       "key": "property.enterFadeDuration",
-      "text": "Enter Fade Duration"
+      "text": "Fade-in duration (s)"
     },
     {
       "key": "property.entries",
@@ -4077,7 +4077,7 @@
     },
     {
       "key": "property.exitFadeDuration",
-      "text": "Exit Fade Duration"
+      "text": "Fade-out duration (s)"
     },
     {
       "key": "property.failureMessage",
@@ -4305,7 +4305,7 @@
     },
     {
       "key": "property.waitForResourceSources",
-      "text": "Wait For Resource Sources"
+      "text": "Wait for resource bindings before display"
     },
     {
       "key": "property.wrapNavigation",
@@ -5353,11 +5353,11 @@
     },
     {
       "key": "enum.MUI.UGUI.ViewHiddenMode.CanvasGroupOnly",
-      "text": "Keep content running"
+      "text": "Hide visuals only (keep content active)"
     },
     {
       "key": "enum.MUI.UGUI.ViewHiddenMode.DeactivateContent",
-      "text": "Deactivate content"
+      "text": "Hide and deactivate content"
     },
     {
       "key": "enum.MUI.Navigation.ViewCacheDecision.Retained",
@@ -6196,6 +6196,230 @@
       "text": "Capture input, visibility, resource readiness and raycast details on demand. Snapshots are read-only; opening this tab does not run queries."
     },
     {
+      "key": "editor.UIBuildValidationReport.title",
+      "text": "MUI build validation"
+    },
+    {
+      "key": "editor.UIBuildValidationReport.passed",
+      "text": "Passed"
+    },
+    {
+      "key": "editor.UIBuildValidationReport.failed",
+      "text": "Failed ({0} issues)"
+    },
+    {
+      "key": "editor.UIBuildValidationReport.unverified",
+      "text": "Not verified (no UI catalog registered)"
+    },
+    {
+      "key": "editor.UIBuildValidationReport.counts",
+      "text": "Registered catalogs: {0} | Pages checked: {1} | Routes: {2}"
+    },
+    {
+      "key": "viewPanel.policy.editHelp",
+      "text": "Rules are stored in the settings asset below and read when routes are created, before prefabs load. Recreate routes after edits; explicit code/config-table values take priority."
+    },
+    {
+      "key": "viewPanel.policy.noResource",
+      "text": "Select a binding contract or configure the root View of a page prefab under Resources. Custom resources can receive policies from project code. Child Views are not treated as pages."
+    },
+    {
+      "key": "viewPanel.policy.resource",
+      "text": "Page resource"
+    },
+    {
+      "key": "viewPanel.policy.create",
+      "text": "Create global settings to store page rules"
+    },
+    {
+      "key": "viewPanel.policy.noOverride",
+      "text": "This resource has no page overrides and inherits the settings and preset supplied when creating its route."
+    },
+    {
+      "key": "viewPanel.policy.add",
+      "text": "Configure this page"
+    },
+    {
+      "key": "viewPanel.policy.preset",
+      "text": "Page preset"
+    },
+    {
+      "key": "viewPanel.policy.inheritPreset",
+      "text": "Inherit code preset (preview global default)"
+    },
+    {
+      "key": "viewPanel.policy.override",
+      "text": "Override: {0}"
+    },
+    {
+      "key": "viewPanel.policy.effective",
+      "text": "Page configuration preview"
+    },
+    {
+      "key": "viewPanel.policy.summary",
+      "text": "Layer {0} · Modal {1} · Coverage {2} · Back {3}"
+    },
+    {
+      "key": "viewPanel.policy.remove",
+      "text": "Clear page rules and restore inheritance"
+    },
+    {
+      "key": "viewPanel.policy.invalidPreview",
+      "text": "Invalid settings; preview unavailable"
+    },
+    {
+      "key": "viewPanel.policy.storage",
+      "text": "Stored in"
+    },
+    {
+      "key": "viewPanel.policy.locate",
+      "text": "Locate"
+    },
+    {
+      "key": "viewPanel.policy.overrideLegend",
+      "text": "Check to override; unchecked values are inherited. Expand grouped rules to edit them."
+    },
+    {
+      "key": "viewPanel.policy.localValue",
+      "text": "Override"
+    },
+    {
+      "key": "viewPanel.policy.inheritedValue",
+      "text": "Inherited"
+    },
+    {
+      "key": "settings.pages.title",
+      "text": "Page overrides"
+    },
+    {
+      "key": "settings.pages.help",
+      "text": "Shares data with the View Inspector. Linked prefabs are tracked across moves; confirmed prefab deletion removes their rules. Unlinked code/config-table rules are retained. Rule removal supports Undo."
+    },
+    {
+      "key": "settings.pages.search",
+      "text": "Filter resource keys"
+    },
+    {
+      "key": "settings.pages.count",
+      "text": "Rule count"
+    },
+    {
+      "key": "settings.pages.delete",
+      "text": "Delete"
+    },
+    {
+      "key": "settings.pages.add",
+      "text": "Add code/config-table rule"
+    },
+    {
+      "key": "settings.pages.prefab",
+      "text": "Linked page prefab"
+    },
+    {
+      "key": "settings.pages.unlinked",
+      "text": "No linked prefab; this rule will not be auto-deleted. Assign a prefab with a View on its root."
+    },
+    {
+      "key": "settings.pages.missing",
+      "text": "The linked prefab is missing, without a confirmed deletion event. The rule is retained; relink, unlink or delete it manually."
+    },
+    {
+      "key": "settings.pages.unlink",
+      "text": "Clear missing link"
+    },
+    {
+      "key": "settings.pages.linked",
+      "text": "Tracks the prefab by GUID. Confirmed deletion of that asset removes this rule."
+    },
+    {
+      "key": "settings.pages.keyMismatch",
+      "text": "The key differs from the current Resources path, possibly because the prefab moved outside Resources or the new key conflicts with another rule. Check the key and business routes."
+    },
+    {
+      "key": "property.ResourceKey",
+      "text": "Resource key"
+    },
+    {
+      "key": "property.ResourceVersion",
+      "text": "Resource version"
+    },
+    {
+      "key": "property.ResourceKeyFromPath",
+      "text": "Follow Resources path for key"
+    },
+    {
+      "key": "viewPanel.policy",
+      "text": "Page policy"
+    },
+    {
+      "key": "viewPanel.policy.help",
+      "text": "Select a preset and override page rules for this resource. Code and project configuration tables can override them when creating routes."
+    },
+    {
+      "key": "viewPanel.policy.dynamic",
+      "text": "The final policy depends on settings, presets and overrides supplied when creating the route. It cannot be determined from this View alone. The global settings below are not the final policy for this page."
+    },
+    {
+      "key": "viewPanel.policy.settings",
+      "text": "Global settings"
+    },
+    {
+      "key": "viewPanel.policy.builtIn",
+      "text": "No global asset is configured; global policy resolution falls back to built-in settings."
+    },
+    {
+      "key": "viewPanel.policy.openSettings",
+      "text": "Open or create global policy settings"
+    },
+    {
+      "key": "viewPanel.focus.order",
+      "text": "Previous selection → default control → another eligible control. Applies when the page has focus and input is enabled."
+    },
+    {
+      "key": "viewPanel.focus.outside",
+      "text": "The default control is outside this View hierarchy and will not be selected at runtime."
+    },
+    {
+      "key": "viewPanel.focus.unavailable",
+      "text": "This control is currently unavailable. If still unavailable when focus is acquired, another eligible control will be used."
+    },
+    {
+      "key": "viewPanel.hidden",
+      "text": "Hidden behavior"
+    },
+    {
+      "key": "viewPanel.hidden.help",
+      "text": "Controls content activation while fully hidden, without closing the page. Presenter Tick pause is determined by page policy."
+    },
+    {
+      "key": "viewPanel.resources.inheritance",
+      "text": "Uses the nearest parent View’s active loader only when no local loader is configured. Does not search beyond that parent View."
+    },
+    {
+      "key": "viewPanel.resources.waitScope",
+      "text": "On each activation, waits for initial resource-key bindings using the default loader. Does not cover all business async work; later updates still load progressively."
+    },
+    {
+      "key": "viewPanel.modal.source",
+      "text": "Backdrop source"
+    },
+    {
+      "key": "viewPanel.modal.global",
+      "text": "Global default"
+    },
+    {
+      "key": "viewPanel.modal.local",
+      "text": "Page override"
+    },
+    {
+      "key": "viewPanel.modal.resolvedPrefab",
+      "text": "Resolved backdrop prefab"
+    },
+    {
+      "key": "viewPanel.modal.resolvedColor",
+      "text": "Resolved tint"
+    },
+    {
       "key": "viewPanel.transitions",
       "text": "Transitions"
     },
@@ -6205,11 +6429,11 @@
     },
     {
       "key": "viewPanel.interaction",
-      "text": "Focus & visibility"
+      "text": "Focus navigation"
     },
     {
       "key": "viewPanel.interaction.help",
-      "text": "Configure default selection and behavior when fully hidden. Content stays active when visible behind a popup."
+      "text": "Configure the default control for keyboard or gamepad navigation."
     },
     {
       "key": "viewPanel.modal",
@@ -6217,7 +6441,7 @@
     },
     {
       "key": "viewPanel.modal.help",
-      "text": "Applies only to modal routes. Use the global backdrop or customize this page."
+      "text": "Applies only to modal routes. These appearance settings do not enable modality or add click-to-dismiss behavior."
     },
     {
       "key": "viewPanel.resources",
@@ -6253,11 +6477,11 @@
     },
     {
       "key": "viewPanel.field.defaultSelection",
-      "text": "The default selected control when this page takes focus, for keyboard or controller navigation."
+      "text": "Restores the previous selection first, then this control, then another eligible control."
     },
     {
       "key": "viewPanel.field.hiddenMode",
-      "text": "Deactivate content: disable the designated child while fully hidden and restore it when shown. Keep content running: hide visuals and block interaction while scripts remain active. Hiding does not close the page."
+      "text": "Hiding visuals keeps content active; deactivation disables the specified child. Presenter Tick pause is controlled by page policy. Hiding does not close the page."
     },
     {
       "key": "viewPanel.field.hiddenContentRoot",

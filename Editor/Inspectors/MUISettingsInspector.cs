@@ -99,6 +99,11 @@ namespace MUI.Editor
             presets.Add(AddAction("settings.presets.add", AddPreset));
             root.Add(presets);
 
+            var pages = Section("settings.pages.title", "pagePolicies", true);
+            pages.Add(MUIEditorControls.Text("settings.pages.help", "mui-note"));
+            pages.Add(new IMGUIContainer(DrawPagePolicies));
+            root.Add(pages);
+
             var runtime = Section("settings.runtime", "runtime", false);
             Tooltip(runtime, "settings.update.help");
             var automaticUpdate = new PropertyField(serializedObject.FindProperty("automaticFramePump"), L.Get("property.automaticFramePump"));

@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using MUI.Resources;
 
 namespace MUI.Navigation
 {
@@ -49,6 +51,64 @@ namespace MUI.Navigation
 
     public sealed class RoutePolicy
     {
+        private Dictionary<ViewResource, RoutePolicy> resourcePolicies;
+        private List<Func<RoutePolicy, RoutePolicy>> resourceOverrides;
+
+        /// <summary>复制页面策略表；路由构造时选择资源对应的不可变快照，不加载 View。</summary>
+        public RoutePolicy WithResourcePolicies(IReadOnlyDictionary<ViewResource, RoutePolicy> policies,
+            RoutePolicyOverrides overrides = null)
+        {
+            if (policies == null) throw new ArgumentNullException(nameof(policies));
+            var copy = new RoutePolicyOverrides().Apply(this);
+            copy.resourcePolicies = new Dictionary<ViewResource, RoutePolicy>();
+            copy.resourceOverrides = new List<Func<RoutePolicy, RoutePolicy>>();
+            if (overrides != null)
+            {
+                var snapshot = overrides.Copy();
+                copy.resourceOverrides.Add(policy => snapshot.Apply(policy));
+            }
+            foreach (var pair in policies)
+            {
+                if (pair.Key == null || pair.Value == null) throw new ArgumentException("Page policy entries cannot be null.", nameof(policies));
+                var value = new RoutePolicyOverrides().Apply(pair.Value);
+                value.resourcePolicies = null;
+                value.resourceOverrides = null;
+                copy.resourcePolicies.Add(pair.Key, value);
+            }
+            return copy;
+        }
+
+        public RoutePolicy ForResource(ViewResource resource)
+        {
+            if (resource == null) throw new ArgumentNullException(nameof(resource));
+            if (resourcePolicies == null) return this;
+            if (resourcePolicies.TryGetValue(resource, out var policy))
+            {
+                foreach (var apply in resourceOverrides) policy = apply(policy);
+                return policy;
+            }
+            return WithoutResourcePolicies();
+        }
+
+        /// <summary>取未匹配页面覆盖时的基础策略快照，供配置预览使用。</summary>
+        public RoutePolicy WithoutResourcePolicies()
+        {
+            var copy = new RoutePolicyOverrides().Apply(this);
+            copy.resourcePolicies = null;
+            copy.resourceOverrides = null;
+            return copy;
+        }
+
+        internal void CopyResourcePolicies(RoutePolicy source, RoutePolicyOverrides overrides,
+            string layerName, string presetName, string configurationName)
+        {
+            if (source.resourcePolicies == null) return;
+            resourcePolicies = new Dictionary<ViewResource, RoutePolicy>(source.resourcePolicies);
+            resourceOverrides = new List<Func<RoutePolicy, RoutePolicy>>(source.resourceOverrides);
+            var snapshot = overrides.Copy();
+            resourceOverrides.Add(policy => snapshot.Apply(policy, layerName, presetName, configurationName));
+        }
+
         public RoutePolicy(int layer = 0,
                     bool allowMultiple = false,
                     int maxInstances = 1,
@@ -285,7 +345,8 @@ namespace MUI.Navigation
             get;
         }
 
-        internal CoveragePolicy RequestedCoverage { get; }
+        /// <summary>未计入模态自动阻挡的显式覆盖配置，供编辑器显示继承值。</summary>
+        public CoveragePolicy RequestedCoverage { get; }
 
         /// <summary>是否接收页面输入；关闭时自身 UI 不阻挡射线，也不获取焦点。</summary>
         public bool ReceivesInput { get; }

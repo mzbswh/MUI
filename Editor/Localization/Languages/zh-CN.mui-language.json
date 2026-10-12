@@ -1345,7 +1345,7 @@
     },
     {
       "key": "editor.UIIncrementalValidation.06bf605b8a",
-      "text": "MUI 增量校验：\n"
+      "text": "MUI 增量校验"
     },
     {
       "key": "editor.ViewContractValidator.0961434628",
@@ -4021,7 +4021,7 @@
     },
     {
       "key": "property.defaultSelection",
-      "text": "默认选择对象"
+      "text": "默认选中控件"
     },
     {
       "key": "property.dismissButton",
@@ -4057,7 +4057,7 @@
     },
     {
       "key": "property.enterFadeDuration",
-      "text": "进入淡入时长"
+      "text": "淡入时长（秒）"
     },
     {
       "key": "property.entries",
@@ -4077,7 +4077,7 @@
     },
     {
       "key": "property.exitFadeDuration",
-      "text": "退出淡出时长"
+      "text": "淡出时长（秒）"
     },
     {
       "key": "property.failureMessage",
@@ -4305,7 +4305,7 @@
     },
     {
       "key": "property.waitForResourceSources",
-      "text": "首次显示前等待资源"
+      "text": "显示前等待资源绑定"
     },
     {
       "key": "property.wrapNavigation",
@@ -5353,11 +5353,11 @@
     },
     {
       "key": "enum.MUI.UGUI.ViewHiddenMode.CanvasGroupOnly",
-      "text": "保持内容运行"
+      "text": "仅隐藏画面（内容保持激活）"
     },
     {
       "key": "enum.MUI.UGUI.ViewHiddenMode.DeactivateContent",
-      "text": "停用内容"
+      "text": "隐藏并停用内容节点"
     },
     {
       "key": "enum.MUI.Navigation.ViewCacheDecision.Retained",
@@ -6196,8 +6196,232 @@
       "text": "按需采集输入、可见性、资源准备和射线信息。这里显示只读快照，展开面板不会自动执行查询。"
     },
     {
+      "key": "editor.UIBuildValidationReport.title",
+      "text": "MUI 构建校验"
+    },
+    {
+      "key": "editor.UIBuildValidationReport.passed",
+      "text": "通过"
+    },
+    {
+      "key": "editor.UIBuildValidationReport.failed",
+      "text": "未通过（{0} 个问题）"
+    },
+    {
+      "key": "editor.UIBuildValidationReport.unverified",
+      "text": "未验证（未登记 UI 目录）"
+    },
+    {
+      "key": "editor.UIBuildValidationReport.counts",
+      "text": "已登记目录：{0} | 本次检查页面：{1} | 路由：{2}"
+    },
+    {
+      "key": "viewPanel.policy.editHelp",
+      "text": "规则保存在下方配置资产，创建路由时读取，早于 Prefab 加载。修改后需重新创建路由；代码／配置表的显式值优先。"
+    },
+    {
+      "key": "viewPanel.policy.noResource",
+      "text": "请选择绑定契约，或在 Resources 下的页面 Prefab 根 View 上配置。自定义资源由项目代码传入策略；不会把子 View 当作独立页面。"
+    },
+    {
+      "key": "viewPanel.policy.resource",
+      "text": "页面资源"
+    },
+    {
+      "key": "viewPanel.policy.create",
+      "text": "创建全局配置以保存页面规则"
+    },
+    {
+      "key": "viewPanel.policy.noOverride",
+      "text": "当前资源尚无独立规则，继承创建路由时指定的配置与预设。"
+    },
+    {
+      "key": "viewPanel.policy.add",
+      "text": "配置当前页面"
+    },
+    {
+      "key": "viewPanel.policy.preset",
+      "text": "页面预设"
+    },
+    {
+      "key": "viewPanel.policy.inheritPreset",
+      "text": "继承代码预设（预览全局默认）"
+    },
+    {
+      "key": "viewPanel.policy.override",
+      "text": "覆盖：{0}"
+    },
+    {
+      "key": "viewPanel.policy.effective",
+      "text": "页面配置预览"
+    },
+    {
+      "key": "viewPanel.policy.summary",
+      "text": "层级 {0} · 模态 {1} · 下层影响 {2} · 返回 {3}"
+    },
+    {
+      "key": "viewPanel.policy.remove",
+      "text": "清除本页规则，恢复继承"
+    },
+    {
+      "key": "viewPanel.policy.invalidPreview",
+      "text": "配置无效，无法预览"
+    },
+    {
+      "key": "viewPanel.policy.storage",
+      "text": "保存位置"
+    },
+    {
+      "key": "viewPanel.policy.locate",
+      "text": "定位"
+    },
+    {
+      "key": "viewPanel.policy.overrideLegend",
+      "text": "勾选以覆盖；未勾选时继承。多项规则可展开编辑。"
+    },
+    {
+      "key": "viewPanel.policy.localValue",
+      "text": "本页覆盖"
+    },
+    {
+      "key": "viewPanel.policy.inheritedValue",
+      "text": "继承"
+    },
+    {
+      "key": "settings.pages.title",
+      "text": "页面专属规则"
+    },
+    {
+      "key": "settings.pages.help",
+      "text": "与 View Inspector 共用同一份数据。关联 Prefab 后，移动会更新关联，确认删除该 Prefab 时自动移除规则；未关联的代码／配置表规则保留。删除规则可通过撤销恢复。"
+    },
+    {
+      "key": "settings.pages.search",
+      "text": "筛选资源标识"
+    },
+    {
+      "key": "settings.pages.count",
+      "text": "规则数量"
+    },
+    {
+      "key": "settings.pages.delete",
+      "text": "删除"
+    },
+    {
+      "key": "settings.pages.add",
+      "text": "添加代码／配置表规则"
+    },
+    {
+      "key": "settings.pages.prefab",
+      "text": "关联页面 Prefab"
+    },
+    {
+      "key": "settings.pages.unlinked",
+      "text": "未关联 Prefab，不会自动删除。可拖入页面根节点带有 View 的 Prefab。"
+    },
+    {
+      "key": "settings.pages.missing",
+      "text": "关联 Prefab 已缺失，但未捕获到确认删除事件。规则保留，可重新关联、解除关联或手动删除。"
+    },
+    {
+      "key": "settings.pages.unlink",
+      "text": "解除失效关联"
+    },
+    {
+      "key": "settings.pages.linked",
+      "text": "按 GUID 跟随 Prefab；确认删除该资源时同步移除此条规则。"
+    },
+    {
+      "key": "settings.pages.keyMismatch",
+      "text": "资源标识与当前 Resources 路径不一致，可能已移出 Resources 或新标识与其他规则冲突。请检查标识及业务路由。"
+    },
+    {
+      "key": "property.ResourceKey",
+      "text": "资源标识"
+    },
+    {
+      "key": "property.ResourceVersion",
+      "text": "资源版本"
+    },
+    {
+      "key": "property.ResourceKeyFromPath",
+      "text": "随 Resources 路径更新标识"
+    },
+    {
+      "key": "viewPanel.policy",
+      "text": "页面策略"
+    },
+    {
+      "key": "viewPanel.policy.help",
+      "text": "为当前资源选择预设并覆盖页面规则；代码和项目配置表可在创建路由时继续覆盖。"
+    },
+    {
+      "key": "viewPanel.policy.dynamic",
+      "text": "最终策略由创建路由时的配置、预设和覆盖项决定，无法仅凭当前 View 确定。下方是全局配置入口，不代表本页最终策略。"
+    },
+    {
+      "key": "viewPanel.policy.settings",
+      "text": "全局配置"
+    },
+    {
+      "key": "viewPanel.policy.builtIn",
+      "text": "未配置全局资产；使用全局策略入口时将回退到内置配置。"
+    },
+    {
+      "key": "viewPanel.policy.openSettings",
+      "text": "打开或创建全局策略配置"
+    },
+    {
+      "key": "viewPanel.focus.order",
+      "text": "恢复上次选中 → 默认控件 → 其他可选控件；仅在页面获得焦点且允许输入时生效。"
+    },
+    {
+      "key": "viewPanel.focus.outside",
+      "text": "默认选中控件不属于当前 View 层级，运行时不会选中它。"
+    },
+    {
+      "key": "viewPanel.focus.unavailable",
+      "text": "该控件当前不可选中；获得焦点时若仍不可用，将使用其他可选控件。"
+    },
+    {
+      "key": "viewPanel.hidden",
+      "text": "隐藏行为"
+    },
+    {
+      "key": "viewPanel.hidden.help",
+      "text": "仅控制完全隐藏后的内容节点状态，不关闭页面。Presenter Tick 是否暂停由页面策略决定。"
+    },
+    {
+      "key": "viewPanel.resources.inheritance",
+      "text": "仅在未配置自身加载器时，借用最近父 View 的活动加载器；不跨过该父 View 向上查找。"
+    },
+    {
+      "key": "viewPanel.resources.waitScope",
+      "text": "每次激活时，等待默认加载器的初始资源键绑定；不包含所有业务异步任务，后续资源变化仍渐进加载。"
+    },
+    {
+      "key": "viewPanel.modal.source",
+      "text": "遮罩来源"
+    },
+    {
+      "key": "viewPanel.modal.global",
+      "text": "全局默认"
+    },
+    {
+      "key": "viewPanel.modal.local",
+      "text": "本页自定义"
+    },
+    {
+      "key": "viewPanel.modal.resolvedPrefab",
+      "text": "采用的遮罩预制体"
+    },
+    {
+      "key": "viewPanel.modal.resolvedColor",
+      "text": "采用的底色"
+    },
+    {
       "key": "viewPanel.transitions",
-      "text": "进入与退出"
+      "text": "过渡效果"
     },
     {
       "key": "viewPanel.transitions.help",
@@ -6205,11 +6429,11 @@
     },
     {
       "key": "viewPanel.interaction",
-      "text": "焦点与隐藏"
+      "text": "焦点导航"
     },
     {
       "key": "viewPanel.interaction.help",
-      "text": "设置默认选中控件和完全隐藏后的处理方式。被弹窗遮挡但仍可见时，不会停用内容。"
+      "text": "设置键盘或手柄导航的默认选中控件。"
     },
     {
       "key": "viewPanel.modal",
@@ -6217,7 +6441,7 @@
     },
     {
       "key": "viewPanel.modal.help",
-      "text": "仅在路由启用模态时生效。可使用全局默认遮罩，或为当前页面单独设置。"
+      "text": "仅在路由启用模态时生效；这里配置外观，不会开启模态，也不会自动添加点击遮罩关闭行为。"
     },
     {
       "key": "viewPanel.resources",
@@ -6253,11 +6477,11 @@
     },
     {
       "key": "viewPanel.field.defaultSelection",
-      "text": "页面获取焦点时默认选中的控件，供键盘或手柄导航使用。"
+      "text": "恢复焦点时优先使用上次选中控件；不可用时尝试此控件，再寻找其他可选控件。"
     },
     {
       "key": "viewPanel.field.hiddenMode",
-      "text": "停用内容：完全隐藏时停用指定子节点，重新显示时恢复。保持内容运行：仅隐藏画面并关闭交互，内容脚本仍可运行。隐藏不代表关闭页面。"
+      "text": "仅隐藏画面不会停用内容节点；停用内容模式会停用指定子节点。Presenter Tick 是否暂停由页面策略决定，隐藏不代表关闭页面。"
     },
     {
       "key": "viewPanel.field.hiddenContentRoot",

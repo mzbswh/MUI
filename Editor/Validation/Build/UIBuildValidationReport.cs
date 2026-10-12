@@ -53,18 +53,23 @@ namespace MUI.Editor
             issues.Add(message);
         }
 
-        public string ExportText()
+        public string ExportText() => ExportText(L.Get("editor.UIBuildValidationReport.title"));
+
+        internal string ExportText(string title)
         {
             var text = new StringBuilder();
-            text.Append(L.Get("editor.UIBuildValidationReport.b79876b776")).Append(CatalogCount).Append(L.Get("editor.UIBuildValidationReport.0fb3e9344a")).Append(PageCount)
-                .Append(L.Get("editor.UIBuildValidationReport.c636b7b038")).Append(RouteCount).AppendLine();
+            var status = CatalogCount == 0 ? L.Get("editor.UIBuildValidationReport.unverified") :
+                IsValid ? L.Get("editor.UIBuildValidationReport.passed") :
+                L.Format("editor.UIBuildValidationReport.failed", issues.Count + (IsTruncated ? "+" : ""));
+            text.Append(title).Append("：").AppendLine(status);
+            text.AppendLine(L.Format("editor.UIBuildValidationReport.counts", CatalogCount, PageCount, RouteCount));
             if (CatalogCount == 0)
             {
                 text.AppendLine(L.Get("editor.UIBuildValidationReport.0dbf27f994"));
             }
-            foreach (var issue in issues)
+            for (var index = 0; index < issues.Count; index++)
             {
-                text.AppendLine(issue);
+                text.Append(index + 1).Append(". ").AppendLine(issues[index]);
             }
             if (IsTruncated)
             {

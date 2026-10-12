@@ -149,7 +149,7 @@ namespace MUI.UGUI
             RequireValid();
             var policy = Resolve(layers, defaultRules, presets, preset ?? defaultPreset, layer, overrides, name);
             RequireRenderSpan(policy);
-            return policy;
+            return AttachPagePolicies(policy, preset ?? defaultPreset, layer, overrides);
         }
 
         private void RequireRenderSpan(RoutePolicy policy)
@@ -265,6 +265,7 @@ namespace MUI.UGUI
                     }
                 }
             }
+            ValidatePagePolicies(errors);
             return errors.AsReadOnly();
         }
 

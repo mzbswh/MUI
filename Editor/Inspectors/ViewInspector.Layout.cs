@@ -45,15 +45,28 @@ namespace MUI.Editor
             }
 
             var configuration = panels[1];
+            AddViewSection(configuration, "policy", true, DrawPagePolicySource);
             AddViewSection(configuration, "transitions", true, () =>
             {
                 DrawViewField("enterFadeDuration");
                 DrawViewField("exitFadeDuration");
+                DrawConfigurationHint("viewPanel.transitions.help");
             });
             AddViewSection(configuration, "interaction", true, () =>
             {
                 DrawViewField("defaultSelection");
+                DrawConfigurationHint("viewPanel.focus.order");
+                var selection = serializedObject.FindProperty("defaultSelection").objectReferenceValue as UnityEngine.UI.Selectable;
+                var view = (View)target;
+                if (selection != null && !selection.transform.IsChildOf(view.transform))
+                    EditorGUILayout.HelpBox(L.Get("viewPanel.focus.outside"), MessageType.Warning);
+                else if (selection != null && (!selection.isActiveAndEnabled || !selection.IsInteractable()))
+                    DrawConfigurationHint("viewPanel.focus.unavailable");
+            });
+            AddViewSection(configuration, "hidden", true, () =>
+            {
                 DrawViewField("hiddenMode");
+                DrawConfigurationHint("viewPanel.hidden.help");
                 if ((ViewHiddenMode)serializedObject.FindProperty("hiddenMode").enumValueIndex == ViewHiddenMode.DeactivateContent)
                 {
                     DrawViewField("hiddenContentRoot");
@@ -63,33 +76,13 @@ namespace MUI.Editor
                         EditorGUILayout.HelpBox(L.Get("policy.hidden.invalid"), MessageType.Error);
                 }
             });
-            AddViewSection(configuration, "modal", false, () =>
-            {
-                DrawViewField("useGlobalModalBackdrop");
-                if (serializedObject.FindProperty("useGlobalModalBackdrop").boolValue)
-                {
-                    if (!MUIProjectSettings.TryGet(out var settings, out var error))
-                        EditorGUILayout.HelpBox(error, MessageType.Error);
-                    else
-                    {
-                        using (new EditorGUI.DisabledScope(true))
-                            EditorGUILayout.ObjectField(L.Get("property.defaultModalBackdropPrefab"),
-                                settings == null ? null : settings.DefaultModalBackdropPrefab, typeof(RectTransform), false);
-                        if (settings == null || settings.DefaultModalBackdropPrefab == null)
-                            EditorGUILayout.LabelField(L.Get("viewPanel.modal.fallback"), EditorStyles.wordWrappedMiniLabel);
-                        if (GUILayout.Button(L.Get("viewPanel.modal.openSettings"), EditorStyles.miniButton))
-                            MUIProjectSettings.OpenOrCreate();
-                    }
-                    return;
-                }
-                DrawViewField("modalBackdropStyle");
-                using (new EditorGUI.DisabledScope(serializedObject.FindProperty("modalBackdropStyle").objectReferenceValue != null))
-                    DrawViewField("modalBarrierColor");
-            });
+            AddViewSection(configuration, "modal", false, DrawModalConfiguration);
             AddViewSection(configuration, "resources", false, () =>
             {
                 DrawViewField("inheritParentResources");
+                DrawConfigurationHint("viewPanel.resources.inheritance");
                 DrawViewField("waitForResourceSources");
+                DrawConfigurationHint("viewPanel.resources.waitScope");
             });
 
             panels[0].Add(MUIEditorControls.Text("viewPanel.bindings.help"));
@@ -113,6 +106,60 @@ namespace MUI.Editor
             panels[2].Add(diagnosticsCard);
             Select(0);
             return root;
+        }
+
+        private static void DrawConfigurationHint(string key)
+        {
+            EditorGUILayout.LabelField(L.Get(key), EditorStyles.wordWrappedMiniLabel);
+        }
+
+        private void DrawModalConfiguration()
+        {
+            DrawConfigurationHint("viewPanel.modal.help");
+            var global = serializedObject.FindProperty("useGlobalModalBackdrop");
+            var rect = EditorGUILayout.GetControlRect();
+            var label = EditorGUI.BeginProperty(rect, new GUIContent(L.Get("viewPanel.modal.source")), global);
+            EditorGUI.BeginChangeCheck();
+            var source = EditorGUI.Popup(rect, label, global.boolValue ? 0 : 1,
+                new[] { new GUIContent(L.Get("viewPanel.modal.global")), new GUIContent(L.Get("viewPanel.modal.local")) });
+            if (EditorGUI.EndChangeCheck())
+            {
+                global.boolValue = source == 0;
+                serializedObject.ApplyModifiedProperties();
+            }
+            EditorGUI.EndProperty();
+            if (global.boolValue)
+            {
+                if (!MUIProjectSettings.TryGet(out var settings, out var error))
+                    EditorGUILayout.HelpBox(error, MessageType.Error);
+                else
+                {
+                    DrawResolvedBackdrop(settings == null ? null : settings.DefaultModalBackdropPrefab,
+                        settings == null ? new Color(0, 0, 0, 0.45f) : settings.DefaultModalBackdropColor);
+                    if (GUILayout.Button(L.Get("viewPanel.modal.openSettings"), EditorStyles.miniButton))
+                        MUIProjectSettings.OpenOrCreate();
+                }
+                return;
+            }
+            DrawViewField("modalBackdropStyle");
+            var style = serializedObject.FindProperty("modalBackdropStyle").objectReferenceValue as ModalBackdropStyle;
+            if (style == null)
+            {
+                DrawViewField("modalBarrierColor");
+                DrawConfigurationHint("viewPanel.modal.fallback");
+            }
+            else
+                DrawResolvedBackdrop(style.VisualPrefab, style.Tint);
+        }
+
+        private static void DrawResolvedBackdrop(RectTransform prefab, Color tint)
+        {
+            using (new EditorGUI.DisabledScope(true))
+            {
+                EditorGUILayout.ObjectField(L.Get("viewPanel.modal.resolvedPrefab"), prefab, typeof(RectTransform), false);
+                EditorGUILayout.ColorField(L.Get("viewPanel.modal.resolvedColor"), tint);
+            }
+            if (prefab == null) DrawConfigurationHint("viewPanel.modal.fallback");
         }
 
         private void DrawRenderOrderDiagnostics()

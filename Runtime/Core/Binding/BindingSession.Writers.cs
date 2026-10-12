@@ -7,7 +7,16 @@ namespace MUI
     internal sealed partial class BindingSession
     {
         private readonly Dictionary<(IElement element, string property), string> targetWriters = new Dictionary<(IElement, string), string>(TargetIdentity.Instance);
+        private readonly HashSet<(IElement element, string property)> commandEvents = new HashSet<(IElement, string)>(TargetIdentity.Instance);
         private readonly Dictionary<string, string> sourceWriters = new Dictionary<string, string>(StringComparer.Ordinal);
+
+        public void RegisterCommandEvent(IElement element, string eventName)
+        {
+            if (!IsActive || !commandEvents.Add((element, eventName)))
+            {
+                throw new InvalidOperationException("Command event is already bound or session has ended: " + element.Name + "." + eventName);
+            }
+        }
 
         public void RegisterPropertyWriter(IElement element, string source, string property, BindingMode mode)
         {

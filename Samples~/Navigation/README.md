@@ -555,3 +555,7 @@ public void OnLowFrequencyTick(float intervalSeconds)
 ```
 
 页面和子视图使用相同规则。旧 `RoutePolicy`、`RoutePolicyOverrides`、`ChildViewTemplate` 上的 `MaxTickCatchUp` / `maxTickCatchUp` 已移除；显式配置需要迁移到 Presenter。旧设置资产中的同名字段不再生效，未实现可选接口时使用新默认值 1。
+
+## Presenter 命令
+
+`PagePresenter` 为 partial 类，直接在 Confirm 方法上声明 `[Command]` 与 `[BindCommand]`，通过 `CommandContext.RequestClose(ViewModel.Selection)` 返回结果。生成的 ConfirmCommand 归 Presenter 实例持有，由页面/子视图宿主追加到当前绑定会话；无需 ViewModel Handler 或手写订阅。Close 继续由 PageViewModelBase 提供。两者共用输入资格、取消和解绑规则；同一事件重复接管会报错。当前变更仅做离线编译，尚未执行 Unity 交互验收。

@@ -8,8 +8,6 @@ namespace MUI.UGUI
         public const string DefaultPagePrefabDirectory = "Assets/{PageName}/Resources";
         public const string DefaultPageScriptDirectory = "Assets/{PageName}/Scripts";
 
-        [SerializeField, HideInInspector] private string pageRootDirectory = "Assets";
-        [SerializeField, HideInInspector] private bool pageDirectoryRulesAbsolute;
         [SerializeField] private string pagePrefabDirectory = DefaultPagePrefabDirectory;
         [SerializeField] private string pageScriptDirectory = DefaultPageScriptDirectory;
 
@@ -27,21 +25,6 @@ namespace MUI.UGUI
             else throw new ArgumentException("Page directory rule must start with Assets/: " + rule);
             ValidateDirectory(path);
             return path;
-        }
-
-        private void UpgradeDirectoryRules()
-        {
-            if (pageDirectoryRulesAbsolute) return;
-            pagePrefabDirectory = UpgradeDirectoryRule(pagePrefabDirectory);
-            pageScriptDirectory = UpgradeDirectoryRule(pageScriptDirectory);
-            pageDirectoryRulesAbsolute = true;
-        }
-
-        private string UpgradeDirectoryRule(string rule)
-        {
-            if (string.IsNullOrEmpty(rule) || rule.Equals("Assets", StringComparison.OrdinalIgnoreCase) ||
-                rule.StartsWith("Assets/", StringComparison.OrdinalIgnoreCase)) return rule;
-            return pageRootDirectory + "/" + rule;
         }
 
         private static void ValidateDirectory(string path)

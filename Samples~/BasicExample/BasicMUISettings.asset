@@ -23,7 +23,9 @@ MonoBehaviour:
     Order: 200
   defaultRules:
     Layer: Default
-    EnterHistory: 1
+    PageRole: 1
+    OwnerDeparture: 0
+    ReceivesInput: 1
     Coverage: 0
     TakesFocus: 1
     Modal: 0
@@ -45,7 +47,9 @@ MonoBehaviour:
     Overrides: 0
     Values:
       Layer: Default
-      EnterHistory: 1
+      PageRole: 1
+      OwnerDeparture: 0
+      ReceivesInput: 1
       Coverage: 0
       TakesFocus: 1
       Modal: 0
@@ -63,10 +67,12 @@ MonoBehaviour:
       CloseTimeoutSeconds: 30
       CloseDecisionTimeoutSeconds: 120
   - Name: FullScreen
-    Overrides: 4
+    Overrides: 1026
     Values:
       Layer: Default
-      EnterHistory: 1
+      PageRole: 1
+      OwnerDeparture: 0
+      ReceivesInput: 1
       Coverage: 2
       TakesFocus: 1
       Modal: 0
@@ -84,10 +90,12 @@ MonoBehaviour:
       CloseTimeoutSeconds: 30
       CloseDecisionTimeoutSeconds: 120
   - Name: Popup
-    Overrides: 21
+    Overrides: 1035
     Values:
       Layer: Popup
-      EnterHistory: 1
+      PageRole: 2
+      OwnerDeparture: 0
+      ReceivesInput: 1
       Coverage: 1
       TakesFocus: 1
       Modal: 1
@@ -105,10 +113,12 @@ MonoBehaviour:
       CloseTimeoutSeconds: 30
       CloseDecisionTimeoutSeconds: 120
   - Name: Notice
-    Overrides: 63
+    Overrides: 3103
     Values:
       Layer: Notice
-      EnterHistory: 0
+      PageRole: 0
+      OwnerDeparture: 0
+      ReceivesInput: 0
       Coverage: 0
       TakesFocus: 0
       Modal: 0
@@ -126,10 +136,12 @@ MonoBehaviour:
       CloseTimeoutSeconds: 30
       CloseDecisionTimeoutSeconds: 120
   - Name: Background
-    Overrides: 63
+    Overrides: 3103
     Values:
       Layer: Background
-      EnterHistory: 0
+      PageRole: 0
+      OwnerDeparture: 0
+      ReceivesInput: 0
       Coverage: 0
       TakesFocus: 0
       Modal: 0

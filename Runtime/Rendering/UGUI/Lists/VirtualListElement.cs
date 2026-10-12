@@ -15,7 +15,7 @@ namespace MUI.UGUI
         private ScrollRect scrollRect = null;
         [SerializeField]
         private View itemTemplate = null;
-        [SerializeField, UnityEngine.Serialization.FormerlySerializedAs("rowHeight")]
+        [SerializeField]
         private float estimatedItemExtent = 64;
         [SerializeField]
         private RectTransform.Axis scrollAxis = RectTransform.Axis.Vertical;

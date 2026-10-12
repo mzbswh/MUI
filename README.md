@@ -15,7 +15,7 @@
 
 ## 开发入口
 
-普通页面由 ViewModel、带 Element 的 View/Prefab、Route 和宿主配置组成，Presenter 按需使用。属性、命令与绑定接线由包内生成器生成。
+普通页面由 ViewModel、带 Element 的 View/Prefab、Route 和宿主配置组成，Presenter 按需使用。属性、命令与绑定接线由包内生成器生成。业务命令可直接声明在 partial Presenter 上，由宿主自动接入当前绑定会话，无需 ViewModel 转发 Handler。
 
 - [入门与生命周期](Documentation~/index.md)
 - [虚拟列表接入](Documentation~/virtual-lists.md)

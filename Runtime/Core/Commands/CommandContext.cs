@@ -97,6 +97,7 @@ namespace MUI
             update();
         }
 
+        /// <summary>不携带结果请求关闭当前来源；不等待关闭完成。</summary>
         public void RequestClose()
         {
             ThrowIfInvalid();
@@ -109,7 +110,8 @@ namespace MUI
             HasRequestedClose = true;
         }
 
-        public void Complete<TResult>(TResult result)
+        /// <summary>携带结果请求关闭当前来源；结果发布遵循宿主关闭协议，不等待关闭完成。</summary>
+        public void RequestClose<TResult>(TResult result)
         {
             ThrowIfInvalid();
             if (target == null)
@@ -117,7 +119,7 @@ namespace MUI
                 throw new InvalidOperationException("This command has no source childView.");
             }
 
-            target.Complete(result);
+            target.RequestClose(result);
             HasRequestedClose = true;
         }
 

@@ -197,9 +197,78 @@ TwoWay 默认用模型初始化控件，路径缺失期间忽略反向写入。�
 
 命令统一实现 `IUICommand`；立即完成的业务可传给 `new AsyncCommand(context => { /* 业务操作 */ })`，不需要独立同步命令。绑定入口要求可等待清理的激活作用域，以保证关闭或换绑时撤销命令来源并等待在途工作。
 
+### 手动触发命令
+
+只需触发、不等待结果时使用 `Execute()`，需要结果时使用 `ExecuteAsync()`：
+
+```csharp
+// 不依赖界面来源的普通命令
+viewModel.RefreshCommand.Execute();
+
+// 命令需要关闭界面或返回结果时，传入当前界面的 ICommandTarget。
+viewModel.CloseBtnCmd.Execute(commandTarget, cancellationToken);
+
+// 需要等待并检查结果
+var outcome = await viewModel.RefreshCommand.ExecuteAsync(
+    cancellationToken: cancellationToken);
+```
+
+`Execute()` 在当前线程立即进入同一个执行流程，不调度到后台线程、不延迟一帧，也不阻塞等待异步完成。AsyncCommand 实例和 IUICommand 接口变量均可使用；接口变量通过 MUI 命名空间的扩展方法调用，无需修改自定义 IUICommand 实现。
+
+此入口自动观察失败结果及执行异常，并交给 UIErrors；取消和资格/并发拒绝不会作为错误报告。调用仍需遵守命令的 UI 线程约束，CanExecute、并发策略和执行状态与 ExecuteAsync 相同。
+
+手动调用不会自动归属某个绑定会话，也不会推断界面来源；调用方需管理取消与必要的等待。调用 RequestClose（含带结果重载）的命令仍需有效的 ICommandTarget。按钮点击继续由原绑定会话执行，以保留会话的输入门控、取消和清理；外部业务关闭页面应优先使用导航关闭 API。
+
+### 请求关闭与返回结果
+
+```csharp
+context.RequestClose();       // 不携带结果请求关闭
+context.RequestClose(true);   // 携带结果请求关闭
+```
+
+CommandContext 和 Presenter 的 ActivationContext 均提供这两种入口。它们只发出请求，不等待页面完全关闭；关闭守卫、结果发布和清理仍由宿主原有协议处理。带结果关闭不是单独设置结果，也不意味着请求已经获准。带结果关闭统一使用 `RequestClose(result)`，不提供 `Complete(result)` 旧入口。
+
+### Presenter 命令
+
+需要业务协调的操作可直接声明在 `partial Presenter<TViewModel, TArgs, TResult>` 上，使用与 ViewModel 相同的 `[Command]` / `[BindCommand]`。不需要在 ViewModel 中声明 Handler，也不需要在 OnOpen/OnClose 中手写转发或订阅。
+
+```csharp
+public partial class ShopPresenter : Presenter<ShopViewModel, ShopArgs, bool>
+{
+    private bool CanBuy => ViewModel.Quantity > 0;
+
+    [Command(CanExecute = nameof(CanBuy))]
+    [BindCommand("Buy", nameof(MUI.UGUI.ButtonElement.Clicked))]
+    private async System.Threading.Tasks.ValueTask BuyAsync(CommandContext context)
+    {
+        var model = ViewModel;
+        var productId = model.SelectedProductId;
+        var quantity = model.Quantity;
+        await shopService.BuyAsync(productId, quantity, context.Token);
+        context.Apply(() => model.Message = "购买成功");
+    }
+}
+```
+
+上例的业务服务由项目构造注入，模型和参数类型由项目定义。生成器在 Presenter 上生成 `BuyCommand`；按钮通过当前绑定会话执行它，命令实例不写入共享 ViewModel。同步 void、Task、ValueTask、CommandContext、CancellationToken 以及并发选项与 ViewModel 命令一致；禁止 async void。
+
+页面和子视图宿主都会自动接入。关闭、停用和换绑沿用会话的取消、解绑与清理；换绑预览也校验 Presenter 命令，但不会执行命令或 CanExecute。异步返回后用 `context.Apply` 写入状态，并遵守其 UI 线程要求。命令仍在执行时能否完成换绑，沿用宿主已有的在途命令规则。
+
+CanExecute 可读取当前 ViewModel；模型属性通知和命令执行状态会自动刷新按钮。条件只依赖 Presenter 私有字段或外部服务时，改变条件后调用生成的 `BuyCommand.NotifyCanExecuteChanged()`。框架不会自动观察普通业务字段。
+
+同一控件事件不能同时由 ViewModel 和 Presenter 命令接管，生成器报告 MUI001；运行时会话还会检查真实 Element 上的事件和属性写入冲突。基类 Presenter 的命令沿用继承绑定，不重复订阅。`CommandManifest` 提供当前 Presenter（含基类）的命令清单，模型工厂的 Manifest 仍只描述模型绑定。
+
+使用 Prefab 自动绑定时，明确选择（ViewRoute.PresenterType）或唯一匹配的 Presenter 手写命令优先于同目标的自动命令。多个 Presenter 候选无法确定时不会猜测；请明确指定类型或移除该目标的自动命令声明。Presenter 仍须由路由/子视图工厂选用；仅声明类不会替换手动路由的 Presenter。自定义绑定上下文应继承 `BindingContext<TViewModel>` 才能接入实例命令，直接继承非泛型基类的上下文会明确报错。
+
+Navigation 示例的 Confirm 现位于 PagePresenter，Close 仍位于 PageViewModelBase，展示两种命令在同一页面共存。
+
 诊断接入：通过 `UIErrors.Sink` 接管错误输出；操作结果与导航事件/追踪的 `DiagnosticId` 可关联同一次异常，也可使用 `UIErrors.GetDiagnosticId(error)` 查询。查询不会触发报告。同一异常实例只报告一次，单项聚合复用原因标识，多项聚合逐项报告实际失败；重试产生的新异常有独立标识。错误出口和观察者抛错不打断其他观察者或框架清理。
 
 在错误出口调用 `UIErrors.GetDiagnosticContext(error)` 可读取宿主、句柄编号、路由、操作与原始阶段，关闭时间线追踪也保留这些字段。上下文仅含值与有界字符串，按异常弱键保存，不保留页面、模型或资源。项目适配器可使用 `UIErrors.BeginContext(...)` 提供外部阶段，或 `AttachContext(...)` 在传播前补充位置；传播只填补缺失字段，不重写原始故障位置。Unity 默认出口将标识、上下文和异常栈合并为一条错误日志。
+
+### 开发期 API 与配置
+
+当前只维护一套 API 和配置格式，不提供弃用别名、旧序列化字段映射或自动升级。控件命名规则使用 `Expression`、`ComponentTypes` 和 `DefaultBindingProperties`；页面目录直接保存完整 Assets 路径。页面预设直接声明角色与输入策略，覆盖字段使用当前 `MUIPagePolicyFields`。旧配置需重新设置，旧自动绑定需重新生成；仓库 Basic 示例资产已按当前字段更新。手写控件契约和 Element 组件适配器是仍支持的功能，不属于历史迁移入口。
 
 ## 输入转换与校验
 
@@ -277,7 +346,7 @@ UIHost 的 `ownsProvider: true` 将提供方最终释放交给宿主；默认资
 
 页面缓存只持有解除绑定并重置的 View 凭证，每次打开仍创建新的模型、Presenter、实例作用域、激活、句柄和结果。正常关闭清理模型与 Presenter 的实例资源后才尝试缓存，外部传入模型仍只借用；故障关闭、强制关闭与宿主退出直接归还。缓存命中不重复获取 View，但会重新执行当前激活所需的资源配置；重置或重新配置失败的 View 淘汰并归还，不继续复用。
 
-渲染器通过 `ICacheableView.ResetForCache()` 清除旧模型引用、焦点、输入与资源上下文；凭证通过 `ICacheableViewAcquisition` 显式保证必要后端依赖能延长至实际归还，并通过 `PrepareForReuse()` 注入当前配置。`AcquiredView` 默认 `supportsCaching: false`，项目后端满足此保证才显式启用。UGUI View 和 PrefabViewProvider 已支持；Prefab 的配置回调在缓存命中后再次执行，须允许重复配置。旧 `IReusableViewPresenter` 标记已弃用，不能使 Presenter 或模型跨关闭保留。缓存未接管任何旧实例的 LifetimeScope 或业务资源。
+渲染器通过 `ICacheableView.ResetForCache()` 清除旧模型引用、焦点、输入与资源上下文；凭证通过 `ICacheableViewAcquisition` 显式保证必要后端依赖能延长至实际归还，并通过 `PrepareForReuse()` 注入当前配置。`AcquiredView` 默认 `supportsCaching: false`，项目后端满足此保证才显式启用。UGUI View 和 PrefabViewProvider 已支持；Prefab 的配置回调在缓存命中后再次执行，须允许重复配置。Presenter 或模型不会跨关闭保留。缓存未接管任何旧实例的 LifetimeScope 或业务资源。
 
 构造 Navigator 时传入 `maxCachedEstimatedBytes` 后，Route 必须给出 `estimatedRetainedBytes` 才能进入缓存；未知估算和超出总预算的 View 直接归还。`ReservedCacheEstimatedBytes` 包含缓存目录、在途淘汰与未确认失败的估算额度；移出目录不提前归还额度。`FailedCacheEstimatedBytes` 仅反映当前未确认的失败额度，明确支持安全重试的凭证确认后恢复预算，首次清理错误及 `HasCleanupFailure` 保持原值。两项查询不启动清理、不重读项目责任属性；仅观察已捕获责任。原生节点消失不能代替未知部分归还的确认。
 
@@ -318,7 +387,7 @@ Prefab 保存、导入及其依赖资产变化按路径合并，在 Editor 空�
 - Prefab：`Assets/LocalResource/{PageName}/`
 - 脚本：`Assets/Scripts/UI/{PageName}/`
 
-Inventory 会生成到 `Assets/LocalResource/Inventory/InventoryView.prefab` 和 `Assets/Scripts/UI/Inventory/`。路径以 `Assets/` 开始，接受末尾斜杠；输入的 `assets/` 会统一为 Unity 的 `Assets/`。旧版根目录加相对规则自动转换为等价完整路径，不移动已有文件。
+Inventory 会生成到 `Assets/LocalResource/Inventory/InventoryView.prefab` 和 `Assets/Scripts/UI/Inventory/`。路径以 `Assets/` 开始，接受末尾斜杠；输入的 `assets/` 会统一为 Unity 的 `Assets/`。目录规则直接保存完整 Assets 路径，不转换旧版相对目录。
 
 默认规则仍保持 `Assets/{PageName}/Resources` 和 `Assets/{PageName}/Scripts`。缺失目录自动创建，已有文件不覆盖；预览、程序集检查和实际写入使用同一套解析路径。
 
@@ -350,13 +419,13 @@ Resources 子目录中的 Prefab 自动生成对应资源键；例如 `Assets/Re
 
 向导生成的 `[ViewContract]` 会记录 `PrefabAssetGuid`，检查器按 GUID 自动关联当前 Prefab 根节点的 ViewModel。唯一匹配时只读显示；多个匹配时仅列出该 Prefab 的候选契约。此关联不改变运行时资源加载或路由。
 
-旧版向导的 `Page.PrefabAssetGuid` 常量和 Resources 资源键匹配仍受支持。自定义加载路径的旧页面可为 ViewModel 补充 `[ViewContract("资源键", PrefabAssetGuid = "Prefab 的 GUID")]`。未匹配时只提供结构校验，不按对象名称或项目契约数量猜测。独立场景对象需要先保存为 Prefab；内部嵌套 View 不沿用外层页面契约。
+Prefab 通过 ViewModel 的 GUID 契约或 Resources 资源键匹配；自定义加载路径需在 ViewModel 声明 `[ViewContract("资源键", PrefabAssetGuid = "Prefab 的 GUID")]`。未匹配时只提供结构校验，不按对象名称或项目契约数量猜测。独立场景对象需要先保存为 Prefab；内部嵌套 View 不沿用外层页面契约。
 
 ### 原生控件绑定与代码双向声明
 
 全局 MUI Settings 的“控件绑定规则”配置前缀与类型，默认 `Img_` → Image、`Txt_` → Text/TMP、`Btn_` → Button。前缀后的部分作为绑定名称，例如 `Img_Icon` 对应 `Icon`；不带前缀的装饰节点不会收集。每个前缀可多选组件类型；每次取最长前缀并继续解析后续前缀。规则支持修改、添加和删除，名称必须满足生成代码的 C# 标识符要求。
 
-View 的“绑定与校验”统一展示规则扫描结果及 ViewModel 已有 `[Bind]` / `[BindCommand]` 声明。名称、引用、状态、定位、源码放在同一行区域。已有有效引用优先保留；新增目标按前缀、绑定名称和类型自动匹配，不会靠猜测消除重名。代码声明在检查器初始化（含编译后重建）或切换契约时自动同步唯一匹配，可撤销；不在重绘时写入。缺失目标可以拖入并立即记录，已有非空引用不会被自动替换。规则扫描候选在生成绑定时记录，不再提供独立的保存引用按钮。旧 Element 契约只读显示，保留兼容，不隐式删除组件或改写源码。
+View 的“绑定与校验”统一展示规则扫描结果及 ViewModel 已有 `[Bind]` / `[BindCommand]` 声明。名称、引用、状态、定位、源码放在同一行区域。已有有效引用优先保留；新增目标按前缀、绑定名称和类型自动匹配，不会靠猜测消除重名。代码声明在检查器初始化（含编译后重建）或切换契约时自动同步唯一匹配，可撤销；不在重绘时写入。缺失目标可以拖入并立即记录，已有非空引用不会被自动替换。规则扫描候选在生成绑定时记录，不再提供独立的保存引用按钮。Element 组件契约只读显示，不隐式删除组件或改写源码。
 
 点击“生成绑定”保存控件引用和自动声明，并请求重新编译。匹配到的文本默认生成同名字符串属性，图片生成 Sprite 属性，滑块/开关/输入框/下拉框生成 Value 对应的属性，滚动区域生成 Vector2 属性。输入类默认双向绑定，显示类默认单向绑定。全局命名规则可覆盖属性或 Action 事件名、绑定方向；属性类型从适配器推导，自定义组件需要注册适配器。
 
@@ -380,7 +449,7 @@ partial void OnClose(CommandContext context) => context.RequestClose();
 
 自动生成目前支持 Assets 下的 Prefab 和非嵌套、非泛型 ViewModel；同一模型只能由一个 Prefab 提供自动声明。Prefab 是编译输入，必须提交到版本控制。修改规则或引用后再次点击生成；仅保存场景不会更新自动声明。
 
-旧手写代码仍可通过公共契约声明（兼容接口保留，新属性选择不再显示 Content 等别名）：
+手写绑定可使用跨后端公共契约；原生属性选择器只展示原生属性名，避免重复：
 
 ```csharp
 [ObservableProperty]
@@ -400,7 +469,7 @@ private UnityEngine.Vector2 listPosition;
 private void Close(CommandContext context) => context.RequestClose();
 ```
 
-Presenter 只修改 `ViewModel.Title`、`ViewModel.ListPosition` 等状态，不持有原生控件。简单页面可不编写 Presenter。Text/TMP 共享 ITextElement；按钮使用 IButtonElement；Slider/Scrollbar 使用 IValueElement<float>，Toggle 使用 IValueElement<bool>；UGUI/TMP 输入框、下拉框分别使用 IInputFieldElement、IDropdownElement。图片、RawImage、滚动区域契约位于 MUI.UGUI。输入框支持逐字或结束编辑后回写；下拉框支持文本选项。ScrollRect 包含归一化位置、速度和方向；它不是虚拟化列表，列表数据与资源加载继续使用已有列表/资源能力。
+Presenter 修改 `ViewModel.Title`、`ViewModel.ListPosition` 等状态，也可声明业务命令，不持有原生控件。简单页面可不编写 Presenter。Text/TMP 共享 ITextElement；按钮使用 IButtonElement；Slider/Scrollbar 使用 IValueElement<float>，Toggle 使用 IValueElement<bool>；UGUI/TMP 输入框、下拉框分别使用 IInputFieldElement、IDropdownElement。图片、RawImage、滚动区域契约位于 MUI.UGUI。输入框支持逐字或结束编辑后回写；下拉框支持文本选项。ScrollRect 包含归一化位置、速度和方向；它不是虚拟化列表，列表数据与资源加载继续使用已有列表/资源能力。
 
 模型写入使用无通知原生 setter 或同步保护，不发布用户操作命令。有效交互先发布 PropertyChanged，再发布业务事件；门控检查 View、Host 和控件交互状态。绑定上下文负责激活阶段的业务解绑，适配器负责自身原生事件清理，不通过 RemoveAllListeners 清除他人的监听。绕过适配器直接修改 Text、Image 等原生属性不会自动通知模型。
 
@@ -428,7 +497,7 @@ public sealed class PriceProperties : ControlPropertyExtension<Text>
 
 需要界面回写时，在属性上标记 `[NotifiesChange]`，并在真实变化回调调用 `Changed(nameof(Property))`。该标记是通知契约，不会自动监听变化。Unity 输入事件使用 `Listen(Component.onValueChanged, value => Changed(nameof(Property)))`，自动执行输入门控并随控件释放解绑；普通 C# 事件使用 `TrackCleanup` 注册解绑，在用户输入回调中先检查 `CanReceiveInput()`。模型写入应使用 `SetValueWithoutNotify` 等无通知 API，避免触发用户命令。`ForwardChanges("Value", nameof(Property))` 可复用原适配器通知；扩展通知按类型隔离，不会串到同名原生属性。
 
-#### 完整控件适配器（兼容与高级扩展）
+#### 完整控件适配器（高级扩展）
 
 
 

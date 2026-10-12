@@ -273,6 +273,7 @@ namespace MUI
                     var candidate = bindingFactory(view, next);
                     ViewPreparation.ValidateBinding(candidate, view, next);
                     preparedBinding = candidate;
+                    presenter.AttachCommandBindings(candidate);
                 });
                 RequireCurrent();
                 if (!(preparedBinding is IBindingRebindPreparation bindingPreparation))

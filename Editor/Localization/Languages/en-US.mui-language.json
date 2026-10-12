@@ -1260,6 +1260,26 @@
       "text": "UI build catalog count exceeds 32."
     },
     {
+      "key": "editor.UIBuildValidationReport.title",
+      "text": "MUI build validation"
+    },
+    {
+      "key": "editor.UIBuildValidationReport.passed",
+      "text": "Passed"
+    },
+    {
+      "key": "editor.UIBuildValidationReport.failed",
+      "text": "Failed ({0} issues)"
+    },
+    {
+      "key": "editor.UIBuildValidationReport.unverified",
+      "text": "Not verified (no UI catalog registered)"
+    },
+    {
+      "key": "editor.UIBuildValidationReport.counts",
+      "text": "Registered catalogs: {0} | Pages checked: {1} | Routes: {2}"
+    },
+    {
       "key": "editor.UIBuildValidationReport.0dbf27f994",
       "text": "No UI build catalog registered; project page coverage was not verified."
     },
@@ -4601,7 +4621,7 @@
     },
     {
       "key": "diagnostic.settings.rulesRequired",
-      "text": "Default rules cannot be "Generate Bindings".",
+      "text": "Default rules cannot be \"Generate Bindings\".",
       "source": "默认规则不能为空。"
     },
     {
@@ -6120,20 +6140,12 @@
       "text": "Configure independent full project paths for Prefabs and scripts, using {PageName}. For example Assets/LocalResource/{PageName} and Assets/Scripts/UI/{PageName}. No shared root; changes do not move existing files."
     },
     {
-      "key": "property.pageRootDirectory",
-      "text": "Page root directory"
-    },
-    {
       "key": "property.pagePrefabDirectory",
       "text": "Prefab directory rule"
     },
     {
       "key": "property.pageScriptDirectory",
       "text": "Script directory rule"
-    },
-    {
-      "key": "settings.pageRootDirectory.help",
-      "text": "A project path under Assets, e.g. Assets/UI. Missing folders are created when generating a page."
     },
     {
       "key": "settings.pagePrefabDirectory.help",
@@ -6194,26 +6206,6 @@
     {
       "key": "viewPanel.diagnostics.help",
       "text": "Capture input, visibility, resource readiness and raycast details on demand. Snapshots are read-only; opening this tab does not run queries."
-    },
-    {
-      "key": "editor.UIBuildValidationReport.title",
-      "text": "MUI build validation"
-    },
-    {
-      "key": "editor.UIBuildValidationReport.passed",
-      "text": "Passed"
-    },
-    {
-      "key": "editor.UIBuildValidationReport.failed",
-      "text": "Failed ({0} issues)"
-    },
-    {
-      "key": "editor.UIBuildValidationReport.unverified",
-      "text": "Not verified (no UI catalog registered)"
-    },
-    {
-      "key": "editor.UIBuildValidationReport.counts",
-      "text": "Registered catalogs: {0} | Pages checked: {1} | Routes: {2}"
     },
     {
       "key": "viewPanel.policy.editHelp",
@@ -6640,8 +6632,8 @@
       "text": "Incompatible type, another view boundary, or an existing Element component."
     },
     {
-      "key": "nativeRules.legacy",
-      "text": "Existing Element binding (compatible)"
+      "key": "nativeRules.elementBinding",
+      "text": "Element component binding"
     },
     {
       "key": "nativeRules.missing",

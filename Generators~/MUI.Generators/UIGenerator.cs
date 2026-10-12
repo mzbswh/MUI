@@ -51,6 +51,12 @@ namespace MUI.Generators
 
                 try
                 {
+                    if (PresenterBase(type) != null)
+                    {
+                        GeneratePresenterCommands(context, type);
+                        continue;
+                    }
+
                     var result = Generate(context, type);
                     if (result != null)
                     {

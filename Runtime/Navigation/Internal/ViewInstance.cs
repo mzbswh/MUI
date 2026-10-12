@@ -322,7 +322,7 @@ namespace MUI.Navigation
             Owner.RequestClose(this, DismissReason.Closed);
         }
 
-        public abstract void Complete<TResult>(TResult result);
+        public abstract void RequestClose<TResult>(TResult result);
 
         internal abstract void PublishResultObservers();
 
@@ -572,7 +572,7 @@ namespace MUI.Navigation
 
         public override void SetFailure(Exception error) => failure = error;
 
-        public override void Complete<T>(T completion)
+        public override void RequestClose<T>(T completion)
         {
             if (!IsActive)
             {

@@ -65,6 +65,8 @@ namespace MUI.Generators
                     if (type.Arity != 0 || type.ContainingType != null) Fail(type, "Automatic Prefab bindings require a non-nested, non-generic ViewModel.");
                     var names = CollectReservedMemberNames(context.WithCompilation(compilation), type);
                     var members = CollectBindingMembers(type).ToArray();
+                    var presenter = AutoBindingPresenter(context.Compilation.GetTypeByMetadataName(pair.Key), candidates);
+                    var authoredMembers = presenter == null ? members : members.Concat(CollectBindingMembers(presenter)).ToArray();
                     foreach (var member in members)
                     {
                         var observable = Attribute(member, "MUI.ObservablePropertyAttribute");
@@ -82,7 +84,7 @@ namespace MUI.Generators
                         var contractName = (string)entry.Attribute("contract");
                         var command = (string)entry.Attribute("command") == "true";
                         // An authored binding owns this target member, not the whole control.
-                        if (members.Any(member => member.GetAttributes().Any(attribute =>
+                        if (authoredMembers.Any(member => member.GetAttributes().Any(attribute =>
                             (attribute.AttributeClass?.ToDisplayString() == "MUI.BindAttribute" || attribute.AttributeClass?.ToDisplayString() == "MUI.BindCommandAttribute") &&
                             attribute.ConstructorArguments.Length > 1 && attribute.ConstructorArguments[0].Value as string == name && CanonicalAutoProperty(attribute.ConstructorArguments[1].Value as string) == CanonicalAutoProperty(property)))) continue;
                         if (!writes.Add(name + "\0" + CanonicalAutoProperty(property))) Fail(type, "Duplicate automatic target binding: " + name + "." + property);

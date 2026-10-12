@@ -158,6 +158,7 @@ namespace MUI
                         var candidate = bindingFactory(view, model);
                         ViewPreparation.ValidateBinding(candidate, view, model);
                         Binding = candidate;
+                        presenter.AttachCommandBindings(candidate);
                     });
                     requireCurrent();
                     invoke(() => Binding.SetCommandTarget(target));

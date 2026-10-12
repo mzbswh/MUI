@@ -34,10 +34,6 @@ namespace MUI.UGUI
         [SerializeField] private List<NativeControlBinding> nativeBindings = new List<NativeControlBinding>();
         public IReadOnlyList<NativeControlBinding> NativeBindings => nativeBindings;
 
-        // 仅用于迁移旧版直接访问生成数据；同步绑定时清空，不再参与生成。
-        [SerializeField, HideInInspector] private string muiGeneratedControls = string.Empty;
-        public string GeneratedControlsMetadata => muiGeneratedControls;
-
         [SerializeField, HideInInspector] private string muiAutoBindings = string.Empty;
         [SerializeField, HideInInspector] private List<AutoBindingSelection> autoBindingSelections = new List<AutoBindingSelection>();
         public IReadOnlyList<AutoBindingSelection> AutoBindingSelections => autoBindingSelections;

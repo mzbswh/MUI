@@ -47,25 +47,7 @@ namespace MUI.Editor
             if (target != null) SessionState.SetBool(BindingFoldoutKey(control), expanded);
         }
 
-        private List<AutoBindingProperty> GetBindingChoices(ControlRow row)
-        {
-            var choices = GetStoredBindingChoices(row);
-            if (row.Target == null) return choices;
-            using (var adapter = NativeControl.Create(row.Name, row.Target))
-                foreach (var choice in choices)
-                {
-                    if (choice.Native || !string.IsNullOrEmpty(choice.Extension)) continue;
-                    var native = NativeAlias(adapter.GetType(), row.Target.GetType(), choice.Property);
-                    if (native == null) continue;
-                    choice.Property = native;
-                    choice.Native = true;
-                    if (NativeNotificationProperty(row.Target.GetType(), native) == null && choice.Mode != BindingMode.OneTime)
-                        choice.Mode = BindingMode.OneWay;
-                }
-            return choices;
-        }
-
-        private static string NativeAlias(Type adapter, Type component, string property)
+        private static string NativePropertyForContract(Type adapter, Type component, string property)
         {
             if (adapter.Assembly != typeof(NativeControl).Assembly && adapter.FullName != "MUI.TMP.NativeTMPText" && adapter.FullName != "MUI.TMP.NativeTMPInputField" && adapter.FullName != "MUI.TMP.NativeTMPDropdown") return null;
             string native = null;
@@ -87,25 +69,11 @@ namespace MUI.Editor
             return null;
         }
 
-        private List<AutoBindingProperty> GetStoredBindingChoices(ControlRow row)
+        private List<AutoBindingProperty> GetBindingChoices(ControlRow row)
         {
             var view = (View)target;
             var saved = view.AutoBindingSelections.FirstOrDefault(item => item.Control == row.Name);
             if (saved != null) return saved.Properties.Select(item => new AutoBindingProperty { Property = item.Property, Source = item.Source, Mode = item.Mode, Native = item.Native, Extension = item.Extension }).ToList();
-            // Preserve previous generated declarations when first opening the new inspector.
-            if (!string.IsNullOrEmpty(view.AutoBindingsMetadata))
-            {
-                var metadata = XElement.Parse(Encoding.UTF8.GetString(Convert.FromBase64String(view.AutoBindingsMetadata)));
-                var previous = metadata.Elements("binding").Where(item => (string)item.Attribute("name") == row.Name).Select(item => new AutoBindingProperty
-                {
-                    Property = (string)item.Attribute("property"),
-                    Native = item.Attribute("component") != null && item.Attribute("extension") == null,
-                    Extension = (string)item.Attribute("extension"),
-                    Source = (string)item.Attribute("source") ?? (row.Name + ((string)item.Attribute("command") == "true" ? "Command" : "")),
-                    Mode = Enum.TryParse((string)item.Attribute("mode"), out BindingMode mode) ? mode : BindingMode.OneWay
-                }).ToList();
-                if (previous.Count != 0) return previous;
-            }
             if (row.Target == null) return new List<AutoBindingProperty>();
             using (var adapter = NativeControl.Create(row.Name, row.Target))
             {
@@ -124,18 +92,17 @@ namespace MUI.Editor
                         if (row.Rule.OverrideBindingDirection) choice.Mode = row.Rule.BindingDirection;
                         return choice;
                     }).ToList();
-                var property = row.Rule == null ? null : row.Rule.BindingProperty;
-                if (string.IsNullOrWhiteSpace(property))
-                {
-                    if (row.Target is UnityEngine.UI.Slider || row.Target is UnityEngine.UI.Scrollbar) property = "value";
-                    else if (row.Target is UnityEngine.UI.Toggle) property = "isOn";
-                    else if (adapter is ITextElement) property = "Content";
-                    else if (adapter is IButtonElement) property = "Clicked";
-                    else if (adapter is IImageElement) property = "Sprite";
-                    else if (adapter is IRawImageElement) property = "Texture";
-                    else if (adapter is IScrollElement) property = "NormalizedPosition";
-                    else if (adapter is IInputFieldElement || adapter is IDropdownElement || adapter.GetType().GetInterfaces().Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IValueElement<>))) property = "Value";
-                }
+                string property = null;
+                if (row.Target is UnityEngine.UI.Slider || row.Target is UnityEngine.UI.Scrollbar) property = "value";
+                else if (row.Target is UnityEngine.UI.Toggle) property = "isOn";
+                else if (adapter is ITextElement) property = "text";
+                else if (adapter is IButtonElement) property = "Clicked";
+                else if (adapter is IImageElement) property = "sprite";
+                else if (adapter is IRawImageElement) property = "texture";
+                else if (adapter is IScrollElement) property = "normalizedPosition";
+                else if (adapter is IInputFieldElement) property = "text";
+                else if (adapter is IDropdownElement) property = "value";
+                else if (adapter.GetType().GetInterfaces().Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IValueElement<>))) property = "Value";
                 if (string.IsNullOrWhiteSpace(property)) return new List<AutoBindingProperty>();
                 var command = adapter.GetType().GetEvent(property) != null;
                 var choice = NewBindingChoice(row, property, command, true);
@@ -282,7 +249,7 @@ namespace MUI.Editor
             foreach (var type in new[] { adapterType, componentType }.Concat(extensions))
                 foreach (var property in type.GetProperties(BindingFlags.Instance | BindingFlags.Public))
                 {
-                    if (type == adapterType && (NativeAlias(adapterType, componentType, property.Name) != null || new[] { "Name", "Target", "IsAlive" }.Contains(property.Name))) continue;
+                    if (type == adapterType && (NativePropertyForContract(adapterType, componentType, property.Name) != null || new[] { "Name", "Target", "IsAlive" }.Contains(property.Name))) continue;
                     var reason = property.GetIndexParameters().Length != 0 ? "索引器需要参数" :
                         property.IsDefined(typeof(ObsoleteAttribute), true) ? "已弃用" :
                         (property.GetMethod == null || !property.GetMethod.IsPublic) && (property.SetMethod == null || !property.SetMethod.IsPublic) ? "没有公开访问器" :
@@ -297,7 +264,7 @@ namespace MUI.Editor
 
         private void DrawBindingProperties(ControlRow row)
         {
-            if (row.Legacy || row.Target == null || !IsBindingExpanded(row.Name)) return;
+            if (row.IsElementBinding || row.Target == null || !IsBindingExpanded(row.Name)) return;
             try
             {
                 var choices = GetBindingChoices(row);

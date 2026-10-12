@@ -19,6 +19,29 @@ namespace MUI
             get; private set;
         }
 
+        /// <summary>当前 Presenter 的命令契约，由生成器提供；不包含 ViewModel 自身的绑定。</summary>
+        public virtual BindingManifest CommandManifest => null;
+
+        /// <summary>由生成器将实例命令加入当前绑定会话，沿用其取消、预览和解绑协议。</summary>
+        protected virtual void BuildCommandBindings(BindingBuilder<TViewModel> builder)
+        {
+        }
+
+        internal void AttachCommandBindings(BindingContext binding)
+        {
+            if (CommandManifest == null || CommandManifest.Entries.Count == 0)
+            {
+                return;
+            }
+
+            if (!(binding is BindingContext<TViewModel> typed))
+            {
+                throw new System.InvalidOperationException("Presenter commands require BindingContext<TViewModel>.");
+            }
+
+            typed.SetPresenterCommandBindings(BuildCommandBindings);
+        }
+
         protected virtual void OnCreate()
         {
         }

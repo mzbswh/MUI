@@ -1,9 +1,15 @@
+using MUI.UGUI;
 using UnityEngine;
 
 namespace MUI.Samples.Navigation
 {
-    public class PagePresenter : Presenter<PageViewModel, PageArgs, int>
+    public partial class PagePresenter : Presenter<PageViewModel, PageArgs, int>
     {
+        // 命令直接声明在 Presenter，框架将其接入当前页面的绑定会话。
+        [Command]
+        [BindCommand("Confirm", nameof(ButtonElement.Clicked))]
+        private void Confirm(CommandContext context) => context.RequestClose(ViewModel.Selection);
+
         protected override void OnCreate() => Debug.Log("MUI Navigation OnCreate");
 
         protected override void OnOpen(PageArgs args)

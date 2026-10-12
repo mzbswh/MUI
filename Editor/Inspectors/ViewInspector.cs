@@ -116,14 +116,6 @@ namespace MUI.Editor
             var model = manifest.ViewModelType;
             var contract = model.GetCustomAttribute<ViewContractAttribute>();
             var guid = contract == null ? null : contract.PrefabAssetGuid;
-            // 兼容旧版向导放在 Page 类中的 GUID 常量，只读取常量，不执行业务代码。
-            if (string.IsNullOrEmpty(guid) && model.Name.EndsWith("ViewModel", StringComparison.Ordinal))
-            {
-                var pageName = model.FullName.Substring(0, model.FullName.Length - "ViewModel".Length) + "Page";
-                var field = model.Assembly.GetType(pageName)?.GetField("PrefabAssetGuid", BindingFlags.Public | BindingFlags.Static);
-                if (field != null && field.IsLiteral && field.FieldType == typeof(string))
-                    guid = field.GetRawConstantValue() as string;
-            }
             if (!string.IsNullOrEmpty(guid))
                 return string.Equals(guid, AssetDatabase.AssetPathToGUID(path), StringComparison.OrdinalIgnoreCase);
             const string marker = "/Resources/";

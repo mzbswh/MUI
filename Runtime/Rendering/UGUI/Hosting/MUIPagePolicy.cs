@@ -8,19 +8,18 @@ namespace MUI.UGUI
     {
         None = 0,
         Layer = 1,
-        // 位 2 原为 History，保留为空，避免旧资产其它配置位移位。
-        Coverage = 4,
-        Focus = 8,
-        Modal = 16,
-        Back = 32,
-        Instances = 64,
-        Tick = 128,
-        Cache = 256,
-        Timeouts = 512,
-        RenderOrder = 1024,
-        PageScope = 2048,
-        Input = 4096,
-        All = 8189
+        Coverage = 2,
+        Focus = 4,
+        Modal = 8,
+        Back = 16,
+        Instances = 32,
+        Tick = 64,
+        Cache = 128,
+        Timeouts = 256,
+        RenderOrder = 512,
+        PageScope = 1024,
+        Input = 2048,
+        All = 4095
     }
 
     [Serializable]
@@ -28,7 +27,7 @@ namespace MUI.UGUI
     {
         public string Name;
         public int Order;
-        [UnityEngine.Serialization.FormerlySerializedAs("OrderGap")]
+
         public int LayerGapAfter = -1;
 
         public MUILayer(string name, int order)

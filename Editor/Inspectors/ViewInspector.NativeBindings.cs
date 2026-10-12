@@ -26,7 +26,7 @@ namespace MUI.Editor
             public Component Target;
             public BindingEntry Entry;
             public string Error;
-            public bool Legacy;
+            public bool IsElementBinding;
             public bool DeclaredInCode;
             public readonly List<Component> Candidates = new List<Component>();
         }
@@ -58,7 +58,7 @@ namespace MUI.Editor
                     return row;
                 }
                 row = new ControlRow { Name = name, Adapter = adapter, Entry = entry, ComponentType = componentType,
-                    Legacy = typeof(Element).IsAssignableFrom(adapter) };
+                    IsElementBinding = typeof(Element).IsAssignableFrom(adapter) };
                 row.RequiredAdapters.Add(adapter);
                 rows.Add(row);
                 return row;
@@ -87,14 +87,14 @@ namespace MUI.Editor
                     if (rules != null)
                         foreach (var candidate in rules)
                         {
-                            if (candidate == null || string.IsNullOrEmpty(candidate.Prefix)) continue;
+                            if (candidate == null || candidate.ComponentTypes == null || string.IsNullOrEmpty(candidate.Expression)) continue;
                             try
                             {
                                 if (ControlRuleMatcher.TryMatch(candidate, remaining, out var matched) &&
-                                    (rule == null || candidate.Prefix.Length > rule.Prefix.Length))
+                                    (rule == null || candidate.Expression.Length > rule.Expression.Length))
                                 { rule = candidate; remainder = matched; }
                             }
-                            catch (Exception error) { nativeRuleErrors.Add(candidate.Prefix + ": " + error.Message); }
+                            catch (Exception error) { nativeRuleErrors.Add(candidate.Expression + ": " + error.Message); }
                         }
                     if (rule == null) break;
                     tokens.Add(rule);
@@ -110,11 +110,11 @@ namespace MUI.Editor
                 var matches = new List<Component>();
                 foreach (var rule in tokens)
                 {
-                    var resolvedTypes = rule.EffectiveComponentTypes.Select(value => Type.GetType(value, false)).Where(type => type != null).ToList();
+                    var resolvedTypes = rule.ComponentTypes.Select(value => Type.GetType(value, false)).Where(type => type != null).ToList();
                     var ruleMatches = node.GetComponents<Component>().Where(component => component != null &&
                         resolvedTypes.Any(type => type.IsInstanceOfType(component))).ToList();
                     if (ruleMatches.Count == 0)
-                        nativeRuleErrors.Add(node.name + " / " + rule.Prefix + ": " + L.Get("nativeRules.missingComponent"));
+                        nativeRuleErrors.Add(node.name + " / " + rule.Expression + ": " + L.Get("nativeRules.missingComponent"));
                     foreach (var component in ruleMatches)
                         if (!matches.Contains(component)) matches.Add(component);
                 }
@@ -125,9 +125,9 @@ namespace MUI.Editor
                     using (var adapter = NativeControl.Create(name, component))
                     {
                         var row = Add(name, adapter.GetType(), componentType: adapter is NativeComponent ? component.GetType() : null);
-                        var matchingRules = tokens.Where(rule => rule.EffectiveComponentTypes.Any(value => { var t = Type.GetType(value, false); return t != null && t.IsInstanceOfType(component); })).ToArray();
+                        var matchingRules = tokens.Where(rule => rule.ComponentTypes.Any(value => { var t = Type.GetType(value, false); return t != null && t.IsInstanceOfType(component); })).ToArray();
                         row.Rule = matchingRules.FirstOrDefault();
-                        if (matchingRules.Any(rule => rule.BindingProperty != row.Rule.BindingProperty || rule.OverrideBindingDirection != row.Rule.OverrideBindingDirection || rule.BindingDirection != row.Rule.BindingDirection))
+                        if (matchingRules.Any(rule => rule.OverrideDefaultProperties != row.Rule.OverrideDefaultProperties || (rule.OverrideDefaultProperties && !(rule.DefaultBindingProperties ?? new List<string>()).SequenceEqual(row.Rule.DefaultBindingProperties ?? new List<string>())) || rule.OverrideBindingDirection != row.Rule.OverrideBindingDirection || rule.BindingDirection != row.Rule.BindingDirection))
                             row.Error = "同一组件匹配到不同的绑定规则，请统一属性及方向。";
                         if (!PageSourceTemplate.IsIdentifier(name)) row.Error = L.Get("nativeRules.invalidName");
                         if (!row.Candidates.Contains(component)) row.Candidates.Add(component);
@@ -140,12 +140,12 @@ namespace MUI.Editor
                 if (row.Candidates.Count > 1)
                     row.Error = L.Format("nativeRules.duplicateName", row.Name) + "\n" +
                         string.Join("\n", row.Candidates.Select(component => AnimationUtility.CalculateTransformPath(component.transform, view.transform)));
-                if (row.Entry != null && !row.Legacy)
+                if (row.Entry != null && !row.IsElementBinding)
                 {
                     var existingTargets = ViewContractValidator.FindBindingTargets(view, row.Entry);
-                    if (existingTargets.Count == 1 && existingTargets[0] is Element) row.Legacy = true;
+                    if (existingTargets.Count == 1 && existingTargets[0] is Element) row.IsElementBinding = true;
                 }
-                if (row.Legacy)
+                if (row.IsElementBinding)
                 {
                     if (row.Entry != null)
                     {
@@ -170,7 +170,7 @@ namespace MUI.Editor
                 if (row.Candidates.Count == 1) row.Target = row.Candidates[0];
                 else if (row.Candidates.Count > 1 && row.Error == null) row.Error = L.Get("nativeRules.missingOrMultiple");
             }
-            foreach (var group in rows.Where(row => !row.Legacy && row.Target != null).GroupBy(row => row.Target))
+            foreach (var group in rows.Where(row => !row.IsElementBinding && row.Target != null).GroupBy(row => row.Target))
                 if (group.Count() > 1)
                     foreach (var row in group) row.Error = L.Get("nativeRules.fixErrors");
             return rows;
@@ -213,7 +213,7 @@ namespace MUI.Editor
             try
             {
                 var view = (View)target;
-                var pending = BuildControlRows().Where(row => !row.Legacy && (row.Entry != null || row.DeclaredInCode) &&
+                var pending = BuildControlRows().Where(row => !row.IsElementBinding && (row.Entry != null || row.DeclaredInCode) &&
                     row.Target != null && row.Error == null &&
                     !view.NativeBindings.Any(binding => binding != null &&
                         (binding.Name == row.Name && binding.Target != null || binding.Target == row.Target))).ToList();
@@ -267,7 +267,7 @@ namespace MUI.Editor
                     var expanded = IsBindingExpanded(row.Name);
                     var nextExpanded = EditorGUI.Foldout(GUILayoutUtility.GetRect(100, EditorGUIUtility.singleLineHeight, GUILayout.Width(100)), expanded, new GUIContent(row.Name, "展开选择此控件需要绑定的属性"), true);
                     if (nextExpanded != expanded) SetBindingExpanded(row.Name, nextExpanded);
-                    using (new EditorGUI.DisabledScope(row.Legacy))
+                    using (new EditorGUI.DisabledScope(row.IsElementBinding))
                     {
                         var next = EditorGUILayout.ObjectField(row.Target, row.ComponentType ?? typeof(Component), true);
                         if (next != row.Target)
@@ -281,7 +281,7 @@ namespace MUI.Editor
                     var canOpenSource = row.Entry != null && !string.IsNullOrEmpty(row.Entry.SourcePath);
                     var sourceHelp = row.Entry == null ? "此控件还没有代码声明；选择属性并生成绑定后可查看生成成员。" : IsAutoBinding(row.Entry) ? "打开编译器直接输出的生成源码；首次使用会启用输出并重新编译。文件位于 Library，请勿手动修改。" : string.IsNullOrEmpty(row.Entry.SourcePath) ? "没有可定位的源码信息。" : "打开绑定声明：" + row.Entry.SourcePath + ":" + row.Entry.SourceLine;
                     if (BindingActionButton(L.Get("bindingRow.source"), sourceHelp, 44, canOpenSource)) OpenBindingSource(row.Entry);
-                    using (new EditorGUI.DisabledScope(row.Legacy))
+                    using (new EditorGUI.DisabledScope(row.IsElementBinding))
                         if (GUILayout.Button(new GUIContent("×", L.Get("nativeRules.removeOne.help")), EditorStyles.miniButton, GUILayout.Width(22)))
                         {
                             serializedObject.Update();
@@ -295,7 +295,7 @@ namespace MUI.Editor
                         }
                 }
                 DrawBindingProperties(row);
-                var status = row.Error ?? (row.Legacy ? null : row.Target == null ? L.Get("nativeRules.missing") :
+                var status = row.Error ?? (row.IsElementBinding ? null : row.Target == null ? L.Get("nativeRules.missing") :
                     ((View)target).NativeBindings.Any(b => b != null && b.Name == row.Name && b.Target == row.Target) ? null : L.Get("nativeRules.matched"));
                 if (row.Error != null) EditorGUILayout.HelpBox(row.Error, MessageType.Error);
                 else if (!string.IsNullOrEmpty(status))
@@ -362,10 +362,10 @@ namespace MUI.Editor
                 foreach (var row in rows)
                 {
                     if (!string.IsNullOrEmpty(row.Error)) errors.Add(row.Name + "：" + row.Error);
-                    else if (!row.Legacy && row.Target == null) errors.Add(row.Name + "：缺少控件引用。");
+                    else if (!row.IsElementBinding && row.Target == null) errors.Add(row.Name + "：缺少控件引用。");
                 }
                 if (selected >= 0 && errors.Count == 0)
-                    BuildAutoBindingMetadata(rows.Where(row => !row.Legacy).ToList(), manifests[selected], captureInitialValues: false);
+                    BuildAutoBindingMetadata(rows.Where(row => !row.IsElementBinding).ToList(), manifests[selected], captureInitialValues: false);
             }
             catch (Exception error) { errors.Add(error.Message); }
             results = errors.Distinct().ToList();
@@ -377,7 +377,7 @@ namespace MUI.Editor
             try
             {
                 if (nativeRuleErrors.Count != 0) throw new InvalidOperationException(L.Get("nativeRules.fixErrors"));
-                var bindings = rows.Where(row => !row.Legacy).ToList();
+                var bindings = rows.Where(row => !row.IsElementBinding).ToList();
                 if (bindings.Count == 0) throw new InvalidOperationException(L.Get("nativeRules.empty"));
                 if (bindings.Any(row => row.Error != null || row.Target == null || !PageSourceTemplate.IsIdentifier(row.Name)))
                     throw new InvalidOperationException(L.Get("nativeRules.fixErrors"));
@@ -391,11 +391,6 @@ namespace MUI.Editor
                 if (selected < 0) throw new InvalidOperationException("请先关联页面的 ViewModel，再生成绑定。");
                 ValidateAutoBindingOwner(prefabPath, manifests[selected].ViewModelType);
                 var metadata = BuildAutoBindingMetadata(bindings, manifests[selected]);
-                var guid = AssetDatabase.AssetPathToGUID(prefabPath);
-                var marker = "// <auto-generated MUI controls " + guid + ">";
-                var owned = AssetDatabase.FindAssets("t:MonoScript").Select(AssetDatabase.GUIDToAssetPath)
-                    .Where(file => file.StartsWith("Assets/", StringComparison.Ordinal) && File.Exists(file) &&
-                        File.ReadAllText(file).StartsWith(marker + "\n", StringComparison.Ordinal)).ToList();
                 foreach (var row in bindings)
                 {
                     var choices = GetBindingChoices(row);
@@ -403,7 +398,6 @@ namespace MUI.Editor
                     SaveBindingChoices(row.Name, choices, separateUndo: false);
                 }
                 serializedObject.Update();
-                serializedObject.FindProperty("muiGeneratedControls").stringValue = string.Empty;
                 serializedObject.FindProperty("muiAutoBindings").stringValue = Convert.ToBase64String(Encoding.UTF8.GetBytes(metadata.ToString(System.Xml.Linq.SaveOptions.DisableFormatting)));
                 serializedObject.ApplyModifiedProperties();
                 var view = (View)target;
@@ -421,8 +415,6 @@ namespace MUI.Editor
                 }
                 else PrefabUtility.ApplyObjectOverride(view, prefabPath, InteractionMode.UserAction);
                 // 只移除带本页生成标记的旧文件，业务源码不改写。
-                foreach (var file in owned)
-                    if (!AssetDatabase.DeleteAsset(file)) throw new IOException("Cannot remove legacy bindings: " + file);
                 UnityEditor.Compilation.CompilationPipeline.RequestScriptCompilation(UnityEditor.Compilation.RequestScriptCompilationOptions.CleanBuildCache);
                 var hint = CompilerGeneratedSources.AssemblyPrefix(manifests[selected].ViewModelType.Assembly.GetName().Name) + "_" + string.Concat(manifests[selected].ViewModelType.FullName.Select(c => char.IsLetterOrDigit(c) ? c.ToString() : "_" + ((int)c).ToString("X4")));
                 var validation = ViewContractValidator.ValidateStructure(view);

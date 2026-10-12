@@ -6,28 +6,22 @@ namespace MUI.UGUI
 {
     public enum ControlNameMatch { Prefix, Suffix, Contains, Regex }
 
-    public enum NativeControlKind { Image, Text, Button }
-
     [Serializable]
     public sealed class ControlNamingRule
     {
-        public string Prefix; // 保留序列化字段名以兼容已有规则；现在保存匹配表达式。
+        public string Expression;
         public ControlNameMatch Match;
         public bool OverrideDefaultProperties;
         public List<string> DefaultBindingProperties = new List<string>();
-        public string BindingProperty; // 空值使用适配器默认属性；也可以指定事件名。
         public BindingMode BindingDirection = BindingMode.OneWay;
         public bool OverrideBindingDirection;
-        [HideInInspector] public NativeControlKind Kind;
-        public List<string> ComponentTypes;
-        public IReadOnlyList<string> EffectiveComponentTypes => ComponentTypes ?? DefaultTypes(Kind);
-        public static List<string> DefaultTypes(NativeControlKind kind)
+        public List<string> ComponentTypes = new List<string>();
+
+        public ControlNamingRule(string expression, params string[] componentTypes)
         {
-            if (kind == NativeControlKind.Button) return new List<string> { "UnityEngine.UI.Button, UnityEngine.UI" };
-            if (kind == NativeControlKind.Text) return new List<string> { "UnityEngine.UI.Text, UnityEngine.UI", "TMPro.TMP_Text, Unity.TextMeshPro" };
-            return new List<string> { "UnityEngine.UI.Image, UnityEngine.UI" };
+            Expression = expression;
+            ComponentTypes = new List<string>(componentTypes);
         }
-        public ControlNamingRule(string prefix, NativeControlKind kind) { Prefix = prefix; Kind = kind; ComponentTypes = DefaultTypes(kind); }
     }
 
     [Serializable]
@@ -111,9 +105,9 @@ namespace MUI.UGUI
         public IReadOnlyList<ControlNamingRule> ControlNamingRules => controlNamingRules;
         public static List<ControlNamingRule> CreateControlNamingRules() => new List<ControlNamingRule>
         {
-            new ControlNamingRule("Img_", NativeControlKind.Image),
-            new ControlNamingRule("Txt_", NativeControlKind.Text),
-            new ControlNamingRule("Btn_", NativeControlKind.Button)
+            new ControlNamingRule("Img_", "UnityEngine.UI.Image, UnityEngine.UI"),
+            new ControlNamingRule("Txt_", "UnityEngine.UI.Text, UnityEngine.UI", "TMPro.TMP_Text, Unity.TextMeshPro"),
+            new ControlNamingRule("Btn_", "UnityEngine.UI.Button, UnityEngine.UI")
         };
     }
 }

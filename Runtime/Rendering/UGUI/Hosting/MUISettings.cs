@@ -7,8 +7,6 @@ namespace MUI.UGUI
 {
     public sealed partial class MUISettings : ScriptableObject
     {
-        [SerializeField, HideInInspector] private int pageScopeVersion = 0;
-        [SerializeField, HideInInspector] private int inputPolicyVersion;
         [SerializeField] private List<MUILayer> layers = CreateLayers();
         [SerializeField] private MUIPagePolicyValues defaultRules = new MUIPagePolicyValues();
         [SerializeField] private List<MUIPagePolicy> presets = CreatePresets();
@@ -52,61 +50,6 @@ namespace MUI.UGUI
         public int CleanupCapacity => cleanupCapacity;
 
         public int TerminalCapacity => terminalCapacity;
-
-        private void OnEnable()
-        {
-            UpgradeDirectoryRules();
-            if (inputPolicyVersion == 0)
-            {
-                if (presets != null)
-                {
-                    foreach (var preset in presets)
-                    {
-                        if (preset == null || preset.Values == null ||
-                            (preset.Name != "Notice" && preset.Name != "Background") ||
-                            (preset.Overrides & MUIPagePolicyFields.Input) != 0)
-                        {
-                            continue;
-                        }
-                        preset.Values.ReceivesInput = false;
-                        preset.Overrides |= MUIPagePolicyFields.Input;
-                    }
-                }
-                inputPolicyVersion = 1;
-            }
-            if (pageScopeVersion != 0)
-            {
-                return;
-            }
-            // 旧预设资产没有角色字段；按已有内置预设名迁移，不复用旧 History 位。
-            if (presets != null)
-            {
-                foreach (var preset in presets)
-                {
-                    if (preset == null || preset.Values == null)
-                    {
-                        continue;
-                    }
-                    switch (preset.Name)
-                    {
-                        case "Popup":
-                            preset.Values.PageRole = PageRole.Overlay;
-                            break;
-                        case "FullScreen":
-                            preset.Values.PageRole = PageRole.Main;
-                            break;
-                        case "Notice":
-                        case "Background":
-                            preset.Values.PageRole = PageRole.Independent;
-                            break;
-                        default:
-                            continue;
-                    }
-                    preset.Overrides |= MUIPagePolicyFields.PageScope;
-                }
-            }
-            pageScopeVersion = 1;
-        }
 
         public RenderOrderOptions CreateRenderOrderOptions()
         {
@@ -173,11 +116,11 @@ namespace MUI.UGUI
         public IReadOnlyList<string> Validate()
         {
             var errors = new List<string>();
-            var prefixes = new HashSet<string>(StringComparer.Ordinal);
+            var expressions = new HashSet<string>(StringComparer.Ordinal);
             if (controlNamingRules != null)
                 foreach (var rule in controlNamingRules)
-                    if (rule == null || string.IsNullOrWhiteSpace(rule.Prefix) || !prefixes.Add(rule.Match + ":" + rule.Prefix) || !Enum.IsDefined(typeof(ControlNameMatch), rule.Match) || rule.EffectiveComponentTypes.Count == 0)
-                        errors.Add("控件命名前缀不能为空或重复，且必须配置组件类型。");
+                    if (rule == null || string.IsNullOrWhiteSpace(rule.Expression) || !expressions.Add(rule.Match + ":" + rule.Expression) || !Enum.IsDefined(typeof(ControlNameMatch), rule.Match) || rule.ComponentTypes == null || rule.ComponentTypes.Count == 0)
+                        errors.Add("控件命名表达式不能为空或重复，且必须配置组件类型。");
             try { ModalBackdropStyle.ValidateVisualPrefab(defaultModalBackdropPrefab); }
             catch (InvalidOperationException error) { errors.Add(error.Message); }
             try

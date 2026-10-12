@@ -29,17 +29,6 @@ namespace MUI.UGUI
             closingRenderOrder = order;
         }
 
-        /// <summary>兼容不区分指针的输入适配器；多指针模块应使用包含 PointerEventData 的重载。</summary>
-        public static IDisposable RegisterPressStateProvider(Func<BaseInputModule, PointerEventData.InputButton, Func<bool>> provider)
-        {
-            if (provider == null)
-            {
-                throw new ArgumentNullException(nameof(provider));
-            }
-
-            return RegisterPointerPressStateProvider((inputModule, eventData, button) => provider(inputModule, button));
-        }
-
         /// <summary>按关闭手势的指针登记状态读取器；不支持该模块时返回 null，凭证用于撤销登记。</summary>
         public static IDisposable RegisterPointerPressStateProvider(
             Func<BaseInputModule, PointerEventData, PointerEventData.InputButton, Func<bool>> provider)

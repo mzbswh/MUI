@@ -36,9 +36,5 @@ namespace MUI.Samples.Navigation
 
             return new ObservableList<VirtualListItem>(values, itemKey: value => value.Key);
         }
-
-        [Command]
-        [BindCommand("Confirm", nameof(ButtonElement.Clicked))]
-        private void Confirm(CommandContext context) => context.Complete(Selection);
     }
 }

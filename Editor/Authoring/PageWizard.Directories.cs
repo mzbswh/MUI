@@ -27,14 +27,9 @@ namespace MUI.Editor
 
         private IReadOnlyDictionary<string, string> CreatePageSources() => PageSourceTemplate.Create(
             pageName, targetNamespace, presetName, ReceivesInput, createPresenter, typedContracts,
-            ExistingTitleBindingType,
+            PageTextBackend.Find(textBackendId).ElementType,
             existingPrefab == null ? "Title" : titleElementName,
             existingPrefab == null ? "Close" : closeElementName, AssetDatabase.AssetPathToGUID(PrefabPath), PageResourceKey);
-
-        private Type ExistingTitleBindingType => existingPrefab != null &&
-            existingPrefab.GetComponent<View>() != null && existingPrefab.GetComponent<View>().NativeBindings.Count == 0
-                ? PageTextBackend.Find(textBackendId).LegacyElementType
-                : PageTextBackend.Find(textBackendId).ElementType;
 
         private static bool PathOccupied(string path) => File.Exists(path) || Directory.Exists(path) ||
             File.Exists(path + ".meta") || AssetDatabase.LoadMainAssetAtPath(path) != null;

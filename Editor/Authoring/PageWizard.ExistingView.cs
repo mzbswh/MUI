@@ -82,7 +82,7 @@ namespace MUI.Editor
             }
             var entries = new List<BindingEntry>
             {
-                new BindingEntry("Title", titleElementName, ExistingTitleBindingType, "Content", BindingMode.OneWay)
+                new BindingEntry("Title", titleElementName, (typeof(ITextElement).IsAssignableFrom(backend.ElementType) ? typeof(ITextElement) : backend.ElementType), "Content", BindingMode.OneWay)
             };
             if (!ReceivesInput)
             {
@@ -100,7 +100,7 @@ namespace MUI.Editor
             }
             else
             {
-                entries.Add(new BindingEntry("Close", closeElementName, (typeof(NativeControl).IsAssignableFrom(ExistingTitleBindingType) ? typeof(NativeButton) : typeof(ButtonElement)), nameof(ButtonElement.Clicked),
+                entries.Add(new BindingEntry("Close", closeElementName, typeof(IButtonElement), nameof(ButtonElement.Clicked),
                     BindingMode.OneWay, BindingEntryKind.Command));
             }
             var manifest = new BindingManifest(typeof(ViewModel), entries);

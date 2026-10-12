@@ -22,7 +22,7 @@ namespace MUI.Samples.Navigation
         [SerializeField] private bool showArgsUpdateWalkthrough = false;
         [SerializeField] private bool showRebindWalkthrough = false;
         [SerializeField] private bool showCloseTimeoutWalkthrough = false;
-        [SerializeField, UnityEngine.Serialization.FormerlySerializedAs("showSynchronousGuardWalkthrough")]
+        [SerializeField]
         private bool showImmediateGuardWalkthrough = false;
         [SerializeField] private bool recordLifecycleTrace;
         private readonly CancellationTokenSource cancellation = new CancellationTokenSource();

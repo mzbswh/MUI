@@ -42,16 +42,8 @@ namespace MUI.Editor
             for (var i = 0; i < rules.arraySize; i++)
             {
                 var rule = rules.GetArrayElementAtIndex(i);
-                var prefix = rule.FindPropertyRelative("Prefix");
+                var prefix = rule.FindPropertyRelative("Expression");
                 var types = rule.FindPropertyRelative("ComponentTypes");
-                var settings = (MUISettings)target;
-                // Preserve legacy single-kind matching, including Text / TMP.
-                if (settings.ControlNamingRules[i].ComponentTypes == null)
-                {
-                    var defaults = ControlNamingRule.DefaultTypes(settings.ControlNamingRules[i].Kind);
-                    types.arraySize = defaults.Count;
-                    for (var t = 0; t < defaults.Count; t++) types.GetArrayElementAtIndex(t).stringValue = defaults[t];
-                }
                 var row = EditorGUILayout.GetControlRect(false, EditorGUIUtility.singleLineHeight + 2);
                 if (Event.current.type == EventType.Repaint && i % 2 == 0)
                     EditorGUI.DrawRect(row, new Color(0.5f, 0.5f, 0.5f, 0.07f));
@@ -95,10 +87,9 @@ namespace MUI.Editor
                     var rule = rules.GetArrayElementAtIndex(rules.arraySize++);
                     rule.FindPropertyRelative("OverrideDefaultProperties").boolValue = false;
                     rule.FindPropertyRelative("DefaultBindingProperties").arraySize = 0;
-                    rule.FindPropertyRelative("BindingProperty").stringValue = "";
                     rule.FindPropertyRelative("OverrideBindingDirection").boolValue = false;
                     rule.FindPropertyRelative("BindingDirection").enumValueIndex = 0;
-                    rule.FindPropertyRelative("Prefix").stringValue = "";
+                    rule.FindPropertyRelative("Expression").stringValue = "";
                     rule.FindPropertyRelative("Match").enumValueIndex = 0;
                     rule.FindPropertyRelative("ComponentTypes").arraySize = 0;
                     SessionState.SetBool(RuleFoldoutKey(index), true);
@@ -182,22 +173,18 @@ namespace MUI.Editor
                 {
                     DrawComponentMemberNames(rule);
                     var custom = rule.FindPropertyRelative("OverrideDefaultProperties");
-                    var legacy = rule.FindPropertyRelative("BindingProperty");
                     var properties = rule.FindPropertyRelative("DefaultBindingProperties");
-                    var useCustom = custom.boolValue || !string.IsNullOrEmpty(legacy.stringValue);
+                    var useCustom = custom.boolValue;
                     var next = EditorGUILayout.Popup(new GUIContent("默认属性", "只决定尚未保存属性选择的控件如何预选，不覆盖页面已有配置。"), useCustom ? 1 : 0,
                         new[] { new GUIContent("自动选择", "文本 text、图片 sprite、按钮 Clicked；输入控件选择对应值属性。"), new GUIContent("自定义列表", "指定一个或多个属性或事件名；空列表表示不预选。") });
                     if ((next == 1) != useCustom)
                     {
                         custom.boolValue = next == 1;
-                        if (next == 0) legacy.stringValue = "";
                         useCustom = next == 1;
                     }
                     if (useCustom)
                     {
-                        var selectedNames = custom.boolValue
-                            ? Enumerable.Range(0, properties.arraySize).Select(index => properties.GetArrayElementAtIndex(index).stringValue).ToArray()
-                            : new[] { legacy.stringValue };
+                        var selectedNames = Enumerable.Range(0, properties.arraySize).Select(index => properties.GetArrayElementAtIndex(index).stringValue).ToArray();
                         var rect = EditorGUILayout.GetControlRect();
                         rect = EditorGUI.PrefixLabel(rect, new GUIContent("预选属性", "只影响尚未保存选择的控件；空列表表示不预选。"));
                         if (GUI.Button(rect, new GUIContent(selectedNames.Length == 0 ? "选择属性…" : string.Join(", ", selectedNames),
@@ -244,7 +231,7 @@ namespace MUI.Editor
                 using (var state = new SerializedObject(owner))
                 {
                     var rule = state.FindProperty(path);
-                    pattern = rule.FindPropertyRelative("Prefix").stringValue;
+                    pattern = rule.FindPropertyRelative("Expression").stringValue;
                     var types = rule.FindPropertyRelative("ComponentTypes");
                     var componentTypes = Enumerable.Range(0, types.arraySize).Select(i => Type.GetType(types.GetArrayElementAtIndex(i).stringValue, false)).ToArray();
                     var catalogs = new List<List<ViewInspector.BindingMember>>();
@@ -278,8 +265,7 @@ namespace MUI.Editor
             {
                 if (!rule.FindPropertyRelative("OverrideDefaultProperties").boolValue)
                 {
-                    var legacy = rule.FindPropertyRelative("BindingProperty").stringValue;
-                    return string.IsNullOrEmpty(legacy) ? Array.Empty<string>() : new[] { legacy };
+                    return Array.Empty<string>();
                 }
                 var properties = rule.FindPropertyRelative("DefaultBindingProperties");
                 return Enumerable.Range(0, properties.arraySize).Select(i => properties.GetArrayElementAtIndex(i).stringValue).ToArray();
@@ -293,7 +279,7 @@ namespace MUI.Editor
                 {
                     state.Update();
                     var rule = state.FindProperty(path);
-                    if (rule == null || rule.FindPropertyRelative("Prefix").stringValue != pattern) { editorWindow.Close(); return; }
+                    if (rule == null || rule.FindPropertyRelative("Expression").stringValue != pattern) { editorWindow.Close(); return; }
                     var selected = new HashSet<string>(ReadNames(rule), StringComparer.Ordinal);
                     GUI.SetNextControlName("MUI.RulePropertySearch");
                     EditorGUI.BeginChangeCheck();
@@ -324,7 +310,6 @@ namespace MUI.Editor
                             var ordered = ReadNames(rule).Where(n => n != name).ToList();
                             if (next) ordered.Add(name);
                             rule.FindPropertyRelative("OverrideDefaultProperties").boolValue = true;
-                            rule.FindPropertyRelative("BindingProperty").stringValue = "";
                             var properties = rule.FindPropertyRelative("DefaultBindingProperties");
                             properties.arraySize = ordered.Count;
                             for (var i = 0; i < ordered.Count; i++) properties.GetArrayElementAtIndex(i).stringValue = ordered[i];

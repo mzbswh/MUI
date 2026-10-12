@@ -70,11 +70,11 @@ namespace MUI
             target.RequestClose();
         }
 
-        /// <summary>在本次激活仍有效时提交结果。</summary>
-        public void Complete(TResult result)
+        /// <summary>在本次激活仍有效时携带结果请求关闭；不等待关闭完成。</summary>
+        public void RequestClose(TResult result)
         {
             RequireValid();
-            target.Complete(result);
+            target.RequestClose(result);
         }
 
         private void RequireValid()

@@ -16,8 +16,8 @@ namespace MUI.Dialogs
         /// <summary>创建两个完成结果的命令；必须在有效的界面命令上下文中执行。</summary>
         public ConfirmationViewModel()
         {
-            Confirm = new AsyncCommand(context => context.Complete(true));
-            Cancel = new AsyncCommand(context => context.Complete(false));
+            Confirm = new AsyncCommand(context => context.RequestClose(true));
+            Cancel = new AsyncCommand(context => context.RequestClose(false));
         }
 
         /// <summary>标题。</summary>

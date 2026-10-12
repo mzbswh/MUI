@@ -15,7 +15,7 @@ namespace MUI.Dialogs
         /// <summary>创建同步完成结果的命令；必须在有效的界面命令上下文中执行。</summary>
         public AlertViewModel()
         {
-            Acknowledge = new AsyncCommand(context => context.Complete(Unit.Value));
+            Acknowledge = new AsyncCommand(context => context.RequestClose(Unit.Value));
         }
 
         /// <summary>标题。</summary>

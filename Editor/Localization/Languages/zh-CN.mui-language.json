@@ -1260,6 +1260,26 @@
       "text": "UI 构建目录数量超过 32。"
     },
     {
+      "key": "editor.UIBuildValidationReport.title",
+      "text": "MUI 构建校验"
+    },
+    {
+      "key": "editor.UIBuildValidationReport.passed",
+      "text": "通过"
+    },
+    {
+      "key": "editor.UIBuildValidationReport.failed",
+      "text": "未通过（{0} 个问题）"
+    },
+    {
+      "key": "editor.UIBuildValidationReport.unverified",
+      "text": "未验证（未登记 UI 目录）"
+    },
+    {
+      "key": "editor.UIBuildValidationReport.counts",
+      "text": "已登记目录：{0} | 本次检查页面：{1} | 路由：{2}"
+    },
+    {
       "key": "editor.UIBuildValidationReport.0dbf27f994",
       "text": "未登记 UI 构建目录，本次未验证项目页面覆盖范围。"
     },
@@ -6120,20 +6140,12 @@
       "text": "Prefab 和脚本分别配置独立的完整项目路径，支持 {PageName}。例如 Assets/LocalResource/{PageName} 和 Assets/Scripts/UI/{PageName}。不共用根目录；修改规则不移动已有文件。"
     },
     {
-      "key": "property.pageRootDirectory",
-      "text": "页面根目录"
-    },
-    {
       "key": "property.pagePrefabDirectory",
       "text": "Prefab 目录规则"
     },
     {
       "key": "property.pageScriptDirectory",
       "text": "脚本目录规则"
-    },
-    {
-      "key": "settings.pageRootDirectory.help",
-      "text": "Assets 下的项目路径，例如 Assets/UI；缺失目录会在创建页面时自动建立。"
     },
     {
       "key": "settings.pagePrefabDirectory.help",
@@ -6194,26 +6206,6 @@
     {
       "key": "viewPanel.diagnostics.help",
       "text": "按需采集输入、可见性、资源准备和射线信息。这里显示只读快照，展开面板不会自动执行查询。"
-    },
-    {
-      "key": "editor.UIBuildValidationReport.title",
-      "text": "MUI 构建校验"
-    },
-    {
-      "key": "editor.UIBuildValidationReport.passed",
-      "text": "通过"
-    },
-    {
-      "key": "editor.UIBuildValidationReport.failed",
-      "text": "未通过（{0} 个问题）"
-    },
-    {
-      "key": "editor.UIBuildValidationReport.unverified",
-      "text": "未验证（未登记 UI 目录）"
-    },
-    {
-      "key": "editor.UIBuildValidationReport.counts",
-      "text": "已登记目录：{0} | 本次检查页面：{1} | 路由：{2}"
     },
     {
       "key": "viewPanel.policy.editHelp",
@@ -6640,8 +6632,8 @@
       "text": "引用类型不匹配、属于其他页面，或仍挂有 Element。"
     },
     {
-      "key": "nativeRules.legacy",
-      "text": "已有 Element 绑定（保留兼容）"
+      "key": "nativeRules.elementBinding",
+      "text": "Element 组件绑定"
     },
     {
       "key": "nativeRules.missing",

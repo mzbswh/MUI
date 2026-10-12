@@ -12,14 +12,9 @@ namespace MUI
 
     public sealed class BindingEntry
     {
-        public BindingEntry(string source, string elementName, Type elementType, string targetProperty, BindingMode mode, BindingEntryKind kind = BindingEntryKind.Property, string interactableProperty = "Interactable")
-                    : this(source, elementName, elementType, targetProperty, mode, kind, interactableProperty, null, 0)
-        {
-        }
-
-        /// <summary>附带声明位置的编辑器清单条目；旧清单仍可使用不含位置的构造函数。</summary>
+        /// <summary>绑定契约条目，可附带编辑器源码位置。</summary>
         public BindingEntry(string source, string elementName, Type elementType, string targetProperty, BindingMode mode,
-            BindingEntryKind kind, string interactableProperty, string sourcePath, int sourceLine)
+            BindingEntryKind kind = BindingEntryKind.Property, string interactableProperty = "Interactable", string sourcePath = null, int sourceLine = 0)
         {
             if (source == null)
             {

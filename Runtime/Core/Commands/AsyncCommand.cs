@@ -113,6 +113,10 @@ namespace MUI
 
         private bool HasCapacity() => executions.Count < capacity && (Concurrency != CommandConcurrency.RejectWhileRunning || executions.Count == 0);
 
+        /// <summary>立即触发命令并观察失败，不阻塞或等待完成；仍须在 UI 线程调用。</summary>
+        public void Execute(ICommandTarget source = null, CancellationToken cancellationToken = default)
+            => UICommandExtensions.Execute(this, source, cancellationToken);
+
         public ValueTask<CommandOutcome> ExecuteAsync(ICommandTarget source = null, CancellationToken cancellationToken = default)
         {
             RequireThread();

@@ -9,7 +9,7 @@ namespace MUI.UGUI
 {
     public sealed partial class VirtualListElement
     {
-        [SerializeField, UnityEngine.Serialization.FormerlySerializedAs("measureItemHeights")]
+        [SerializeField]
         private bool measureItemExtents;
         [SerializeField, Min(1)]
         private int measurementsPerFrame = 4;

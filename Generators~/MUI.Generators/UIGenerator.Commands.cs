@@ -177,7 +177,7 @@ namespace MUI.Generators
                     Fail(member, "Command target requires a writable bool Interactable property (or configured equivalent).");
                 }
 
-                if (!commandEvents.Add(targetName + "\0" + TypeName(element) + "\0" + eventName))
+                if (!commandEvents.Add(targetName + "\0" + eventName))
                 {
                     Fail(member, "Multiple commands bind the same Element event: " + targetName + "." + eventName);
                 }
@@ -190,7 +190,7 @@ namespace MUI.Generators
                 bindings.Append("            builder.Command<").Append(TypeName(element)).Append(">(\n                ").Append(Literal(targetName))
                     .Append(", model => ").Append(receiver).Append('.').Append(Escape(propertyName)).Append(",\n                (element, handler) => element.").Append(Escape(eventName))
                     .Append(" += handler, (element, handler) => element.").Append(Escape(eventName)).Append(" -= handler,\n                (element, value) => element.")
-                    .Append(Escape(interactableName)).Append(" = value, ").Append(Literal(interactableName)).Append(");\n");
+                    .Append(Escape(interactableName)).Append(" = value, ").Append(Literal(interactableName)).Append(", ").Append(Literal(eventName)).Append(");\n");
                 manifest.Append("                new global::MUI.BindingEntry(").Append(Literal(propertyName)).Append(", ").Append(Literal(targetName))
                     .Append(", typeof(").Append(TypeName(element)).Append("), ").Append(Literal(eventName))
                     .Append(", global::MUI.BindingMode.OneWay, global::MUI.BindingEntryKind.Command, ").Append(Literal(interactableName));

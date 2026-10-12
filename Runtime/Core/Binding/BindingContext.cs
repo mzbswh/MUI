@@ -111,6 +111,7 @@ namespace MUI
     /// </summary>
     public abstract partial class BindingContext<TViewModel> : BindingContext, IFreezableBindingContext, IImmediateRebindDetach, IBindingRebindPreparation where TViewModel : ViewModel
     {
+        private Action<BindingBuilder<TViewModel>> presenterCommands;
         private BindingSession session;
         private BindingSession cleanupSession;
         private bool completedSessionCleanupConfirmed = true;
@@ -182,6 +183,22 @@ namespace MUI
         internal override void SetRebindCleanupOwner(LifetimeScope owner) => rebindCleanupOwner = owner;
 
         protected abstract void BuildBindings(BindingBuilder<TViewModel> builder);
+
+        internal void SetPresenterCommandBindings(Action<BindingBuilder<TViewModel>> build)
+        {
+            if (state != BindingState.Unbound || presenterCommands != null)
+            {
+                throw new InvalidOperationException("Presenter commands must be attached once before binding.");
+            }
+
+            presenterCommands = build;
+        }
+
+        private void BuildAllBindings(BindingBuilder<TViewModel> builder)
+        {
+            BuildBindings(builder);
+            presenterCommands?.Invoke(builder);
+        }
 
         public override void SetCommandTarget(ICommandTarget target)
         {
@@ -292,7 +309,7 @@ namespace MUI
                     // 解绑先结束会话与订阅，再收尾原生编辑；收尾通知不能回写旧模型。
                     candidate.AddDetach(gestures.InvalidateInputGestures);
                 }
-                BuildBindings(new BindingBuilder<TViewModel>(View, ViewModel, candidate));
+                BuildAllBindings(new BindingBuilder<TViewModel>(View, ViewModel, candidate));
                 session = candidate;
                 state = BindingState.Bound;
             }
@@ -393,7 +410,7 @@ namespace MUI
             try
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                BuildBindings(new BindingBuilder<TViewModel>(View, ViewModel, validation, preview));
+                BuildAllBindings(new BindingBuilder<TViewModel>(View, ViewModel, validation, preview));
                 cancellationToken.ThrowIfCancellationRequested();
                 await preview.PrepareAsync(cancellationToken);
                 cancellationToken.ThrowIfCancellationRequested();

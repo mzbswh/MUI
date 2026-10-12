@@ -95,7 +95,7 @@ namespace MUI.Editor
                 throw new ArgumentOutOfRangeException(nameof(preset));
             }
 
-            titleElementType = titleElementType ?? typeof(MUI.UGUI.TextElement);
+            titleElementType = titleElementType ?? typeof(MUI.UGUI.NativeText);
             PageTextBackend.RequireElementType(titleElementType);
             var titleContract = typeof(ITextElement).IsAssignableFrom(titleElementType)
                 ? typeof(ITextElement) : titleElementType;
@@ -114,7 +114,7 @@ namespace MUI.Editor
                     "namespace " + escapedNamespace + "\n{\n" + string.Join("\n", lines) + "\n}\n";
             }
 
-            var buttonType = typeof(MUI.UGUI.NativeControl).IsAssignableFrom(titleElementType) ? "global::MUI.IButtonElement" : "global::MUI.UGUI.ButtonElement";
+            var buttonType = "global::MUI.IButtonElement";
             var args = typed ? name + "Args" : "global::MUI.Unit";
             var result = typed ? name + "Result" : "global::MUI.Unit";
             var routeDeclaration = $"    [global::MUI.Navigation.ViewRoute(typeof({args}), typeof({result}), Key = {StringLiteral(ns + "." + name)}";

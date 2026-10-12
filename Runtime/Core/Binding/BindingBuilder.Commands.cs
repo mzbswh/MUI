@@ -7,7 +7,10 @@ namespace MUI
     public sealed partial class BindingBuilder<TViewModel>
         where TViewModel : ViewModel
     {
-        public void Command<TElement>(string elementName, Func<TViewModel, IUICommand> readCommand, Action<TElement, Action> subscribe, Action<TElement, Action> unsubscribe, Action<TElement, bool> setInteractable, string interactableProperty = "Interactable")
+        /// <summary>生成绑定携带事件名，在同一会话内检测 VM 与 Presenter 重复占用事件。</summary>
+        public void Command<TElement>(string elementName, Func<TViewModel, IUICommand> readCommand,
+            Action<TElement, Action> subscribe, Action<TElement, Action> unsubscribe,
+            Action<TElement, bool> setInteractable, string interactableProperty = "Interactable", string eventName = null)
             where TElement : class, IElement
         {
             if (readCommand == null)
@@ -37,6 +40,11 @@ namespace MUI
 
             var element = view.GetElement<TElement>(elementName);
             var command = readCommand(model) ?? throw new InvalidOperationException("Command property returned null.");
+
+            if (eventName != null)
+            {
+                session.RegisterCommandEvent(element, eventName);
+            }
 
             session.HasAsynchronousCommands = true;
 

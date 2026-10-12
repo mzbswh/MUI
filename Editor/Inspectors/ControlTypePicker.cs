@@ -85,8 +85,8 @@ namespace MUI.Editor
             using (var serialized = new SerializedObject(owner))
             {
                 var values = serialized.FindProperty(path);
-                var prefixPath = path.Substring(0, path.LastIndexOf('.')) + ".Prefix";
-                var prefix = serialized.FindProperty(prefixPath);
+                var expressionPath = path.Substring(0, path.LastIndexOf('.')) + ".Expression";
+                var prefix = serialized.FindProperty(expressionPath);
                 if (values == null || prefix == null || prefix.stringValue != rulePattern) { editorWindow.Close(); return; }
                 EditorGUILayout.LabelField(L.Get("typePicker.title"), EditorStyles.boldLabel);
                 GUI.SetNextControlName("ComponentSearch");

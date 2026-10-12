@@ -17,16 +17,15 @@ namespace MUI.Editor
         static PageTextBackend()
         {
             Register("ugui", L.Get("editor.PageTextBackend.19baaca2f4"), typeof(NativeText), () => null,
-                (name, parent, content) => PrefabAuthoring.CreateText(name, parent, content), typeof(TextElement));
+                (name, parent, content) => PrefabAuthoring.CreateText(name, parent, content));
         }
 
         private PageTextBackend(string id, string label, Type elementType, Func<string> validate,
-                    Func<string, Transform, string, Graphic> create, Type legacyElementType = null)
+                    Func<string, Transform, string, Graphic> create)
         {
             Id = id;
             Label = label;
             ElementType = elementType;
-            LegacyElementType = legacyElementType ?? elementType;
             this.validate = validate;
             this.create = create;
         }
@@ -41,8 +40,6 @@ namespace MUI.Editor
             get;
         }
 
-        public Type LegacyElementType { get; }
-
         public Type ElementType
         {
             get;
@@ -50,7 +47,7 @@ namespace MUI.Editor
 
         /// <summary>同一标识只允许注册一次；工厂创建非射线目标文本，生命周期由向导拥有。</summary>
         public static void Register(string id, string label, Type elementType, Func<string> validate,
-            Func<string, Transform, string, Graphic> create, Type legacyElementType = null)
+            Func<string, Transform, string, Graphic> create)
         {
             if (string.IsNullOrWhiteSpace(id) || string.IsNullOrWhiteSpace(label))
             {
@@ -65,7 +62,7 @@ namespace MUI.Editor
             {
                 throw new InvalidOperationException(L.Get("editor.PageTextBackend.ce0434eb31") + id);
             }
-            registered.Add(new PageTextBackend(id, label, elementType, validate, create, legacyElementType));
+            registered.Add(new PageTextBackend(id, label, elementType, validate, create));
         }
 
         internal static void RequireElementType(Type type)

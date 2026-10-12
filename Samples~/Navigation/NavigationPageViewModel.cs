@@ -13,6 +13,6 @@ namespace MUI.Samples.Navigation
 
         [Command]
         [BindCommand("Confirm", nameof(ButtonElement.Clicked))]
-        private void Confirm(CommandContext context) => context.Complete(42);
+        private void Confirm(CommandContext context) => context.RequestClose(42);
     }
 }

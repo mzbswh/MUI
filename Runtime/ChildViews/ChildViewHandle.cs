@@ -162,7 +162,7 @@ namespace MUI.ChildViews
         }
 
         /// <summary>子视图仅接受 Unit 完成值；道具点击等业务结果应通过业务回调传递。</summary>
-        public void Complete<TResult>(TResult result)
+        public void RequestClose<TResult>(TResult result)
         {
             if (typeof(TResult) != typeof(Unit))
             {

@@ -317,7 +317,7 @@ namespace MUI.Generators
                 }
             }
 
-            Fail(command, "CanExecute must name an accessible bool property or parameterless bool method on this ViewModel or its base types.");
+            Fail(command, "CanExecute must name an accessible bool property or parameterless bool method on the command owner or its base types.");
             return null;
         }
     }

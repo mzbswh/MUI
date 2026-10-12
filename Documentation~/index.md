@@ -6,6 +6,25 @@
 
 Core 不引用 Unity；Resources、Navigation 与 Widgets 分别定义资源凭证、页面导航和子视图生命周期。MUI.UGUI 提供原生 uGUI 的 Element 适配。TMP 与 Input System 位于独立程序集，项目按需安装对应包；基础页面不要求这些可选依赖。
 
+## 页面打开、关闭动画
+
+在 `MUISettings` 的转场设置中配置动画总开关、默认进入动画和默认退出动画。总开关关闭时，页面覆盖也被禁用，正在播放的动画在下一次 UI Tick 收尾。运行时可设置 `settings.AnimationsEnabled`；默认资产变更在下一次创建播放实例时生效，不替换正在播放的实例。减少动态效果设置仍优先跳过动画。
+
+View Inspector 的转场设置提供 `Inherit`（继承全局）、`Disabled`（此页面禁用）和 `Override`（页面覆盖）。覆盖模式可分别指定进入、退出资产或组件，组件优先于资产。没有配置动画时沿用原有 `EnterDuration` / `ExitDuration` 淡入淡出时长，零表示无动画。代码工厂 `EnterTransitionFactory` / `ExitTransitionFactory` 优先于资产和组件，但仍服从总开关及页面禁用设置。
+
+通过 `Assets/Create/MUI/Curve View Transition` 创建内置曲线动画资产。可同时启用透明度、缩放和位移；同一资产可以用于进入与退出。进入从隐藏态到稳定态，退出从当前画面到隐藏态。缩放为相对稳定态的倍率，位移为相对稳定态的局部偏移，曲线允许回弹，透明度限制在 0—1。`Transition Target` 为空时使用页面根 RectTransform，建议指定不受布局和业务绑定驱动的内容节点。退出隐藏后及缓存复用前仅恢复动画控制过的位置和缩放，不重置纯淡入淡出页面的布局。
+
+自定义动画继承 `ViewTransitionAsset`（共享配置）或 `ViewTransitionBehaviour`（预制体组件），实现 `CreatePlayback(ViewTransitionContext)`，每次返回独立、尚未启动的 `ITransitionPlayback`。也可以在页面准备阶段通过工厂直接注入实例。内置 `TransitionPlayback` 基类提供完成任务和幂等停止、释放：
+
+- `OnPlay()` 启动播放器；外部动画结束后调用 `Complete()`，失败时调用 `Fail(error)`。
+- `OnTick(unscaledDeltaTime)` 为可选的框架非缩放时间驱动；自行计时的播放器可不实现。
+- `OnStop(reason)` 必须同步停止所有后续视觉写入、取消播放器并解绑完成回调。`Interrupted` 保留当前姿态供退出动画接管；其余原因按实现收尾。不能仅取消等待而让动画继续播放。
+- `OnDispose()` 释放本次播放资源，不能启动新动画或破坏中断保留的姿态。播放器操作和视觉写入必须在 Unity 主线程进行。
+
+框架等待 `Completion` 的实际结果，同时保留策略的进入/退出超时。完成信号在 UI Tick 中处理，因此自定义动画同样需要宿主帧泵。退出播放不绑定业务激活的取消令牌；业务取消后，画面和资源仍保留到退出完成。打开中途关闭时先停止进入播放器，再创建退出播放器。`ViewTransitionContext.SetAlpha()` 通过框架门控设置透明度，避免直接写根 CanvasGroup 与可见性控制冲突。自定义适配器可调用 `context.RegisterTargetRestore(position, scale)`，登记退出隐藏后需要恢复的目标属性；只登记本动画控制的属性。
+
+可在项目可选程序集内实现 Tween、Animator 或 Timeline 适配器；MUI 核心不依赖这些播放器，当前包内提供曲线实现和自定义接入协议，未内置第三方适配器。正常打开使用句柄的 `WaitForEnterAsync()` 等待视觉完成，关闭使用 `WaitForExitAsync()`；`OpenAsync()` 仍只等待就绪，不等待动画。
+
 ## 从 Basic 开始
 
 导入 Basic Example 并打开 Basic.unity。BasicPageViewModel 声明标题绑定与 Confirm 命令，BasicView.prefab 包含名为 Title 和 Confirm 的 Element。导入的 BasicMUISettings 可作为项目唯一全局配置；页面资源标识 BasicView 直接对应 Resources/BasicView.prefab，无需在 UIHost 登记。BasicExampleModule 声明生成注册入口，BasicDemo 负责注册、解析配置策略、初始化 UIHost 的默认提供方并调用 OpenAsync。

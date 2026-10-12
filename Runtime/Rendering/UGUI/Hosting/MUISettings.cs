@@ -19,6 +19,9 @@ namespace MUI.UGUI
         [SerializeField] private int preferredLayerGap = 128;
         [SerializeField] private RectTransform defaultModalBackdropPrefab = null;
         [SerializeField] private Color defaultModalBackdropColor = new Color(0, 0, 0, 0.45f);
+        [SerializeField] private bool animationsEnabled = true;
+        [SerializeField] private ViewTransitionAsset defaultEnterTransition;
+        [SerializeField] private ViewTransitionAsset defaultExitTransition;
         [SerializeField] private bool automaticFramePump = true;
         [SerializeField, Min(0)] private int cacheCapacity = 16;
         [SerializeField, Min(1)] private int queueCapacity = 64;
@@ -38,6 +41,11 @@ namespace MUI.UGUI
         public RectTransform DefaultModalBackdropPrefab => defaultModalBackdropPrefab;
 
         public Color DefaultModalBackdropColor => defaultModalBackdropColor;
+
+        /// <summary>Master switch, including page overrides. Disabling it also ends active transitions on the next UI frame.</summary>
+        public bool AnimationsEnabled { get => animationsEnabled; set => animationsEnabled = value; }
+        public ViewTransitionAsset DefaultEnterTransition { get => defaultEnterTransition; set => defaultEnterTransition = value; }
+        public ViewTransitionAsset DefaultExitTransition { get => defaultExitTransition; set => defaultExitTransition = value; }
 
         public bool AutomaticFramePump => automaticFramePump;
 

@@ -112,6 +112,7 @@ namespace MUI.UGUI
                     if (IsAlive)
                     {
                         ApplyGates();
+                        RestoreTransitionPose();
                     }
                 }
                 catch (Exception error)

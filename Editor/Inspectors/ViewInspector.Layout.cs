@@ -49,6 +49,15 @@ namespace MUI.Editor
             AddViewSection(configuration, "policy", true, DrawPagePolicySource);
             AddViewSection(configuration, "transitions", true, () =>
             {
+                DrawViewField("transitionMode");
+                DrawViewField("transitionTarget");
+                if (serializedObject.FindProperty("transitionMode").enumValueIndex == (int)ViewTransitionMode.Override)
+                {
+                    DrawViewField("enterTransition");
+                    DrawViewField("exitTransition");
+                    DrawViewField("enterTransitionBehaviour");
+                    DrawViewField("exitTransitionBehaviour");
+                }
                 DrawViewField("enterFadeDuration");
                 DrawViewField("exitFadeDuration");
                 DrawConfigurationHint("viewPanel.transitions.help");

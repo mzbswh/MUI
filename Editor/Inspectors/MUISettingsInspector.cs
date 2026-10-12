@@ -47,6 +47,12 @@ namespace MUI.Editor
             modal.Add(new IMGUIContainer(() => DrawSettingsFields("defaultModalBackdropPrefab", "defaultModalBackdropColor")));
             root.Add(modal);
 
+            var transitions = Section("viewPanel.transitions", "transitions", true);
+            transitions.Add(new IMGUIContainer(() => DrawSettingsFields(
+                "animationsEnabled", "defaultEnterTransition", "defaultExitTransition")));
+            transitions.Add(MUIEditorControls.Text("settings.transitions.help", "mui-note"));
+            root.Add(transitions);
+
             var bindingRules = Section("nativeRules.title", "controlNamingRules", true);
             bindingRules.Add(MUIEditorControls.Text("nativeRules.help", "mui-note"));
             bindingRules.Add(new IMGUIContainer(DrawControlNamingRules));

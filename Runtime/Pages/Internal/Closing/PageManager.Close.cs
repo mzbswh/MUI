@@ -81,7 +81,7 @@ namespace MUI.Pages
             {
                 if (reason == DismissReason.HostShutdown || reason == DismissReason.Forced)
                 {
-                    FinishExit(instance);
+                    FinishExit(instance, endReason: TransitionEndReason.Skipped);
                 }
 
                 return instance.Closing;
@@ -101,6 +101,13 @@ namespace MUI.Pages
 
             var errors = new List<Exception>();
             var pageClosures = ClosePageDescendants(instance);
+            // Stop the entering writer before the exit captures the current pose.
+            try { StopEnterPlayback(instance, TransitionEndReason.Interrupted); }
+            catch (Exception error)
+            {
+                errors.Add(error);
+                canAnimate = false;
+            }
             var visualExit = StartExit(instance, canAnimate, errors);
             try
             {

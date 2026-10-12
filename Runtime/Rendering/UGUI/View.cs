@@ -8,7 +8,7 @@ namespace MUI.UGUI
 {
     [DisallowMultipleComponent]
     [RequireComponent(typeof(CanvasGroup))]
-    public sealed partial class View : MonoBehaviour, IOrderedView, IWidgetHost, IModalView, IInputGestureView, IFocusView, IVisibilityView, IWidgetTickHost, IEnterTransitionView, IExitTransitionView, ICacheableView, IDisposable, IAsyncDisposable, ICleanupResponsibilitySource
+    public sealed partial class View : MonoBehaviour, IOrderedView, IWidgetHost, IModalView, IInputGestureView, IFocusView, IVisibilityView, IWidgetTickHost, ITransitionPlaybackView, ICacheableView, IDisposable, IAsyncDisposable, ICleanupResponsibilitySource
     {
         private InputGate inputGate;
         private bool lastInputEnabled;

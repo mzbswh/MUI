@@ -6429,7 +6429,7 @@
     },
     {
       "key": "viewPanel.transitions.help",
-      "text": "Fade durations in seconds. Set either value to 0 to disable that effect."
+      "text": "Inherit global animations, disable this page, or override with a component or asset (component wins). Missing animations use legacy fade durations. The global master switch always wins. Prefer a content target not driven by layout."
     },
     {
       "key": "viewPanel.interaction",
@@ -6826,6 +6826,126 @@
     {
       "key": "nativeRules.referencesSynced",
       "text": "Saved {0} references and automatic declarations; compilation requested (not yet confirmed). Access ViewModel properties after compilation."
+    },
+    {
+      "key": "property.animationsEnabled",
+      "text": "Enable animations"
+    },
+    {
+      "key": "property.defaultEnterTransition",
+      "text": "Default enter transition"
+    },
+    {
+      "key": "property.defaultExitTransition",
+      "text": "Default exit transition"
+    },
+    {
+      "key": "property.transitionMode",
+      "text": "Transition mode"
+    },
+    {
+      "key": "property.transitionTarget",
+      "text": "Animation target (empty: view root)"
+    },
+    {
+      "key": "property.enterTransition",
+      "text": "Enter transition asset"
+    },
+    {
+      "key": "property.exitTransition",
+      "text": "Exit transition asset"
+    },
+    {
+      "key": "property.enterTransitionBehaviour",
+      "text": "Enter component (overrides asset)"
+    },
+    {
+      "key": "property.exitTransitionBehaviour",
+      "text": "Exit component (overrides asset)"
+    },
+    {
+      "key": "settings.transitions.help",
+      "text": "The master switch also disables page overrides. Pages inherit defaults, disable animations, or override them. Without an animation, legacy page fade durations are used."
+    },
+    {
+      "key": "enum.MUI.UGUI.ViewTransitionMode.Inherit",
+      "text": "Inherit global"
+    },
+    {
+      "key": "enum.MUI.UGUI.ViewTransitionMode.Disabled",
+      "text": "Disabled"
+    },
+    {
+      "key": "enum.MUI.UGUI.ViewTransitionMode.Override",
+      "text": "Override"
+    },
+    {
+      "key": "property.curve",
+      "text": "Animation curve"
+    },
+    {
+      "key": "property.hiddenAlpha",
+      "text": "Hidden alpha"
+    },
+    {
+      "key": "property.animateAlpha",
+      "text": "Animate alpha"
+    },
+    {
+      "key": "property.animateScale",
+      "text": "Animate scale"
+    },
+    {
+      "key": "property.hiddenScale",
+      "text": "Hidden scale multiplier"
+    },
+    {
+      "key": "property.animatePosition",
+      "text": "Animate position"
+    },
+    {
+      "key": "property.hiddenOffset",
+      "text": "Hidden position offset"
+    },
+    {
+      "key": "property.duration",
+      "text": "Duration (seconds)"
+    },
+    {
+      "key": "settings.animationsEnabled.help",
+      "text": "Master switch. Disables page overrides too and finishes active transitions on the next UI frame."
+    },
+    {
+      "key": "settings.defaultEnterTransition.help",
+      "text": "Enter animation for inheriting pages. Empty uses the page fade duration."
+    },
+    {
+      "key": "settings.defaultExitTransition.help",
+      "text": "Exit animation for inheriting pages. Empty uses the page fade duration."
+    },
+    {
+      "key": "viewPanel.field.transitionMode",
+      "text": "Inherit global settings, disable animations, or use page overrides."
+    },
+    {
+      "key": "viewPanel.field.transitionTarget",
+      "text": "Scale and position target. Empty uses the view root. Prefer a content node not driven by layout or bindings."
+    },
+    {
+      "key": "viewPanel.field.enterTransition",
+      "text": "Page enter animation asset. Used in Override mode."
+    },
+    {
+      "key": "viewPanel.field.exitTransition",
+      "text": "Page exit animation asset. Used in Override mode."
+    },
+    {
+      "key": "viewPanel.field.enterTransitionBehaviour",
+      "text": "Custom enter component, taking precedence over the asset. Must create a fresh playback each time."
+    },
+    {
+      "key": "viewPanel.field.exitTransitionBehaviour",
+      "text": "Custom exit component, taking precedence over the asset. Must create a fresh playback each time."
     }
   ]
 }

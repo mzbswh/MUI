@@ -6429,7 +6429,7 @@
     },
     {
       "key": "viewPanel.transitions.help",
-      "text": "设置页面淡入淡出时间，单位为秒。填 0 即可关闭对应效果。"
+      "text": "继承：使用全局动画。禁用：本页面无动画。覆盖：使用本页面动画组件或资产；组件优先。未指定时使用淡入淡出时长。全局总开关始终优先。目标建议使用不受布局驱动的内容节点。"
     },
     {
       "key": "viewPanel.interaction",
@@ -6826,6 +6826,126 @@
     {
       "key": "nativeRules.referencesSynced",
       "text": "已保存 {0} 个控件引用及自动声明，已请求编译（尚未确认成功）。编译后可直接访问 ViewModel 属性。"
+    },
+    {
+      "key": "property.animationsEnabled",
+      "text": "动画总开关"
+    },
+    {
+      "key": "property.defaultEnterTransition",
+      "text": "默认进入动画"
+    },
+    {
+      "key": "property.defaultExitTransition",
+      "text": "默认退出动画"
+    },
+    {
+      "key": "property.transitionMode",
+      "text": "动画配置模式"
+    },
+    {
+      "key": "property.transitionTarget",
+      "text": "动画目标（空为页面根节点）"
+    },
+    {
+      "key": "property.enterTransition",
+      "text": "进入动画资产"
+    },
+    {
+      "key": "property.exitTransition",
+      "text": "退出动画资产"
+    },
+    {
+      "key": "property.enterTransitionBehaviour",
+      "text": "进入动画组件（优先于资产）"
+    },
+    {
+      "key": "property.exitTransitionBehaviour",
+      "text": "退出动画组件（优先于资产）"
+    },
+    {
+      "key": "settings.transitions.help",
+      "text": "总开关关闭时包括页面覆盖动画也会停止。页面默认继承全局动画，也可单独禁用或覆盖。未指定动画时沿用页面的淡入淡出时长。"
+    },
+    {
+      "key": "enum.MUI.UGUI.ViewTransitionMode.Inherit",
+      "text": "继承全局"
+    },
+    {
+      "key": "enum.MUI.UGUI.ViewTransitionMode.Disabled",
+      "text": "禁用"
+    },
+    {
+      "key": "enum.MUI.UGUI.ViewTransitionMode.Override",
+      "text": "页面覆盖"
+    },
+    {
+      "key": "property.curve",
+      "text": "动画曲线"
+    },
+    {
+      "key": "property.hiddenAlpha",
+      "text": "隐藏态透明度"
+    },
+    {
+      "key": "property.animateAlpha",
+      "text": "动画控制透明度"
+    },
+    {
+      "key": "property.animateScale",
+      "text": "动画控制缩放"
+    },
+    {
+      "key": "property.hiddenScale",
+      "text": "隐藏态缩放倍率"
+    },
+    {
+      "key": "property.animatePosition",
+      "text": "动画控制位移"
+    },
+    {
+      "key": "property.hiddenOffset",
+      "text": "隐藏态位置偏移"
+    },
+    {
+      "key": "property.duration",
+      "text": "时长（秒）"
+    },
+    {
+      "key": "settings.animationsEnabled.help",
+      "text": "全局动画总开关；关闭时页面覆盖同样禁用，并在下一帧结束在播动画。"
+    },
+    {
+      "key": "settings.defaultEnterTransition.help",
+      "text": "继承模式页面的进入动画。为空时使用页面淡入时长。"
+    },
+    {
+      "key": "settings.defaultExitTransition.help",
+      "text": "继承模式页面的退出动画。为空时使用页面淡出时长。"
+    },
+    {
+      "key": "viewPanel.field.transitionMode",
+      "text": "选择继承全局、禁用或使用本页面动画配置。"
+    },
+    {
+      "key": "viewPanel.field.transitionTarget",
+      "text": "缩放与位移目标，空时使用页面根节点。建议选择不被布局或业务绑定驱动的内容节点。"
+    },
+    {
+      "key": "viewPanel.field.enterTransition",
+      "text": "页面进入动画资产。仅覆盖模式生效。"
+    },
+    {
+      "key": "viewPanel.field.exitTransition",
+      "text": "页面退出动画资产。仅覆盖模式生效。"
+    },
+    {
+      "key": "viewPanel.field.enterTransitionBehaviour",
+      "text": "自定义进入动画组件，优先于资产。每次必须创建独立播放实例。"
+    },
+    {
+      "key": "viewPanel.field.exitTransitionBehaviour",
+      "text": "自定义退出动画组件，优先于资产。每次必须创建独立播放实例。"
     }
   ]
 }

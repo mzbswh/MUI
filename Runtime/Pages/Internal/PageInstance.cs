@@ -27,6 +27,8 @@ namespace MUI.Pages
         internal bool EnterPending;
         internal bool EnterFinishing;
         internal bool ExitPending;
+        internal ITransitionPlayback EnterPlayback;
+        internal bool UsesEnterPlayback;
         internal float EnterDuration;
         internal double EnterElapsed;
         internal Exception EnterDegradation;

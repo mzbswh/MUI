@@ -49,6 +49,7 @@ namespace MUI.UGUI
             inputGate.Changed += ApplyGates;
             localVisible = true;
             localInteractable = true;
+            RestoreTransitionPose();
             enterAlpha = 1;
             exitAlpha = 1;
             exitVisible = true;

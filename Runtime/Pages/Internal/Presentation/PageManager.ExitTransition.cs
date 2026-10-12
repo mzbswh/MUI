@@ -30,7 +30,7 @@ namespace MUI.Pages
                         return Task.CompletedTask;
                     }
 
-                    duration = transition.ExitDuration;
+                    duration = transition is ITransitionPlaybackView ? 1 : transition.ExitDuration;
                 }
 
                 if (float.IsNaN(duration) || float.IsInfinity(duration) || duration < 0)
@@ -69,13 +69,35 @@ namespace MUI.Pages
                     transition.BeginVisualRetention();
                     if (instance.ExitPending && !IsShutdown)
                     {
-                        transition.SampleExit(0);
+                        if (transition is ITransitionPlaybackView playbackView)
+                        {
+                            var playback = playbackView.CreateExitPlayback();
+                            if (!instance.ExitPending)
+                            {
+                                ReleasePlayback(playback, TransitionEndReason.Interrupted);
+                                return frame.Completion.Task;
+                            }
+                            frame.Playback = playback;
+                            frame.UsesPlayback = true;
+                            if (playback == null || !playbackView.TransitionsEnabled)
+                                FinishExit(instance, endReason: TransitionEndReason.Skipped);
+                            else
+                            {
+                                playback.Play();
+                                if (instance.ExitPending && playback.Completion.IsCompleted)
+                                {
+                                    playback.Completion.GetAwaiter().GetResult();
+                                    FinishExit(instance);
+                                }
+                            }
+                        }
+                        else transition.SampleExit(0);
                     }
                 }
 
                 if (IsShutdown)
                 {
-                    FinishExit(instance);
+                    FinishExit(instance, endReason: TransitionEndReason.Skipped);
                 }
             }
             catch (Exception error)
@@ -100,13 +122,32 @@ namespace MUI.Pages
                         continue;
                     }
 
-                    if (IsShutdown || (userPreferences != null && userPreferences.ReducedMotion))
+                    if (IsShutdown || (userPreferences != null && userPreferences.ReducedMotion) ||
+                        (frame.View is ITransitionPlaybackView controlled && !controlled.TransitionsEnabled))
                     {
-                        FinishExit(instance);
+                        FinishExit(instance, endReason: TransitionEndReason.Skipped);
                         continue;
                     }
 
                     frame.Elapsed += delta;
+                    if (frame.UsesPlayback)
+                    {
+                        try
+                        {
+                            var playback = frame.Playback;
+                            using (EnterCallback(instance)) playback.Tick(delta);
+                            if (!instance.ExitPending) continue;
+                            if (playback.Completion.IsCompleted)
+                            {
+                                playback.Completion.GetAwaiter().GetResult();
+                                FinishExit(instance);
+                            }
+                            else if (frame.Elapsed >= instance.Definition.Policy.ExitTimeout)
+                                FinishExit(instance, new TimeoutException("Exit transition exceeded its frame-time budget."));
+                        }
+                        catch (Exception error) { FinishExit(instance, error); }
+                        continue;
+                    }
                     if (frame.Elapsed >= frame.Duration && frame.Duration <= instance.Definition.Policy.ExitTimeout)
                     {
                         FinishExit(instance);
@@ -138,7 +179,8 @@ namespace MUI.Pages
             }
         }
 
-        private void FinishExit(PageInstance instance, Exception degradation = null)
+        private void FinishExit(PageInstance instance, Exception degradation = null,
+            TransitionEndReason endReason = TransitionEndReason.Completed)
         {
             if (!exiting.TryGetValue(instance, out var frame))
             {
@@ -152,6 +194,10 @@ namespace MUI.Pages
             {
                 try
                 {
+                    var playback = frame.Playback;
+                    frame.Playback = null;
+                    using (EnterCallback(instance))
+                        ReleasePlayback(playback, degradation == null ? endReason : TransitionEndReason.Failed);
                     if (frame.View.IsAlive)
                     {
                         using (EnterCallback(instance))
@@ -264,6 +310,8 @@ namespace MUI.Pages
         {
             internal PageInstance Instance;
             internal IExitTransitionView View;
+            internal ITransitionPlayback Playback;
+            internal bool UsesPlayback;
             internal float Duration;
             internal double Elapsed;
             internal List<Exception> Errors;

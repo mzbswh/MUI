@@ -33,6 +33,32 @@ namespace MUI.Pages
                     enteringTrace.Add(instance, phase);
                 }
 
+                if (transition is ITransitionPlaybackView playbackView)
+                {
+                    instance.UsesEnterPlayback = true;
+                    ITransitionPlayback playback;
+                    using (EnterCallback(instance)) playback = playbackView.CreateEnterPlayback();
+                    if (!instance.IsActive || !instance.EnterPending)
+                    {
+                        ReleasePlayback(playback, TransitionEndReason.Interrupted);
+                        return;
+                    }
+                    instance.EnterPlayback = playback;
+                    if (playback == null || !playbackView.TransitionsEnabled ||
+                        (userPreferences != null && userPreferences.ReducedMotion))
+                    {
+                        FinishEnter(instance, endReason: TransitionEndReason.Skipped);
+                        return;
+                    }
+                    using (EnterCallback(instance)) playback.Play();
+                    if (instance.EnterPending && playback.Completion.IsCompleted)
+                    {
+                        playback.Completion.GetAwaiter().GetResult();
+                        FinishEnter(instance);
+                    }
+                    return;
+                }
+
                 float duration;
                 using (EnterCallback(instance))
                 {
@@ -80,13 +106,32 @@ namespace MUI.Pages
                         continue;
                     }
 
-                    if (userPreferences != null && userPreferences.ReducedMotion)
+                    if ((userPreferences != null && userPreferences.ReducedMotion) ||
+                        (instance.View is ITransitionPlaybackView controlled && !controlled.TransitionsEnabled))
                     {
-                        FinishEnter(instance);
+                        FinishEnter(instance, endReason: TransitionEndReason.Skipped);
                         continue;
                     }
 
                     instance.EnterElapsed += delta;
+                    if (instance.UsesEnterPlayback)
+                    {
+                        try
+                        {
+                            var playback = instance.EnterPlayback;
+                            using (EnterCallback(instance)) playback.Tick(delta);
+                            if (!instance.EnterPending) continue;
+                            if (playback.Completion.IsCompleted)
+                            {
+                                playback.Completion.GetAwaiter().GetResult();
+                                FinishEnter(instance);
+                            }
+                            else if (instance.EnterElapsed >= instance.Definition.Policy.EnterTimeout)
+                                FinishEnter(instance, new TimeoutException("Enter transition exceeded its frame-time budget."));
+                        }
+                        catch (Exception error) { FinishEnter(instance, error); }
+                        continue;
+                    }
                     if (instance.EnterElapsed >= instance.EnterDuration && instance.EnterDuration <= instance.Definition.Policy.EnterTimeout)
                     {
                         FinishEnter(instance);
@@ -118,7 +163,8 @@ namespace MUI.Pages
             }
         }
 
-        private void FinishEnter(PageInstance instance, Exception degradation = null)
+        private void FinishEnter(PageInstance instance, Exception degradation = null,
+            TransitionEndReason endReason = TransitionEndReason.Completed)
         {
             if (!instance.EnterPending)
             {
@@ -140,6 +186,8 @@ namespace MUI.Pages
                     UIErrors.Report(degradation);
                 }
 
+                StopEnterPlayback(instance, !instance.IsActive ? TransitionEndReason.Interrupted :
+                    degradation != null ? TransitionEndReason.Failed : endReason);
                 if (instance.View != null && instance.View.IsAlive && instance.View is IEnterTransitionView transition)
                 {
                     using (EnterCallback(instance))
@@ -186,6 +234,28 @@ namespace MUI.Pages
                     phase?.Dispose();
                 }
             }
+        }
+
+        private void StopEnterPlayback(PageInstance instance, TransitionEndReason reason)
+        {
+            var playback = instance.EnterPlayback;
+            instance.EnterPlayback = null;
+            if (playback != null)
+            {
+                using (EnterCallback(instance)) ReleasePlayback(playback, reason);
+            }
+        }
+
+        private static void ReleasePlayback(ITransitionPlayback playback, TransitionEndReason reason)
+        {
+            if (playback == null) return;
+            // Observe task failures even when an adapter completes after it has been interrupted.
+            var completion = playback.Completion;
+            if (completion != null)
+                _ = completion.ContinueWith(task => { _ = task.Exception; },
+                    TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously);
+            try { playback.Stop(reason); }
+            finally { playback.Dispose(); }
         }
 
         private async Task WaitForReadinessAsync(PageInstance instance, CancellationToken token)

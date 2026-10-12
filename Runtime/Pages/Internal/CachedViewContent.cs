@@ -63,7 +63,7 @@ namespace MUI.Pages
                     }
                 }
                 var beforeRelease = errors.Count;
-                await PageInstanceCleanup.ReleaseViewResourceAsync(release, errors);
+                await ViewInstanceCleanup.ReleaseViewResourceAsync(release, errors);
                 cleanupConfirmed = errors.Count == beforeRelease;
                 if (phase != null)
                 {

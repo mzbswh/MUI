@@ -7,7 +7,7 @@ namespace MUI.UGUI
     public sealed partial class NestedViewElement
     {
         /// <summary>捕获已有借用的稳定责任；不查询项目对象，也不因再次借用或解除父引用而遗失旧失败。</summary>
-        internal Func<bool> CaptureChildViewCleanupConfirmation()
+        internal Func<bool> CaptureWidgetCleanupConfirmation()
         {
             childViewReleases.RemoveAll(release => release.CaptureSnapshot().State == CleanupResponsibilityState.Completed);
             var releases = childViewReleases.ToArray();
@@ -29,7 +29,7 @@ namespace MUI.UGUI
         internal Func<bool> CaptureNodeCleanupConfirmation()
         {
             var cleanup = nodeCleanup;
-            return cleanup == null ? CaptureChildViewCleanupConfirmation() :
+            return cleanup == null ? CaptureWidgetCleanupConfirmation() :
                 () => cleanup.CaptureSnapshot().State == CleanupResponsibilityState.Completed;
         }
 
@@ -41,7 +41,7 @@ namespace MUI.UGUI
         {
             if (nodeCleanup == null)
             {
-                var confirmed = CaptureChildViewCleanupConfirmation();
+                var confirmed = CaptureWidgetCleanupConfirmation();
                 var lifetime = parentLifetime;
                 var elementCleanup = CleanupResponsibility;
                 var views = new ViewHierarchyCleanup(gameObject);

@@ -12,7 +12,7 @@ namespace MUI.Editor
 {
     public sealed partial class ViewInspector
     {
-        private readonly HashSet<MUIPagePolicyFields> expandedPagePolicyGroups = new HashSet<MUIPagePolicyFields>();
+        private readonly HashSet<PagePolicyFields> expandedPagePolicyGroups = new HashSet<PagePolicyFields>();
 
         private void DrawPagePolicySource()
         {
@@ -36,14 +36,15 @@ namespace MUI.Editor
                 return;
             }
             EditorGUILayout.LabelField(L.Get("viewPanel.policy.resource"), key + "@1");
-            if (!MUIProjectSettings.TryGet(out var settings, out var error))
+            if (!RuntimeSettingsAsset.TryGet(out var settings, out var error))
             {
                 EditorGUILayout.HelpBox(error, MessageType.Error);
                 return;
             }
             if (settings == null)
             {
-                if (GUILayout.Button(L.Get("viewPanel.policy.create"))) MUIProjectSettings.GetOrCreate();
+                if (GUILayout.Button(L.Get("viewPanel.policy.create")))
+                    RuntimeSettingsAsset.GetOrCreate();
                 return;
             }
             using (new EditorGUILayout.HorizontalScope())
@@ -82,7 +83,8 @@ namespace MUI.Editor
                         entry.FindPropertyRelative("Overrides").intValue = 0;
                         state.ApplyModifiedProperties();
                     }
-                    else return;
+                    else
+                        return;
                 }
                 PagePolicyAssetSync.LinkFromView(entry, (View)target, manifests.Count == 0);
                 state.ApplyModifiedProperties();
@@ -129,24 +131,29 @@ namespace MUI.Editor
             {
                 var modelType = manifests[selected].ViewModelType;
                 var page = modelType.GetCustomAttribute<UIPageAttribute>();
-                if (page != null) return page.GetResourceKey(modelType);
+                if (page != null)
+                    return page.GetResourceKey(modelType);
                 var widget = modelType.GetCustomAttribute<UIWidgetAttribute>();
                 return widget == null ? null : widget.GetResourceKey(modelType);
             }
-            if (manifests.Count > 1) return null;
+            if (manifests.Count > 1)
+                return null;
             var view = (View)target;
             var stage = UnityEditor.SceneManagement.PrefabStageUtility.GetPrefabStage(view.gameObject);
             string path;
-            if (stage != null && stage.prefabContentsRoot == view.gameObject) path = stage.assetPath;
+            if (stage != null && stage.prefabContentsRoot == view.gameObject)
+                path = stage.assetPath;
             else
             {
                 var source = EditorUtility.IsPersistent(view) ? view : PrefabUtility.GetCorrespondingObjectFromSource(view);
-                if (source == null || source.transform.parent != null) return null;
+                if (source == null || source.transform.parent != null)
+                    return null;
                 path = AssetDatabase.GetAssetPath(source);
             }
             const string marker = "/Resources/";
             var start = path.LastIndexOf(marker, StringComparison.Ordinal);
-            if (start < 0) return null;
+            if (start < 0)
+                return null;
             var relative = path.Substring(start + marker.Length);
             return relative.Substring(0, relative.Length - System.IO.Path.GetExtension(relative).Length);
         }

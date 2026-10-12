@@ -10,7 +10,7 @@
     <ProjectReference Include="MUI.Core.csproj" />
     <ProjectReference Include="MUI.Resources.csproj" />
     <ProjectReference Include="MUI.Pages.csproj" />
-    <ProjectReference Include="MUI.ChildViews.csproj" />
+    <ProjectReference Include="MUI.Widgets.csproj" />
     <Reference Include="UnityEngine.CoreModule"><HintPath>$(UnityManagedPath)/UnityEngine.CoreModule.dll</HintPath><Private>false</Private></Reference>
     <Reference Include="UnityEngine.InputLegacyModule"><HintPath>$(UnityManagedPath)/UnityEngine.InputLegacyModule.dll</HintPath><Private>false</Private></Reference>
     <Reference Include="UnityEngine.UIModule"><HintPath>$(UnityManagedPath)/UnityEngine.UIModule.dll</HintPath><Private>false</Private></Reference>

@@ -11,16 +11,16 @@ namespace MUI.Editor
     {
         private void AddRuleGroups(VisualElement parent, string path, bool expanded)
         {
-            AddRuleGroup(parent, path, "settings.rules.presentation", MUIPagePolicyFields.PageScope | MUIPagePolicyFields.Layer |
-                MUIPagePolicyFields.Input | MUIPagePolicyFields.Coverage | MUIPagePolicyFields.Focus | MUIPagePolicyFields.Modal | MUIPagePolicyFields.Back, expanded);
-            AddRuleGroup(parent, path, "settings.rules.instances", MUIPagePolicyFields.Instances, false);
-            AddRuleGroup(parent, path, "settings.rules.tick", MUIPagePolicyFields.Tick, false);
-            AddRuleGroup(parent, path, "sorting.page", MUIPagePolicyFields.RenderOrder, false);
-            AddRuleGroup(parent, path, "settings.rules.cache", MUIPagePolicyFields.Cache, false);
-            AddRuleGroup(parent, path, "settings.rules.timeouts", MUIPagePolicyFields.Timeouts, false);
+            AddRuleGroup(parent, path, "settings.rules.presentation", PagePolicyFields.PageScope | PagePolicyFields.Layer |
+                PagePolicyFields.Input | PagePolicyFields.Coverage | PagePolicyFields.Focus | PagePolicyFields.Modal | PagePolicyFields.Back, expanded);
+            AddRuleGroup(parent, path, "settings.rules.instances", PagePolicyFields.Instances, false);
+            AddRuleGroup(parent, path, "settings.rules.tick", PagePolicyFields.Tick, false);
+            AddRuleGroup(parent, path, "sorting.page", PagePolicyFields.RenderOrder, false);
+            AddRuleGroup(parent, path, "settings.rules.cache", PagePolicyFields.Cache, false);
+            AddRuleGroup(parent, path, "settings.rules.timeouts", PagePolicyFields.Timeouts, false);
         }
 
-        private void AddRuleGroup(VisualElement parent, string path, string key, MUIPagePolicyFields fields, bool expanded)
+        private void AddRuleGroup(VisualElement parent, string path, string key, PagePolicyFields fields, bool expanded)
         {
             var group = Section(key, path + "." + key, expanded);
             group.RemoveFromClassList("mui-card");
@@ -30,9 +30,9 @@ namespace MUI.Editor
             parent.Add(group);
         }
 
-        private void DrawValues(string path, MUIPagePolicyFields fields)
+        private void DrawValues(string path, PagePolicyFields fields)
         {
-            bool Has(MUIPagePolicyFields field) => (fields & field) != 0;
+            bool Has(PagePolicyFields field) => (fields & field) != 0;
             void Draw(params string[] names)
             {
                 foreach (var name in names)
@@ -48,7 +48,7 @@ namespace MUI.Editor
                     }
                 }
             }
-            if (Has(MUIPagePolicyFields.PageScope))
+            if (Has(PagePolicyFields.PageScope))
             {
                 Draw("PageRole");
                 if (serializedObject.FindProperty(path + ".PageRole").intValue == (int)PageRole.Overlay)
@@ -56,31 +56,31 @@ namespace MUI.Editor
                     Draw("OwnerDeparture");
                 }
             }
-            if (Has(MUIPagePolicyFields.Layer))
+            if (Has(PagePolicyFields.Layer))
             {
                 DrawNamedChoice(path + ".Layer", "layers", "policy.layer.help");
             }
-            if (Has(MUIPagePolicyFields.Coverage))
+            if (Has(PagePolicyFields.Coverage))
             {
                 Draw("Coverage");
             }
-            if (Has(MUIPagePolicyFields.Input))
+            if (Has(PagePolicyFields.Input))
             {
                 Draw("ReceivesInput");
             }
-            if (Has(MUIPagePolicyFields.Focus))
+            if (Has(PagePolicyFields.Focus))
             {
                 Draw("TakesFocus");
             }
-            if (Has(MUIPagePolicyFields.Modal))
+            if (Has(PagePolicyFields.Modal))
             {
                 Draw("Modal");
             }
-            if (Has(MUIPagePolicyFields.Back))
+            if (Has(PagePolicyFields.Back))
             {
                 Draw("BackBehavior");
             }
-            if (Has(MUIPagePolicyFields.Instances))
+            if (Has(PagePolicyFields.Instances))
             {
                 Draw("AllowMultiple");
                 var multiple = serializedObject.FindProperty(path + ".AllowMultiple").boolValue;
@@ -94,11 +94,11 @@ namespace MUI.Editor
                 }
                 Draw("Overflow");
             }
-            if (Has(MUIPagePolicyFields.Tick))
+            if (Has(PagePolicyFields.Tick))
             {
                 DrawTickPause(path + ".TickPause");
             }
-            if (Has(MUIPagePolicyFields.Cache))
+            if (Has(PagePolicyFields.Cache))
             {
                 Draw("CacheMode");
                 if (serializedObject.FindProperty(path + ".CacheMode").intValue == (int)ViewCacheMode.Timed)
@@ -106,11 +106,11 @@ namespace MUI.Editor
                     Draw("CacheDurationSeconds");
                 }
             }
-            if (Has(MUIPagePolicyFields.RenderOrder))
+            if (Has(PagePolicyFields.RenderOrder))
             {
                 Draw("RenderOrderSpan");
             }
-            if (Has(MUIPagePolicyFields.Timeouts))
+            if (Has(PagePolicyFields.Timeouts))
             {
                 Draw("EnterTimeout", "ExitTimeout", "PrepareTimeoutSeconds", "CloseTimeoutSeconds", "CloseDecisionTimeoutSeconds");
             }

@@ -58,3 +58,28 @@ LocalTabsDemo 使用统一异步协议接入常驻 Prefab，不额外延迟立�
 启动默认选择背包。Allow Leave 关闭时拒绝离开背包；Fail Quests 开启时任务页准备失败并保留原内容。选择、定义替换和缓存清理均使用异步入口，守卫通过立即完成的 ValueTask 返回结果。缓存容量为 2、TTL 为 5 秒，由控制器维护；组件不再额外逐帧扫描。销毁等待父 LifetimeScope 排空并释放子视图、控制器、缓存和提供方。菜单入口观察异常并忽略父生命周期结束引起的取消。上述行为仍需 Unity 运行验收。
 
 闲置 UI 内容由项目显式清理：导航调用 ClearInactiveContentAsync，Tab 调用 ClearCacheAsync。框架不订阅平台低内存事件或协调项目对象池。Navigation 示例需先导入 Resource Integration 接入示例。
+
+
+## 一个界面切换不同子界面
+
+父界面持有一个 View，Tab 按钮区域使用 TabBarElement，内容区域使用 AsyncContentElement。每个 TabContentDefinition 独立选择自己的 WidgetDefinition，因此不同 Tab 可以使用完全不同的 ViewModel、Presenter、Prefab 和打开参数；不要求继承同一个业务 ViewModel，也不需要调用 PageManager.OpenAsync。
+
+TabsDemo 的 Inventory 使用 TabPageViewModel / TabPagePresenter / TabPage 资源；Quests 使用 QuestTabViewModel / QuestTabPresenter / QuestTab 资源，紫色内容背景用于区分。两个定义共享同一个父 View.Widgets 和挂载后的资源提供方。示例保留 Quests 首次加载失败与重试行为。
+
+```csharp
+var catalog = new[]
+{
+    new TabContentDefinition("inventory", "背包", async (scope, token) =>
+        await scope.PrepareAsync(inventoryDefinition, mountedProvider, inventoryArgs, cancellationToken: token)),
+    new TabContentDefinition("quests", "任务", async (scope, token) =>
+        await scope.PrepareAsync(questDefinition, mountedProvider, questArgs, cancellationToken: token))
+};
+var controller = new TabContentController(view.Widgets, catalog);
+content.Bind(controller);
+tabBar.Bind(controller);
+await controller.SelectAsync("inventory");
+```
+
+前提：父 View 已进入激活，mountedProvider 由内容区域的 CreateProvider 配置，随后父 View 提交激活。点击 Tab 时控制器执行离开守卫、准备目标 Widget，并由 WidgetSlot 提交切换。快速连续切换使旧请求失去提交资格；迟到完成的内容仍由父级负责释放。默认释放旧内容；需要保留实例时显式传入 TabCacheOptions。KeepPrevious 控制加载期间的旧画面保留，与停用实例缓存是两回事。父界面关闭时结束其 WidgetScope，控制器、缓存和在途任务随父级清理。
+
+此示例已做编译检查，视觉、切换、缓存和父关闭行为仍需在 Unity Play Mode 验证。

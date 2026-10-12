@@ -159,7 +159,7 @@ namespace MUI.Pages
                 {
                     var before = errors.Count;
                     var instanceScope = instance;
-                    await PageInstanceCleanup.ReleaseViewResourceAsync(ownedResource, errors,
+                    await ViewInstanceCleanup.ReleaseViewResourceAsync(ownedResource, errors,
                         () => instanceScope.IsCleanupConfirmed && (activation == null || activation.IsCleanupConfirmed));
                     FinishResourceReleaseTrace(phase, errors, before);
                 }
@@ -180,7 +180,7 @@ namespace MUI.Pages
             {
                 Lifecycle.Destroy(errors);
             }
-            await PageInstanceCleanup.RunAsync(instance, null, errors, detachHost);
+            await ViewInstanceCleanup.RunAsync(instance, null, errors, detachHost);
         }
 
         private static void FinishResourceReleaseTrace(IViewResourceReleaseTraceScope phase, List<Exception> errors, int before)

@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using MUI.ChildViews;
+using MUI.Widgets;
 
 namespace MUI.UGUI
 {
@@ -43,7 +43,7 @@ namespace MUI.UGUI
         private sealed class PreparedRebind : IPreparedBindingTarget, ICleanupResponsibilitySource
         {
             private readonly VirtualListElement element;
-            private readonly ChildViewScope scope;
+            private readonly WidgetScope scope;
             private readonly LifetimeScope lifetime;
             private Task priorChange;
             private readonly long assignment;
@@ -310,7 +310,7 @@ namespace MUI.UGUI
                         View.ReleaseFocusWithin(cell.Root);
                         cell.Root.gameObject.SetActive(false);
                         cell.Element.ViewModel = null;
-                        retirements.Add(((IChildViewElement)cell.Element).Preparation);
+                        retirements.Add(((IWidgetElement)cell.Element).Preparation);
                     }
 
                     // 所有旧节点仍由列表持有，完成退役后才物理释放。
@@ -337,7 +337,7 @@ namespace MUI.UGUI
                     }
 
                     RequireCommittedSource();
-                    element.SetSelection(bindsSelection ? selection : element.selectedKey);
+                    element.SetSelection(bindsSelection ? selection : element.selectionState.Key);
                     RequireCommittedSource();
 
                     element.first = start;
@@ -347,7 +347,7 @@ namespace MUI.UGUI
                     var readiness = new Task[prepared.Count];
                     for (var index = 0; index < prepared.Count; ++index)
                     {
-                        readiness[index] = ((IChildViewElement)prepared[index].Cell.Element).Preparation;
+                        readiness[index] = ((IWidgetElement)prepared[index].Cell.Element).Preparation;
                     }
 
                     _ = CompleteCommitAsync(oldCells, readiness, retirements.ToArray(), items.Count, completion);
@@ -370,7 +370,7 @@ namespace MUI.UGUI
                 }
             }
 
-            private async Task CompleteCommitAsync(Cell[] oldCells, Task[] readiness, Task[] retirementTasks,
+            private async Task CompleteCommitAsync(VirtualListCell[] oldCells, Task[] readiness, Task[] retirementTasks,
                 int itemCount, TaskCompletionSource<bool> completion)
             {
                 try
@@ -398,7 +398,7 @@ namespace MUI.UGUI
                                 // 父级关闭可能已接管节点清理，迟到收尾不能再次释放。
                                 if (element.cells.Remove(cell))
                                 {
-                                    ReleaseCell(cell);
+                                    cell.Release();
                                 }
                             }
                             catch (Exception error)
@@ -483,14 +483,14 @@ namespace MUI.UGUI
                     catch (Exception error)
                     {
                         errors.Add(error);
-                        cleanupConfirmations.Add(entry.Cell.Element.CaptureChildViewCleanupConfirmation());
+                        cleanupConfirmations.Add(entry.Cell.Element.CaptureWidgetCleanupConfirmation());
                     }
 
                     if (!entry.Adopted)
                     {
                         try
                         {
-                            ReleaseCell(entry.Cell);
+                            entry.Cell.Release();
                         }
                         catch (Exception error)
                         {
@@ -518,13 +518,13 @@ namespace MUI.UGUI
 
         private sealed class PreparedCell
         {
-            internal readonly Cell Cell;
+            internal readonly VirtualListCell Cell;
             internal readonly VirtualListItem Item;
             internal readonly int Index;
             internal IPreparedBindingTarget Binding;
             internal bool Adopted;
 
-            internal PreparedCell(Cell cell, VirtualListItem item, int index)
+            internal PreparedCell(VirtualListCell cell, VirtualListItem item, int index)
             {
                 Cell = cell;
                 Item = item;

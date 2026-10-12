@@ -8,10 +8,10 @@ namespace MUI.Editor
 {
     public sealed partial class PageWizard
     {
-        private string ScriptDirectory => MUISettings.ResolvePageDirectory(
-            settings == null ? MUISettings.DefaultPageScriptDirectory : settings.PageScriptDirectory, pageName);
-        private string PrefabDirectory => MUISettings.ResolvePageDirectory(
-            settings == null ? MUISettings.DefaultPagePrefabDirectory : settings.PagePrefabDirectory, pageName);
+        private string ScriptDirectory => MUIEditorSettings.ResolvePageDirectory(
+            MUIEditorSettings.instance.PageScriptDirectory, pageName);
+        private string PrefabDirectory => MUIEditorSettings.ResolvePageDirectory(
+            MUIEditorSettings.instance.PagePrefabDirectory, pageName);
         private string PrefabPath => existingPrefab == null ? PrefabDirectory + "/" + pageName + "View.prefab"
             : AssetDatabase.GetAssetPath(existingPrefab);
 
@@ -40,7 +40,8 @@ namespace MUI.Editor
             try
             {
                 var view = root.GetComponent<View>();
-                if (view == null) throw new InvalidOperationException("Prefab 根节点没有 View。");
+                if (view == null)
+                    throw new InvalidOperationException("Prefab 根节点没有 View。");
                 var metadata = string.IsNullOrEmpty(view.AutoBindingsMetadata) ? new System.Xml.Linq.XElement("bindings") :
                     System.Xml.Linq.XElement.Parse(System.Text.Encoding.UTF8.GetString(Convert.FromBase64String(view.AutoBindingsMetadata)));
                 metadata.SetAttributeValue("assembly", assemblyName);
@@ -48,7 +49,8 @@ namespace MUI.Editor
                 var serialized = new SerializedObject(view);
                 serialized.FindProperty("muiAutoBindings").stringValue = Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(metadata.ToString(System.Xml.Linq.SaveOptions.DisableFormatting)));
                 serialized.ApplyModifiedPropertiesWithoutUndo();
-                if (PrefabUtility.SaveAsPrefabAsset(root, path) == null) throw new IOException("保存 Prefab 关联失败：" + path);
+                if (PrefabUtility.SaveAsPrefabAsset(root, path) == null)
+                    throw new IOException("保存 Prefab 关联失败：" + path);
             }
             finally { PrefabUtility.UnloadPrefabContents(root); }
         }
@@ -60,7 +62,8 @@ namespace MUI.Editor
         {
             while (!string.IsNullOrEmpty(path) && path != "Assets")
             {
-                if (!AssetDatabase.IsValidFolder(path) && PathOccupied(path)) return path;
+                if (!AssetDatabase.IsValidFolder(path) && PathOccupied(path))
+                    return path;
                 path = Path.GetDirectoryName(path).Replace('\\', '/');
             }
             return null;
@@ -68,15 +71,19 @@ namespace MUI.Editor
 
         private static void EnsurePageDirectory(string path, List<string> createdDirectories)
         {
-            if (AssetDatabase.IsValidFolder(path)) return;
-            if (PathOccupied(path)) throw new IOException("Page directory is occupied: " + path);
+            if (AssetDatabase.IsValidFolder(path))
+                return;
+            if (PathOccupied(path))
+                throw new IOException("Page directory is occupied: " + path);
             var parent = Path.GetDirectoryName(path).Replace('\\', '/');
             EnsurePageDirectory(parent, createdDirectories);
             var guid = AssetDatabase.CreateFolder(parent, Path.GetFileName(path));
-            if (string.IsNullOrEmpty(guid)) throw new IOException("Cannot create page directory: " + path);
+            if (string.IsNullOrEmpty(guid))
+                throw new IOException("Cannot create page directory: " + path);
             var actual = AssetDatabase.GUIDToAssetPath(guid);
             createdDirectories.Add(actual);
-            if (actual != path) throw new IOException("Page directory changed during creation: " + path);
+            if (actual != path)
+                throw new IOException("Page directory changed during creation: " + path);
         }
 
         private static bool RollbackPageFiles(List<string> files, List<string> directories)
@@ -86,8 +93,10 @@ namespace MUI.Editor
             {
                 try
                 {
-                    if (File.Exists(files[i])) File.Delete(files[i]);
-                    if (File.Exists(files[i] + ".meta")) File.Delete(files[i] + ".meta");
+                    if (File.Exists(files[i]))
+                        File.Delete(files[i]);
+                    if (File.Exists(files[i] + ".meta"))
+                        File.Delete(files[i] + ".meta");
                 }
                 catch (Exception) { removed = false; }
             }

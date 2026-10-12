@@ -2372,7 +2372,7 @@
       "text": "重入"
     },
     {
-      "key": "enum.MUI.ArgsUpdateRejection.PageDefinitionMismatch",
+      "key": "enum.MUI.ArgsUpdateRejection.DefinitionMismatch",
       "text": "路由不匹配"
     },
     {
@@ -2452,63 +2452,63 @@
       "text": "未绑定"
     },
     {
-      "key": "enum.MUI.ChildViews.ChildViewChangeStatus.Cancelled",
+      "key": "enum.MUI.Widgets.WidgetChangeStatus.Cancelled",
       "text": "已取消"
     },
     {
-      "key": "enum.MUI.ChildViews.ChildViewChangeStatus.Empty",
+      "key": "enum.MUI.Widgets.WidgetChangeStatus.Empty",
       "text": "空"
     },
     {
-      "key": "enum.MUI.ChildViews.ChildViewChangeStatus.Failed",
+      "key": "enum.MUI.Widgets.WidgetChangeStatus.Failed",
       "text": "失败"
     },
     {
-      "key": "enum.MUI.ChildViews.ChildViewChangeStatus.ParentInactive",
+      "key": "enum.MUI.Widgets.WidgetChangeStatus.ParentInactive",
       "text": "父页面未激活"
     },
     {
-      "key": "enum.MUI.ChildViews.ChildViewChangeStatus.Ready",
+      "key": "enum.MUI.Widgets.WidgetChangeStatus.Ready",
       "text": "已就绪"
     },
     {
-      "key": "enum.MUI.ChildViews.ChildViewChangeStatus.Superseded",
+      "key": "enum.MUI.Widgets.WidgetChangeStatus.Superseded",
       "text": "已被替代"
     },
     {
-      "key": "enum.MUI.ChildViews.ChildViewState.Active",
+      "key": "enum.MUI.Widgets.WidgetState.Active",
       "text": "活动"
     },
     {
-      "key": "enum.MUI.ChildViews.ChildViewState.Closed",
+      "key": "enum.MUI.Widgets.WidgetState.Closed",
       "text": "已关闭"
     },
     {
-      "key": "enum.MUI.ChildViews.ChildViewState.Closing",
+      "key": "enum.MUI.Widgets.WidgetState.Closing",
       "text": "关闭中"
     },
     {
-      "key": "enum.MUI.ChildViews.ChildViewState.Deactivating",
+      "key": "enum.MUI.Widgets.WidgetState.Deactivating",
       "text": "停用中"
     },
     {
-      "key": "enum.MUI.ChildViews.ChildViewState.Failed",
+      "key": "enum.MUI.Widgets.WidgetState.Failed",
       "text": "失败"
     },
     {
-      "key": "enum.MUI.ChildViews.ChildViewState.Inactive",
+      "key": "enum.MUI.Widgets.WidgetState.Inactive",
       "text": "未激活"
     },
     {
-      "key": "enum.MUI.ChildViews.ChildViewState.Prepared",
+      "key": "enum.MUI.Widgets.WidgetState.Prepared",
       "text": "已准备"
     },
     {
-      "key": "enum.MUI.ChildViews.ChildViewState.Preparing",
+      "key": "enum.MUI.Widgets.WidgetState.Preparing",
       "text": "准备中"
     },
     {
-      "key": "enum.MUI.ChildViews.ChildViewState.Retained",
+      "key": "enum.MUI.Widgets.WidgetState.Retained",
       "text": "保留中"
     },
     {
@@ -2944,11 +2944,11 @@
       "text": "创建展示器"
     },
     {
-      "key": "enum.MUI.Pages.PagePreparationStage.PresenterOpen",
+      "key": "enum.MUI.Pages.PagePreparationStage.PresenterPrepareOpen",
       "text": "展示器打开"
     },
     {
-      "key": "enum.MUI.Pages.PagePreparationStage.PresenterOpenAsync",
+      "key": "enum.MUI.Pages.PagePreparationStage.PresenterPrepareOpenAsync",
       "text": "展示器异步打开"
     },
     {
@@ -3312,31 +3312,31 @@
       "text": "等待中"
     },
     {
-      "key": "enum.MUI.Pages.ViewState.Closing",
+      "key": "enum.MUI.Pages.PageState.Closing",
       "text": "关闭中"
     },
     {
-      "key": "enum.MUI.Pages.ViewState.Destroyed",
+      "key": "enum.MUI.Pages.PageState.Destroyed",
       "text": "已销毁"
     },
     {
-      "key": "enum.MUI.Pages.ViewState.Failed",
+      "key": "enum.MUI.Pages.PageState.Failed",
       "text": "失败"
     },
     {
-      "key": "enum.MUI.Pages.ViewState.Open",
+      "key": "enum.MUI.Pages.PageState.Open",
       "text": "已打开"
     },
     {
-      "key": "enum.MUI.Pages.ViewState.Opening",
+      "key": "enum.MUI.Pages.PageState.Opening",
       "text": "打开中"
     },
     {
-      "key": "enum.MUI.Pages.ViewState.Unknown",
+      "key": "enum.MUI.Pages.PageState.Unknown",
       "text": "未知"
     },
     {
-      "key": "enum.MUI.Pages.ViewState.UnknownOrExpired",
+      "key": "enum.MUI.Pages.PageState.UnknownOrExpired",
       "text": "未知或已过期"
     },
     {
@@ -3412,7 +3412,7 @@
       "text": "重入"
     },
     {
-      "key": "enum.MUI.RebindRejection.PageDefinitionMismatch",
+      "key": "enum.MUI.RebindRejection.DefinitionMismatch",
       "text": "路由不匹配"
     },
     {
@@ -3548,47 +3548,47 @@
       "text": "结束编辑时"
     },
     {
-      "key": "enum.MUI.UGUI.MUIPagePolicyFields.All",
+      "key": "enum.MUI.UGUI.PagePolicyFields.All",
       "text": "全部"
     },
     {
-      "key": "enum.MUI.UGUI.MUIPagePolicyFields.Back",
+      "key": "enum.MUI.UGUI.PagePolicyFields.Back",
       "text": "返回"
     },
     {
-      "key": "enum.MUI.UGUI.MUIPagePolicyFields.Cache",
+      "key": "enum.MUI.UGUI.PagePolicyFields.Cache",
       "text": "缓存"
     },
     {
-      "key": "enum.MUI.UGUI.MUIPagePolicyFields.Coverage",
+      "key": "enum.MUI.UGUI.PagePolicyFields.Coverage",
       "text": "覆盖"
     },
     {
-      "key": "enum.MUI.UGUI.MUIPagePolicyFields.Focus",
+      "key": "enum.MUI.UGUI.PagePolicyFields.Focus",
       "text": "焦点"
     },
     {
-      "key": "enum.MUI.UGUI.MUIPagePolicyFields.Instances",
+      "key": "enum.MUI.UGUI.PagePolicyFields.Instances",
       "text": "实例"
     },
     {
-      "key": "enum.MUI.UGUI.MUIPagePolicyFields.Layer",
+      "key": "enum.MUI.UGUI.PagePolicyFields.Layer",
       "text": "层级"
     },
     {
-      "key": "enum.MUI.UGUI.MUIPagePolicyFields.Modal",
+      "key": "enum.MUI.UGUI.PagePolicyFields.Modal",
       "text": "模态"
     },
     {
-      "key": "enum.MUI.UGUI.MUIPagePolicyFields.None",
+      "key": "enum.MUI.UGUI.PagePolicyFields.None",
       "text": "无"
     },
     {
-      "key": "enum.MUI.UGUI.MUIPagePolicyFields.Tick",
+      "key": "enum.MUI.UGUI.PagePolicyFields.Tick",
       "text": "帧更新"
     },
     {
-      "key": "enum.MUI.UGUI.MUIPagePolicyFields.Timeouts",
+      "key": "enum.MUI.UGUI.PagePolicyFields.Timeouts",
       "text": "超时"
     },
     {
@@ -3836,11 +3836,11 @@
       "text": "创建展示器"
     },
     {
-      "key": "enum.MUI.ViewPreparationStep.PresenterOpen",
+      "key": "enum.MUI.ViewPreparationStep.PresenterPrepareOpen",
       "text": "展示器打开"
     },
     {
-      "key": "enum.MUI.ViewPreparationStep.PresenterOpenAsync",
+      "key": "enum.MUI.ViewPreparationStep.PresenterPrepareOpenAsync",
       "text": "展示器异步打开"
     },
     {
@@ -4740,7 +4740,7 @@
       "text": "重入"
     },
     {
-      "key": "trace.token.PageDefinitionMismatch",
+      "key": "trace.token.DefinitionMismatch",
       "text": "路由不匹配"
     },
     {
@@ -5029,7 +5029,7 @@
     },
     {
       "key": "settings.description",
-      "text": "设置层级与默认规则，再通过预设覆盖需要的行为。"
+      "text": "设置层级与默认规则，再通过预设覆盖需要的行为。目录、绑定规则和开发工具选项独立保存在 ProjectSettings，不随运行配置进入 Player。"
     },
     {
       "key": "settings.valid",
@@ -5552,7 +5552,7 @@
       "text": "相对 Order 偏移"
     },
     {
-      "key": "enum.MUI.UGUI.MUIPagePolicyFields.RenderOrder",
+      "key": "enum.MUI.UGUI.PagePolicyFields.RenderOrder",
       "text": "页面排序跨度"
     },
     {
@@ -5592,7 +5592,7 @@
       "text": "隐藏并保留"
     },
     {
-      "key": "enum.MUI.UGUI.MUIPagePolicyFields.PageScope",
+      "key": "enum.MUI.UGUI.PagePolicyFields.PageScope",
       "text": "页面归属规则"
     },
     {
@@ -5752,7 +5752,7 @@
       "text": "接收输入"
     },
     {
-      "key": "enum.MUI.UGUI.MUIPagePolicyFields.Input",
+      "key": "enum.MUI.UGUI.PagePolicyFields.Input",
       "text": "输入"
     },
     {

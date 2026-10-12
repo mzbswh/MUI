@@ -73,9 +73,10 @@ namespace MUI.Editor
 
         private void RefreshGlobalSettings()
         {
-            MUIProjectSettings.TryGet(out var settings, out var error);
+            RuntimeSettingsAsset.TryGet(out var settings, out var error);
             settingsField.SetValueWithoutNotify(settings);
-            if (error != null) SetMessage(error, HelpBoxMessageType.Error);
+            if (error != null)
+                SetMessage(error, HelpBoxMessageType.Error);
         }
 
         private void ShowSettings()
@@ -110,7 +111,7 @@ namespace MUI.Editor
 
         private void CreateSettings() => Run(() =>
         {
-            var settings = MUIProjectSettings.GetOrCreate();
+            var settings = RuntimeSettingsAsset.GetOrCreate();
             settingsField.SetValueWithoutNotify(settings);
             ShowSettings();
             EditorGUIUtility.PingObject(settings);

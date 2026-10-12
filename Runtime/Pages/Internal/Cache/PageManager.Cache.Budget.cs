@@ -6,79 +6,40 @@ namespace MUI.Pages
 {
     public sealed partial class PageManager
     {
-        private readonly long? maxCachedEstimatedBytes;
-        private long reservedCacheEstimatedBytes;
-        private long failedCacheEstimatedBytes;
-        private readonly List<FailedCacheBudget> failedCacheBudgets = new List<FailedCacheBudget>();
-
-        /// <summary>缓存、在途淘汰及释放失败所占估算额度；命中转为活动实例后移出本预算。</summary>
+        private readonly PageCacheBudget cacheBudget;
         public long ReservedCacheEstimatedBytes
         {
             get
             {
                 AssertThread();
-                return reservedCacheEstimatedBytes - ConfirmedFailedCacheEstimatedBytes;
+                return cacheBudget.Reserved;
             }
         }
-
-        /// <summary>释放失败而未归还的估算额度；不表示框架能够测量实际残留内存。</summary>
         public long FailedCacheEstimatedBytes
         {
             get
             {
                 AssertThread();
-                return failedCacheEstimatedBytes - ConfirmedFailedCacheEstimatedBytes;
-            }
-        }
-
-        // 诊断读取只计算值；已确认的记录由下一次缓存维护或准入移除，不从查询启动工作。
-        private long ConfirmedFailedCacheEstimatedBytes
-        {
-            get
-            {
-                long confirmed = 0;
-                foreach (var entry in failedCacheBudgets)
-                {
-                    if (entry.Content.IsCleanupConfirmed)
-                    {
-                        confirmed += entry.EstimatedBytes;
-                    }
-                }
-                return confirmed;
-            }
-        }
-
-        private void RefreshFailedCacheBudget()
-        {
-            for (var index = failedCacheBudgets.Count - 1; index >= 0; --index)
-            {
-                var entry = failedCacheBudgets[index];
-                if (!entry.Content.IsCleanupConfirmed)
-                {
-                    continue;
-                }
-                reservedCacheEstimatedBytes -= entry.EstimatedBytes;
-                failedCacheEstimatedBytes -= entry.EstimatedBytes;
-                failedCacheBudgets.RemoveAt(index);
+                return cacheBudget.Failed;
             }
         }
 
         private bool TryMakeCacheRoom(PageDefinition route)
         {
-            RefreshFailedCacheBudget();
-            if (maxCachedEstimatedBytes.HasValue && !route.EstimatedRetainedBytes.HasValue)
+            cacheBudget.Refresh();
+            if (cacheBudget.Limit.HasValue && !route.EstimatedRetainedBytes.HasValue)
             {
                 return RejectCache(route, PageCacheDecision.EstimateRequired);
             }
 
             var estimate = route.EstimatedRetainedBytes ?? 0;
-            var limit = maxCachedEstimatedBytes ?? long.MaxValue;
+            var limit = cacheBudget.Limit ?? long.MaxValue;
             if (estimate > limit)
             {
                 return RejectCache(route, PageCacheDecision.BudgetExceeded);
             }
 
-            if (cachedContents.Count < cacheCapacity && estimate <= limit - reservedCacheEstimatedBytes)
+            if (cachedContents.Count < cacheCapacity && estimate <= limit - cacheBudget.Committed)
             {
                 return true;
             }
@@ -88,24 +49,10 @@ namespace MUI.Pages
                 return RejectCache(route, PageCacheDecision.RetirementPending);
             }
 
-            var removeCount = 0;
-            long reclaimable = 0;
-            while (removeCount < cachedContents.Count &&
-                (cachedContents.Count - removeCount >= cacheCapacity ||
-                 estimate > limit - (reservedCacheEstimatedBytes - reclaimable)))
-            {
-                reclaimable += cachedContents[removeCount].Definition.EstimatedRetainedBytes ?? 0;
-                removeCount++;
-            }
-
-            // 在途或失败额度导致即使清空目录也不足时，保留现有可用内容。
-            if (estimate > limit - (reservedCacheEstimatedBytes - reclaimable))
-            {
+            var removeCount = cachedContents.PlanEviction(estimate, limit, cacheBudget.Committed);
+            if (removeCount < 0)
                 return RejectCache(route, PageCacheDecision.BudgetExceeded);
-            }
-
-            var retiring = cachedContents.GetRange(0, removeCount).ToArray();
-            cachedContents.RemoveRange(0, removeCount);
+            var retiring = cachedContents.EvictOldest(removeCount);
             foreach (var entry in retiring)
             {
                 RecordCacheDecision(entry.Definition, PageCacheDecision.EvictedForCapacity);
@@ -118,14 +65,10 @@ namespace MUI.Pages
             {
                 return RejectCache(route, PageCacheDecision.HostUnavailable);
             }
-            return (cachedContents.Count < cacheCapacity && estimate <= limit - reservedCacheEstimatedBytes) ||
+            return (cachedContents.Count < cacheCapacity && estimate <= limit - cacheBudget.Committed) ||
                 RejectCache(route, PageCacheDecision.RetirementPending);
         }
 
-        private sealed class FailedCacheBudget
-        {
-            internal CachedViewContent Content;
-            internal long EstimatedBytes;
-        }
+
     }
 }

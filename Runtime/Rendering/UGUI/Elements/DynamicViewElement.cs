@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using MUI.ChildViews;
+using MUI.Widgets;
 using MUI.Resources;
 using UnityEngine;
 
@@ -14,16 +14,16 @@ namespace MUI.UGUI
     /// 返回的 UGUI 实例在仍隐藏时挂载到此元素下。
     /// </summary>
     [DisallowMultipleComponent]
-    public sealed class DynamicViewElement : Element, IElementBoundary, IChildViewElement, IBindingRebindTarget
+    public sealed class DynamicViewElement : Element, IElementBoundary, IWidgetElement, IBindingRebindTarget
     {
         private IViewProvider provider;
         private IViewProvider displayedProvider;
-        private ChildViewScope scope;
-        private ChildViewSlot slot;
+        private WidgetScope scope;
+        private WidgetSlot slot;
         private string source;
         private ViewModel model;
         private bool showUnbound;
-        private Task<ChildViewChangeResult> pending;
+        private Task<WidgetChangeOutcome> pending;
         private Task preparation;
         private object refreshVersion;
         private PreparedRebind preparedRebind;
@@ -95,8 +95,8 @@ namespace MUI.UGUI
         }
 
         /// <summary>最近一次内容变更的完成结果；未提交内容时为 Empty。</summary>
-        public Task<ChildViewChangeResult> PendingChange => pending ??
-            (pending = Task.FromResult(new ChildViewChangeResult(ChildViewChangeStatus.Empty)));
+        public Task<WidgetChangeOutcome> PendingChange => pending ??
+            (pending = Task.FromResult(new WidgetChangeOutcome(WidgetChangeStatus.Empty)));
 
         private bool HasPreparationFailure => preparation != null && (preparation.IsFaulted || preparation.IsCanceled);
 
@@ -106,7 +106,7 @@ namespace MUI.UGUI
 
         public ViewModel DisplayedViewModel => HasInstance && !(slot.Current.Model is UnboundModel) ? slot.Current.Model : null;
 
-        Task IChildViewElement.Preparation => preparation ?? Task.CompletedTask;
+        Task IWidgetElement.Preparation => preparation ?? Task.CompletedTask;
 
         public void Configure(IViewProvider viewProvider)
         {
@@ -172,11 +172,11 @@ namespace MUI.UGUI
             });
         }
 
-        void IChildViewElement.BeginParentActivation(ChildViewScope scope, LifetimeScope lifetime)
+        void IWidgetElement.BeginParentActivation(WidgetScope scope, LifetimeScope lifetime)
         {
             RequireAlive();
             this.scope = scope;
-            slot = new ChildViewSlot(scope);
+            slot = new WidgetSlot(scope);
             displayedProvider = null;
             var activationSlot = slot;
             slot.CurrentChanged += _ =>
@@ -271,7 +271,7 @@ namespace MUI.UGUI
                     previous != null && previous.Resource.Key == nextSource &&
                     ReferenceEquals(previous.Model, nextModel) &&
                     ReferenceEquals(displayedProvider, requestedProvider));
-            ChildViewHandle candidate = null;
+            WidgetHandle candidate = null;
             try
             {
                 cancellationToken.ThrowIfCancellationRequested();
@@ -286,7 +286,7 @@ namespace MUI.UGUI
                     var assigned = nextModel ?? new UnboundModel();
                     var mounted = new ContentViewProvider(requestedProvider, transform,
                         nextModel != null || nextShowUnbound);
-                    var template = new ChildViewTemplate<ViewModel, Unit>(resource,
+                    var template = new WidgetDefinition<ViewModel, Unit>(resource,
                         () => throw new InvalidOperationException("Dynamic content uses an assigned model."),
                         (view, value) => value is UnboundModel ? new UnboundBinding(view, value) : BindingRegistry.Create(view, value));
                     candidate = await parentScope.PrepareAsync(template, mounted, Unit.Value, assigned, cancellationToken);
@@ -304,7 +304,7 @@ namespace MUI.UGUI
                     {
                         await candidate.DisposeAsync();
                     }
-                    else if (failure is ChildViewPreparationException preparationFailure)
+                    else if (failure is WidgetPreparationException preparationFailure)
                     {
                         await preparationFailure.CleanupCompletion;
                     }
@@ -329,7 +329,7 @@ namespace MUI.UGUI
             refreshVersion = version;
             var owner = slot;
             // 在调用提供方、绑定或版本查询前发布本轮信号，重入读取不能取得上一轮结果。
-            var completion = new TaskCompletionSource<ChildViewChangeResult>(TaskCreationOptions.RunContinuationsAsynchronously);
+            var completion = new TaskCompletionSource<WidgetChangeOutcome>(TaskCreationOptions.RunContinuationsAsynchronously);
             pending = completion.Task;
             var preparationCompletion = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
             var prepared = preparationCompletion.Task;
@@ -340,7 +340,7 @@ namespace MUI.UGUI
             }
             catch (Exception error)
             {
-                CompleteChange(new ChildViewChangeResult(ChildViewChangeStatus.Failed, error), completion, preparationCompletion);
+                CompleteChange(new WidgetChangeOutcome(WidgetChangeStatus.Failed, error), completion, preparationCompletion);
             }
 
             if (!ReferenceEquals(refreshVersion, version) || !ReferenceEquals(slot, owner))
@@ -359,9 +359,9 @@ namespace MUI.UGUI
             }
         }
 
-        private Task<ChildViewChangeResult> StartChange(ChildViewSlot owner, object version)
+        private Task<WidgetChangeOutcome> StartChange(WidgetSlot owner, object version)
         {
-            Task<ChildViewChangeResult> change;
+            Task<WidgetChangeOutcome> change;
             if (string.IsNullOrEmpty(source))
             {
                 change = owner.ClearAsync().AsTask();
@@ -380,7 +380,7 @@ namespace MUI.UGUI
                 var reusable = FindReusableContent(owner);
                 if (!ReferenceEquals(refreshVersion, version) || !ReferenceEquals(slot, owner))
                 {
-                    return Task.FromResult(new ChildViewChangeResult(ChildViewChangeStatus.Superseded));
+                    return Task.FromResult(new WidgetChangeOutcome(WidgetChangeStatus.Superseded));
                 }
 
                 if (reusable != null)
@@ -390,7 +390,7 @@ namespace MUI.UGUI
                 else
                 {
                     var mounted = new ContentViewProvider(currentProvider, transform, model != null || showUnbound);
-                    var template = new ChildViewTemplate<ViewModel, Unit>(resource, () => throw new InvalidOperationException("Dynamic content uses an assigned model."), (view, value) => value is UnboundModel ? new UnboundBinding(view, value) : BindingRegistry.Create(view, value));
+                    var template = new WidgetDefinition<ViewModel, Unit>(resource, () => throw new InvalidOperationException("Dynamic content uses an assigned model."), (view, value) => value is UnboundModel ? new UnboundBinding(view, value) : BindingRegistry.Create(view, value));
                     change = owner.ReplaceAsync(async (scope, token) => await scope.PrepareAsync(template, mounted, Unit.Value, assigned, token),
                         committed: _ =>
                         {
@@ -405,35 +405,35 @@ namespace MUI.UGUI
             return change;
         }
 
-        private static async Task CompleteChangeAsync(Task<ChildViewChangeResult> change,
-            TaskCompletionSource<ChildViewChangeResult> completion, TaskCompletionSource<bool> preparationCompletion)
+        private static async Task CompleteChangeAsync(Task<WidgetChangeOutcome> change,
+            TaskCompletionSource<WidgetChangeOutcome> completion, TaskCompletionSource<bool> preparationCompletion)
         {
-            ChildViewChangeResult result;
+            WidgetChangeOutcome result;
             try
             {
                 result = await change;
             }
             catch (OperationCanceledException)
             {
-                result = new ChildViewChangeResult(ChildViewChangeStatus.Cancelled);
+                result = new WidgetChangeOutcome(WidgetChangeStatus.Cancelled);
             }
             catch (Exception error)
             {
-                result = new ChildViewChangeResult(ChildViewChangeStatus.Failed, error);
+                result = new WidgetChangeOutcome(WidgetChangeStatus.Failed, error);
             }
 
             CompleteChange(result, completion, preparationCompletion);
         }
 
-        private static void CompleteChange(ChildViewChangeResult result,
-            TaskCompletionSource<ChildViewChangeResult> completion, TaskCompletionSource<bool> preparationCompletion)
+        private static void CompleteChange(WidgetChangeOutcome result,
+            TaskCompletionSource<WidgetChangeOutcome> completion, TaskCompletionSource<bool> preparationCompletion)
         {
             completion.TrySetResult(result);
-            if (result.Error != null || result.Status == ChildViewChangeStatus.Failed)
+            if (result.Error != null || result.Status == WidgetChangeStatus.Failed)
             {
                 preparationCompletion.TrySetException(result.Error ?? new InvalidOperationException("Dynamic preparation failed."));
             }
-            else if (result.Status == ChildViewChangeStatus.Cancelled || result.Status == ChildViewChangeStatus.ParentInactive)
+            else if (result.Status == WidgetChangeStatus.Cancelled || result.Status == WidgetChangeStatus.ParentInactive)
             {
                 preparationCompletion.TrySetCanceled();
             }
@@ -444,12 +444,12 @@ namespace MUI.UGUI
         }
 
         /// <summary>只复用同提供方的已绑定内容；首次准备和未绑定显示仍走候选替换。</summary>
-        private ChildViewHandle<ViewModel, Unit> FindReusableContent(ChildViewSlot owner)
+        private WidgetHandle<ViewModel, Unit> FindReusableContent(WidgetSlot owner)
         {
             var expectedProvider = provider;
             var expectedSource = source;
             var expectedModel = model;
-            var current = owner.Current as ChildViewHandle<ViewModel, Unit>;
+            var current = owner.Current as WidgetHandle<ViewModel, Unit>;
             if (current == null || expectedModel == null || current.Model == null || current.Model is UnboundModel ||
                 current.Model.GetType() != expectedModel.GetType() ||
                 !ReferenceEquals(displayedProvider, expectedProvider) || current.Resource.Key != expectedSource ||
@@ -502,16 +502,16 @@ namespace MUI.UGUI
         private sealed class PreparedRebind : IPreparedBindingTarget
         {
             private readonly DynamicViewElement element;
-            private readonly ChildViewScope scope;
-            private readonly ChildViewSlot slot;
-            private readonly ChildViewHandle previous;
+            private readonly WidgetScope scope;
+            private readonly WidgetSlot slot;
+            private readonly WidgetHandle previous;
             private readonly object version;
             private readonly IViewProvider provider;
             private readonly string source;
             private readonly ViewModel model;
             private readonly bool showUnbound;
             private readonly bool unchanged;
-            private ChildViewHandle candidate;
+            private WidgetHandle candidate;
             private Task retirement;
             private bool adopted;
             private bool started;
@@ -519,9 +519,9 @@ namespace MUI.UGUI
             private ViewModel originalModel;
             private bool originalShowUnbound;
 
-            internal PreparedRebind(DynamicViewElement element, ChildViewScope scope, ChildViewSlot slot,
-                ChildViewHandle previous, object version, IViewProvider provider, string source,
-                ViewModel model, bool showUnbound, ChildViewHandle candidate, bool unchanged)
+            internal PreparedRebind(DynamicViewElement element, WidgetScope scope, WidgetSlot slot,
+                WidgetHandle previous, object version, IViewProvider provider, string source,
+                ViewModel model, bool showUnbound, WidgetHandle candidate, bool unchanged)
             {
                 this.element = element;
                 this.scope = scope;
@@ -580,8 +580,8 @@ namespace MUI.UGUI
                     adopted = true;
                     element.displayedProvider = string.IsNullOrEmpty(source) ? null : provider;
                     element.refreshVersion = new object();
-                    element.pending = Task.FromResult(new ChildViewChangeResult(
-                        string.IsNullOrEmpty(source) ? ChildViewChangeStatus.Empty : ChildViewChangeStatus.Ready));
+                    element.pending = Task.FromResult(new WidgetChangeOutcome(
+                        string.IsNullOrEmpty(source) ? WidgetChangeStatus.Empty : WidgetChangeStatus.Ready));
                     element.preparation = Task.CompletedTask;
                 }
 

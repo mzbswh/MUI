@@ -32,7 +32,8 @@ namespace MUI.Editor
 
         private void OnBindingUndoRedo()
         {
-            if (this == null || target == null) return;
+            if (this == null || target == null)
+                return;
             serializedObject.Update();
             InitializeInspectorState();
             ClearBindingTargets();
@@ -141,7 +142,8 @@ namespace MUI.Editor
             }
 
             // 多个匹配时才展示候选，供用户逐一定位；正常匹配保持单行。
-            if (locatedElements.Count == 1) return;
+            if (locatedElements.Count == 1)
+                return;
             foreach (var element in locatedElements)
             {
                 using (new EditorGUILayout.HorizontalScope())
@@ -178,7 +180,7 @@ namespace MUI.Editor
                     {
                         if (!CompilerGeneratedSources.OutputEnabled)
                         {
-                            MUIProjectSettings.OpenOrCreate();
+                            RuntimeSettingsAsset.OpenOrCreate();
                             sourceOpenError = "请在 MUI 全局设置的开发工具中开启“输出生成源码供 IDE 使用”。";
                             return;
                         }

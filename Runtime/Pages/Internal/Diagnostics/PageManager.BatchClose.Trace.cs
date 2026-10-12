@@ -14,7 +14,7 @@ namespace MUI.Pages
         private ValueTask<BatchCloseOutcome> CloseBatchTracedAsync(int? layer, CancellationToken token)
         {
             AssertThread();
-            var trace = traceRecording ? BeginOperationTrace(string.Empty, GetBatchTraceName(layer)) : default;
+            var trace = traceBuffer.IsRecording ? BeginOperationTrace(string.Empty, GetBatchTraceName(layer)) : default;
             try
             {
                 using (EnterOperationTrace(trace))
@@ -32,12 +32,12 @@ namespace MUI.Pages
 
         private void FinishBatchCloseTrace(PageTraceOperation trace, BatchCloseOutcome result)
         {
-            if (trace.Id == 0 || !traceRecording || !ReferenceEquals(trace.Session, traceSession))
+            if (trace.Id == 0 || !traceBuffer.IsRecording || !ReferenceEquals(trace.Session, traceBuffer.Session))
             {
                 return;
             }
             // 为最终汇总保留一格；复制工作量不随超大批次无界增长，省略数明确写入汇总。
-            var start = Math.Max(0, result.Items.Count - (traceEntries.Length - 1));
+            var start = Math.Max(0, result.Items.Count - (traceBuffer.Capacity - 1));
             for (var i = start; i < result.Items.Count; ++i)
             {
                 AppendTrace(new PageTraceEntry(host, trace.Id, trace.Name, result.Items[i], i));

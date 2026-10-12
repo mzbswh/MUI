@@ -13,8 +13,8 @@ namespace MUI.Pages
             candidate.PreparationTraceSession = operation.Session;
         }
 
-        internal bool IsPreparationTraceEnabled(PageInstance candidate) => traceRecording &&
-            (candidate.PreparationOperationId == 0 || ReferenceEquals(candidate.PreparationTraceSession, traceSession));
+        internal bool IsPreparationTraceEnabled(PageInstance candidate) => traceBuffer.IsRecording &&
+            (candidate.PreparationOperationId == 0 || ReferenceEquals(candidate.PreparationTraceSession, traceBuffer.Session));
 
         private PreparationTraceScope BeginPreparationTrace(PageInstance candidate, PagePreparationStage stage)
         {
@@ -27,8 +27,8 @@ namespace MUI.Pages
             {
                 ViewPreparationStep.PresenterCreate => PagePreparationStage.PresenterCreate,
                 ViewPreparationStep.Binding => PagePreparationStage.Binding,
-                ViewPreparationStep.PresenterOpen => PagePreparationStage.PresenterOpen,
-                ViewPreparationStep.PresenterOpenAsync => PagePreparationStage.PresenterOpenAsync,
+                ViewPreparationStep.PresenterPrepareOpen => PagePreparationStage.PresenterPrepareOpen,
+                ViewPreparationStep.PresenterPrepareOpenAsync => PagePreparationStage.PresenterPrepareOpenAsync,
                 _ => throw new ArgumentOutOfRangeException(nameof(step))
             });
         }
@@ -50,7 +50,7 @@ namespace MUI.Pages
             internal PreparationTraceScope(PageManager owner, PageInstance candidate, PagePreparationStage stage)
             {
                 this.owner = owner;
-                session = owner.traceSession;
+                session = owner.traceBuffer.Session;
                 operationId = candidate.PreparationOperationId;
                 handle = candidate.Handle;
                 key = candidate.Definition.Key;
@@ -76,7 +76,7 @@ namespace MUI.Pages
                 owner = null;
                 diagnostic.Dispose();
                 if (pages == null || !recording || Thread.CurrentThread.ManagedThreadId != pages.thread ||
-                    !pages.traceRecording || !ReferenceEquals(session, pages.traceSession))
+                    !pages.traceBuffer.IsRecording || !ReferenceEquals(session, pages.traceBuffer.Session))
                 {
                     return;
                 }

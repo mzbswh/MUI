@@ -47,6 +47,25 @@ namespace MUI.Pages
             // 回调可能请求关闭或引发新的表现重算；在重算保护退出后按稳定快照派发。
             foreach (var instance in readySnapshot)
             {
+                if (instance.IsActive && instance.ActivationCommitted && instance.HostVisible &&
+                    !instance.EnterPending && instance.Failure == null &&
+                    instance.TryGetReadiness(out var readiness) && readiness.IsReady)
+                {
+                    try
+                    {
+                        using (EnterCallback(instance))
+                        {
+                            instance.NotifyOpened();
+                        }
+                    }
+                    catch (Exception error)
+                    {
+                        instance.SetFailure(error);
+                        UIErrors.Report(error);
+                        CloseAfterFailure(instance, DismissReason.OpenFailed);
+                    }
+                }
+
                 using (EnterCallback(instance))
                 {
                     instance.PublishReadinessObservers();
@@ -77,7 +96,7 @@ namespace MUI.Pages
             {
                 RefreshRenderOrders();
             }
-            var visible = activeOrder.Where(entry => entry.State == ViewState.Open || entry.ExitPending).ToArray();
+            var visible = activeOrder.Where(entry => entry.State == PageState.Open || entry.ExitPending).ToArray();
             var mainPage = CurrentMainPage;
             var hiddenBelow = false;
             var blockedBelow = false;
@@ -89,7 +108,7 @@ namespace MUI.Pages
                 var entry = visible[i];
                 var inScope = IsInPageScope(entry, mainPage, new HashSet<PageHandle>());
                 entry.HostVisible = (entry.ActivationCommitted || entry.ExitPending) && !IsShutdown && !hiddenBelow && inScope;
-                entry.HostInteractable = entry.State == ViewState.Open && entry.HostVisible && entry.Definition.Policy.ReceivesInput && !blockedBelow && !entry.EnterPending;
+                entry.HostInteractable = entry.State == PageState.Open && entry.HostVisible && entry.Definition.Policy.ReceivesInput && !blockedBelow && !entry.EnterPending;
                 var covered = !inScope || hiddenBelow || blockedBelow;
                 entry.Covered = covered;
                 entry.HiddenBy = inScope ? hiddenBy : mainPage;
@@ -118,7 +137,7 @@ namespace MUI.Pages
 
             foreach (var entry in visible)
             {
-                if (entry.State != ViewState.Open && !entry.ExitPending)
+                if (entry.State != PageState.Open && !entry.ExitPending)
                 {
                     continue;
                 }
@@ -149,7 +168,7 @@ namespace MUI.Pages
                             entry.View.SetHostState(false, false);
                         }
                     }
-                    else if (entry.State == ViewState.Open)
+                    else if (entry.State == PageState.Open)
                     {
                         entry.View.SetHostState(entry.HostVisible, entry.HostInteractable);
                     }
@@ -179,7 +198,7 @@ namespace MUI.Pages
             for (var i = visible.Length - 1; i >= 0; --i)
             {
                 var entry = visible[i];
-                if (entry.State != ViewState.Open || !entry.HostInteractable || !entry.Definition.Policy.TakesFocus || entry.ExplicitFocusReleased)
+                if (entry.State != PageState.Open || !entry.HostInteractable || !entry.Definition.Policy.TakesFocus || entry.ExplicitFocusReleased)
                 {
                     continue;
                 }
@@ -196,7 +215,7 @@ namespace MUI.Pages
             var changes = new List<(PageInstance instance, bool focused)>();
             foreach (var entry in entries.Values.ToArray())
             {
-                var desired = entry.State == ViewState.Open && entry.Handle == focused;
+                var desired = entry.State == PageState.Open && entry.Handle == focused;
                 entry.Focused = desired;
                 if (entry.NotifiedFocused != desired)
                 {
@@ -218,7 +237,7 @@ namespace MUI.Pages
                     break;
                 }
 
-                if (change.instance.State != ViewState.Open || !change.instance.ActivationCommitted || change.instance.Covered != change.covered)
+                if (change.instance.State != PageState.Open || !change.instance.ActivationCommitted || change.instance.Covered != change.covered)
                 {
                     continue;
                 }
@@ -255,7 +274,7 @@ namespace MUI.Pages
 
         private void NotifyFocusChange(PageInstance instance, bool desired)
         {
-            if (instance.Focused != desired || (instance.State != ViewState.Open && instance.State != ViewState.Closing))
+            if (instance.Focused != desired || (instance.State != PageState.Open && instance.State != PageState.Closing))
             {
                 return;
             }
@@ -289,7 +308,7 @@ namespace MUI.Pages
         internal void InputStateChanged(PageInstance instance)
         {
             AssertThread();
-            if (instance.State == ViewState.Open)
+            if (instance.State == PageState.Open)
             {
                 // 原生激活回调中的输入变化只更新门控与焦点，不能重排正在改变状态的层级。
                 RecomputePresentation(updateOrder: false);
@@ -298,7 +317,7 @@ namespace MUI.Pages
 
         private void MaintainNativeFocus()
         {
-            var modal = activeOrder.LastOrDefault(entry => entry.State == ViewState.Open && entry.HostVisible && entry.HostInteractable && entry.Definition.Policy.Modal);
+            var modal = activeOrder.LastOrDefault(entry => entry.State == PageState.Open && entry.HostVisible && entry.HostInteractable && entry.Definition.Policy.Modal);
             var target = modal;
             if (target == null)
             {
@@ -339,12 +358,12 @@ namespace MUI.Pages
             entry.Order = ++order;
             // 显式修改同层导航顺序；打开历史独立，渲染器只投影新的顺序。
             RecomputePresentation();
-            return entry.State == ViewState.Open;
+            return entry.State == PageState.Open;
         }
 
         private bool CanBringToFront(PageInstance entry)
         {
-            if (entry.State != ViewState.Open)
+            if (entry.State != PageState.Open)
             {
                 return false;
             }
@@ -363,7 +382,7 @@ namespace MUI.Pages
             {
                 var above = activeOrder[i];
                 if (above.Definition.Policy.Layer == entry.Definition.Policy.Layer && above.Definition.Policy.Modal &&
-                    (above.State == ViewState.Open || above.ExitPending))
+                    (above.State == PageState.Open || above.ExitPending))
                 {
                     return false;
                 }
@@ -376,11 +395,11 @@ namespace MUI.Pages
                     where TViewModel : ViewModel
         {
             AssertThread();
-            model = entries.TryGetValue(handle, out var entry) && entry.State == ViewState.Open ? entry.Model as TViewModel : null;
+            model = entries.TryGetValue(handle, out var entry) && entry.State == PageState.Open ? entry.Model as TViewModel : null;
             return model != null;
         }
 
-        public ViewState GetState(PageHandle handle)
+        public PageState GetState(PageHandle handle)
         {
             AssertThread();
             if (entries.TryGetValue(handle, out var instance))
@@ -390,10 +409,10 @@ namespace MUI.Pages
 
             if (TryGetTerminal(handle, out var outcome))
             {
-                return outcome.Status == CloseStatus.Failed ? ViewState.Failed : ViewState.Destroyed;
+                return outcome.Status == CloseStatus.Failed ? PageState.Failed : PageState.Destroyed;
             }
 
-            return IsExpired(handle) ? ViewState.UnknownOrExpired : ViewState.Unknown;
+            return IsExpired(handle) ? PageState.UnknownOrExpired : PageState.Unknown;
         }
 
         private bool IsExpired(PageHandle handle) => handle.Host == host && handle.Id > 0 && handle.Id <= nextHandle;

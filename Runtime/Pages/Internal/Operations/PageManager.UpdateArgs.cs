@@ -59,7 +59,7 @@ namespace MUI.Pages
 
                     if (!ReferenceEquals(entry.Definition, route) || !(entry is PageInstance<TViewModel, TArgs, TResult> instance))
                     {
-                        return new ArgsUpdateOutcome(ArgsUpdateStatus.Rejected, ArgsUpdateRejection.PageDefinitionMismatch);
+                        return new ArgsUpdateOutcome(ArgsUpdateStatus.Rejected, ArgsUpdateRejection.DefinitionMismatch);
                     }
 
                     if (ownership.HasOwners(instance.Handle))

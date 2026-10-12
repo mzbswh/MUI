@@ -55,7 +55,7 @@ Enable **Show Enter Transition Preview** on NavigationDemo to display a dedicate
 
 ## 顶层页面缓存演示
 
-Play 前启用 NavigationDemo 的 **Show Cache Walkthrough**，建议关闭两个 Preview 选项。示例先异步打开页面并等待关闭清理，再用新参数打开同一路由。观察日志：View 引用相同，模型与 Handle 不同，Selection 从 10 变为 20；关闭旧句柄不会关闭新激活。每次打开创建新的 Presenter，OnCreate/OnOpen/OnClose/OnDestroy 各执行一次，实例资源与模型在关闭时清理。第二次关闭后等待 ClearCacheAsync，缓存数量应为 0，View 凭证已实际归还。缓存需要 View 实现 ICacheableView，凭证通过 ICacheableViewAcquisition 显式保证归还依赖可延长；PrefabViewProvider 已支持，缓存命中前重新执行配置回调以注入当前资源加载器。
+Play 前启用 NavigationDemo 的 **Show Cache Walkthrough**，建议关闭两个 Preview 选项。示例先异步打开页面并等待关闭清理，再用新参数打开同一路由。观察日志：View 引用相同，模型与 Handle 不同，Selection 从 10 变为 20；关闭旧句柄不会关闭新激活。每次打开创建新的 Presenter，OnCreate/OnPrepareOpen/OnClose/OnDestroy 各执行一次，实例资源与模型在关闭时清理。第二次关闭后等待 ClearCacheAsync，缓存数量应为 0，View 凭证已实际归还。缓存需要 View 实现 ICacheableView，凭证通过 ICacheableViewAcquisition 显式保证归还依赖可延长；PrefabViewProvider 已支持，缓存命中前重新执行配置回调以注入当前资源加载器。
 
 缓存仅保留解除绑定的 View 凭证与其原生节点，初次异步准备仍可能涉及子视图；重新打开会重建子激活。示例未在 Unity 中运行，上述为人工验收预期，不是通过记录。
 
@@ -118,7 +118,7 @@ MUI 不监听平台低内存事件，也不提供全局资源预算或自动回�
 
 开启 NavigationDemo 的 **Show Args Update Walkthrough**：成功更新后新参数 Open 复用原 Handle；Prepare failure 保持旧页面。Slow 候选演示忽略取消后的归还；独立页面的 Commit failure 在部分写入后抛错，预期 CommitFailed、ViewFaulted=true，并等待故障清理。提交失败不恢复业务副作用，原页面不可继续使用。该完整示例流程仍待运行验收。
 
-Show Args Update Walkthrough 也启用 ThingItem 子视图演示：UpdateArgsAsync("Iron") 后 Args 与 Label 更新而 OpenCount 不变；停用再恢复才调用第二次 OnOpen，并继续使用 Iron 参数。Slow 候选准备期间第二个更新返回 Busy，随后停用取消更新、放行迟到候选，预期 CancelledBeforeCommit、Inactive、CandidatesDisposed=2、ClosedDuringArgsUpdate=false；最后恢复该子项以继续父关闭演示。父子更新现在共用 Core 的 ArgsUpdateOutcome，清理枚举为 ArgsUpdateCleanup。仍仅有离线编译证据。
+Show Args Update Walkthrough 也启用 ThingItem 子视图演示：UpdateArgsAsync("Iron") 后 Args 与 Label 更新而 OpenCount 不变；停用再恢复才调用第二次 OnPrepareOpen，并继续使用 Iron 参数。Slow 候选准备期间第二个更新返回 Busy，随后停用取消更新、放行迟到候选，预期 CancelledBeforeCommit、Inactive、CandidatesDisposed=2、ClosedDuringArgsUpdate=false；最后恢复该子项以继续父关闭演示。父子更新现在共用 Core 的 ArgsUpdateOutcome，清理枚举为 ArgsUpdateCleanup。仍仅有离线编译证据。
 
 ## ViewModel 换绑演示
 
@@ -151,7 +151,7 @@ LocalThingPresenter 通过统一 IArgsUpdatePresenter 准备候选。失败演�
 
 配置场景父 View，后代 NestedItem 包装节点挂 NestedViewElement，其下放带 ItemLabel/TextElement 的 ThingItem 子 View。将父 View 赋给 LocalNestedDemo.parentView。父 View 使用 NestedPage 契约，模型为 LocalNestedDemo.NestedPageViewModel。
 
-Start 建立父绑定后等待 CompleteChildPreparationAsync，再提交父子激活。菜单修改模型或设为 null，嵌套控件通过同一异步准备和清理路径替换借用内容；本地准备可立即完成。销毁等待父 LifetimeScope 排空，场景节点仍由场景所有者管理。旧纯同步父激活不再支持 NestedViewElement。
+Start 建立父绑定后等待 CompleteWidgetPreparationAsync，再提交父子激活。菜单修改模型或设为 null，嵌套控件通过同一异步准备和清理路径替换借用内容；本地准备可立即完成。销毁等待父 LifetimeScope 排空，场景节点仍由场景所有者管理。旧纯同步父激活不再支持 NestedViewElement。
 
 ## 本地动态子视图
 
@@ -202,7 +202,7 @@ icon.SpriteSource = "Icons/Stone";
 
 ### 纹理预览的生成绑定
 
-可运行入口：导入 Navigation 示例后，选择 `Tools/MUI/示例 (Samples)/打开资源绑定场景 (Open Resource Binding Scene)` 创建独立场景；也可在空 GameObject 上手工挂 `ResourceImageDemo`。菜单会选中示例组件，便于在 Inspector 设置 delayMilliseconds 和 ignoreCancellation，再手动进入 Play。播放或切换播放状态时不创建场景，已有场景的未保存修改沿用 Unity 保存提示。它会创建 Canvas、Image、RawImage、按钮和状态文本，并通过示例加载器生成两个颜色不同的纹理，不需要准备 Prefab 或图片资源。示例在 View 上配置一次加载器，再显式驱动 BeginChildActivation/CommitChildActivation；图标、纹理与字体控件首次绑定 Source 时自动建立本次激活的资源槽。主文件负责绑定与清理，Layout 文件负责原生层级，Loader 文件负责样例资源及凭证，示例逻辑不进入框架 Runtime。
+可运行入口：导入 Navigation 示例后，选择 `Tools/MUI/示例 (Samples)/打开资源绑定场景 (Open Resource Binding Scene)` 创建独立场景；也可在空 GameObject 上手工挂 `ResourceImageDemo`。菜单会选中示例组件，便于在 Inspector 设置 delayMilliseconds 和 ignoreCancellation，再手动进入 Play。播放或切换播放状态时不创建场景，已有场景的未保存修改沿用 Unity 保存提示。它会创建 Canvas、Image、RawImage、按钮和状态文本，并通过示例加载器生成两个颜色不同的纹理，不需要准备 Prefab 或图片资源。示例在 View 上配置一次加载器，再显式驱动 BeginWidgetActivation/CommitWidgetActivation；图标、纹理与字体控件首次绑定 Source 时自动建立本次激活的资源槽。主文件负责绑定与清理，Layout 文件负责原生层级，Loader 文件负责样例资源及凭证，示例逻辑不进入框架 Runtime。
 
 统一使用默认 LifetimeScope 和异步资源协议。delayMilliseconds 为 0 时允许立即完成；默认 500 毫秒用于演示延迟加载。ignoreCancellation 默认开启，用来验证框架归还后端交付的迟到凭证。Close 等待解绑和资源排空。
 
@@ -274,7 +274,7 @@ LabelFont 演示 TextElement.Font 的直接对象绑定，绑定前应赋予实�
 异步示例的预期流程：
 
 1. 第一个父页面等待可选共享状态准备完成后打开。
-2. 第二个父页面复用共享状态，并加载会在 `OnOpenAsync` 中失败的可选项；日志应先出现该项“物理清理完成”，再报告父打开成功。
+2. 第二个父页面复用共享状态，并加载会在 `OnPrepareOpenAsync` 中失败的可选项；日志应先出现该项“物理清理完成”，再报告父打开成功。
 3. 在加载或准备尚未完成时执行“取消当前异步打开”；当前候选应回收，不影响先前已经提交的父页面。
 4. 启动前打开 `simulateNonCooperativeLoading`，重复取消操作；示例提供方故意迟到返回凭证，框架应接管后回收，不提交该候选。该模式只演示取消边界，不能作为生产资源后端实现。
 5. 两个父页面都打开后执行“异步强制关闭共享依赖”；可选父页面保留并收到降级事件，必需父页面关闭。Ready 为一次性结果，后续降级应通过事件和 `GetDependencyFailures` 查询。
@@ -422,7 +422,7 @@ Content 与 ItemTemplate 到列表根之间不能经过其他 View 或 NestedVie
 
 点击条目自身的 Remove 按钮时，立即完成的命令按模型身份从集合移除该项，随后直接返回。此调用链仍在使用条目绑定，列表保留待刷新状态，随后排空旧绑定并复用节点。普通外部集合修改可在调用内完成立即就绪的刷新，也可能等待子项准备；业务命令不要等待自身所在列表的 PendingChange，框架会拒绝这类循环等待。
 
-父激活结束后退订来源，由父 ChildViewScope 结束条目绑定及激活资源，最终销毁回收列表时销毁拥有的池节点；模型由项目持有。PendingChange 是统一准备与回收边界，准备完成前对应条目隐藏。普通集合更新失败会保留已完成的部分并记录 Error，可在修正来源后调用 Refresh 重试；父页面换绑使用候选准备与短提交契约。
+父激活结束后退订来源，由父 WidgetScope 结束条目绑定及激活资源，最终销毁回收列表时销毁拥有的池节点；模型由项目持有。PendingChange 是统一准备与回收边界，准备完成前对应条目隐藏。普通集合更新失败会保留已完成的部分并记录 Error，可在修正来源后调用 Refresh 重试；父页面换绑使用候选准备与短提交契约。
 
 图标通过 `RewardItemViewModel.IconKey → ImageElement.SpriteSource` 的生成绑定加载。示例只为父 RewardsView 配置一次 RewardResourceLoader，子 View 通过默认继承取得加载器，各自独立持有资源凭证。加载器实现 IResourceLoader.LoadAsync，立即生成 Warm/Cool 两种小图标，并借用 Unity 的 LegacyRuntime.ttf 内置字体；返回已完成的 ValueTask，不调度后台任务或人为等待。字体通过 FontKey → TextElement.FontSource 绑定，DefaultFont 是示例加载器的字体键；字体凭证归还不销毁 Unity 持有的共享字体。手工模板也需添加 Icon 节点并保留子 View 的 Inherit Parent Resources 设置。
 
@@ -533,28 +533,32 @@ await pages.OpenAsync(popupRoute, args, owner: PageOwner.Host); // 显式声明�
 
 打开主页面时先准备隐藏候选，再检查旧主页面及将关闭的附属界面的关闭守卫；拒绝或状态变化时取消切换。主页面保留在打开集合中，所属界面默认 Close；OwnerDeparture.Hide 则随旧主页面隐藏，关闭新主页面后恢复。关闭/替换所属页面时所有附属界面都关闭，正常操作先统一检查守卫，强制关闭则绕过守卫。退出前台的页面组不参与遮挡、焦点和输入计算，业务 Tick 按各页面的隐藏暂停规则处理。
 
-ReplaceAsync 用于结束当前页面并替换为相同角色的新页面，继承其归属；不允许借此将附属界面转为主页面或激活后台主页面。BringToFront 只调整当前页面组内顺序。`CurrentMainPage` / `GetParentPage` 以及 Dashboard 可查看归属。关闭确认对话框必须归属宿主，避免依附正在检查离开的页面；内置 DialogService 已如此处理。
+ReplaceAsync 用于结束当前页面并替换为相同角色的新页面，继承其归属；不允许借此将附属界面转为主页面或激活后台主页面。BringToFront 只调整当前页面组内顺序。`CurrentMainPage` / `GetParentPage` 以及 Dashboard 可查看归属。关闭确认对话框必须归属宿主，避免依附正在检查离开的页面；内置 ConfirmationDialogService 已如此处理。
 
 框架始终管理模态输入屏障及其 Canvas Order；外观在 View 上设置。未指定 ModalBackdropStyle 时使用原有 modalBarrierColor。可通过 Create/MUI/模态遮罩样式 创建可复用样式资产，配置底色和可选视觉 Prefab，再赋给各 View。视觉 Prefab 只能提供显示内容，不能带 Canvas、Renderer、Selectable 或另一个 View；Image/RawImage 的 raycastTarget 由框架关闭，点击仍由屏障阻挡。
 
 项目模糊可用 RawImage、材质及项目渲染管线采集的背景纹理实现。框架不内置通用模糊 Shader 或抓屏：背景采样来源与渲染管线有关，也应避免采样弹窗自身。视觉实例仅在模态显示期间启用，随覆盖隐藏/关闭停用；项目脚本在 OnDisable/OnDestroy 释放其临时纹理或渲染注册。关闭点击的透明防穿透屏障保留期间，视觉 Prefab 已停用。透明样式同样保持输入阻挡。
 
-### 低频业务 Tick
+### Presenter 更新配置
 
-页面规则只决定被覆盖、隐藏时是否暂停 Tick。执行间隔由 Presenter 的 `ILowFrequencyViewTick.TickInterval` 定义，单位为秒；配置在实例创建时读取。默认每帧最多执行一次到期的低频 Tick，超期次数丢弃，仅保留不足一个间隔的余量。普通逐帧 `IViewTick` 不受影响，两个频率接口不能同时实现。
-
-大多数 UI 应在回调中刷新最新状态，例如根据结束时间计算倒计时，而不是通过调用次数累计时间。有明确补执行需求时，Presenter 改为实现继承自 `ILowFrequencyViewTick` 的 `ILowFrequencyViewTickCatchUp`，并提供 `MaxTickCatchUp`（1～32）。例如：
+Presenter 通过 OnUpdate 统一更新，无需实现频率接口。默认禁用；显式配置后启用，配置在实例创建时读取。
 
 ```csharp
-public float TickInterval => 0.1f;
-public int MaxTickCatchUp => 2;
-public void OnLowFrequencyTick(float intervalSeconds)
+// 非缩放时间，每帧调用。
+protected override UpdateOptions UpdateOptions => MUI.UpdateOptions.EveryFrame;
+
+protected override void OnUpdate(UpdateTime time)
 {
-    // 每帧最多执行两次到期 Tick；超出次数仍会丢弃。
+    // DeltaTime / UnscaledDeltaTime：上次回调以来累计的缩放/非缩放秒数。
+    // ElapsedTime / UnscaledElapsedTime：本次激活可更新期间累计的两种秒数。
 }
 ```
 
-页面和子视图使用相同规则。旧 `PagePolicy`、`PagePolicyOverrides`、`ChildViewTemplate` 上的 `MaxTickCatchUp` / `maxTickCatchUp` 已移除；显式配置需要迁移到 Presenter。旧设置资产中的同名字段不再生效，未实现可选接口时使用新默认值 1。
+每两秒调用一次可将配置改为 `MUI.UpdateOptions.Every(2f)`；使用缩放时间调度则为 `MUI.UpdateOptions.Every(2f, UpdateTimeMode.Scaled)`。每帧按缩放时间调度使用 `new UpdateOptions(0f, UpdateTimeMode.Scaled)`。选择 Scaled 后，timeScale 为零不调用 OnUpdate；Unscaled 仍可更新。同一回调始终提供两种时间，全部使用 double 秒数。
+
+每帧最多调用一次，卡顿时合并遗漏的回调，保留间隔余量；DeltaTime 与 UnscaledDeltaTime 传实际累计时长，不伪装成配置间隔。准备和进入动画期间、隐藏暂停或缓存停用期间不累计；缓存重新激活从零开始，隐藏后恢复保留累计值。缩放时间停走而界面仍可更新时，非缩放累计值继续增长，在下次回调可读取。
+
+UIPage 和 UIWidget 共用规则。页面暂停由 PagePolicy.TickPause 控制（默认隐藏暂停），Widget 还受父级暂停及 WidgetDefinition.PauseTickWhenHidden 控制。UIHost 自动传递 Time.deltaTime 与 Time.unscaledDeltaTime；手动驱动使用 AdvanceFrame(deltaTime, unscaledDeltaTime)，PageManager.Tick 与 WidgetScope.Tick 同样接收两种帧时长。输入必须为有限非负数，不能同时使用自动与手动驱动。页面进入/退出动画仍使用非缩放时间。
 
 ## Presenter 命令
 

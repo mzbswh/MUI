@@ -100,7 +100,7 @@ namespace MUI.UGUI
                     childActivationToken = default;
                     InputStateChanged = null;
                     InputGesturesInvalidated = null;
-                    ChildTickActivityChanged = null;
+                    WidgetTickActivityChanged = null;
                     nativeGestures.Clear();
                     elements.Clear();
                     index = null;
@@ -147,7 +147,7 @@ namespace MUI.UGUI
                 InvalidateInputGestures();
                 if (children != null)
                 {
-                    children.TickActivityChanged -= NotifyChildTicks;
+                    children.TickActivityChanged -= NotifyWidgetTicks;
                     children.Cancel();
                 }
                 ApplyGates();

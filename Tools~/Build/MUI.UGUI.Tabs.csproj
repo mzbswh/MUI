@@ -11,7 +11,7 @@
     <ProjectReference Include="MUI.UGUI.csproj" />
     <ProjectReference Include="MUI.Tabs.csproj" />
     <ProjectReference Include="MUI.Resources.csproj" />
-    <ProjectReference Include="MUI.ChildViews.csproj" />
+    <ProjectReference Include="MUI.Widgets.csproj" />
     <Reference Include="UnityEngine.CoreModule"><HintPath>$(UnityManagedPath)/UnityEngine.CoreModule.dll</HintPath><Private>false</Private></Reference>
     <Reference Include="UnityEngine.UIModule"><HintPath>$(UnityManagedPath)/UnityEngine.UIModule.dll</HintPath><Private>false</Private></Reference>
     <Reference Include="UnityEngine.TextRenderingModule"><HintPath>$(UnityManagedPath)/UnityEngine.TextRenderingModule.dll</HintPath><Private>false</Private></Reference>

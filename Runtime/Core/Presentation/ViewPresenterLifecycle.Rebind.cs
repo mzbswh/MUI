@@ -543,13 +543,13 @@ namespace MUI
         }
 
         private ValueTask CompleteRebindChildrenAsync(IView view, CancellationToken token) =>
-                    view is IChildViewHost child ? invokeAsync(() => child.CompleteChildPreparationAsync(token)) : default;
+                    view is IWidgetHost child ? invokeAsync(() => child.CompleteWidgetPreparationAsync(token)) : default;
 
         private void CommitRebindChildren(IView view)
         {
-            if (view is IChildViewHost child)
+            if (view is IWidgetHost child)
             {
-                invoke(child.CommitChildActivation);
+                invoke(child.CommitWidgetActivation);
             }
         }
 

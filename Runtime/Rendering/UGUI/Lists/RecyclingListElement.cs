@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using MUI.ChildViews;
+using MUI.Widgets;
 using UnityEngine;
 
 namespace MUI.UGUI
@@ -12,7 +12,7 @@ namespace MUI.UGUI
     /// 内容节点的 LayoutGroup 负责排布；本控件不接管滚动、尺寸或业务数据所有权。
     /// </summary>
     [DisallowMultipleComponent]
-    public partial class RecyclingListElement : Element, IElementBoundary, IChildViewElement, IBindingRebindTarget
+    public partial class RecyclingListElement : Element, IElementBoundary, IWidgetElement, IBindingRebindTarget
     {
         [SerializeField] private RectTransform content;
         [SerializeField] private NestedViewElement itemTemplate;
@@ -23,7 +23,7 @@ namespace MUI.UGUI
         private object sourceSubscription;
         private long itemsAssignmentVersion;
         private List<ViewModel> snapshot = new List<ViewModel>();
-        private ChildViewScope scope;
+        private WidgetScope scope;
         private LifetimeScope lifetime;
         private Task pending;
         private bool initialized;
@@ -62,7 +62,7 @@ namespace MUI.UGUI
             }
         }
 
-        Task IChildViewElement.Preparation => pending ?? Task.CompletedTask;
+        Task IWidgetElement.Preparation => pending ?? Task.CompletedTask;
 
         public IReadOnlyObservableList<ViewModel> Items
         {
@@ -292,7 +292,7 @@ namespace MUI.UGUI
             return true;
         }
 
-        void IChildViewElement.BeginParentActivation(ChildViewScope parentScope, LifetimeScope parentLifetime)
+        void IWidgetElement.BeginParentActivation(WidgetScope parentScope, LifetimeScope parentLifetime)
         {
             RequireListAlive();
 
@@ -334,7 +334,7 @@ namespace MUI.UGUI
                         throw new InvalidOperationException("回收列表的池节点已被外部销毁。");
                     }
 
-                    ((IChildViewElement)cell).BeginParentActivation(scope, lifetime);
+                    ((IWidgetElement)cell).BeginParentActivation(scope, lifetime);
                     cell.gameObject.SetActive(false);
                 }
             }

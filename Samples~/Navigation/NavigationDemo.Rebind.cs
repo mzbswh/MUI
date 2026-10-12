@@ -1,6 +1,6 @@
 using System;
 using System.Threading.Tasks;
-using MUI.ChildViews;
+using MUI.Widgets;
 using MUI.Pages;
 using MUI.Resources;
 using UnityEngine;
@@ -86,7 +86,7 @@ namespace MUI.Samples.Navigation
             }
         }
 
-        private async Task DemonstrateChildRebindAsync(ChildViewHandle<ThingItemViewModel, string> child,
+        private async Task DemonstrateChildRebindAsync(WidgetHandle<ThingItemViewModel, string> child,
             ThingItemPresenter presenter)
         {
             var previous = child.ViewModel;

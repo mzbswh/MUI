@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using MUI.ChildViews;
+using MUI.Widgets;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -9,7 +9,7 @@ namespace MUI.UGUI
 {
     /// <summary>通过借用的子视图实现横向、纵向列表与纵向网格的视口虚拟化。</summary>
     [DisallowMultipleComponent]
-    public sealed partial class VirtualListElement : Element, IElementBoundary, IChildViewElement, IBindingRebindTarget
+    public sealed partial class VirtualListElement : Element, IElementBoundary, IWidgetElement, IBindingRebindTarget
     {
         [SerializeField]
         private ScrollRect scrollRect = null;
@@ -26,14 +26,14 @@ namespace MUI.UGUI
         [SerializeField]
         private int columns = 1;
         private VirtualRowIndex rowIndex;
-        private readonly List<Cell> cells = new List<Cell>();
+        private readonly List<VirtualListCell> cells = new List<VirtualListCell>();
         private readonly List<VirtualListItem> snapshot = new List<VirtualListItem>();
         private IReadOnlyObservableList<VirtualListItem> items;
         private Action<ListChangeSet<VirtualListItem>> itemsChanged;
         private object itemsSubscription;
         private long itemsAssignmentVersion;
         private long snapshotVersion = -1;
-        private ChildViewScope scope;
+        private WidgetScope scope;
         private LifetimeScope lifetime;
         private bool running;
         private bool dirty;
@@ -83,7 +83,7 @@ namespace MUI.UGUI
             }
         }
 
-        Task IChildViewElement.Preparation => (pending ?? Task.CompletedTask);
+        Task IWidgetElement.Preparation => (pending ?? Task.CompletedTask);
 
         public IReadOnlyObservableList<VirtualListItem> Items
         {
@@ -429,7 +429,7 @@ namespace MUI.UGUI
             UpdateContentExtent();
         }
 
-        void IChildViewElement.BeginParentActivation(ChildViewScope parentScope, LifetimeScope parentLifetime)
+        void IWidgetElement.BeginParentActivation(WidgetScope parentScope, LifetimeScope parentLifetime)
         {
             RequireListAlive();
 
@@ -457,8 +457,8 @@ namespace MUI.UGUI
                 rowIndex = null;
                 keyIndices.Clear();
                 intrinsicKeyIndex = true;
-                selectedKey = null;
-                selectedIndex = -1;
+                selectionState.ClearKey();
+                selectionState.ClearIndex();
                 ++sourceRevision;
                 ++revealSourceRevision;
                 StopReveal(VirtualListRevealStatus.Superseded);
@@ -467,7 +467,7 @@ namespace MUI.UGUI
                 foreach (var cell in cells)
                 {
                     cell.Key = null;
-                    ((IChildViewElement)cell.Element).BeginParentActivation(scope, lifetime);
+                    ((IWidgetElement)cell.Element).BeginParentActivation(scope, lifetime);
                     cell.Root.gameObject.SetActive(false);
                     RequireCurrentParentActivation(parentLifetime);
                 }

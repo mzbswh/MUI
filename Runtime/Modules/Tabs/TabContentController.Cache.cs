@@ -3,15 +3,15 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
-using MUI.ChildViews;
+using MUI.Widgets;
 
 namespace MUI.Tabs
 {
     public sealed partial class TabContentController
     {
         private readonly TabCacheOptions cacheOptions;
-        private readonly Dictionary<ChildViewHandle, TabContentDefinition> contentDefinitions =
-                    new Dictionary<ChildViewHandle, TabContentDefinition>();
+        private readonly Dictionary<WidgetHandle, TabContentDefinition> contentDefinitions =
+                    new Dictionary<WidgetHandle, TabContentDefinition>();
         private readonly LinkedList<CachedContent> cachedContents = new LinkedList<CachedContent>();
         private Task cacheMaintenance;
         private bool cacheInvalidationRequested;
@@ -140,7 +140,7 @@ namespace MUI.Tabs
             return elapsedSeconds >= duration.Value.TotalSeconds;
         }
 
-        private static bool IsContentReusable(ChildViewHandle handle)
+        private static bool IsContentReusable(WidgetHandle handle)
         {
             try
             {
@@ -175,7 +175,7 @@ namespace MUI.Tabs
                 total.Value <= budget.Value - definition.EstimatedRetainedBytes.Value;
         }
 
-        private void TrackContent(ChildViewHandle handle, TabContentDefinition definition)
+        private void TrackContent(WidgetHandle handle, TabContentDefinition definition)
         {
             if (cacheOptions.Capacity == 0)
             {
@@ -196,7 +196,7 @@ namespace MUI.Tabs
             handle.Closed += OnTrackedContentClosed;
         }
 
-        private void OnTrackedContentClosed(ChildViewHandle handle)
+        private void OnTrackedContentClosed(WidgetHandle handle)
         {
             contentDefinitions.Remove(handle);
             for (var node = cachedContents.First; node != null; node = node.Next)
@@ -228,7 +228,7 @@ namespace MUI.Tabs
             return false;
         }
 
-        private async ValueTask<bool> CacheRetiredAsync(ChildViewHandle handle)
+        private async ValueTask<bool> CacheRetiredAsync(WidgetHandle handle)
         {
             await cacheMaintenance;
             if (!contentDefinitions.TryGetValue(handle, out var definition) ||
@@ -276,7 +276,7 @@ namespace MUI.Tabs
             return true;
         }
 
-        private async ValueTask<ChildViewHandle> TakeCachedAsync(TabContentDefinition definition,
+        private async ValueTask<WidgetHandle> TakeCachedAsync(TabContentDefinition definition,
                     bool forceReload, CancellationToken token)
         {
             await cacheMaintenance;
@@ -291,7 +291,7 @@ namespace MUI.Tabs
 
                 cachedContents.Remove(node);
                 if (forceReload || IsCacheInvalid(saved) || !ReferenceEquals(saved.Definition, definition) ||
-                    saved.Handle.State != ChildViewState.Inactive)
+                    saved.Handle.State != WidgetState.Inactive)
                 {
                     await saved.Handle.BeginClose();
                     token.ThrowIfCancellationRequested();
@@ -430,7 +430,7 @@ namespace MUI.Tabs
 
         private sealed class CachedContent
         {
-            public ChildViewHandle Handle;
+            public WidgetHandle Handle;
             public TabContentDefinition Definition;
             public long CachedAt;
         }

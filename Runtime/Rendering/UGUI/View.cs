@@ -1,14 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
-using MUI.ChildViews;
+using MUI.Widgets;
 using UnityEngine;
 
 namespace MUI.UGUI
 {
     [DisallowMultipleComponent]
     [RequireComponent(typeof(CanvasGroup))]
-    public sealed partial class View : MonoBehaviour, IOrderedView, IChildViewHost, IModalView, IInputGestureView, IFocusView, IVisibilityView, IChildTickHost, IEnterTransitionView, IExitTransitionView, ICacheableView, IDisposable, IAsyncDisposable, ICleanupResponsibilitySource
+    public sealed partial class View : MonoBehaviour, IOrderedView, IWidgetHost, IModalView, IInputGestureView, IFocusView, IVisibilityView, IWidgetTickHost, IEnterTransitionView, IExitTransitionView, ICacheableView, IDisposable, IAsyncDisposable, ICleanupResponsibilitySource
     {
         private InputGate inputGate;
         private bool lastInputEnabled;
@@ -21,7 +21,7 @@ namespace MUI.UGUI
         private bool hostInteractable;
         private bool localVisible = true;
         private bool localInteractable = true;
-        private ChildViewScope childViews;
+        private WidgetScope childViews;
         private LifetimeScope activeActivation;
         private CancellationToken childActivationToken;
         private bool configuringCreation;
@@ -52,7 +52,7 @@ namespace MUI.UGUI
         }
 
         /// <summary>子项共享此 View 的激活周期和有效渲染门控。</summary>
-        public ChildViewScope ChildViews
+        public WidgetScope Widgets
         {
             get
             {
@@ -108,7 +108,7 @@ namespace MUI.UGUI
             }
         }
 
-        public void BeginChildActivation(LifetimeScope activation)
+        public void BeginWidgetActivation(LifetimeScope activation)
         {
             if (activation == null)
             {
@@ -141,12 +141,12 @@ namespace MUI.UGUI
 
             if (childViews != null)
             {
-                childViews.TickActivityChanged -= NotifyChildTicks;
+                childViews.TickActivityChanged -= NotifyWidgetTicks;
             }
 
-            childViews = new ChildViewScope(activation);
+            childViews = new WidgetScope(activation);
             childActivationToken = activation.Token;
-            childViews.TickActivityChanged += NotifyChildTicks;
+            childViews.TickActivityChanged += NotifyWidgetTicks;
             foreach (var element in elements)
             {
                 if (element != null && element is GraphicElement graphic)
@@ -158,7 +158,7 @@ namespace MUI.UGUI
             ApplyGates();
             foreach (var element in elements)
             {
-                if (element != null && element is IChildViewElement child)
+                if (element != null && element is IWidgetElement child)
                 {
                     child.BeginParentActivation(childViews, activation);
                 }

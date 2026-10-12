@@ -20,6 +20,7 @@ namespace MUI
         private bool created;
         private bool opened;
         private bool destroyed;
+        private bool openedNotified;
 
         private ViewPresenterLifecycle(
                     ViewModelOwnership<TViewModel> modelOwnership,
@@ -41,17 +42,16 @@ namespace MUI
 
         internal Presenter<TViewModel, TArgs, TResult> Presenter => presenter;
 
-        internal bool HasTick => presenter is IViewTick || presenter is ILowFrequencyViewTick;
+        private UpdateOptions updateOptions;
+        private PresenterUpdateClock updateClock;
+        internal bool HasTick => updateOptions.Enabled;
 
-        internal float TickInterval
+        internal void Update(float deltaTime, float unscaledDeltaTime)
         {
-            get; private set;
+            if (HasTick && opened && openedNotified && !destroyed &&
+                updateClock.Advance(deltaTime, unscaledDeltaTime, out var time))
+                invoke(() => presenter.Update(time));
         }
-
-        internal int MaxTickCatchUp
-        {
-            get; private set;
-        } = 1;
 
         internal BindingContext Binding
         {
@@ -88,6 +88,9 @@ namespace MUI
 
             requireCurrent();
             var lifecycle = new ViewPresenterLifecycle<TViewModel, TArgs, TResult>(ownership, presenter, instance, invoke, invokeAsync);
+            invoke(() => lifecycle.updateOptions = presenter.GetUpdateOptions());
+            requireCurrent();
+            lifecycle.updateClock = new PresenterUpdateClock(lifecycle.updateOptions);
             if (lifecycle.HasTick)
             {
                 var claim = ViewTickOwnership.Acquire(presenter);
@@ -101,11 +104,6 @@ namespace MUI
                     throw;
                 }
 
-                invoke(() =>
-                {
-                    lifecycle.TickInterval = ViewTickTiming.Interval(presenter);
-                    lifecycle.MaxTickCatchUp = ViewTickTiming.CatchUpLimit(presenter);
-                });
                 requireCurrent();
             }
 
@@ -127,6 +125,8 @@ namespace MUI
                 throw new InvalidOperationException("Previous view activation must finish before preparation.");
             }
 
+            openedNotified = false;
+            updateClock.Reset();
             ViewPreparation.Begin(view, activation, invoke, requireCurrent);
             if (!created)
             {
@@ -173,11 +173,11 @@ namespace MUI
                     throw;
                 }
             }
-            using (var phase = trace?.Invoke(ViewPreparationStep.PresenterOpen))
+            using (var phase = trace?.Invoke(ViewPreparationStep.PresenterPrepareOpen))
             {
                 try
                 {
-                    invoke(() => presenter.Open(new ActivationContext<TArgs, TResult>(args, activation, target, view as IInputView)));
+                    invoke(() => presenter.PrepareOpen(new ActivationContext<TArgs, TResult>(args, activation, target, view as IInputView)));
                     opened = true;
                     requireCurrent();
                     phase?.Complete();
@@ -190,25 +190,37 @@ namespace MUI
             }
         }
 
+        /// <summary>宿主确认首次显示后调用；先登记再派发，防止回调重入导致重复通知。</summary>
+        internal void NotifyOpened()
+        {
+            if (!opened || destroyed || openedNotified)
+            {
+                return;
+            }
+
+            openedNotified = true;
+            invoke(presenter.Opened);
+        }
+
         internal ValueTask PrepareAsync(IView view, TArgs args, Action requireCurrent, CancellationToken token,
             Func<ViewPreparationStep, IViewPreparationTraceScope> trace = null)
         {
             Func<CancellationToken, ValueTask> openAsync = null;
-            if (presenter is IAsyncOpenPresenter<TArgs> asynchronous)
+            if (presenter is IAsyncOpenPreparation<TArgs> asynchronous)
             {
                 if (trace == null)
                 {
-                    openAsync = cancellation => invokeAsync(() => asynchronous.OnOpenAsync(args, cancellation));
+                    openAsync = cancellation => invokeAsync(() => asynchronous.OnPrepareOpenAsync(args, cancellation));
                 }
                 else
                 {
                     openAsync = async cancellation =>
                     {
-                        using (var phase = trace(ViewPreparationStep.PresenterOpenAsync))
+                        using (var phase = trace(ViewPreparationStep.PresenterPrepareOpenAsync))
                         {
                             try
                             {
-                                await invokeAsync(() => asynchronous.OnOpenAsync(args, cancellation));
+                                await invokeAsync(() => asynchronous.OnPrepareOpenAsync(args, cancellation));
                                 phase?.Complete();
                             }
                             catch (Exception error)

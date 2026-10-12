@@ -33,7 +33,7 @@ namespace MUI.Pages
 
         private void FinishMutationTrace(PageTraceOperation trace, ArgsUpdateOutcome result)
         {
-            if (trace.Id == 0 || !traceRecording || !ReferenceEquals(trace.Session, traceSession))
+            if (trace.Id == 0 || !traceBuffer.IsRecording || !ReferenceEquals(trace.Session, traceBuffer.Session))
             {
                 return;
             }
@@ -72,7 +72,7 @@ namespace MUI.Pages
 
         private void FinishMutationTrace(PageTraceOperation trace, RebindOutcome result)
         {
-            if (trace.Id == 0 || !traceRecording || !ReferenceEquals(trace.Session, traceSession))
+            if (trace.Id == 0 || !traceBuffer.IsRecording || !ReferenceEquals(trace.Session, traceBuffer.Session))
             {
                 return;
             }

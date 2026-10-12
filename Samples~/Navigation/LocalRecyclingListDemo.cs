@@ -50,7 +50,7 @@ namespace MUI.Samples.Navigation
                 // 只配置父 View；克隆的奖励子 View 默认继承加载器，并独立持有自己的图标和字体凭证。
                 parentView.ConfigureResources(resourceLoader);
                 parentView.SetHostState(false, false);
-                parentView.BeginChildActivation(lifetime);
+                parentView.BeginWidgetActivation(lifetime);
                 lifetime.OnDispose(() =>
                 {
                     if (parentView != null && parentView.IsAlive)
@@ -68,8 +68,8 @@ namespace MUI.Samples.Navigation
                 AddReward();
                 AddReward();
                 AddReward();
-                await parentView.CompleteChildPreparationAsync(lifetime.Token);
-                parentView.CommitChildActivation();
+                await parentView.CompleteWidgetPreparationAsync(lifetime.Token);
+                parentView.CommitWidgetActivation();
                 binding.CommitSourceWrites();
                 parentView.SetHostState(true, true);
                 if (generatedCanvas != null)

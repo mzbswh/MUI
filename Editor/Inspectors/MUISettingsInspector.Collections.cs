@@ -85,8 +85,8 @@ namespace MUI.Editor
                 {
                     return;
                 }
-                var fields = (MUIPagePolicyFields)mask.intValue;
-                if (fields == MUIPagePolicyFields.None)
+                var fields = (PagePolicyFields)mask.intValue;
+                if (fields == PagePolicyFields.None)
                 {
                     EditorGUILayout.LabelField(L.Get("settings.preset.inherit"), EditorStyles.wordWrappedMiniLabel);
                 }
@@ -112,28 +112,28 @@ namespace MUI.Editor
                     return;
                 }
                 var presetName = nameProperty.stringValue;
-                var fields = (MUIPagePolicyFields)fieldsProperty.intValue;
+                var fields = (PagePolicyFields)fieldsProperty.intValue;
                 try
                 {
                     var policy = settings.ResolvePolicy(presetName);
-                    string Value(string property, object value, MUIPagePolicyFields field, bool automatic = false)
+                    string Value(string property, object value, PagePolicyFields field, bool automatic = false)
                         => L.Format("settings.preset.value", L.Get("property." + property), value,
                             L.Get(automatic ? "settings.preset.source.modal" :
                                 (fields & field) != 0 ? "settings.preset.source.override" : "settings.preset.source.default"));
-                    var rawCoverage = (fields & MUIPagePolicyFields.Coverage) != 0
+                    var rawCoverage = (fields & PagePolicyFields.Coverage) != 0
                         ? serializedObject.FindProperty(path + ".Values.Coverage").intValue
                         : serializedObject.FindProperty("defaultRules.Coverage").intValue;
                     effective.text = string.Join("\n", new[]
                     {
                         L.Get("settings.preset.effective"),
-                        Value("PageRole", policy.PageRole, MUIPagePolicyFields.PageScope),
-                        Value("Layer", policy.LayerName, MUIPagePolicyFields.Layer),
-                        Value("ReceivesInput", policy.ReceivesInput, MUIPagePolicyFields.Input),
-                        Value("Coverage", policy.Coverage, MUIPagePolicyFields.Coverage,
+                        Value("PageRole", policy.PageRole, PagePolicyFields.PageScope),
+                        Value("Layer", policy.LayerName, PagePolicyFields.Layer),
+                        Value("ReceivesInput", policy.ReceivesInput, PagePolicyFields.Input),
+                        Value("Coverage", policy.Coverage, PagePolicyFields.Coverage,
                             policy.Modal && rawCoverage == (int)MUI.Pages.CoveragePolicy.None),
-                        Value("TakesFocus", policy.TakesFocus, MUIPagePolicyFields.Focus),
-                        Value("Modal", policy.Modal, MUIPagePolicyFields.Modal),
-                        Value("BackBehavior", policy.BackBehavior, MUIPagePolicyFields.Back)
+                        Value("TakesFocus", policy.TakesFocus, PagePolicyFields.Focus),
+                        Value("Modal", policy.Modal, PagePolicyFields.Modal),
+                        Value("BackBehavior", policy.BackBehavior, PagePolicyFields.Back)
                     });
                 }
                 catch (Exception)
@@ -223,21 +223,29 @@ namespace MUI.Editor
             var index = presets.arraySize++;
             var entry = presets.GetArrayElementAtIndex(index);
             entry.FindPropertyRelative("Name").stringValue = name;
-            entry.FindPropertyRelative("Overrides").intValue = (int)MUIPagePolicyFields.None;
+            entry.FindPropertyRelative("Overrides").intValue = (int)PagePolicyFields.None;
             // Unity 扩容可能复制上一项，显式恢复新预设的规则初值。
             var values = entry.FindPropertyRelative("Values");
-            var defaults = new MUIPagePolicyValues();
-            foreach (var field in typeof(MUIPagePolicyValues).GetFields(BindingFlags.Instance | BindingFlags.Public))
+            var defaults = new PagePolicySettings();
+            foreach (var field in typeof(PagePolicySettings).GetFields(BindingFlags.Instance | BindingFlags.Public))
             {
                 var property = values.FindPropertyRelative(field.Name);
                 var value = field.GetValue(defaults);
                 switch (property.propertyType)
                 {
-                    case SerializedPropertyType.String: property.stringValue = (string)value; break;
-                    case SerializedPropertyType.Boolean: property.boolValue = (bool)value; break;
-                    case SerializedPropertyType.Float: property.floatValue = (float)value; break;
+                    case SerializedPropertyType.String:
+                        property.stringValue = (string)value;
+                        break;
+                    case SerializedPropertyType.Boolean:
+                        property.boolValue = (bool)value;
+                        break;
+                    case SerializedPropertyType.Float:
+                        property.floatValue = (float)value;
+                        break;
                     case SerializedPropertyType.Integer:
-                    case SerializedPropertyType.Enum: property.intValue = Convert.ToInt32(value); break;
+                    case SerializedPropertyType.Enum:
+                        property.intValue = Convert.ToInt32(value);
+                        break;
                 }
             }
             serializedObject.ApplyModifiedProperties();

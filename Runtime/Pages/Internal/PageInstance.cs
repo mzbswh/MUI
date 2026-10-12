@@ -35,7 +35,6 @@ namespace MUI.Pages
         internal PageHandle BlockedBy;
         internal PageHandle ReplacementSource;
         private Task<CloseOutcome> closing;
-        public double TickRemainder;
 
         protected PageInstance(PageManager owner, PageDefinition route, PageHandle handle)
         {
@@ -59,7 +58,7 @@ namespace MUI.Pages
             get;
         }
 
-        public ViewState State { get; set; } = ViewState.Opening;
+        public PageState State { get; set; } = PageState.Opening;
 
         protected ViewCompletion<PageReadiness> ReadinessResult => readiness;
 
@@ -205,21 +204,11 @@ namespace MUI.Pages
 
         internal long CloseGuardVersion => CloseGuard.CloseVersion;
 
-        public bool IsActive => State == ViewState.Open && !Owner.IsShutdown;
+        public bool IsActive => State == PageState.Open && !Owner.IsShutdown;
 
         public abstract bool HasTick
         {
             get;
-        }
-
-        internal int MaxTickCatchUp
-        {
-            get; set;
-        } = 1;
-
-        public float TickInterval
-        {
-            get; protected set;
         }
 
         /// <summary>撤销显式打开后保留依赖展示，独立焦点资格需再次显式打开才恢复。</summary>
@@ -271,7 +260,7 @@ namespace MUI.Pages
 
         public abstract ValueTask<CloseStatus> EvaluateCloseAsync(Func<CancellationToken, ValueTask<CloseStatus>> evaluate);
 
-        public abstract void InvokeTick(float delta);
+        public abstract void InvokeTick(float deltaTime, float unscaledDeltaTime);
 
         internal abstract DependencyRequest ResolveDependency(int index);
 
@@ -286,7 +275,7 @@ namespace MUI.Pages
         /// <summary>异步模式将提供方未结束的回滚纳入候选激活清理。</summary>
         internal abstract void OwnPreparationCleanup(Task cleanup);
 
-        protected void ChildTicksChanged() => Owner.RefreshTickRegistration(this);
+        protected void WidgetTicksChanged() => Owner.RefreshTickRegistration(this);
 
         protected void InputStateChanged() => Owner.InputStateChanged(this);
 
@@ -301,6 +290,8 @@ namespace MUI.Pages
         public abstract void FreezeBindings();
 
         public abstract void CancelActivation();
+
+        public abstract void NotifyOpened();
 
         public abstract void NotifyFocus(bool focused);
 
@@ -387,7 +378,7 @@ namespace MUI.Pages
 
         public override ICloseGuard CloseGuard => presenter as ICloseGuard;
 
-        public override bool HasTick => presenter is IViewTick || presenter is ILowFrequencyViewTick;
+        public override bool HasTick => lifecycle != null && lifecycle.HasTick;
 
         /// <summary>缓存命中时沿用实例视图，无需再次向提供者取得资源凭证。</summary>
         internal override bool NeedsViewResource => view == null;
@@ -406,21 +397,10 @@ namespace MUI.Pages
 
         public override ValueTask<CloseStatus> EvaluateCloseAsync(Func<CancellationToken, ValueTask<CloseStatus>> evaluate) => activationLifetime.RunAsync(evaluate);
 
-        public override void InvokeTick(float delta)
+        public override void InvokeTick(float deltaTime, float unscaledDeltaTime)
         {
-            if (IsRebinding)
-            {
-                return;
-            }
-
-            if (presenter is IViewTick frame)
-            {
-                frame.OnViewTick(delta);
-            }
-            else if (presenter is ILowFrequencyViewTick low)
-            {
-                low.OnLowFrequencyTick(delta);
-            }
+            if (!IsRebinding)
+                lifecycle.Update(deltaTime, unscaledDeltaTime);
         }
 
         internal override DependencyRequest ResolveDependency(int index) => route.Dependencies[index].Resolve(Args);
@@ -438,8 +418,6 @@ namespace MUI.Pages
             content.Create(route, assignedModel, InvokeLifecycle, InvokeLifecycleAsync, RequirePreparationCurrent);
 
             RequirePreparationCurrent();
-            TickInterval = lifecycle.TickInterval;
-            MaxTickCatchUp = lifecycle.MaxTickCatchUp;
         }
 
         public override void AdoptViewResource(IAcquiredView acquired)
@@ -456,9 +434,9 @@ namespace MUI.Pages
                 input.InputStateChanged += InputStateChanged;
             }
 
-            if (view is IChildTickHost tickHost)
+            if (view is IWidgetTickHost tickHost)
             {
-                tickHost.ChildTickActivityChanged += ChildTicksChanged;
+                tickHost.WidgetTickActivityChanged += WidgetTicksChanged;
             }
         }
 
@@ -527,7 +505,7 @@ namespace MUI.Pages
             }
 
             activationLifetime.Token.ThrowIfCancellationRequested();
-            if (Owner.IsShutdown || State != ViewState.Opening || HasCloseStarted)
+            if (Owner.IsShutdown || State != PageState.Opening || HasCloseStarted)
             {
                 throw new OperationCanceledException("View closed during preparation.");
             }
@@ -542,9 +520,9 @@ namespace MUI.Pages
                 return;
             }
 
-            if (view is IChildViewHost childHost)
+            if (view is IWidgetHost childHost)
             {
-                childHost.CommitChildActivation();
+                childHost.CommitWidgetActivation();
             }
         }
 
@@ -564,6 +542,8 @@ namespace MUI.Pages
                 binding.CancelCommands();
             }
         }
+
+        public override void NotifyOpened() => lifecycle.NotifyOpened();
 
         public override void NotifyFocus(bool focused) => presenter.Focus(focused);
 
@@ -614,9 +594,9 @@ namespace MUI.Pages
 
             try
             {
-                if (view is IChildTickHost ticks)
+                if (view is IWidgetTickHost ticks)
                 {
-                    ticks.ChildTickActivityChanged -= ChildTicksChanged;
+                    ticks.WidgetTickActivityChanged -= WidgetTicksChanged;
                 }
             }
             catch (Exception error)
@@ -646,7 +626,7 @@ namespace MUI.Pages
             }
 
             // 先取消准备，再等待整次准备退出。迟到加载结果仍由候选接管；
-            // 不能在 OnOpenAsync 或提供方仍使用内容时先销毁模型、视图和实例资源。
+            // 不能在 OnPrepareOpenAsync 或提供方仍使用内容时先销毁模型、视图和实例资源。
             if (IsPreparing)
             {
                 await PreparationExecutionCompletion;
@@ -767,7 +747,7 @@ namespace MUI.Pages
             }
 
             PublishCloseResult(reason, reported, cleanup, lifecycleFailure != null);
-            State = aggregate == null && lifecycleFailure == null ? ViewState.Destroyed : ViewState.Failed;
+            State = aggregate == null && lifecycleFailure == null ? PageState.Destroyed : PageState.Failed;
             return new CloseOutcome(aggregate == null && lifecycleFailure == null ? CloseStatus.Closed : CloseStatus.Failed, reported, cleanup);
         }
 

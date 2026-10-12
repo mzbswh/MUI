@@ -9,7 +9,7 @@ namespace MUI.Pages
             PageInstance oldest = null;
             foreach (var instance in entries.Values)
             {
-                if (!ReferenceEquals(instance.Definition, route) || instance.State != ViewState.Open)
+                if (!ReferenceEquals(instance.Definition, route) || instance.State != PageState.Open)
                 {
                     continue;
                 }

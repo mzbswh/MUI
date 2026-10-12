@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
-using MUI.ChildViews;
+using MUI.Widgets;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -205,7 +205,7 @@ namespace MUI.UGUI
         }
 
         private void ApplyMeasuredRows(HashSet<int> rows, Dictionary<VirtualListItem, float> measuredBatch,
-            ChildViewScope owner, long revision)
+            WidgetScope owner, long revision)
         {
             if (measuredBatch.Count == 0)
             {
@@ -330,7 +330,7 @@ namespace MUI.UGUI
 
                 var changedRows = new HashSet<int>();
                 var measuredBatch = new Dictionary<VirtualListItem, float>();
-                var measuredCells = new List<(Cell Cell, VirtualListItem Item, int Index, RectTransform Root)>();
+                var measuredCells = new List<(VirtualListCell Cell, VirtualListItem Item, int Index, RectTransform Root)>();
                 List<(VirtualListItem Item, int Index)> invalidItems = null;
                 var remaining = measurementsPerFrame;
                 foreach (var cell in cells.ToArray())
@@ -438,7 +438,7 @@ namespace MUI.UGUI
             }
         }
 
-        private bool TryGetUnmeasuredItem(Cell cell, out VirtualListItem item, out int index)
+        private bool TryGetUnmeasuredItem(VirtualListCell cell, out VirtualListItem item, out int index)
         {
             item = null;
             index = -1;
@@ -473,11 +473,11 @@ namespace MUI.UGUI
                 ReferenceEquals(cell.Element.DisplayedViewModel, item.ViewModel);
         }
 
-        private bool IsMeasurementSourceCurrent(ChildViewScope owner, long revision) =>
+        private bool IsMeasurementSourceCurrent(WidgetScope owner, long revision) =>
             IsAlive && ReferenceEquals(scope, owner) && owner != null && owner.IsActive &&
             revision == sourceRevision && !dirty && Error == null;
 
-        private bool IsCurrentMeasurement(ChildViewScope owner, long revision, float crossExtent, Cell cell,
+        private bool IsCurrentMeasurement(WidgetScope owner, long revision, float crossExtent, VirtualListCell cell,
                     VirtualListItem item, int index, RectTransform measurementRoot)
         {
             if (!IsMeasurementSourceCurrent(owner, revision) || IsVisualRetentionActive ||

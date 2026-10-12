@@ -153,16 +153,7 @@ namespace MUI.Pages
         }
     }
 
-    public enum ViewState
-    {
-        Unknown,
-        Opening,
-        Open,
-        Closing,
-        Destroyed,
-        Failed,
-        UnknownOrExpired
-    }
+
 
     public enum PostOpenStatus
     {

@@ -1,0 +1,7 @@
+{
+  "name": "MUI.Widgets",
+  "rootNamespace": "MUI.Widgets",
+  "references": ["MUI.Core", "MUI.Resources"],
+  "autoReferenced": true,
+  "noEngineReferences": true
+}

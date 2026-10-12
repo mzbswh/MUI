@@ -10,7 +10,7 @@ namespace MUI.Samples.Navigation
     {
         public const string FailingArgs = "演示部分提交失败";
 
-        protected override void OnOpen(string args) => ViewModel.Label = args;
+        protected override void OnPrepareOpen(string args) => ViewModel.Label = args;
 
         public ValueTask<IPreparedArgsUpdate> PrepareArgsUpdateAsync(string args, CancellationToken cancellationToken)
         {

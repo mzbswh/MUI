@@ -49,7 +49,7 @@ namespace MUI.Samples.Navigation
                 view.WaitForResourceSources = waitForInitialResources;
 
                 // 正式导航会驱动这两个激活阶段；独立示例显式调用，复用相同控件接入路径。
-                view.BeginChildActivation(resources);
+                view.BeginWidgetActivation(resources);
 
                 alternate = true;
                 model = new ResourceImageViewModel
@@ -74,13 +74,13 @@ namespace MUI.Samples.Navigation
         {
             try
             {
-                await view.CompleteChildPreparationAsync(activation.Token);
+                await view.CompleteWidgetPreparationAsync(activation.Token);
                 if (closing || activation.IsEnded || !ReferenceEquals(resources, activation) || view == null)
                 {
                     return;
                 }
 
-                view.CommitChildActivation();
+                view.CommitWidgetActivation();
                 view.SetHostState(true, true);
             }
             catch (OperationCanceledException) when (activation.IsEnded)

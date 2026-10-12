@@ -45,7 +45,7 @@ namespace MUI.Pages
         private PageInstance[] CaptureCloseBatch(int? layer) =>
                     ownership.OrderCloseBatch(entries.Values
                         .Where(instance => instance.HasOpenCommitted &&
-                            (instance.State == ViewState.Open || instance.State == ViewState.Closing) &&
+                            (instance.State == PageState.Open || instance.State == PageState.Closing) &&
                             (!layer.HasValue || instance.Definition.Policy.Layer == layer.Value))
                         .OrderByDescending(instance => instance.Definition.Policy.Layer)
                         .ThenByDescending(instance => instance.Order)

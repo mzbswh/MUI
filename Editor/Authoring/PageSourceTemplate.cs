@@ -17,7 +17,8 @@ namespace MUI.Editor
         {
             var parts = value.Split('.');
             for (var i = 0; i < parts.Length; i++)
-                if (Keywords.Contains(parts[i])) parts[i] = "@" + parts[i];
+                if (Keywords.Contains(parts[i]))
+                    parts[i] = "@" + parts[i];
             return string.Join(".", parts);
         }
 
@@ -133,10 +134,12 @@ namespace MUI.Editor
             var args = typed ? name + "Args" : "global::MUI.Unit";
             var result = "global::MUI.Unit";
             var pageOptions = new List<string>();
-            if (!presenter) pageOptions.Add($"typeof({args}), typeof({result})");
+            if (!presenter)
+                pageOptions.Add($"typeof({args}), typeof({result})");
             if (resourceKey != null && resourceKey != (name.EndsWith("View", StringComparison.Ordinal) ? name : name + "View"))
                 pageOptions.Add($"ResourceKey = {StringLiteral(resourceKey)}");
-            if (preset != defaultPreset) pageOptions.Add($"PolicyPreset = {StringLiteral(preset)}");
+            if (preset != defaultPreset)
+                pageOptions.Add($"PolicyPreset = {StringLiteral(preset)}");
             var pageDeclaration = pageOptions.Count == 0 ? "    [global::MUI.UIPage]"
                 : "    [global::MUI.UIPage(" + string.Join(", ", pageOptions) + ")]";
 
@@ -148,7 +151,8 @@ namespace MUI.Editor
                 $"    public partial class {name}ViewModel : global::MUI.ViewModel",
                 "    {"
             };
-            if (!autoBindings) modelLines.AddRange(new[]
+            if (!autoBindings)
+                modelLines.AddRange(new[]
             {
                 "        /// <summary>页面标题，由生成的 Title 属性发布变化。</summary>",
                 "        [global::MUI.ObservableProperty]",
@@ -182,7 +186,8 @@ namespace MUI.Editor
 
             if (typed)
             {
-                if (!presenter) files.Add(name + "Args.cs", Wrap(
+                if (!presenter)
+                    files.Add(name + "Args.cs", Wrap(
                     "    /// <summary>本次打开页面的参数，按项目需求扩展。</summary>",
                     $"    public readonly struct {name}Args",
                     "    {",
@@ -206,8 +211,8 @@ namespace MUI.Editor
                     "        /// <summary>显示前初始化；需要等待加载时改为 async Task 或 async ValueTask，框架会等待完成再显示。</summary>",
                     "        [OpenEntry]",
                     typed
-                        ? "        private void OnOpen(string title)"
-                        : "        private void OnOpen()",
+                        ? "        private void OnPrepareOpen(string title)"
+                        : "        private void OnPrepareOpen()",
                     "        {",
                     typed
                         ? "            ViewModel.Title = title ?? string.Empty;"

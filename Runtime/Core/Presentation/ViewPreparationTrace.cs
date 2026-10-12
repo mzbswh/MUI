@@ -7,8 +7,8 @@ namespace MUI
     {
         PresenterCreate,
         Binding,
-        PresenterOpen,
-        PresenterOpenAsync
+        PresenterPrepareOpen,
+        PresenterPrepareOpenAsync
     }
 
     internal interface IViewPreparationTraceScope : IDisposable

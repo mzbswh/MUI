@@ -2372,7 +2372,7 @@
       "text": "Reentrant"
     },
     {
-      "key": "enum.MUI.ArgsUpdateRejection.PageDefinitionMismatch",
+      "key": "enum.MUI.ArgsUpdateRejection.DefinitionMismatch",
       "text": "PageDefinition Mismatch"
     },
     {
@@ -2452,63 +2452,63 @@
       "text": "Unbound"
     },
     {
-      "key": "enum.MUI.ChildViews.ChildViewChangeStatus.Cancelled",
+      "key": "enum.MUI.Widgets.WidgetChangeStatus.Cancelled",
       "text": "Cancelled"
     },
     {
-      "key": "enum.MUI.ChildViews.ChildViewChangeStatus.Empty",
+      "key": "enum.MUI.Widgets.WidgetChangeStatus.Empty",
       "text": "Empty"
     },
     {
-      "key": "enum.MUI.ChildViews.ChildViewChangeStatus.Failed",
+      "key": "enum.MUI.Widgets.WidgetChangeStatus.Failed",
       "text": "Failed"
     },
     {
-      "key": "enum.MUI.ChildViews.ChildViewChangeStatus.ParentInactive",
+      "key": "enum.MUI.Widgets.WidgetChangeStatus.ParentInactive",
       "text": "Parent Inactive"
     },
     {
-      "key": "enum.MUI.ChildViews.ChildViewChangeStatus.Ready",
+      "key": "enum.MUI.Widgets.WidgetChangeStatus.Ready",
       "text": "Ready"
     },
     {
-      "key": "enum.MUI.ChildViews.ChildViewChangeStatus.Superseded",
+      "key": "enum.MUI.Widgets.WidgetChangeStatus.Superseded",
       "text": "Superseded"
     },
     {
-      "key": "enum.MUI.ChildViews.ChildViewState.Active",
+      "key": "enum.MUI.Widgets.WidgetState.Active",
       "text": "Active"
     },
     {
-      "key": "enum.MUI.ChildViews.ChildViewState.Closed",
+      "key": "enum.MUI.Widgets.WidgetState.Closed",
       "text": "Closed"
     },
     {
-      "key": "enum.MUI.ChildViews.ChildViewState.Closing",
+      "key": "enum.MUI.Widgets.WidgetState.Closing",
       "text": "Closing"
     },
     {
-      "key": "enum.MUI.ChildViews.ChildViewState.Deactivating",
+      "key": "enum.MUI.Widgets.WidgetState.Deactivating",
       "text": "Deactivating"
     },
     {
-      "key": "enum.MUI.ChildViews.ChildViewState.Failed",
+      "key": "enum.MUI.Widgets.WidgetState.Failed",
       "text": "Failed"
     },
     {
-      "key": "enum.MUI.ChildViews.ChildViewState.Inactive",
+      "key": "enum.MUI.Widgets.WidgetState.Inactive",
       "text": "Inactive"
     },
     {
-      "key": "enum.MUI.ChildViews.ChildViewState.Prepared",
+      "key": "enum.MUI.Widgets.WidgetState.Prepared",
       "text": "Prepared"
     },
     {
-      "key": "enum.MUI.ChildViews.ChildViewState.Preparing",
+      "key": "enum.MUI.Widgets.WidgetState.Preparing",
       "text": "Preparing"
     },
     {
-      "key": "enum.MUI.ChildViews.ChildViewState.Retained",
+      "key": "enum.MUI.Widgets.WidgetState.Retained",
       "text": "Retained"
     },
     {
@@ -2944,11 +2944,11 @@
       "text": "Presenter Create"
     },
     {
-      "key": "enum.MUI.Pages.PagePreparationStage.PresenterOpen",
+      "key": "enum.MUI.Pages.PagePreparationStage.PresenterPrepareOpen",
       "text": "Presenter Open"
     },
     {
-      "key": "enum.MUI.Pages.PagePreparationStage.PresenterOpenAsync",
+      "key": "enum.MUI.Pages.PagePreparationStage.PresenterPrepareOpenAsync",
       "text": "Presenter Open Async"
     },
     {
@@ -3312,31 +3312,31 @@
       "text": "Pending"
     },
     {
-      "key": "enum.MUI.Pages.ViewState.Closing",
+      "key": "enum.MUI.Pages.PageState.Closing",
       "text": "Closing"
     },
     {
-      "key": "enum.MUI.Pages.ViewState.Destroyed",
+      "key": "enum.MUI.Pages.PageState.Destroyed",
       "text": "Destroyed"
     },
     {
-      "key": "enum.MUI.Pages.ViewState.Failed",
+      "key": "enum.MUI.Pages.PageState.Failed",
       "text": "Failed"
     },
     {
-      "key": "enum.MUI.Pages.ViewState.Open",
+      "key": "enum.MUI.Pages.PageState.Open",
       "text": "Open"
     },
     {
-      "key": "enum.MUI.Pages.ViewState.Opening",
+      "key": "enum.MUI.Pages.PageState.Opening",
       "text": "Opening"
     },
     {
-      "key": "enum.MUI.Pages.ViewState.Unknown",
+      "key": "enum.MUI.Pages.PageState.Unknown",
       "text": "Unknown"
     },
     {
-      "key": "enum.MUI.Pages.ViewState.UnknownOrExpired",
+      "key": "enum.MUI.Pages.PageState.UnknownOrExpired",
       "text": "Unknown Or Expired"
     },
     {
@@ -3412,7 +3412,7 @@
       "text": "Reentrant"
     },
     {
-      "key": "enum.MUI.RebindRejection.PageDefinitionMismatch",
+      "key": "enum.MUI.RebindRejection.DefinitionMismatch",
       "text": "PageDefinition Mismatch"
     },
     {
@@ -3548,47 +3548,47 @@
       "text": "On End Edit"
     },
     {
-      "key": "enum.MUI.UGUI.MUIPagePolicyFields.All",
+      "key": "enum.MUI.UGUI.PagePolicyFields.All",
       "text": "All"
     },
     {
-      "key": "enum.MUI.UGUI.MUIPagePolicyFields.Back",
+      "key": "enum.MUI.UGUI.PagePolicyFields.Back",
       "text": "Back"
     },
     {
-      "key": "enum.MUI.UGUI.MUIPagePolicyFields.Cache",
+      "key": "enum.MUI.UGUI.PagePolicyFields.Cache",
       "text": "Cache"
     },
     {
-      "key": "enum.MUI.UGUI.MUIPagePolicyFields.Coverage",
+      "key": "enum.MUI.UGUI.PagePolicyFields.Coverage",
       "text": "Coverage"
     },
     {
-      "key": "enum.MUI.UGUI.MUIPagePolicyFields.Focus",
+      "key": "enum.MUI.UGUI.PagePolicyFields.Focus",
       "text": "Focus"
     },
     {
-      "key": "enum.MUI.UGUI.MUIPagePolicyFields.Instances",
+      "key": "enum.MUI.UGUI.PagePolicyFields.Instances",
       "text": "Instances"
     },
     {
-      "key": "enum.MUI.UGUI.MUIPagePolicyFields.Layer",
+      "key": "enum.MUI.UGUI.PagePolicyFields.Layer",
       "text": "Layer"
     },
     {
-      "key": "enum.MUI.UGUI.MUIPagePolicyFields.Modal",
+      "key": "enum.MUI.UGUI.PagePolicyFields.Modal",
       "text": "Modal"
     },
     {
-      "key": "enum.MUI.UGUI.MUIPagePolicyFields.None",
+      "key": "enum.MUI.UGUI.PagePolicyFields.None",
       "text": "None"
     },
     {
-      "key": "enum.MUI.UGUI.MUIPagePolicyFields.Tick",
+      "key": "enum.MUI.UGUI.PagePolicyFields.Tick",
       "text": "Tick"
     },
     {
-      "key": "enum.MUI.UGUI.MUIPagePolicyFields.Timeouts",
+      "key": "enum.MUI.UGUI.PagePolicyFields.Timeouts",
       "text": "Timeouts"
     },
     {
@@ -3836,11 +3836,11 @@
       "text": "Presenter Create"
     },
     {
-      "key": "enum.MUI.ViewPreparationStep.PresenterOpen",
+      "key": "enum.MUI.ViewPreparationStep.PresenterPrepareOpen",
       "text": "Presenter Open"
     },
     {
-      "key": "enum.MUI.ViewPreparationStep.PresenterOpenAsync",
+      "key": "enum.MUI.ViewPreparationStep.PresenterPrepareOpenAsync",
       "text": "Presenter Open Async"
     },
     {
@@ -4740,7 +4740,7 @@
       "text": "Reentrant"
     },
     {
-      "key": "trace.token.PageDefinitionMismatch",
+      "key": "trace.token.DefinitionMismatch",
       "text": "PageDefinition Mismatch"
     },
     {
@@ -5029,7 +5029,7 @@
     },
     {
       "key": "settings.description",
-      "text": "Define layers and defaults, then override selected behaviors in presets."
+      "text": "Define layers and defaults, then override selected behaviors in presets. Directories, binding rules and development options are stored separately in ProjectSettings and excluded from Player settings."
     },
     {
       "key": "settings.valid",
@@ -5552,7 +5552,7 @@
       "text": "Relative order offset"
     },
     {
-      "key": "enum.MUI.UGUI.MUIPagePolicyFields.RenderOrder",
+      "key": "enum.MUI.UGUI.PagePolicyFields.RenderOrder",
       "text": "Page order span"
     },
     {
@@ -5592,7 +5592,7 @@
       "text": "Hide and retain"
     },
     {
-      "key": "enum.MUI.UGUI.MUIPagePolicyFields.PageScope",
+      "key": "enum.MUI.UGUI.PagePolicyFields.PageScope",
       "text": "Page ownership"
     },
     {
@@ -5752,7 +5752,7 @@
       "text": "Receive Input"
     },
     {
-      "key": "enum.MUI.UGUI.MUIPagePolicyFields.Input",
+      "key": "enum.MUI.UGUI.PagePolicyFields.Input",
       "text": "Input"
     },
     {

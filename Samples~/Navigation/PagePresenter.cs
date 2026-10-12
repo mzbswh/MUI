@@ -12,11 +12,11 @@ namespace MUI.Samples.Navigation
 
         protected override void OnCreate() => Debug.Log("MUI Navigation OnCreate");
 
-        protected override void OnOpen(PageArgs args)
+        protected override void OnPrepareOpen(PageArgs args)
         {
             ViewModel.Title = args.Title;
             ViewModel.Selection = args.Selection;
-            Debug.Log("MUI Navigation OnOpen: " + args.Title);
+            Debug.Log("MUI Navigation OnPrepareOpen: " + args.Title);
         }
 
         protected override void OnCovered() => Debug.Log("MUI Navigation OnCovered: " + ViewModel.Title);

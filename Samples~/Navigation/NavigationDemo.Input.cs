@@ -52,9 +52,9 @@ namespace MUI.Samples.Navigation
 
             public int OwnedCount => Context.InputBlockerCount;
 
-            protected override void OnOpen(PageArgs args)
+            protected override void OnPrepareOpen(PageArgs args)
             {
-                base.OnOpen(args);
+                base.OnPrepareOpen(args);
                 first = Context.BlockInput("Loading inventory");
                 second = Context.BlockInput("Entering animation");
             }

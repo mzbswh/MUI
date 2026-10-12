@@ -11,7 +11,8 @@ namespace MUI.Editor
     {
         public override VisualElement CreateInspectorGUI()
         {
-            if (!inspectorReady) InitializeInspectorState();
+            if (!inspectorReady)
+                InitializeInspectorState();
             var root = new VisualElement();
             root.AddToClassList("mui-inspector");
             root.AddToClassList("mui-view-inspector");
@@ -130,14 +131,14 @@ namespace MUI.Editor
             EditorGUI.EndProperty();
             if (global.boolValue)
             {
-                if (!MUIProjectSettings.TryGet(out var settings, out var error))
+                if (!RuntimeSettingsAsset.TryGet(out var settings, out var error))
                     EditorGUILayout.HelpBox(error, MessageType.Error);
                 else
                 {
                     DrawResolvedBackdrop(settings == null ? null : settings.DefaultModalBackdropPrefab,
                         settings == null ? new Color(0, 0, 0, 0.45f) : settings.DefaultModalBackdropColor);
                     if (GUILayout.Button(L.Get("viewPanel.modal.openSettings"), EditorStyles.miniButton))
-                        MUIProjectSettings.OpenOrCreate();
+                        RuntimeSettingsAsset.OpenOrCreate();
                 }
                 return;
             }
@@ -159,7 +160,8 @@ namespace MUI.Editor
                 EditorGUILayout.ObjectField(L.Get("viewPanel.modal.resolvedPrefab"), prefab, typeof(RectTransform), false);
                 EditorGUILayout.ColorField(L.Get("viewPanel.modal.resolvedColor"), tint);
             }
-            if (prefab == null) DrawConfigurationHint("viewPanel.modal.fallback");
+            if (prefab == null)
+                DrawConfigurationHint("viewPanel.modal.fallback");
         }
 
         private void DrawRenderOrderDiagnostics()
@@ -178,7 +180,8 @@ namespace MUI.Editor
             {
                 foreach (var binding in view.ResolvedRenderOrderTargets)
                 {
-                    if (binding.Key == null) continue;
+                    if (binding.Key == null)
+                        continue;
                     EditorGUILayout.ObjectField("Order " + (view.RenderOrderStart + binding.Value), binding.Key, typeof(Component), true);
                 }
             }
@@ -199,10 +202,13 @@ namespace MUI.Editor
             var container = new IMGUIContainer();
             Action handler = () =>
             {
-                if (this == null || target == null || container.panel == null) return;
-                if (!inspectorReady) return;
+                if (this == null || target == null || container.panel == null)
+                    return;
+                if (!inspectorReady)
+                    return;
                 var state = serializedObject;
-                if (state == null || state.targetObject == null) return;
+                if (state == null || state.targetObject == null)
+                    return;
                 var previous = EditorGUIUtility.labelWidth;
                 try
                 {
@@ -216,8 +222,10 @@ namespace MUI.Editor
             container.RegisterCallback<DetachFromPanelEvent>(_ => container.onGUIHandler = null);
             container.RegisterCallback<AttachToPanelEvent>(_ =>
             {
-                if (this == null || target == null) return;
-                if (!inspectorReady) InitializeInspectorState();
+                if (this == null || target == null)
+                    return;
+                if (!inspectorReady)
+                    InitializeInspectorState();
                 container.onGUIHandler = handler;
                 container.MarkDirtyLayout();
             });

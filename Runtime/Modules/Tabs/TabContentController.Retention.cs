@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using MUI.ChildViews;
+using MUI.Widgets;
 
 namespace MUI.Tabs
 {
@@ -14,7 +14,7 @@ namespace MUI.Tabs
 
         private bool IsRetainedCallback => retained != null && retained.Handle.IsExecuting;
 
-        private string RetainedDisplayedKey => pendingDisplay == TabPendingDisplay.KeepPrevious && retained != null && retained.Handle.State == ChildViewState.Retained
+        private string RetainedDisplayedKey => pendingDisplay == TabPendingDisplay.KeepPrevious && retained != null && retained.Handle.State == WidgetState.Retained
                     ? retained.Definition.Key : null;
 
         private void PreparePreviousContent()
@@ -55,12 +55,12 @@ namespace MUI.Tabs
             }
 
             var result = clear.GetAwaiter().GetResult();
-            if (result.Status == ChildViewChangeStatus.Failed)
+            if (result.Status == WidgetChangeStatus.Failed)
             {
                 throw result.Error ?? new InvalidOperationException("Failed to clear old Tab content.");
             }
 
-            if (result.Status == ChildViewChangeStatus.ParentInactive)
+            if (result.Status == WidgetChangeStatus.ParentInactive)
             {
                 throw new OperationCanceledException("Parent is inactive.");
             }
@@ -82,25 +82,25 @@ namespace MUI.Tabs
             }
         }
 
-        private async ValueTask<ChildViewHandle> PrepareSelectionAsync(
+        private async ValueTask<WidgetHandle> PrepareSelectionAsync(
                     Operation target,
                     TabContentDefinition definition,
-                    ChildViewScope owner,
+                    WidgetScope owner,
                     CancellationToken token,
                     bool forceReload)
         {
             var previous = preparing.Value;
             var frame = new PreparationFrame();
             preparing.Value = frame;
-            ChildViewHandle candidate = null;
+            WidgetHandle candidate = null;
             try
             {
                 RequireSelectionCurrent(target, definition);
                 token.ThrowIfCancellationRequested();
                 var saved = retained;
-                ChildViewHandle prepared;
+                WidgetHandle prepared;
                 if (!forceReload && saved != null && ReferenceEquals(saved.Definition, definition) &&
-                    saved.Handle.State == ChildViewState.Retained)
+                    saved.Handle.State == WidgetState.Retained)
                 {
                     // 恢复会结束显示保留并排空旧任务；准备完成前不冒充正在显示旧内容。
                     Publish(new TabSnapshot(target.Key, null, TabPhase.Loading, null, target.Version));
@@ -117,7 +117,7 @@ namespace MUI.Tabs
                     }
                 }
 
-                if (prepared == null || !prepared.BelongsTo(owner) || prepared.State != ChildViewState.Prepared)
+                if (prepared == null || !prepared.BelongsTo(owner) || prepared.State != WidgetState.Prepared)
                 {
                     throw new InvalidOperationException("Tab factory must return a Prepared handle from its supplied scope.");
                 }
@@ -204,7 +204,7 @@ namespace MUI.Tabs
 
         private sealed class RetainedContent
         {
-            public ChildViewHandle Handle;
+            public WidgetHandle Handle;
             public TabContentDefinition Definition;
         }
     }

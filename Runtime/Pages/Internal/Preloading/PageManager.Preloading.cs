@@ -78,7 +78,7 @@ namespace MUI.Pages
                 return PreloadResult(PreloadStatus.CapacityExceeded);
             }
 
-            var entry = new PreloadEntry();
+            var entry = new PagePreloadRequest();
             var consumer = entry.Join(cancellationToken);
             batch.Entries.Add(route.Resource, entry);
             ++preloadReservations;
@@ -91,7 +91,7 @@ namespace MUI.Pages
                     IPreloadViewProvider preloader,
                     ViewResource resource,
                     CancellationToken ownerToken,
-                    PreloadEntry entry)
+                    PagePreloadRequest entry)
         {
             IAcquiredPreload ownedResource = null;
             PreloadReservation reservation = null;
@@ -419,7 +419,7 @@ namespace MUI.Pages
         private sealed class PreloadBatch
         {
             public readonly LifetimeScope Scope = new LifetimeScope();
-            public readonly Dictionary<ViewResource, PreloadEntry> Entries = new Dictionary<ViewResource, PreloadEntry>();
+            public readonly Dictionary<ViewResource, PagePreloadRequest> Entries = new Dictionary<ViewResource, PagePreloadRequest>();
             public object ProviderVersion;
         }
     }

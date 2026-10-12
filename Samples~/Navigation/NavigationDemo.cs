@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using MUI.ChildViews;
+using MUI.Widgets;
 using MUI.Pages;
 using MUI.Resources;
 using MUI.Samples.ResourceIntegration;
@@ -217,7 +217,7 @@ namespace MUI.Samples.Navigation
                 await DemonstrateInputAsync(pages, resource, BindPage);
                 await DemonstrateFocusAsync(pages, resource, BindPage, firstView, first.Handle.Identity);
                 await DemonstrateTicksAsync(pages, resource, BindPage);
-                await DemonstrateChildTicksAsync(firstView);
+                await DemonstrateWidgetTicksAsync(firstView);
                 var nested = firstView.GetElement<NestedViewElement>("NestedItem");
                 if (!pages.TryGetViewModel<PageViewModel>(first.Handle.Identity, out var pageModel))
                 {
@@ -262,30 +262,30 @@ namespace MUI.Samples.Navigation
                 var itemResource = new ViewResource("ThingItem");
                 var itemProvider = new BorrowedViewProvider(itemResource, itemView);
                 var itemModel = new ThingItemViewModel();
-                var itemTemplate = new ChildViewTemplate<ThingItemViewModel, string>(itemResource,
+                var itemTemplate = new WidgetDefinition<ThingItemViewModel, string>(itemResource,
                     () => new ThingItemViewModel(), ThingItemViewModelBindingFactory.Create);
-                var item = await firstView.ChildViews.PrepareAsync(itemTemplate, itemProvider, "Wood", itemModel);
-                Debug.Log($"MUI ChildView prepared: {item.State}; alpha={itemView.GetComponent<CanvasGroup>().alpha}");
+                var item = await firstView.Widgets.PrepareAsync(itemTemplate, itemProvider, "Wood", itemModel);
+                Debug.Log($"MUI Widget prepared: {item.State}; alpha={itemView.GetComponent<CanvasGroup>().alpha}");
                 item.Commit();
-                Debug.Log($"MUI ChildView committed: {item.State}; alpha={itemView.GetComponent<CanvasGroup>().alpha}");
+                Debug.Log($"MUI Widget committed: {item.State}; alpha={itemView.GetComponent<CanvasGroup>().alpha}");
                 item.SetLocalState(false, false);
                 firstView.Visible = false;
                 firstView.Visible = true;
-                Debug.Log($"MUI ChildView local hidden after parent restore: alpha={itemView.GetComponent<CanvasGroup>().alpha}");
+                Debug.Log($"MUI Widget local hidden after parent restore: alpha={itemView.GetComponent<CanvasGroup>().alpha}");
                 item.SetLocalState(true, true);
                 await item.DisposeAsync();
-                Debug.Log($"MUI ChildView borrowed release: {item.State}; nodeAlive={itemView != null}");
+                Debug.Log($"MUI Widget borrowed release: {item.State}; nodeAlive={itemView != null}");
                 ThingItemPresenter itemPresenter = null;
-                var asyncItemTemplate = new ChildViewTemplate<ThingItemViewModel, string>(itemResource,
+                var asyncItemTemplate = new WidgetDefinition<ThingItemViewModel, string>(itemResource,
                     () => new ThingItemViewModel(), ThingItemViewModelBindingFactory.Create,
                     _ => itemPresenter = new ThingItemPresenter());
-                var asyncItem = await firstView.ChildViews.PrepareAsync(asyncItemTemplate, itemProvider,
+                var asyncItem = await firstView.Widgets.PrepareAsync(asyncItemTemplate, itemProvider,
                     "Wood", itemModel, cancellation.Token);
                 asyncItem.Commit();
-                Debug.Log($"MUI ChildView async item: {itemModel.Label}; state={asyncItem.State}");
+                Debug.Log($"MUI Widget async item: {itemModel.Label}; state={asyncItem.State}");
                 if (showArgsUpdateWalkthrough)
                 {
-                    await DemonstrateChildArgsUpdateAsync(firstView.ChildViews, asyncItem, itemPresenter);
+                    await DemonstrateChildArgsUpdateAsync(firstView.Widgets, asyncItem, itemPresenter);
                 }
 
                 if (showRebindWalkthrough)
@@ -314,7 +314,7 @@ namespace MUI.Samples.Navigation
                 await pages.BackAsync(cancellation.Token);
                 var dismissed = await first.Handle.WaitForResultAsync(cancellation.Token);
                 Debug.Log($"MUI Navigation back: {dismissed.Status}/{dismissed.Reason}; history={pages.History.Count}");
-                Debug.Log($"MUI ChildView parent closed: {asyncItem.State}");
+                Debug.Log($"MUI Widget parent closed: {asyncItem.State}");
                 using (var cancelledOpen = CancellationTokenSource.CreateLinkedTokenSource(cancellation.Token))
                 {
                     cancelledOpen.CancelAfter(20);

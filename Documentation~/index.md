@@ -4,7 +4,7 @@
 
 目标版本为 Unity 2022.3.62f3。通过 Package Manager 的 Add package from disk 选择包根目录的 package.json；运行时代码保留在 Packages 引用中，示例由 Package Manager 的 Samples 独立导入。
 
-Core 不引用 Unity；Resources、Navigation 与 ChildViews 分别定义资源凭证、页面导航和子视图生命周期。MUI.UGUI 提供原生 uGUI 的 Element 适配。TMP 与 Input System 位于独立程序集，项目按需安装对应包；基础页面不要求这些可选依赖。
+Core 不引用 Unity；Resources、Navigation 与 Widgets 分别定义资源凭证、页面导航和子视图生命周期。MUI.UGUI 提供原生 uGUI 的 Element 适配。TMP 与 Input System 位于独立程序集，项目按需安装对应包；基础页面不要求这些可选依赖。
 
 ## 从 Basic 开始
 
@@ -174,7 +174,7 @@ Element 提供稳定 `CleanupResponsibility`；重复 `Dispose` 或 `DisposeAsyn
 [ObservableProperty]
 [Bind("Name", nameof(IInputFieldElement.Value), bindingMode: BindingMode.TwoWay,
     SourcePath = "Profile.Name", NullValue = "")]
-private ChildViewModel child;
+private WidgetModel child;
 ```
 
 这会绑定 `Child.Profile.Name`。中间模型必须派生自 ViewModel，路径只包含属性名，支持普通公共属性、生成属性及继承属性；不支持索引器、集合索引或方法调用。普通属性的 setter 应发布对应属性名或全部属性通知。生成器在编译期校验访问权限及转换类型，生成访问器和逐层通知订阅，运行时不解析字符串或使用反射。
@@ -230,7 +230,7 @@ CommandContext 和 Presenter 的 ActivationContext 均提供这两种入口。�
 
 ### Presenter 命令
 
-需要业务协调的操作可直接声明在 `partial Presenter<TViewModel, TArgs, TResult>` 上，使用与 ViewModel 相同的 `[Command]` / `[BindCommand]`。不需要在 ViewModel 中声明 Handler，也不需要在 OnOpen/OnClose 中手写转发或订阅。
+需要业务协调的操作可直接声明在 `partial Presenter<TViewModel, TArgs, TResult>` 上，使用与 ViewModel 相同的 `[Command]` / `[BindCommand]`。不需要在 ViewModel 中声明 Handler，也不需要在 OnPrepareOpen/OnClose 中手写转发或订阅。
 
 ```csharp
 public partial class ShopPresenter : Presenter<ShopViewModel, ShopArgs, bool>
@@ -268,7 +268,7 @@ Navigation 示例的 Confirm 现位于 PagePresenter，Close 仍位于 PageViewM
 
 ### 开发期 API 与配置
 
-当前只维护一套 API 和配置格式，不提供弃用别名、旧序列化字段映射或自动升级。控件命名规则使用 `Expression`、`ComponentTypes` 和 `DefaultBindingProperties`；页面目录直接保存完整 Assets 路径。页面预设直接声明角色与输入策略，覆盖字段使用当前 `MUIPagePolicyFields`。旧配置需重新设置，旧自动绑定需重新生成；仓库 Basic 示例资产已按当前字段更新。手写控件契约和 Element 组件适配器是仍支持的功能，不属于历史迁移入口。
+当前只维护一套 API 和配置格式，不提供弃用别名、旧序列化字段映射或自动升级。控件命名规则使用 `Expression`、`ComponentTypes` 和 `DefaultBindingProperties`；页面目录直接保存完整 Assets 路径。页面预设直接声明角色与输入策略，覆盖字段使用当前 `PagePolicyFields`。旧配置需重新设置，旧自动绑定需重新生成；仓库 Basic 示例资产已按当前字段更新。手写控件契约和 Element 组件适配器是仍支持的功能，不属于历史迁移入口。
 
 ## 输入转换与校验
 
@@ -386,7 +386,7 @@ Prefab 保存、导入及其依赖资产变化按路径合并，在 Editor 空�
 
 ### 页面生成目录
 
-全局 MUISettings 的“页面生成目录”分别配置 Prefab 与脚本的完整项目路径，支持 `{PageName}`，不共用根目录。例如：
+统一设置 Inspector 中 MUIEditorSettings 的“页面生成目录”分别配置 Prefab 与脚本的完整项目路径，支持 `{PageName}`，不共用根目录。例如：
 
 - Prefab：`Assets/LocalResource/{PageName}/`
 - 脚本：`Assets/Scripts/UI/{PageName}/`
@@ -567,14 +567,14 @@ public partial class InventoryViewModel : ViewModel { }
 public partial class InventoryPresenter
 {
     [OpenEntry("ByTab")]
-    private ValueTask OnOpenAsync(int tab, CancellationToken token)
+    private ValueTask OnPrepareOpenAsync(int tab, CancellationToken token)
     {
         // 无需等待时可立即完成；需要加载时改用 async ValueTask。
         return default;
     }
 
     [OpenEntry("ByItem")]
-    private async ValueTask OnOpenAsync(long itemId, bool highlight = true,
+    private async ValueTask OnPrepareOpenAsync(long itemId, bool highlight = true,
         CancellationToken token = default)
     {
         await LoadItemAsync(itemId, token); // 项目自己的业务加载方法
@@ -589,9 +589,9 @@ await InventoryViewModelDefinition.OpenByItemAsync(pages, route,
 
 每个命名入口生成 `ArgsByXxx`、`OpenByXxxAsync`、`BeginOpenByXxx`。自动 Args 位于 `Presenter.OpenArgs`，各入口对应独立的只读数据分支。用于 ReplaceAsync、UpdateArgsAsync 等操作时，可调用 `ArgsByXxx(...)` 取得参数。路由策略、参数比较、参数更新协议和结果等待方式均保持原样；切换入口不会强制重开或绕过复用策略。
 
-入口支持 ValueTask、Task 和立即完成的 void，统一通过 IAsyncOpenPresenter 在 Context 建立后的异步准备阶段调用一次；导航等待其完成再提交打开。末尾 CancellationToken 为框架注入参数，不出现在生成 Args 或便捷调用的业务参数中。async void、泛型入口、ref/out/in、params 和开放泛型页面不受支持。入口名称必须唯一；同参数类型的不同入口可使用不同业务方法名。一个自动 Presenter 只对应一个页面契约和结果类型。
+入口支持 ValueTask、Task 和立即完成的 void，统一通过 IAsyncOpenPreparation 在 Context 建立后的异步准备阶段调用一次；导航等待其完成再提交打开。末尾 CancellationToken 为框架注入参数，不出现在生成 Args 或便捷调用的业务参数中。async void、泛型入口、ref/out/in、params 和开放泛型页面不受支持。入口名称必须唯一；同参数类型的不同入口可使用不同业务方法名。一个自动 Presenter 只对应一个页面契约和结果类型。
 
-页面向导生成 `[OpenEntry] private void OnOpen(...)`，只保留业务参数，不再额外创建 Args.cs。无参特性按业务参数签名生成 `CreateArgs(...)`、`OpenAsync(...)` 和 `BeginOpen(...)` 重载，同一 Presenter 可声明多个。内部 Args 分支名称由参数类型自动生成，建议通过 CreateArgs 获取参数而不依赖分支名称。命名入口可同时存在。末尾 CancellationToken 不参与签名区分；重复业务签名及省略可选参数造成的相同前缀歧义会产生编译诊断。其他重载选择遵循 C# 规则，例如传入 null 或 default 时可能需要显式指定类型。无需等待时使用 void；需要等待数据加载时改为 async ValueTask 或 async Task，可选声明末尾 CancellationToken，由框架注入。无论业务是否异步，框架均通过异步准备协议等待入口完成。
+页面向导生成 `[OpenEntry] private void OnPrepareOpen(...)`，只保留业务参数，不再额外创建 Args.cs。无参特性按业务参数签名生成 `CreateArgs(...)`、`OpenAsync(...)` 和 `BeginOpen(...)` 重载，同一 Presenter 可声明多个。内部 Args 分支名称由参数类型自动生成，建议通过 CreateArgs 获取参数而不依赖分支名称。命名入口可同时存在。末尾 CancellationToken 不参与签名区分；重复业务签名及省略可选参数造成的相同前缀歧义会产生编译诊断。其他重载选择遵循 C# 规则，例如传入 null 或 default 时可能需要显式指定类型。无需等待时使用 void；需要等待数据加载时改为 async ValueTask 或 async Task，可选声明末尾 CancellationToken，由框架注入。无论业务是否异步，框架均通过异步准备协议等待入口完成。
 
 
 `OpenEntry` 表示显示前的业务初始化，不是“已经显示”或“入场动画结束”的通知。执行顺序为资源加载 → 建立模型、绑定与 Context → 执行入口并等待完成 → 提交打开、显示界面并开始入场。入口抛出异常或异步准备取消时，走现有打开失败或取消清理流程，不提交成功打开。
@@ -600,7 +600,7 @@ await InventoryViewModelDefinition.OpenByItemAsync(pages, route,
 
 ```csharp
 [OpenEntry]
-private void OnOpen(string title)
+private void OnPrepareOpen(string title)
 {
     ViewModel.Title = title;
 }
@@ -613,17 +613,17 @@ private void OnOpen(string title)
 
 ```csharp
 [OpenEntry]
-private void OnOpen(int tab) { }
+private void OnPrepareOpen(int tab) { }
 
 [OpenEntry]
-private void OnOpen(long itemId, bool highlight) { }
+private void OnPrepareOpen(long itemId, bool highlight) { }
 
 // 根据参数选择对应的业务入口。
 await InventoryViewModelDefinition.OpenAsync(pages, route, tab: 2);
 await InventoryViewModelDefinition.OpenAsync(pages, route, itemId: 1001L, highlight: true);
 ```
 
-同类型同顺序的参数无法仅凭参数名称区分，例如 `OnOpen(int tab)` 和 `OnOpen(int itemId)`；这种情况仍需不同方法名和命名 OpenEntry。
+同类型同顺序的参数无法仅凭参数名称区分，例如 `OnPrepareOpen(int tab)` 和 `OnPrepareOpen(int itemId)`；这种情况仍需不同方法名和命名 OpenEntry。
 
 
 ### 直接通过页面名打开
@@ -692,3 +692,49 @@ public partial class InventoryViewModel : ViewModel { }
 `PageDefinition<TViewModel, TArgs, TResult>` 描述页面资源、创建工厂、策略和依赖；`PageHandle<TResult>` 标识一次打开的实例；`PageResult<TResult>` 表达页面完成的业务结果。打开操作结果 `OpenOutcome<TResult>` 与业务结果分开。生成的 `InventoryViewModelDefinition.CreateDefinition()` 提供底层定义工厂，自定义依赖通过 `InventoryPage.ConfigureDefinition(...)` 配置。
 
 目录按职责划分为 Definitions、Handles、Operations、Lifecycle、Ownership 和 Diagnostics。常用公开类型位于 `MUI.Pages`；事件、快照和追踪类型位于 `MUI.Pages.Diagnostics`。`Internal` 下按打开、关闭、依赖、缓存、预加载和显示职责组织实现；PageManager 仍统一协调生命周期提交，不改变执行顺序。
+
+
+### 配置和生命周期边界
+
+`MUISettings` 只保存运行时页面策略、容量、输入与显示配置。控件命名、绑定生成规则、页面生成目录和 IDE 源码输出开关保存于 `ProjectSettings/MUIEditorSettings.asset`，由 `MUIEditorSettings` 管理，只在编辑器加载。同一个 MUISettings Inspector 同时编辑两份配置，编辑器配置不加入 Player 预加载。`RuntimeSettingsAsset` 负责运行时资产发现、创建与构建接入。不会从旧运行时字段自动迁移配置。
+
+页面预设为 `PagePolicyPreset`，序列化配置值为 `PagePolicySettings`，最终运行策略为 `PagePolicy`。通用清理仍称 `ViewInstanceCleanup`，页面与 Widget 共享它。
+
+`OnPrepareOpen` / `IAsyncOpenPreparation.OnPrepareOpenAsync` 均在显示提交前执行；有异步操作时框架等待准备完成，再提交激活。`[OpenEntry]` 方法也属于准备阶段，向导默认命名为 `OnPrepareOpen`；不能把回调开始视为界面已经显示完成。打开方通过 `OpenAsync` 的成功结果观察就绪，转场完成另见句柄的转场任务。
+
+子视图模块统一为 `MUI.Widgets`：`WidgetDefinition` 定义工厂，`WidgetScope` 管理父级所有权，公开 `WidgetHandle` 提供访问和操作契约，内部 `WidgetInstance` 执行生命周期，`WidgetSlot` 协调单内容槽的异步替换。它们不进入 PageManager 的顶层页面集合。
+
+PageManager 仍协调打开和关闭的提交；独立的 `PageTraceBuffer`、`PageCacheCatalog`、`PageCacheBudget`、`PagePreloadRequest`、`PageRenderOrderAllocator` 分别负责追踪存储、缓存目录与淘汰计算、缓存释放预算、共享预加载请求以及显示区间分配。虚拟列表由 `VirtualListSelection` 管理选择状态，由 `VirtualListCell` 管理单元格的原生订阅与节点释放，已有 `VirtualGridLayout` / `VirtualRowIndex` 继续负责几何计算。
+
+
+### 打开完成回调与定时更新
+
+UIPage 与 UIWidget 的 Presenter 都可重写 `protected override void OnOpened()`。此时本次激活已提交显示；页面还会等待进入效果结束（无动画时立即完成）。这是逻辑显示完成通知，不保证 GPU 已绘制一帧。每次激活最多触发一次；缓存重新激活会再次触发，单纯隐藏/覆盖后恢复以及更新参数、换绑不会重复触发。准备失败、显示前关闭不触发；回调抛出异常按打开失败清理。
+
+`OnOpened` 是同步通知，可读取 `ViewModel` 和 `Context.Args`；必须在显示前完成的异步加载仍放在 `OnPrepareOpenAsync`。`OpenAsync` 返回的就绪结果保持原有语义，不额外等待进入动画或 `OnOpened`；打开方等待动画请使用句柄的转场任务。
+
+```csharp
+protected override void OnOpened()
+{
+    // 已打开：播放业务提示、发送展示事件等。
+}
+```
+
+Presenter 通过 OnUpdate 统一更新，无需实现频率接口。默认禁用；显式配置后启用，配置在实例创建时读取。
+
+```csharp
+// 非缩放时间，每帧调用。
+protected override UpdateOptions UpdateOptions => MUI.UpdateOptions.EveryFrame;
+
+protected override void OnUpdate(UpdateTime time)
+{
+    // DeltaTime / UnscaledDeltaTime：上次回调以来累计的缩放/非缩放秒数。
+    // ElapsedTime / UnscaledElapsedTime：本次激活可更新期间累计的两种秒数。
+}
+```
+
+每两秒调用一次可将配置改为 `MUI.UpdateOptions.Every(2f)`；使用缩放时间调度则为 `MUI.UpdateOptions.Every(2f, UpdateTimeMode.Scaled)`。每帧按缩放时间调度使用 `new UpdateOptions(0f, UpdateTimeMode.Scaled)`。选择 Scaled 后，timeScale 为零不调用 OnUpdate；Unscaled 仍可更新。同一回调始终提供两种时间，全部使用 double 秒数。
+
+每帧最多调用一次，卡顿时合并遗漏的回调，保留间隔余量；DeltaTime 与 UnscaledDeltaTime 传实际累计时长，不伪装成配置间隔。准备和进入动画期间、隐藏暂停或缓存停用期间不累计；缓存重新激活从零开始，隐藏后恢复保留累计值。缩放时间停走而界面仍可更新时，非缩放累计值继续增长，在下次回调可读取。
+
+UIPage 和 UIWidget 共用规则。页面暂停由 PagePolicy.TickPause 控制（默认隐藏暂停），Widget 还受父级暂停及 WidgetDefinition.PauseTickWhenHidden 控制。UIHost 自动传递 Time.deltaTime 与 Time.unscaledDeltaTime；手动驱动使用 AdvanceFrame(deltaTime, unscaledDeltaTime)，PageManager.Tick 与 WidgetScope.Tick 同样接收两种帧时长。输入必须为有限非负数，不能同时使用自动与手动驱动。页面进入/退出动画仍使用非缩放时间。

@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using MUI.ChildViews;
+using MUI.Widgets;
 
 namespace MUI.Tabs
 {
@@ -13,8 +13,8 @@ namespace MUI.Tabs
     public sealed partial class TabContentController : IAsyncDisposable
     {
         private readonly AsyncLocal<PreparationFrame> preparing = new AsyncLocal<PreparationFrame>();
-        private readonly ChildViewScope scope;
-        private readonly ChildViewSlot slot;
+        private readonly WidgetScope scope;
+        private readonly WidgetSlot slot;
         private readonly Dictionary<string,
                     TabContentDefinition> definitions = new Dictionary<string,
                     TabContentDefinition>(StringComparer.Ordinal);
@@ -33,13 +33,13 @@ namespace MUI.Tabs
         private TaskCompletionSource<bool> disposal;
 
         /// <summary>绑定活动的父 Scope；父级结束时停止选择，并由父级托管异步清理。</summary>
-        public TabContentController(ChildViewScope scope,
+        public TabContentController(WidgetScope scope,
             IEnumerable<TabContentDefinition> definitions,
             TabPendingDisplay pendingDisplay = TabPendingDisplay.LoadingPlaceholder,
             TimeSpan loadingIndicatorDelay = default,
             TabFailureDisplay failureDisplay = TabFailureDisplay.ErrorPlaceholder,
             TabCacheOptions cacheOptions = null,
-            ChildViewPreparationOptions preparationOptions = null)
+            WidgetPreparationOptions preparationOptions = null)
         {
             this.scope = scope ?? throw new ArgumentNullException(nameof(scope));
             scope.RequireActive();
@@ -89,7 +89,7 @@ namespace MUI.Tabs
             }
 
             ViewModel = new TabViewModel(items);
-            slot = new ChildViewSlot(scope, CacheRetiredAsync, preparationOptions);
+            slot = new WidgetSlot(scope, CacheRetiredAsync, preparationOptions);
             slot.CurrentChanged += OnCurrentChanged;
             scope.Own(this);
             parentCancellation = scope.Token.Register(OnParentCancelled);
@@ -298,7 +298,7 @@ namespace MUI.Tabs
             Publish(new TabSnapshot(target.Key, target.Key, TabPhase.Ready, null, target.Version));
         }
 
-        private async ValueTask<bool> FinishAsync(Operation target, ValueTask<ChildViewChangeResult> change)
+        private async ValueTask<bool> FinishAsync(Operation target, ValueTask<WidgetChangeOutcome> change)
         {
             var indicator = ShowIndicatorAsync(target, target.Cancellation.Token);
             try
@@ -395,11 +395,11 @@ namespace MUI.Tabs
             }
         }
 
-        private void OnCurrentChanged(ChildViewHandle current)
+        private void OnCurrentChanged(WidgetHandle current)
         {
             if (current == null)
             {
-                if (retained != null && (retained.Handle.State == ChildViewState.Closed || retained.Handle.State == ChildViewState.Failed))
+                if (retained != null && (retained.Handle.State == WidgetState.Closed || retained.Handle.State == WidgetState.Failed))
                 {
                     retained = null;
                     var snapshot = ViewModel.Snapshot;
@@ -560,17 +560,17 @@ namespace MUI.Tabs
             }
         }
 
-        private static TabSelectionStatus Convert(ChildViewChangeStatus status)
+        private static TabSelectionStatus Convert(WidgetChangeStatus status)
         {
             switch (status)
             {
-                case ChildViewChangeStatus.Ready:
+                case WidgetChangeStatus.Ready:
                     return TabSelectionStatus.Ready;
-                case ChildViewChangeStatus.Superseded:
+                case WidgetChangeStatus.Superseded:
                     return TabSelectionStatus.Superseded;
-                case ChildViewChangeStatus.Cancelled:
+                case WidgetChangeStatus.Cancelled:
                     return TabSelectionStatus.Cancelled;
-                case ChildViewChangeStatus.ParentInactive:
+                case WidgetChangeStatus.ParentInactive:
                     return TabSelectionStatus.ParentInactive;
                 default:
                     return TabSelectionStatus.Failed;

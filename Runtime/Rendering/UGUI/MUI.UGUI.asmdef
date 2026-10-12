@@ -6,7 +6,7 @@
     "MUI.Resources",
     "Unity.ugui",
     "MUI.Pages",
-    "MUI.ChildViews"
+    "MUI.Widgets"
   ],
   "autoReferenced": true
 }

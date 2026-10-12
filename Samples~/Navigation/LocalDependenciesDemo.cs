@@ -360,7 +360,7 @@ namespace MUI.Samples.Navigation
         private sealed class PagePresenter : Presenter<NavigationPageViewModel, string, int>,
                     IArgsUpdatePresenter<string>
         {
-            protected override void OnOpen(string args) => ViewModel.Title = args;
+            protected override void OnPrepareOpen(string args) => ViewModel.Title = args;
 
             protected override void OnViewModelChanged(NavigationPageViewModel previous) =>
                             ViewModel.Title = Context.Args;

@@ -147,9 +147,9 @@ namespace MUI.Samples.Navigation
         /// <summary>每次打开使用新实例，业务资源随本次关闭清理。</summary>
         private sealed class CachedPagePresenter : PagePresenter
         {
-            protected override void OnOpen(PageArgs args)
+            protected override void OnPrepareOpen(PageArgs args)
             {
-                base.OnOpen(args);
+                base.OnPrepareOpen(args);
                 ViewModel.Item = new ThingItemViewModel { Label = "本次参数：" + args.Selection };
                 ViewModel.DynamicSource = null;
                 ViewModel.DynamicItem = null;

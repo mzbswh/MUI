@@ -8,8 +8,8 @@ namespace MUI.UGUI
     public sealed partial class MUISettings : ScriptableObject
     {
         [SerializeField] private List<MUILayer> layers = CreateLayers();
-        [SerializeField] private MUIPagePolicyValues defaultRules = new MUIPagePolicyValues();
-        [SerializeField] private List<MUIPagePolicy> presets = CreatePresets();
+        [SerializeField] private PagePolicySettings defaultRules = new PagePolicySettings();
+        [SerializeField] private List<PagePolicyPreset> presets = CreatePresets();
         [SerializeField] private string defaultPreset = "Default";
         [SerializeField] private string renderSortingLayer = "Default";
         [SerializeField] private int renderOrderMinimum = -16000;
@@ -20,7 +20,6 @@ namespace MUI.UGUI
         [SerializeField] private RectTransform defaultModalBackdropPrefab = null;
         [SerializeField] private Color defaultModalBackdropColor = new Color(0, 0, 0, 0.45f);
         [SerializeField] private bool automaticFramePump = true;
-        [SerializeField] private bool outputCompilerGeneratedSources = true;
         [SerializeField, Min(0)] private int cacheCapacity = 16;
         [SerializeField, Min(1)] private int queueCapacity = 64;
         [SerializeField, Min(1)] private int preloadCapacity = 32;
@@ -32,7 +31,7 @@ namespace MUI.UGUI
         /// <summary>无项目配置时使用的内置预设名称，与内置规则共用同一来源。</summary>
         public static IReadOnlyList<string> BuiltInPresetNames => CreatePresets().ConvertAll(item => item.Name).AsReadOnly();
 
-        public IReadOnlyList<MUIPagePolicy> Presets => presets == null ? (IReadOnlyList<MUIPagePolicy>)Array.Empty<MUIPagePolicy>() : presets.AsReadOnly();
+        public IReadOnlyList<PagePolicyPreset> Presets => presets == null ? (IReadOnlyList<PagePolicyPreset>)Array.Empty<PagePolicyPreset>() : presets.AsReadOnly();
 
         public string DefaultPreset => defaultPreset;
 
@@ -42,7 +41,6 @@ namespace MUI.UGUI
 
         public bool AutomaticFramePump => automaticFramePump;
 
-        public bool OutputCompilerGeneratedSources => outputCompilerGeneratedSources;
 
         public int CacheCapacity => cacheCapacity;
 
@@ -119,19 +117,11 @@ namespace MUI.UGUI
         public IReadOnlyList<string> Validate()
         {
             var errors = new List<string>();
-            var expressions = new HashSet<string>(StringComparer.Ordinal);
-            if (controlNamingRules != null)
-                foreach (var rule in controlNamingRules)
-                    if (rule == null || string.IsNullOrWhiteSpace(rule.Expression) || !expressions.Add(rule.Match + ":" + rule.Expression) || !Enum.IsDefined(typeof(ControlNameMatch), rule.Match) || rule.ComponentTypes == null || rule.ComponentTypes.Count == 0)
-                        errors.Add("控件命名表达式不能为空或重复，且必须配置组件类型。");
-            try { ModalBackdropStyle.ValidateVisualPrefab(defaultModalBackdropPrefab); }
-            catch (InvalidOperationException error) { errors.Add(error.Message); }
             try
             {
-                ResolvePageDirectory(pagePrefabDirectory, "Example");
-                ResolvePageDirectory(pageScriptDirectory, "Example");
+                ModalBackdropStyle.ValidateVisualPrefab(defaultModalBackdropPrefab);
             }
-            catch (ArgumentException error) { errors.Add(error.Message); }
+            catch (InvalidOperationException error) { errors.Add(error.Message); }
             try
             {
                 CreateRenderOrderOptions();
@@ -174,7 +164,7 @@ namespace MUI.UGUI
                     {
                         errors.Add("预设名称不能为空或重复。");
                     }
-                    else if ((entry.Overrides & ~(MUIPagePolicyFields.All | (MUIPagePolicyFields)2)) != 0)
+                    else if ((entry.Overrides & ~(PagePolicyFields.All | (PagePolicyFields)2)) != 0)
                     {
                         errors.Add(entry.Name + " 包含未知的覆盖选项。");
                     }
@@ -217,16 +207,16 @@ namespace MUI.UGUI
 
         /// <summary>未绑定资产时沿用内置预设；不创建或自动查找 ScriptableObject。</summary>
         public static PagePolicy ResolveBuiltInPolicy(string preset = null, string layer = null, PagePolicyOverrides overrides = null)
-            => Resolve(CreateLayers(), new MUIPagePolicyValues(), CreatePresets(), preset ?? "Default", layer, overrides, "内置默认");
+            => Resolve(CreateLayers(), new PagePolicySettings(), CreatePresets(), preset ?? "Default", layer, overrides, "内置默认");
 
-        private static PagePolicy Resolve(IReadOnlyList<MUILayer> layers, MUIPagePolicyValues defaults,
-            IReadOnlyList<MUIPagePolicy> presets, string preset, string layer, PagePolicyOverrides overrides, string configuration)
+        private static PagePolicy Resolve(IReadOnlyList<MUILayer> layers, PagePolicySettings defaults,
+            IReadOnlyList<PagePolicyPreset> presets, string preset, string layer, PagePolicyOverrides overrides, string configuration)
         {
             if (layer != null && overrides != null && overrides.Layer.HasValue)
             {
                 throw new ArgumentException("页面不能同时覆盖命名层级和数值层级。");
             }
-            MUIPagePolicy selected = null;
+            PagePolicyPreset selected = null;
             foreach (var entry in presets)
             {
                 if (entry.Name == preset)
@@ -241,7 +231,7 @@ namespace MUI.UGUI
             }
 
             var policy = ResolveDefaults(layers, defaults);
-            var presetLayer = (selected.Overrides & MUIPagePolicyFields.Layer) != 0
+            var presetLayer = (selected.Overrides & PagePolicyFields.Layer) != 0
                 ? FindLayer(layers, selected.Values.Layer).Order : policy.Layer;
             policy = selected.Values.CreateOverrides(selected.Overrides, presetLayer).Apply(policy);
             var resolvedLayer = layer == null ? policy.Layer : FindLayer(layers, layer).Order;
@@ -265,13 +255,13 @@ namespace MUI.UGUI
             return new PagePolicyOverrides().Apply(policy, layerName, preset, configuration);
         }
 
-        private static PagePolicy ResolveDefaults(IReadOnlyList<MUILayer> layers, MUIPagePolicyValues defaults)
+        private static PagePolicy ResolveDefaults(IReadOnlyList<MUILayer> layers, PagePolicySettings defaults)
         {
             if (defaults == null)
             {
                 throw new InvalidOperationException("默认规则不能为空。");
             }
-            return defaults.CreateOverrides(MUIPagePolicyFields.All, FindLayer(layers, defaults.Layer).Order).Apply(PagePolicy.Default);
+            return defaults.CreateOverrides(PagePolicyFields.All, FindLayer(layers, defaults.Layer).Order).Apply(PagePolicy.Default);
         }
 
         private static MUILayer FindLayer(IReadOnlyList<MUILayer> layers, string name)
@@ -292,26 +282,26 @@ namespace MUI.UGUI
             new MUILayer("Popup", 100), new MUILayer("Notice", 200)
         };
 
-        private static List<MUIPagePolicy> CreatePresets() => new List<MUIPagePolicy>
+        private static List<PagePolicyPreset> CreatePresets() => new List<PagePolicyPreset>
         {
-            new MUIPagePolicy("Default", MUIPagePolicyFields.None),
-            new MUIPagePolicy("FullScreen", MUIPagePolicyFields.Coverage | MUIPagePolicyFields.PageScope)
+            new PagePolicyPreset("Default", PagePolicyFields.None),
+            new PagePolicyPreset("FullScreen", PagePolicyFields.Coverage | PagePolicyFields.PageScope)
             {
-                Values = new MUIPagePolicyValues { PageRole = PageRole.Main, Coverage = CoveragePolicy.Hide }
+                Values = new PagePolicySettings { PageRole = PageRole.Main, Coverage = CoveragePolicy.Hide }
             },
-            new MUIPagePolicy("Popup", MUIPagePolicyFields.PageScope | MUIPagePolicyFields.Layer | MUIPagePolicyFields.Coverage | MUIPagePolicyFields.Modal)
+            new PagePolicyPreset("Popup", PagePolicyFields.PageScope | PagePolicyFields.Layer | PagePolicyFields.Coverage | PagePolicyFields.Modal)
             {
-                Values = new MUIPagePolicyValues { Layer = "Popup", PageRole = PageRole.Overlay, Coverage = CoveragePolicy.BlockInput, Modal = true }
+                Values = new PagePolicySettings { Layer = "Popup", PageRole = PageRole.Overlay, Coverage = CoveragePolicy.BlockInput, Modal = true }
             },
-            new MUIPagePolicy("Notice", MUIPagePolicyFields.PageScope | MUIPagePolicyFields.Layer | MUIPagePolicyFields.Coverage |
-                MUIPagePolicyFields.Focus | MUIPagePolicyFields.Modal | MUIPagePolicyFields.Back | MUIPagePolicyFields.Input)
+            new PagePolicyPreset("Notice", PagePolicyFields.PageScope | PagePolicyFields.Layer | PagePolicyFields.Coverage |
+                PagePolicyFields.Focus | PagePolicyFields.Modal | PagePolicyFields.Back | PagePolicyFields.Input)
             {
-                Values = new MUIPagePolicyValues { Layer = "Notice", PageRole = PageRole.Independent, ReceivesInput = false, TakesFocus = false, BackBehavior = BackBehavior.Ignore }
+                Values = new PagePolicySettings { Layer = "Notice", PageRole = PageRole.Independent, ReceivesInput = false, TakesFocus = false, BackBehavior = BackBehavior.Ignore }
             },
-            new MUIPagePolicy("Background", MUIPagePolicyFields.PageScope | MUIPagePolicyFields.Layer | MUIPagePolicyFields.Coverage |
-                MUIPagePolicyFields.Focus | MUIPagePolicyFields.Modal | MUIPagePolicyFields.Back | MUIPagePolicyFields.Input)
+            new PagePolicyPreset("Background", PagePolicyFields.PageScope | PagePolicyFields.Layer | PagePolicyFields.Coverage |
+                PagePolicyFields.Focus | PagePolicyFields.Modal | PagePolicyFields.Back | PagePolicyFields.Input)
             {
-                Values = new MUIPagePolicyValues { Layer = "Background", PageRole = PageRole.Independent, ReceivesInput = false, TakesFocus = false, BackBehavior = BackBehavior.Ignore }
+                Values = new PagePolicySettings { Layer = "Background", PageRole = PageRole.Independent, ReceivesInput = false, TakesFocus = false, BackBehavior = BackBehavior.Ignore }
             }
         };
     }

@@ -6,7 +6,7 @@
     "MUI.Resources",
     "MUI.Samples.ResourceIntegration",
     "MUI.Pages",
-    "MUI.ChildViews",
+    "MUI.Widgets",
     "MUI.Themes",
     "MUI.UGUI",
     "Unity.ugui"

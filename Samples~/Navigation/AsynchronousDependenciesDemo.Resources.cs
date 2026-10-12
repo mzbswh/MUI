@@ -48,7 +48,7 @@ namespace MUI.Samples.Navigation
             public void Dispose() => inner.Dispose();
         }
 
-        private sealed class DependencyPresenter : Presenter<ThingItemViewModel, Unit, Unit>, IAsyncOpenPresenter<Unit>
+        private sealed class DependencyPresenter : Presenter<ThingItemViewModel, Unit, Unit>, IAsyncOpenPreparation<Unit>
         {
             private readonly bool fail;
             private readonly int prepareDelay;
@@ -61,13 +61,13 @@ namespace MUI.Samples.Navigation
                 this.cleanupDelay = cleanupDelay;
             }
 
-            protected override void OnOpen(Unit args)
+            protected override void OnPrepareOpen(Unit args)
             {
                 ViewModel.Label = fail ? "准备后故意失败" : "异步共享状态";
                 Context.Scope.OnDisposeAsync(CleanupAsync);
             }
 
-            public async ValueTask OnOpenAsync(Unit args, CancellationToken cancellationToken)
+            public async ValueTask OnPrepareOpenAsync(Unit args, CancellationToken cancellationToken)
             {
                 Debug.Log($"依赖开始异步准备，失败模式={fail}");
                 try

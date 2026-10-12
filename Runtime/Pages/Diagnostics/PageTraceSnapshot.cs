@@ -29,8 +29,8 @@ namespace MUI.Pages.Diagnostics
         AttachedDependencies,
         PresenterCreate,
         Binding,
-        PresenterOpen,
-        PresenterOpenAsync
+        PresenterPrepareOpen,
+        PresenterPrepareOpenAsync
     }
 
     /// <summary>提交后的转场与实例清理阶段；与候选准备阶段分别计时。</summary>

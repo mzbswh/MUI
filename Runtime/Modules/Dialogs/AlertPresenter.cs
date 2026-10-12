@@ -6,7 +6,7 @@ namespace MUI.Dialogs
     public sealed class AlertPresenter : Presenter<AlertViewModel, AlertRequest, Unit>
     {
         /// <summary>在打开阶段设置文案；空请求视为调用错误。</summary>
-        protected override void OnOpen(AlertRequest args)
+        protected override void OnPrepareOpen(AlertRequest args)
         {
             ViewModel.SetRequest(args ?? throw new System.ArgumentNullException(nameof(args)));
         }

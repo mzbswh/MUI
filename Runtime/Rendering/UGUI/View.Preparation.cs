@@ -1,13 +1,13 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using MUI.ChildViews;
+using MUI.Widgets;
 
 namespace MUI.UGUI
 {
     public sealed partial class View
     {
-        public bool TryCompleteChildPreparation()
+        public bool TryCompleteWidgetPreparation()
         {
             var scope = childViews;
             var resourceContext = activeResourceContext;
@@ -18,7 +18,7 @@ namespace MUI.UGUI
             }
             foreach (var element in elements)
             {
-                if (element == null || !(element is IChildViewElement child))
+                if (element == null || !(element is IWidgetElement child))
                 {
                     continue;
                 }
@@ -36,7 +36,7 @@ namespace MUI.UGUI
             return true;
         }
 
-        private void RequirePreparationActivation(ChildViewScope scope, ViewResourceContext resourceContext)
+        private void RequirePreparationActivation(WidgetScope scope, ViewResourceContext resourceContext)
         {
             RequireAlive();
             if (scope == null || !scope.IsActive || !ReferenceEquals(childViews, scope) ||
@@ -46,12 +46,12 @@ namespace MUI.UGUI
             }
         }
 
-        public void CommitChildActivation()
+        public void CommitWidgetActivation()
         {
             var scope = childViews;
             var resourceContext = activeResourceContext;
             RequirePreparationActivation(scope, resourceContext);
-            if (!TryCompleteChildPreparation())
+            if (!TryCompleteWidgetPreparation())
             {
                 throw new InvalidOperationException("Required child preparation changed during parent commit.");
             }
@@ -65,7 +65,7 @@ namespace MUI.UGUI
             }
         }
 
-        public async ValueTask CompleteChildPreparationAsync(CancellationToken cancellationToken)
+        public async ValueTask CompleteWidgetPreparationAsync(CancellationToken cancellationToken)
         {
             var activationToken = childActivationToken;
             var scope = childViews;
@@ -75,7 +75,7 @@ namespace MUI.UGUI
                 cancellationToken.ThrowIfCancellationRequested();
                 activationToken.ThrowIfCancellationRequested();
                 RequirePreparationActivation(scope, resourceContext);
-                if (TryCompleteChildPreparation())
+                if (TryCompleteWidgetPreparation())
                 {
                     RequirePreparationActivation(scope, resourceContext);
                     return;
@@ -91,7 +91,7 @@ namespace MUI.UGUI
 
                 foreach (var element in elements)
                 {
-                    if (element == null || !(element is IChildViewElement child))
+                    if (element == null || !(element is IWidgetElement child))
                     {
                         continue;
                     }

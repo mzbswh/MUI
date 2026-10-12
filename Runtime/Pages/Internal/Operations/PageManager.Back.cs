@@ -17,8 +17,8 @@ namespace MUI.Pages
             }
 
             // 复用实际显示顺序（含依赖排序），不能把低层模态排到前台页面之前。
-            var candidates = activeOrder.Where(entry => (entry.State == ViewState.Open && entry.HostInteractable) ||
-                ((entry.State == ViewState.Open || entry.ExitPending) && entry.HostVisible && entry.Definition.Policy.Modal)).Reverse().ToArray();
+            var candidates = activeOrder.Where(entry => (entry.State == PageState.Open && entry.HostInteractable) ||
+                ((entry.State == PageState.Open || entry.ExitPending) && entry.HostVisible && entry.Definition.Policy.Modal)).Reverse().ToArray();
             foreach (var instance in candidates)
             {
                 if (instance.HostVisible && instance.Definition.Policy.Modal && (instance.ExitPending || !instance.HostInteractable))
@@ -26,7 +26,7 @@ namespace MUI.Pages
                     return BackOutcome(CloseStatus.Blocked);
                 }
 
-                if (instance.State != ViewState.Open || !instance.HostInteractable)
+                if (instance.State != PageState.Open || !instance.HostInteractable)
                 {
                     continue;
                 }
@@ -55,7 +55,7 @@ namespace MUI.Pages
                         {
                             handled = local.TryHandleLocalBack();
                         }
-                        if (handled || instance.State != ViewState.Open || !instance.HostInteractable ||
+                        if (handled || instance.State != PageState.Open || !instance.HostInteractable ||
                             (instance.View is IInputView currentInput && !currentInput.IsInputEnabled))
                         {
                             return BackOutcome(CloseStatus.Handled);
@@ -101,7 +101,7 @@ namespace MUI.Pages
                     }
 
                     // 处理器可能请求关闭自身，同一次手势不能继续传给下层。
-                    if (instance.State != ViewState.Open || response == BackResponse.Handled)
+                    if (instance.State != PageState.Open || response == BackResponse.Handled)
                     {
                         return BackOutcome(CloseStatus.Handled);
                     }

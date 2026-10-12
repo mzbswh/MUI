@@ -34,7 +34,7 @@ namespace MUI.Editor
             references.Add(configuration);
             var settingsError = new HelpBox();
             references.Add(settingsError);
-            var openSettings = new Button(MUIProjectSettings.OpenOrCreate);
+            var openSettings = new Button(RuntimeSettingsAsset.OpenOrCreate);
             references.Add(openSettings);
             var viewRoot = new PropertyField(serializedObject.FindProperty("viewRoot"), L.Get("editor.UIHostInspector.6447c4dd81"));
             viewRoot.tooltip = L.Get("editor.UIHostInspector.15bfd7c74a");
@@ -48,7 +48,7 @@ namespace MUI.Editor
                 {
                     return;
                 }
-                var found = MUIProjectSettings.TryGet(out var global, out var error);
+                var found = RuntimeSettingsAsset.TryGet(out var global, out var error);
                 configuration.SetValueWithoutNotify(global);
                 settingsError.text = error ?? L.Get("globalSettings.help");
                 settingsError.messageType = found ? HelpBoxMessageType.Info : HelpBoxMessageType.Error;

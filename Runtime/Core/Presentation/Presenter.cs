@@ -46,9 +46,30 @@ namespace MUI
         {
         }
 
-        protected virtual void OnOpen(TArgs args)
+        /// <summary>打开前的同步准备；此时尚未提交显示。需要异步准备时实现 IAsyncOpenPreparation。</summary>
+        protected virtual void OnPrepareOpen(TArgs args)
         {
         }
+
+        /// <summary>
+        /// 本次激活提交并首次显示后调用；页面还会等待进入效果结束。
+        /// 每次激活调用一次，单纯隐藏后恢复不会重复调用。此回调不等待异步工作。
+        /// </summary>
+        protected virtual void OnOpened()
+        {
+        }
+
+        internal void Opened() => OnOpened();
+
+        /// <summary>显式启用更新；每个实例创建时读取一次，默认禁用。</summary>
+        protected virtual UpdateOptions UpdateOptions => MUI.UpdateOptions.Disabled;
+
+        protected virtual void OnUpdate(UpdateTime time)
+        {
+        }
+
+        internal UpdateOptions GetUpdateOptions() => UpdateOptions;
+        internal void Update(UpdateTime time) => OnUpdate(time);
 
         protected virtual void OnClose()
         {
@@ -97,10 +118,10 @@ namespace MUI
             OnCreate();
         }
 
-        internal void Open(ActivationContext<TArgs, TResult> context)
+        internal void PrepareOpen(ActivationContext<TArgs, TResult> context)
         {
             Context = context;
-            OnOpen(context.Args);
+            OnPrepareOpen(context.Args);
         }
 
         internal void Close()

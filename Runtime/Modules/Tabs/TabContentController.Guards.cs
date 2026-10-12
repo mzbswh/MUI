@@ -1,7 +1,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using MUI.ChildViews;
+using MUI.Widgets;
 
 namespace MUI.Tabs
 {
@@ -181,7 +181,7 @@ namespace MUI.Tabs
         {
             public TabContentDefinition Source;
             public TabContentDefinition Target;
-            public ChildViewHandle SourceHandle;
+            public WidgetHandle SourceHandle;
             public bool ForceReload;
             public CancellationTokenSource Cancellation;
             public CancellationTokenRegistration Registration;

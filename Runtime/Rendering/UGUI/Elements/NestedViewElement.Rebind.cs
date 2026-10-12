@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using MUI.ChildViews;
+using MUI.Widgets;
 
 namespace MUI.UGUI
 {
@@ -45,7 +45,7 @@ namespace MUI.UGUI
             var unchanged = !bindsModel || (ReferenceEquals(DisplayedViewModel, next) &&
                 (next != null || previous == null || !previous.IsActive));
             PreparedViewRebind staged = null;
-            ChildViewHandle<ViewModel, Unit> candidate = null;
+            WidgetHandle<ViewModel, Unit> candidate = null;
             try
             {
                 if (!unchanged && next != null)
@@ -78,7 +78,7 @@ namespace MUI.UGUI
                     {
                         await candidate.DisposeAsync();
                     }
-                    else if (failure is ChildViewPreparationException preparation)
+                    else if (failure is WidgetPreparationException preparation)
                     {
                         await preparation.CleanupCompletion;
                     }

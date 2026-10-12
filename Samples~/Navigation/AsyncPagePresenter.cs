@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace MUI.Samples.Navigation
 {
-    public sealed class AsyncPagePresenter : PagePresenter, IAsyncOpenPresenter<PageArgs>, IAsyncClosePresenter
+    public sealed class AsyncPagePresenter : PagePresenter, IAsyncOpenPreparation<PageArgs>, IAsyncClosePresenter
     {
         private readonly PageManager pages;
         private readonly PageDefinition<PageViewModel, PageArgs, int> otherRoute;
@@ -16,14 +16,14 @@ namespace MUI.Samples.Navigation
             this.otherRoute = otherRoute;
         }
 
-        public async ValueTask OnOpenAsync(PageArgs args, CancellationToken cancellationToken)
+        public async ValueTask OnPrepareOpenAsync(PageArgs args, CancellationToken cancellationToken)
         {
-            Debug.Log("MUI Navigation OnOpenAsync begin");
+            Debug.Log("MUI Navigation OnPrepareOpenAsync begin");
             await Task.Delay(100, cancellationToken);
             var nested = await pages.OpenAsync(otherRoute, new PageArgs("Should be rejected", 0));
             Debug.Log("MUI Navigation nested open: " + nested.Rejection);
             Context.Apply(() => ViewModel.Title = args.Title + " (ready)");
-            Debug.Log("MUI Navigation OnOpenAsync ready");
+            Debug.Log("MUI Navigation OnPrepareOpenAsync ready");
         }
 
         public async ValueTask OnCloseAsync(CancellationToken cancellationToken)

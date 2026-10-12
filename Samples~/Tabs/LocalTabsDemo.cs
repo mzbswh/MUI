@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using MUI.ChildViews;
+using MUI.Widgets;
 using MUI.Resources;
 using MUI.Tabs;
 using MUI.UGUI;
@@ -38,13 +38,13 @@ namespace MUI.Samples.Tabs
                 var provider = lifetime.OwnDisposable(new PrefabViewProvider(parentView.transform,
                     new[] { new KeyValuePair<ViewResource, GameObject>(resource, pagePrefab) }));
                 var mounted = content.CreateProvider(provider);
-                var template = new ChildViewTemplate<TabPageViewModel, string>(resource,
+                var template = new WidgetDefinition<TabPageViewModel, string>(resource,
                     () =>
                     {
                         ++createdModels;
                         return new TabPageViewModel();
                     }, TabPageViewModelBindingFactory.Create, _ => new PagePresenter());
-                parentView.BeginChildActivation(lifetime);
+                parentView.BeginWidgetActivation(lifetime);
                 definitions = new[]
                 {
                     new TabContentDefinition("inventory", "背包",
@@ -60,7 +60,7 @@ namespace MUI.Samples.Tabs
                         return await scope.PrepareAsync(template, mounted, "任务", cancellationToken: token);
                     })
                 };
-                controller = new TabContentController(parentView.ChildViews, definitions,
+                controller = new TabContentController(parentView.Widgets, definitions,
                     failureDisplay: TabFailureDisplay.RestorePrevious,
                     cacheOptions: new TabCacheOptions(TabContentRetention.CacheRecent, capacity: 2,
                         timeToLive: TimeSpan.FromSeconds(5)));
@@ -83,7 +83,7 @@ namespace MUI.Samples.Tabs
                 });
                 Report(await controller.SelectAsync("inventory", lifetime.Token));
                 lifetime.Token.ThrowIfCancellationRequested();
-                parentView.CommitChildActivation();
+                parentView.CommitWidgetActivation();
                 parentView.SetHostState(true, true);
             }
             catch (Exception error)
@@ -203,7 +203,7 @@ namespace MUI.Samples.Tabs
 
         private sealed class PagePresenter : Presenter<TabPageViewModel, string, Unit>
         {
-            protected override void OnOpen(string title) => ViewModel.Title = title;
+            protected override void OnPrepareOpen(string title) => ViewModel.Title = title;
         }
     }
 }

@@ -16,8 +16,8 @@ namespace MUI.Pages
             get
             {
                 var operation = activeTraceOperation == null ? default : activeTraceOperation.Value;
-                return traceRecording && operation.Id != 0 &&
-                    ReferenceEquals(operation.Session, traceSession) && !operation.IsFinished
+                return traceBuffer.IsRecording && operation.Id != 0 &&
+                    ReferenceEquals(operation.Session, traceBuffer.Session) && !operation.IsFinished
                     ? operation : default;
             }
         }
@@ -66,11 +66,11 @@ namespace MUI.Pages
 
         private PageTraceOperation BeginOperationTrace(string key, string name, PageHandle source = default)
         {
-            if (!traceRecording || nextTracedOperationId == long.MaxValue)
+            if (!traceBuffer.IsRecording || traceBuffer.NextOperationId == long.MaxValue)
             {
                 return PageTraceOperation.ForDiagnostics(name, key, source);
             }
-            var operation = new PageTraceOperation(traceSession, ++nextTracedOperationId,
+            var operation = new PageTraceOperation(traceBuffer.Session, ++traceBuffer.NextOperationId,
                 name, PageTraceEntry.Limit(key), Stopwatch.GetTimestamp(), source);
             AppendTrace(new PageTraceEntry(host, operation.Id, name, operation.Key,
                 operation.Timestamp, false, source, string.Empty, null));
@@ -85,7 +85,7 @@ namespace MUI.Pages
                 return;
             }
             operation.MarkFinished();
-            if (!traceRecording || !ReferenceEquals(operation.Session, traceSession))
+            if (!traceBuffer.IsRecording || !ReferenceEquals(operation.Session, traceBuffer.Session))
             {
                 return;
             }

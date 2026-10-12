@@ -1,7 +1,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using MUI.ChildViews;
+using MUI.Widgets;
 
 namespace MUI.Tabs
 {
@@ -17,7 +17,7 @@ namespace MUI.Tabs
         /// <param name="estimatedRetainedBytes">停用后仍持有的实例资源估算字节；未知时为 null，不代表实际进程内存。</param>
         public TabContentDefinition(string key,
             string label,
-            Func<ChildViewScope, CancellationToken, ValueTask<ChildViewHandle>> prepare,
+            Func<WidgetScope, CancellationToken, ValueTask<WidgetHandle>> prepare,
             Func<bool> isEnabled = null,
             Func<TabLeaveContext, CancellationToken, ValueTask<bool>> canLeaveAsync = null,
             long? estimatedRetainedBytes = null)
@@ -59,7 +59,7 @@ namespace MUI.Tabs
         }
 
         // 工厂和策略只交给控制器执行，表现层只观察 ViewModel。
-        internal Func<ChildViewScope, CancellationToken, ValueTask<ChildViewHandle>> Prepare
+        internal Func<WidgetScope, CancellationToken, ValueTask<WidgetHandle>> Prepare
         {
             get;
         }

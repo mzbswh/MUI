@@ -253,7 +253,7 @@ namespace MUI.Editor
             {
                 return;
             }
-            if (!MUIProjectSettings.TryGet(out _, out var configurationError))
+            if (!RuntimeSettingsAsset.TryGet(out _, out var configurationError))
             {
                 ResetSnapshots();
                 SetMessage(configurationError, HelpBoxMessageType.Error);

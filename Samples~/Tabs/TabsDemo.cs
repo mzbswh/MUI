@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using MUI.ChildViews;
+using MUI.Widgets;
 using MUI.Resources;
 using MUI.Tabs;
 using MUI.UGUI;
@@ -95,19 +95,26 @@ namespace MUI.Samples.Tabs
                 tabBar.ConfigureButtonTemplate(templateButton);
                 var view = root.gameObject.AddComponent<View>();
                 view.Initialize();
-                view.BeginChildActivation(lifetime);
+                view.BeginWidgetActivation(lifetime);
                 var prefab = Node("TabPage", canvasObject.transform, new Vector2(650, 220), Vector2.zero);
                 prefab.gameObject.SetActive(false);
                 prefab.gameObject.AddComponent<Image>().color = new Color(0.17f, 0.24f, 0.32f);
                 AddText("Title", "Preparing", prefab, new Vector2(600, 80), Vector2.zero).gameObject.AddComponent<TextElement>();
                 prefab.gameObject.AddComponent<View>();
+                var questPrefab = UnityEngine.Object.Instantiate(prefab.gameObject, canvasObject.transform);
+                questPrefab.name = "QuestTab";
+                questPrefab.GetComponent<UnityEngine.UI.Image>().color = new Color(0.24f, 0.17f, 0.32f);
+                var questResource = new ViewResource("QuestTab");
                 var resource = new ViewResource("TabPage");
                 provider = new PrefabViewProvider(canvasObject.transform,
-                    new[] { new KeyValuePair<ViewResource, GameObject>(resource, prefab.gameObject) });
+                    new[] { new KeyValuePair<ViewResource, GameObject>(resource, prefab.gameObject),
+                        new KeyValuePair<ViewResource, GameObject>(questResource, questPrefab) });
                 versionedProvider = new VersionedTabProvider(provider);
                 var mounted = content.CreateProvider(versionedProvider);
-                var template = new ChildViewTemplate<TabPageViewModel, TabPageArgs>(resource,
+                var template = new WidgetDefinition<TabPageViewModel, TabPageArgs>(resource,
                     () => new TabPageViewModel(), TabPageViewModelBindingFactory.Create, _ => new TabPagePresenter());
+                var questDefinition = new WidgetDefinition<QuestTabViewModel, TabPageArgs>(questResource,
+                    () => new QuestTabViewModel(), QuestTabViewModelBindingFactory.Create, _ => new QuestTabPresenter());
                 var questAttempts = 0;
                 var allowLeave = true;
                 var guardCalls = 0;
@@ -122,22 +129,22 @@ namespace MUI.Samples.Tabs
                             return allowLeave;
                         }),
                     new TabContentDefinition("quests", "Quests", async (scope, token) =>
-                        await scope.PrepareAsync(template, mounted, new TabPageArgs("Quests", ++questAttempts == 1, pageDelayMilliseconds, ignorePagePreparationCancellation), cancellationToken: token)),
+                        await scope.PrepareAsync(questDefinition, mounted, new TabPageArgs("Quests", ++questAttempts == 1, pageDelayMilliseconds, ignorePagePreparationCancellation), cancellationToken: token)),
                     new TabContentDefinition("locked", "Locked", async (scope, token) =>
                         await scope.PrepareAsync(template, mounted, new TabPageArgs("Locked", delayMilliseconds: pageDelayMilliseconds, ignorePreparationCancellation: ignorePagePreparationCancellation), cancellationToken: token), () => false)
                 };
-                controller = new TabContentController(view.ChildViews, catalog,
+                controller = new TabContentController(view.Widgets, catalog,
                     keepPreviousWhileLoading ? TabPendingDisplay.KeepPrevious :
                         blankWhileLoading ? TabPendingDisplay.Blank : TabPendingDisplay.LoadingPlaceholder,
                     TimeSpan.FromMilliseconds(40), failureDisplay,
                     cacheOptions: cacheCapacity == 0 ? null : new TabCacheOptions(TabContentRetention.CacheRecent, cacheCapacity,
                         timeToLive: cacheTimeToLiveSeconds == 0 ? (TimeSpan?)null : TimeSpan.FromSeconds(cacheTimeToLiveSeconds)),
-                    preparationOptions: new ChildViewPreparationOptions(
+                    preparationOptions: new WidgetPreparationOptions(
                         preparationTimeoutSeconds == 0 ? (TimeSpan?)null : TimeSpan.FromSeconds(preparationTimeoutSeconds),
                         maxQuarantinedPreparations));
                 content.Bind(controller);
                 tabBar.Bind(controller);
-                view.CommitChildActivation();
+                view.CommitWidgetActivation();
                 view.SetHostState(true, true);
                 root.gameObject.SetActive(true);
                 var first = controller.SelectAsync("inventory").AsTask();

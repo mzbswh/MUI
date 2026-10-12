@@ -8,6 +8,6 @@
   <ItemGroup>
     <Compile Include="../../Runtime/Modules/Tabs/**/*.cs" />
     <ProjectReference Include="MUI.Core.csproj" />
-    <ProjectReference Include="MUI.ChildViews.csproj" />
+    <ProjectReference Include="MUI.Widgets.csproj" />
   </ItemGroup>
 </Project>

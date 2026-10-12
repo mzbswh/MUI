@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using MUI.ChildViews;
+using MUI.Widgets;
 using MUI.Resources;
 using MUI.UGUI;
 using UnityEngine;
@@ -19,9 +19,9 @@ namespace MUI.Samples.Navigation
         private readonly LifetimeScope lifetime = new LifetimeScope();
         private readonly ViewResource resource = new ViewResource("LocalThingItem");
         private PrefabViewProvider provider;
-        private ChildViewScope scope;
-        private ChildViewTemplate<ThingItemViewModel, string> template;
-        private ChildViewHandle<ThingItemViewModel, string> item;
+        private WidgetScope scope;
+        private WidgetDefinition<ThingItemViewModel, string> template;
+        private WidgetHandle<ThingItemViewModel, string> item;
         private bool running;
 
         private async void Start()
@@ -35,8 +35,8 @@ namespace MUI.Samples.Navigation
 
                 provider = lifetime.OwnDisposable(new PrefabViewProvider(contentHost,
                     new[] { new KeyValuePair<ViewResource, GameObject>(resource, itemPrefab.gameObject) }));
-                scope = new ChildViewScope(lifetime);
-                template = new ChildViewTemplate<ThingItemViewModel, string>(resource,
+                scope = new WidgetScope(lifetime);
+                template = new WidgetDefinition<ThingItemViewModel, string>(resource,
                     () => new ThingItemViewModel { Label = "本地道具 × 10" },
                     (view, model) => BindingRegistry.Create(view, model),
                     _ => new LocalThingPresenter());
@@ -90,7 +90,7 @@ namespace MUI.Samples.Navigation
 
         private async Task ApplyItemArgsAsync(string next)
         {
-            if (item == null || item.State != ChildViewState.Active)
+            if (item == null || item.State != WidgetState.Active)
             {
                 return;
             }
@@ -115,7 +115,7 @@ namespace MUI.Samples.Navigation
 
         private async Task RebindItemAsync()
         {
-            if (item == null || item.State != ChildViewState.Active)
+            if (item == null || item.State != WidgetState.Active)
             {
                 return;
             }
@@ -154,7 +154,7 @@ namespace MUI.Samples.Navigation
 
         private async Task DeactivateItemAsync()
         {
-            if (item == null || item.State != ChildViewState.Active)
+            if (item == null || item.State != WidgetState.Active)
             {
                 return;
             }
@@ -175,7 +175,7 @@ namespace MUI.Samples.Navigation
 
         private async Task ReactivateItemAsync()
         {
-            if (item == null || item.State != ChildViewState.Inactive)
+            if (item == null || item.State != WidgetState.Inactive)
             {
                 return;
             }
@@ -217,7 +217,7 @@ namespace MUI.Samples.Navigation
 
         private void ForgetClosedItem()
         {
-            if (item != null && (item.State == ChildViewState.Closed || item.State == ChildViewState.Failed))
+            if (item != null && (item.State == WidgetState.Closed || item.State == WidgetState.Failed))
             {
                 item = null;
             }

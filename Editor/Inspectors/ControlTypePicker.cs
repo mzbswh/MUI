@@ -25,14 +25,17 @@ namespace MUI.Editor
 
         internal ControlTypePicker(UnityEngine.Object owner, string path, string rulePattern)
         {
-            this.owner = owner; this.path = path; this.rulePattern = rulePattern;
+            this.owner = owner;
+            this.path = path;
+            this.rulePattern = rulePattern;
             using (var serialized = new SerializedObject(owner))
             {
                 var selected = Read(serialized.FindProperty(path));
                 var available = TypeCache.GetTypesDerivedFrom<MonoBehaviour>().Where(type => type.IsVisible && !type.IsAbstract && !type.IsGenericType &&
                     !typeof(Element).IsAssignableFrom(type) && type != typeof(View)).ToList();
                 var tmp = Type.GetType("TMPro.TMP_Text, Unity.TextMeshPro", false);
-                if (tmp != null) available.Add(tmp);
+                if (tmp != null)
+                    available.Add(tmp);
                 entries = available.Select(type => type.FullName + ", " + type.Assembly.GetName().Name).Concat(selected)
                     .GroupBy(value => Type.GetType(value, false)?.AssemblyQualifiedName ?? value).Select(group => group.First())
                     .OrderBy(value => selected.Any(item => Same(item, value)) ? 0 : IsCommon(value) ? 1 : 2)
@@ -54,7 +57,8 @@ namespace MUI.Editor
             }
             var row = EditorGUILayout.GetControlRect(false, 27);
             var hover = row.Contains(Event.current.mousePosition);
-            if (Event.current.type == EventType.MouseMove) editorWindow.Repaint();
+            if (Event.current.type == EventType.MouseMove)
+                editorWindow.Repaint();
             var dark = EditorGUIUtility.isProSkin;
             if (chosen)
                 EditorGUI.DrawRect(row, dark ? new Color(0.20f, 0.40f, 0.60f, 0.65f) : new Color(0.55f, 0.76f, 0.96f));
@@ -80,21 +84,45 @@ namespace MUI.Editor
 
         public override void OnGUI(Rect rect)
         {
-            if (owner == null) { editorWindow.Close(); return; }
-            if (Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Escape) { editorWindow.Close(); return; }
+            if (owner == null)
+            {
+                editorWindow.Close();
+                return;
+            }
+            if (Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Escape)
+            {
+                editorWindow.Close();
+                return;
+            }
             using (var serialized = new SerializedObject(owner))
             {
                 var values = serialized.FindProperty(path);
                 var expressionPath = path.Substring(0, path.LastIndexOf('.')) + ".Expression";
                 var prefix = serialized.FindProperty(expressionPath);
-                if (values == null || prefix == null || prefix.stringValue != rulePattern) { editorWindow.Close(); return; }
+                if (values == null || prefix == null || prefix.stringValue != rulePattern)
+                {
+                    editorWindow.Close();
+                    return;
+                }
                 EditorGUILayout.LabelField(L.Get("typePicker.title"), EditorStyles.boldLabel);
                 GUI.SetNextControlName("ComponentSearch");
                 var nextQuery = EditorGUILayout.TextField(query, EditorStyles.toolbarSearchField);
-                if (nextQuery != query) { query = nextQuery; scroll = Vector2.zero; }
-                if (focusSearch) { EditorGUI.FocusTextInControl("ComponentSearch"); focusSearch = false; }
+                if (nextQuery != query)
+                {
+                    query = nextQuery;
+                    scroll = Vector2.zero;
+                }
+                if (focusSearch)
+                {
+                    EditorGUI.FocusTextInControl("ComponentSearch");
+                    focusSearch = false;
+                }
                 var nextFilter = GUILayout.Toolbar(filter, new[] { L.Get("typePicker.all"), L.Get("typePicker.common"), L.Get("typePicker.selected") });
-                if (nextFilter != filter) { filter = nextFilter; scroll = Vector2.zero; }
+                if (nextFilter != filter)
+                {
+                    filter = nextFilter;
+                    scroll = Vector2.zero;
+                }
                 var selected = Read(values);
                 var count = 0;
                 scroll = EditorGUILayout.BeginScrollView(scroll);
@@ -102,27 +130,34 @@ namespace MUI.Editor
                 {
                     var type = Type.GetType(value, false);
                     var chosen = selected.Any(item => Same(item, value));
-                    if (filter == 1 && !IsCommon(value) || filter == 2 && !chosen) continue;
+                    if (filter == 1 && !IsCommon(value) || filter == 2 && !chosen)
+                        continue;
                     if (!string.IsNullOrWhiteSpace(query) && query.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries)
-                        .Any(word => value.IndexOf(word, StringComparison.OrdinalIgnoreCase) < 0)) continue;
+                        .Any(word => value.IndexOf(word, StringComparison.OrdinalIgnoreCase) < 0))
+                        continue;
                     count++;
                     var next = DrawComponentRow(value, type, chosen, count);
                     if (next != chosen)
                     {
                         for (var i = values.arraySize - 1; i >= 0; i--)
-                            if (Same(values.GetArrayElementAtIndex(i).stringValue, value)) values.DeleteArrayElementAtIndex(i);
-                        if (next) values.GetArrayElementAtIndex(values.arraySize++).stringValue = value;
-                        serialized.ApplyModifiedProperties();
+                            if (Same(values.GetArrayElementAtIndex(i).stringValue, value))
+                                values.DeleteArrayElementAtIndex(i);
+                        if (next)
+                            values.GetArrayElementAtIndex(values.arraySize++).stringValue = value;
+                        if (serialized.ApplyModifiedProperties() && serialized.targetObject is MUIEditorSettings authoring)
+                            authoring.SaveSettings();
                         editorWindow.Repaint();
                         UnityEditorInternal.InternalEditorUtility.RepaintAllViews();
                     }
                 }
-                if (count == 0) EditorGUILayout.LabelField(L.Get("typePicker.empty"), EditorStyles.centeredGreyMiniLabel);
+                if (count == 0)
+                    EditorGUILayout.LabelField(L.Get("typePicker.empty"), EditorStyles.centeredGreyMiniLabel);
                 EditorGUILayout.EndScrollView();
                 using (new EditorGUILayout.HorizontalScope())
                 {
                     EditorGUILayout.LabelField(L.Format("typePicker.count", count, values.arraySize), EditorStyles.miniLabel);
-                    if (GUILayout.Button(L.Get("typePicker.done"), GUILayout.Width(80))) editorWindow.Close();
+                    if (GUILayout.Button(L.Get("typePicker.done"), GUILayout.Width(80)))
+                        editorWindow.Close();
                 }
             }
         }

@@ -10,14 +10,11 @@ namespace MUI.Pages
         private readonly List<PageInstance> tickSnapshot = new List<PageInstance>();
         private bool ticking;
 
-        /// <summary>UIHost 提供非缩放帧时长；其他宿主必须确保只有一个 Tick 驱动器。</summary>
-        public void Tick(float unscaledDeltaTime)
+        /// <summary>UIHost 提供缩放与非缩放帧时长；其他宿主必须确保只有一个 Tick 驱动器。</summary>
+        public void Tick(float deltaTime, float unscaledDeltaTime)
         {
             AssertThread();
-            if (unscaledDeltaTime < 0 || float.IsNaN(unscaledDeltaTime) || float.IsInfinity(unscaledDeltaTime))
-            {
-                throw new ArgumentOutOfRangeException(nameof(unscaledDeltaTime));
-            }
+            PresenterUpdateClock.Validate(deltaTime, unscaledDeltaTime);
 
             if (IsShutdown || IsReentrant || ticking)
             {
@@ -43,20 +40,16 @@ namespace MUI.Pages
 
                         if (instance.HasTick)
                         {
-                            var count = ViewTickTiming.Due(ref instance.TickRemainder, unscaledDeltaTime, instance.TickInterval, instance.MaxTickCatchUp);
-                            for (var i = 0; i < count && CanTick(instance); i++)
-                            {
-                                InvokeTick(instance, instance.TickInterval == 0 ? unscaledDeltaTime : instance.TickInterval);
-                            }
+                            InvokeTick(instance, deltaTime, unscaledDeltaTime);
                         }
 
-                        if (CanTick(instance) && instance.View is IChildTickHost children && children.HasChildTicks)
+                        if (CanTick(instance) && instance.View is IWidgetTickHost children && children.HasWidgetTicks)
                         {
                             try
                             {
                                 using (EnterCallback(instance))
                                 {
-                                    children.TickChildren(unscaledDeltaTime);
+                                    children.TickChildren(deltaTime, unscaledDeltaTime);
                                 }
                             }
                             catch (Exception error)
@@ -81,7 +74,7 @@ namespace MUI.Pages
         internal void RefreshTickRegistration(PageInstance instance)
         {
             AssertThread();
-            var required = instance.IsActive && instance.ActivationCommitted && (instance.HasTick || (instance.View is IChildTickHost children && children.HasChildTicks));
+            var required = instance.IsActive && instance.ActivationCommitted && (instance.HasTick || (instance.View is IWidgetTickHost children && children.HasWidgetTicks));
             if (required)
             {
                 if (!tickInstances.Contains(instance))
@@ -133,13 +126,13 @@ namespace MUI.Pages
             return PageTickStatus.Eligible;
         }
 
-        private void InvokeTick(PageInstance instance, float delta)
+        private void InvokeTick(PageInstance instance, float deltaTime, float unscaledDeltaTime)
         {
             try
             {
                 using (EnterCallback(instance))
                 {
-                    instance.InvokeTick(delta);
+                    instance.InvokeTick(deltaTime, unscaledDeltaTime);
                 }
             }
             catch (Exception error)

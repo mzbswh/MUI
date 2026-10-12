@@ -173,9 +173,9 @@ namespace MUI.Pages
             }
             if (missingPolicy == DependencyMissingPolicy.RequireOpen)
             {
-                return instance.State == ViewState.Open && instance.TryGetReadiness(out var readiness) && readiness.IsReady;
+                return instance.State == PageState.Open && instance.TryGetReadiness(out var readiness) && readiness.IsReady;
             }
-            return instance.State == ViewState.Open || (instance.State == ViewState.Opening && instance.PreparationComplete);
+            return instance.State == PageState.Open || (instance.State == PageState.Opening && instance.PreparationComplete);
         }
 
         private PageInstance FindDependency(PageDefinition route)
@@ -222,7 +222,7 @@ namespace MUI.Pages
                 {
                     throw new OperationCanceledException("必需依赖在父页面提交前已失效。");
                 }
-                if (dependency.State == ViewState.Opening && dependency.PreparationComplete)
+                if (dependency.State == PageState.Opening && dependency.PreparationComplete)
                 {
                     dependency.RequirePreparationCurrent();
                 }
@@ -235,7 +235,7 @@ namespace MUI.Pages
                     pendingDependencies.Push(nested);
                 }
             }
-            if (parent.State != ViewState.Opening || parent.HasCloseStarted ||
+            if (parent.State != PageState.Opening || parent.HasCloseStarted ||
                 parent.ActivationToken.IsCancellationRequested || !entries.ContainsKey(parent.Handle))
             {
                 throw new OperationCanceledException("父页面在依赖校验期间退出。");
@@ -244,7 +244,7 @@ namespace MUI.Pages
             {
                 if (!entries.TryGetValue(handle, out var dependency) || dependency.HasCloseStarted ||
                     retiringDependencies.Contains(handle) || dependency.ActivationToken.IsCancellationRequested ||
-                    (!dependency.IsActive && !(dependency.State == ViewState.Opening && dependency.PreparationComplete)))
+                    (!dependency.IsActive && !(dependency.State == PageState.Opening && dependency.PreparationComplete)))
                 {
                     throw new OperationCanceledException("必需依赖在版本校验期间退出。");
                 }
@@ -256,7 +256,7 @@ namespace MUI.Pages
             foreach (var handle in ownership.CaptureDependencies(parent.Handle, placement))
             {
                 var dependency = entries[handle];
-                if (dependency.State == ViewState.Opening)
+                if (dependency.State == PageState.Opening)
                 {
                     CommitOpen(dependency);
                 }

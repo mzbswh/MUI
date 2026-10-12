@@ -41,7 +41,7 @@ namespace MUI.Pages
             Exception error, bool acquired)
         {
             if (descriptor.IsRequired || parent.HasCloseStarted || parent.ActivationToken.IsCancellationRequested ||
-                parent.State != ViewState.Opening || ContainsNonDegradableError(error))
+                parent.State != PageState.Opening || ContainsNonDegradableError(error))
             {
                 return false;
             }
@@ -108,7 +108,7 @@ namespace MUI.Pages
         private bool CanContinueAfterOptionalExit(PageInstance parent, PageDependencyDescriptor descriptor,
             PageInstance dependency, Exception error)
         {
-            if (descriptor.IsRequired || dependency == null || IsShutdown || parent.State != ViewState.Opening ||
+            if (descriptor.IsRequired || dependency == null || IsShutdown || parent.State != PageState.Opening ||
                 parent.HasCloseStarted || parent.ActivationToken.IsCancellationRequested ||
                 parent.DependencyFailures == null ||
                 !parent.DependencyFailures.TryGetValue(descriptor.Target, out var failure) ||

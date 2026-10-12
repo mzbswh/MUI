@@ -14,7 +14,7 @@ namespace MUI.UGUI
             : direction == MoveDirection.Up || direction == MoveDirection.Down ||
                 (columns > 1 && (direction == MoveDirection.Left || direction == MoveDirection.Right));
 
-        private void AttachNativeFocus(Cell cell, View itemView)
+        private void AttachNativeFocus(VirtualListCell cell, View itemView)
         {
             foreach (var selectable in itemView.GetComponentsInChildren<UnityEngine.UI.Selectable>(true))
             {
@@ -29,19 +29,7 @@ namespace MUI.UGUI
             }
         }
 
-        private static void DetachNativeFocus(Cell cell)
-        {
-            foreach (var relay in cell.FocusInputs)
-            {
-                if (relay != null)
-                {
-                    relay.Detach();
-                    Destroy(relay);
-                }
-            }
 
-            cell.FocusInputs.Clear();
-        }
 
         /// <summary>捕获当前条目的逻辑焦点；原生选择不属于当前来源的已物化条目时返回 null。</summary>
         public VirtualListFocusPosition CaptureFocus()

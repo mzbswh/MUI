@@ -49,7 +49,7 @@ namespace MUI.Pages
         internal void RequestCompletion(PageInstance instance, Action acceptResult)
         {
             AssertThread();
-            if (instance.State != ViewState.Open || instance.HasCloseStarted ||
+            if (instance.State != PageState.Open || instance.HasCloseStarted ||
                 instance.PendingCloseIntent.HasValue || instance.CloseRequest != null)
             {
                 throw new OperationCanceledException("View already entered closing.");
@@ -165,10 +165,10 @@ namespace MUI.Pages
 
         private bool CommitClose(PageInstance instance, DismissReason reason, PageInstance replacement)
         {
-            var wasCommitted = instance.State == ViewState.Open;
+            var wasCommitted = instance.State == PageState.Open;
             var historyIndex = history.IndexOf(instance.Handle);
             ownership.ReleaseExplicit(instance.Handle);
-            instance.State = ViewState.Closing;
+            instance.State = PageState.Closing;
             instance.ActivationCommitted = false;
             instance.EndReadiness();
             if (!instance.EnterPending && !instance.EnterFinishing)
@@ -242,7 +242,7 @@ namespace MUI.Pages
                         errors.Add(failure);
                         result = new CloseOutcome(CloseStatus.Failed, failure, CleanupStatus.Failed);
                         instance.PublishCloseResult(reason, failure, CleanupStatus.Failed, faulted: true);
-                        instance.State = ViewState.Failed;
+                        instance.State = PageState.Failed;
                     }
                     finally
                     {
@@ -258,7 +258,7 @@ namespace MUI.Pages
                     var error = result.Error == null ? instance.CleanupCancellationFailure :
                         new AggregateException("Close cleanup and cancellation failed.", result.Error, instance.CleanupCancellationFailure);
                     result = new CloseOutcome(CloseStatus.Failed, error, CleanupStatus.Failed);
-                    instance.State = ViewState.Failed;
+                    instance.State = PageState.Failed;
                 }
 
                 if (result.Cleanup == CleanupStatus.Complete)
@@ -408,7 +408,7 @@ namespace MUI.Pages
         {
             foreach (var entry in entries.Values.ToArray())
             {
-                if ((activeOnly && entry.State != ViewState.Open && entry.State != ViewState.Closing) ||
+                if ((activeOnly && entry.State != PageState.Open && entry.State != PageState.Closing) ||
                     closing.ContainsKey(entry.Handle))
                 {
                     continue;

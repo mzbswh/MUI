@@ -34,7 +34,7 @@ namespace MUI.Pages
 
         private void FinishOperationTrace<TResult>(PageTraceOperation operation, OpenOutcome<TResult> result)
         {
-            if (operation.Id == 0 || !traceRecording || !ReferenceEquals(operation.Session, traceSession))
+            if (operation.Id == 0 || !traceBuffer.IsRecording || !ReferenceEquals(operation.Session, traceBuffer.Session))
             {
                 return;
             }

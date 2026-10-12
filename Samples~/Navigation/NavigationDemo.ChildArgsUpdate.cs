@@ -1,13 +1,13 @@
 using System.Threading.Tasks;
-using MUI.ChildViews;
+using MUI.Widgets;
 using UnityEngine;
 
 namespace MUI.Samples.Navigation
 {
     public sealed partial class NavigationDemo
     {
-        private async Task DemonstrateChildArgsUpdateAsync(ChildViewScope scope,
-            ChildViewHandle<ThingItemViewModel, string> child, ThingItemPresenter presenter)
+        private async Task DemonstrateChildArgsUpdateAsync(WidgetScope scope,
+            WidgetHandle<ThingItemViewModel, string> child, ThingItemPresenter presenter)
         {
             try
             {

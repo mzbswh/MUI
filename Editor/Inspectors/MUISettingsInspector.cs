@@ -10,6 +10,7 @@ namespace MUI.Editor
     [CustomEditor(typeof(MUISettings))]
     public sealed partial class MUISettingsInspector : UnityEditor.Editor
     {
+        private SerializedObject authoringSettings;
         private VisualElement root;
         private VisualElement layerRows;
         private VisualElement presetRows;
@@ -21,6 +22,7 @@ namespace MUI.Editor
 
         public override VisualElement CreateInspectorGUI()
         {
+            authoringSettings = new SerializedObject(MUIEditorSettings.instance);
             root = new VisualElement();
             root.AddToClassList("mui-inspector");
             MUIEditorControls.Style(root, this);
@@ -37,7 +39,7 @@ namespace MUI.Editor
 
             var directories = Section("settings.directories", "directories", true);
             directories.Add(MUIEditorControls.Text("settings.directories.help"));
-            directories.Add(new IMGUIContainer(() => DrawSettingsFields("pagePrefabDirectory", "pageScriptDirectory")));
+            directories.Add(new IMGUIContainer(() => DrawEditorSettingsFields("pagePrefabDirectory", "pageScriptDirectory")));
             root.Add(directories);
 
             var modal = Section("viewPanel.modal", "modalBackdrop", true);
@@ -113,10 +115,7 @@ namespace MUI.Editor
             root.Add(runtime);
 
             var development = Section("settings.development", "development", false);
-            var generatedSources = new PropertyField(serializedObject.FindProperty("outputCompilerGeneratedSources"), L.Get("property.outputCompilerGeneratedSources"));
-            L.Track(generatedSources, () => generatedSources.label = L.Get("property.outputCompilerGeneratedSources"));
-            Tooltip(generatedSources, "settings.outputCompilerGeneratedSources.help");
-            development.Add(generatedSources);
+            development.Add(new IMGUIContainer(() => DrawEditorSettingsFields("outputCompilerGeneratedSources")));
             development.Add(MUIEditorControls.Text("settings.outputCompilerGeneratedSources.help", "mui-note"));
             root.Add(development);
 
@@ -128,6 +127,7 @@ namespace MUI.Editor
             root.Add(errors);
             RebuildCollections();
             root.TrackSerializedObjectValue(serializedObject, _ => OnSettingsChanged());
+            root.TrackSerializedObjectValue(authoringSettings, _ => { MUIEditorSettings.instance.SaveSettings(); RefreshStatus(); });
             L.Track(root, RefreshStatus);
             RefreshStatus();
             return root;
@@ -137,6 +137,15 @@ namespace MUI.Editor
         {
             element.tooltip = L.Get(key);
             L.Track(element, () => element.tooltip = L.Get(key));
+        }
+
+        private void DrawEditorSettingsFields(params string[] names)
+        {
+            authoringSettings.UpdateIfRequiredOrScript();
+            foreach (var name in names)
+                Localization.MUIEditorInspector.DrawField(authoringSettings, name, "settings." + name + ".help");
+            if (authoringSettings.ApplyModifiedProperties())
+                MUIEditorSettings.instance.SaveSettings();
         }
 
         private void DrawSettingsFields(params string[] names)
@@ -191,11 +200,11 @@ namespace MUI.Editor
             {
                 return;
             }
-            var report = settings.Validate();
-            status.text = report.Count == 0 ? L.Get("settings.valid") : L.Format("settings.invalid", report.Count);
-            status.EnableInClassList("mui-status-error", report.Count != 0);
+            var report = settings.Validate().Concat(MUIEditorSettings.instance.Validate()).ToArray();
+            status.text = report.Length == 0 ? L.Get("settings.valid") : L.Format("settings.invalid", report.Length);
+            status.EnableInClassList("mui-status-error", report.Length != 0);
             errors.text = string.Join("\n", report.Select(L.Diagnostic));
-            errors.style.display = report.Count == 0 ? DisplayStyle.None : DisplayStyle.Flex;
+            errors.style.display = report.Length == 0 ? DisplayStyle.None : DisplayStyle.Flex;
         }
     }
 }

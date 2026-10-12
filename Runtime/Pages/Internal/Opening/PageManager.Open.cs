@@ -275,7 +275,7 @@ namespace MUI.Pages
         {
             // 这里只修改内部状态，不调用生命周期、绑定设置器或渲染器。
             CommitDependencies(instance, DependencyPlacement.RequiredBefore);
-            instance.State = ViewState.Open;
+            instance.State = PageState.Open;
             instance.HasOpenCommitted = true;
             instance.CommitVersion = ++commitVersion;
             activeOrder.Add(instance);

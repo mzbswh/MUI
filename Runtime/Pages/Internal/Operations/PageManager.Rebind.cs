@@ -83,7 +83,7 @@ namespace MUI.Pages
 
                     if (!ReferenceEquals(entry.Definition, route) || !(entry is PageInstance<TViewModel, TArgs, TResult> instance))
                     {
-                        return new RebindOutcome(RebindStatus.Rejected, RebindRejection.PageDefinitionMismatch);
+                        return new RebindOutcome(RebindStatus.Rejected, RebindRejection.DefinitionMismatch);
                     }
 
                     if (ownership.HasOwners(instance.Handle))

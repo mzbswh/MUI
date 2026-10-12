@@ -56,7 +56,7 @@ namespace MUI.Pages
         ValueTask<ReplaceOutcome<TResult>> ReplaceAsync<TViewModel, TArgs, TResult>(PageHandle source, PageDefinition<TViewModel, TArgs, TResult> route, TArgs args, CancellationToken cancellationToken = default, TViewModel assignedViewModel = null)
             where TViewModel : ViewModel;
 
-        /// <summary>显式更新活动实例参数；页面须支持隔离候选与同步提交，提交失败则故障关闭，不重新调用 OnOpen。</summary>
+        /// <summary>显式更新活动实例参数；页面须支持隔离候选与同步提交，提交失败则故障关闭，不重新调用 OnPrepareOpen。</summary>
         ValueTask<ArgsUpdateOutcome> UpdateArgsAsync<TViewModel, TArgs, TResult>(PageHandle source,
             PageDefinition<TViewModel, TArgs, TResult> route, TArgs args, CancellationToken cancellationToken = default)
             where TViewModel : ViewModel;
@@ -94,7 +94,7 @@ namespace MUI.Pages
         bool TryGetInstanceSnapshot(PageHandle handle, out PageInstanceSnapshot snapshot);
 
         /// <summary>查询句柄状态；终态历史有界，历史过期不能继续当作活动界面使用。</summary>
-        ViewState GetState(PageHandle handle);
+        PageState GetState(PageHandle handle);
 
         /// <summary>请求将活动界面置前，不重新创建或激活实例。</summary>
         bool BringToFront(PageHandle handle);

@@ -46,7 +46,7 @@ namespace MUI.UGUI
                         break;
                     }
 
-                    yield return ((IChildViewElement)cell).Preparation;
+                    yield return ((IWidgetElement)cell).Preparation;
                     if (!IsCurrent(activation, currentRevision))
                     {
                         break;
@@ -76,7 +76,7 @@ namespace MUI.UGUI
                         break;
                     }
 
-                    yield return ((IChildViewElement)cell).Preparation;
+                    yield return ((IWidgetElement)cell).Preparation;
                     if (!IsCurrent(activation, currentRevision))
                     {
                         break;
@@ -148,7 +148,7 @@ namespace MUI.UGUI
                     return null;
                 }
 
-                ((IChildViewElement)cell).BeginParentActivation(scope, activation);
+                ((IWidgetElement)cell).BeginParentActivation(scope, activation);
                 if (!IsCurrent(activation, currentRevision))
                 {
                     return null;

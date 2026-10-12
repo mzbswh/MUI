@@ -12,11 +12,12 @@ namespace MUI.Editor
     public sealed partial class MUISettingsInspector
     {
         private string pageFilter = string.Empty;
-        private readonly Dictionary<string, HashSet<MUIPagePolicyFields>> pageExpansions = new Dictionary<string, HashSet<MUIPagePolicyFields>>();
+        private readonly Dictionary<string, HashSet<PagePolicyFields>> pageExpansions = new Dictionary<string, HashSet<PagePolicyFields>>();
 
         private void DrawPagePolicies()
         {
-            if (target == null) return;
+            if (target == null)
+                return;
             serializedObject.UpdateIfRequiredOrScript();
             var pages = serializedObject.FindProperty("pagePolicies");
             pageFilter = EditorGUILayout.TextField(L.Get("settings.pages.search"), pageFilter);
@@ -26,7 +27,8 @@ namespace MUI.Editor
                 var entry = pages.GetArrayElementAtIndex(i);
                 var key = entry.FindPropertyRelative("ResourceKey").stringValue;
                 var version = entry.FindPropertyRelative("ResourceVersion").stringValue;
-                if (!string.IsNullOrEmpty(pageFilter) && key.IndexOf(pageFilter, StringComparison.OrdinalIgnoreCase) < 0) continue;
+                if (!string.IsNullOrEmpty(pageFilter) && key.IndexOf(pageFilter, StringComparison.OrdinalIgnoreCase) < 0)
+                    continue;
                 var identity = key + "@" + version;
                 using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
                 {
@@ -40,7 +42,8 @@ namespace MUI.Editor
                             break;
                         }
                     }
-                    if (!entry.isExpanded) continue;
+                    if (!entry.isExpanded)
+                        continue;
                     Localization.MUIEditorInspector.DrawFields(serializedObject, entry.propertyPath + ".ResourceKey", entry.propertyPath + ".ResourceVersion");
                     DrawPagePrefabLink(entry);
                     PagePolicyControls.DrawPagePreset(serializedObject, entry, (MUISettings)target);
@@ -53,7 +56,7 @@ namespace MUI.Editor
                     catch (Exception error) { EditorGUILayout.HelpBox(L.Diagnostic(error.Message), MessageType.Error); }
                     if (!pageExpansions.TryGetValue(identity, out var expanded))
                     {
-                        expanded = new HashSet<MUIPagePolicyFields>();
+                        expanded = new HashSet<PagePolicyFields>();
                         pageExpansions.Add(identity, expanded);
                     }
                     foreach (var group in PagePolicyControls.Groups)

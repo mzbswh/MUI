@@ -34,7 +34,7 @@ namespace MUI.UGUI
             ReleaseModalBarrier();
             if (childViews != null)
             {
-                childViews.TickActivityChanged -= NotifyChildTicks;
+                childViews.TickActivityChanged -= NotifyWidgetTicks;
                 childViews = null;
             }
             childActivationToken = default;

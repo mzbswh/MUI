@@ -26,10 +26,10 @@ namespace MUI.Samples.Navigation
 
         public PageArgs CurrentArgs => Context.Args;
 
-        protected override void OnOpen(PageArgs args)
+        protected override void OnPrepareOpen(PageArgs args)
         {
             ++OpenCount;
-            base.OnOpen(args);
+            base.OnPrepareOpen(args);
         }
 
         protected override void OnClose()

@@ -34,7 +34,7 @@ namespace MUI.Pages
 
         internal void BeginPreparationExecution(bool asynchronous)
         {
-            if (preparationExecuting || PreparationComplete || HasCloseStarted || State != ViewState.Opening)
+            if (preparationExecuting || PreparationComplete || HasCloseStarted || State != PageState.Opening)
             {
                 throw new InvalidOperationException("界面准备不能重入，也不能在提交或退出后重新开始。");
             }

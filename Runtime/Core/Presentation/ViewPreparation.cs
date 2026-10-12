@@ -13,9 +13,9 @@ namespace MUI
             requireCurrent();
             invoke(() => view.SetHostState(false, false));
             requireCurrent();
-            if (view is IChildViewHost childHost)
+            if (view is IWidgetHost childHost)
             {
-                invoke(() => childHost.BeginChildActivation(activation));
+                invoke(() => childHost.BeginWidgetActivation(activation));
                 requireCurrent();
             }
         }
@@ -63,9 +63,9 @@ namespace MUI
                 token.ThrowIfCancellationRequested();
             }
 
-            if (view is IChildViewHost childHost)
+            if (view is IWidgetHost childHost)
             {
-                await childHost.CompleteChildPreparationAsync(token);
+                await childHost.CompleteWidgetPreparationAsync(token);
                 requireCurrent();
                 token.ThrowIfCancellationRequested();
             }

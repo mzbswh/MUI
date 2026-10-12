@@ -53,7 +53,7 @@ namespace MUI.Pages
                 throw new ArgumentOutOfRangeException(nameof(cleanupCapacity));
             }
 
-            this.renderOrder = renderOrder;
+            renderOrdering = new PageRenderOrderAllocator(renderOrder);
             this.cleanupCapacity = cleanupCapacity;
             if (provider == null)
             {
@@ -93,8 +93,8 @@ namespace MUI.Pages
                 throw new ArgumentOutOfRangeException(nameof(maxCachedEstimatedBytes));
             }
 
-            this.maxCachedEstimatedBytes = maxCachedEstimatedBytes;
-            this.cacheCapacity = cacheCapacity;
+            cacheBudget = new PageCacheBudget(maxCachedEstimatedBytes);
+            cachedContents = new PageCacheCatalog(cacheCapacity);
             this.queueCapacity = queueCapacity;
             this.terminalCapacity = terminalCapacity;
             this.terminalDuration = terminalDuration ?? TimeSpan.FromMinutes(10);
@@ -250,7 +250,7 @@ namespace MUI.Pages
 
                 count++;
                 if (route.Policy.AllowMultiple || route.Policy.ExistingInstance != ExistingInstancePolicy.ReturnReady ||
-                    entry.State != ViewState.Open)
+                    entry.State != PageState.Open)
                 {
                     continue;
                 }
@@ -275,7 +275,7 @@ namespace MUI.Pages
                 }
 
                 if (!entries.TryGetValue(entry.Handle, out var current) || !ReferenceEquals(current, entry) ||
-                    entry.State != ViewState.Open || entry.HasCloseStarted || entry.CloseRequest != null ||
+                    entry.State != PageState.Open || entry.HasCloseStarted || entry.CloseRequest != null ||
                     entry.IsRebinding || entry.IsUpdatingArgs || retiringDependencies.Contains(entry.Handle) ||
                     replacing.Contains(entry.Handle))
                 {
@@ -314,19 +314,19 @@ namespace MUI.Pages
         /// <summary>关闭提交释放逻辑额度；尚未归还的资源由独立清理账本持有。</summary>
         private bool OccupiesInstanceSlot(PageInstance instance)
         {
-            if (instance.State == ViewState.Open)
+            if (instance.State == PageState.Open)
             {
                 return true;
             }
 
-            if (instance.State != ViewState.Opening)
+            if (instance.State != PageState.Opening)
             {
                 return false;
             }
 
             // 同 PageDefinition 替换候选借用仍存活源页的额度；源页先关闭时，候选自动独立占额。
             return !entries.TryGetValue(instance.ReplacementSource, out var source) ||
-                source.State != ViewState.Open || !ReferenceEquals(source.Definition, instance.Definition);
+                source.State != PageState.Open || !ReferenceEquals(source.Definition, instance.Definition);
         }
 
         internal PageInstance<TViewModel, TArgs, TResult> NewInstance<TViewModel, TArgs, TResult>(PageDefinition<TViewModel, TArgs, TResult> route,

@@ -73,8 +73,8 @@ namespace MUI.Samples.DragDrop
             source.ConfigureGhost(icon, ghostRoot);
             source.Source = new DragBinding<ItemPayload>(lifetime, () => new ItemPayload(7));
             view.Initialize();
-            view.BeginChildActivation(lifetime);
-            view.CommitChildActivation();
+            view.BeginWidgetActivation(lifetime);
+            view.CommitWidgetActivation();
             page.gameObject.SetActive(true);
             view.SetHostState(true, true);
         }

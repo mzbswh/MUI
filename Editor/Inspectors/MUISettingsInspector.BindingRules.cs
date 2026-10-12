@@ -28,12 +28,13 @@ namespace MUI.Editor
 
         private void DrawControlNamingRules()
         {
-            if (this == null || target == null) return;
-            serializedObject.UpdateIfRequiredOrScript();
+            if (this == null || target == null)
+                return;
+            authoringSettings.UpdateIfRequiredOrScript();
             DrawMemberNameFormats();
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("nativePropertyNotifications"), new GUIContent("原生属性变化事件映射"), true);
+            EditorGUILayout.PropertyField(authoringSettings.FindProperty("nativePropertyNotifications"), new GUIContent("原生属性变化事件映射"), true);
             EditorGUILayout.HelpBox("内置值属性已映射 onValueChanged。自定义映射填写组件类型、属性、UnityEvent 和可选静默赋值方法；优先于内置映射。映射后可选择双向绑定，重新生成绑定后生效。事件必须在该属性变化时触发。", MessageType.Info);
-            var rules = serializedObject.FindProperty("controlNamingRules");
+            var rules = authoringSettings.FindProperty("controlNamingRules");
             var header = RuleCells(EditorGUILayout.GetControlRect(false, EditorGUIUtility.singleLineHeight));
             GUI.Label(header[1], new GUIContent("匹配方式", L.Get("ruleMatch.help")), EditorStyles.miniBoldLabel);
             GUI.Label(header[2], new GUIContent("表达式", "匹配节点名称，例如 Img_、_Icon；正则可用 (?<name>...) 提取绑定名。"), EditorStyles.miniBoldLabel);
@@ -51,7 +52,8 @@ namespace MUI.Editor
                 var key = RuleFoldoutKey(i);
                 var expanded = SessionState.GetBool(key, false);
                 var nextExpanded = EditorGUI.Foldout(cells[0], expanded, new GUIContent("", "展开默认属性和绑定方向设置"));
-                if (nextExpanded != expanded) SessionState.SetBool(key, nextExpanded);
+                if (nextExpanded != expanded)
+                    SessionState.SetBool(key, nextExpanded);
                 var mode = rule.FindPropertyRelative("Match");
                 mode.enumValueIndex = EditorGUI.Popup(cells[1], mode.enumValueIndex, modes);
                 GUI.Label(cells[1], new GUIContent("", L.Get("ruleMatch.help")), GUIStyle.none);
@@ -65,17 +67,20 @@ namespace MUI.Editor
                 if (GUI.Button(cells[3], new GUIContent(string.IsNullOrEmpty(summary) ? "选择组件…" : summary,
                     "搜索并多选匹配组件。同一节点匹配多个组件时分别生成绑定。\n" + summary), EditorStyles.popup))
                 {
-                    serializedObject.ApplyModifiedProperties();
+                    if (authoringSettings.ApplyModifiedProperties())
+                        MUIEditorSettings.instance.SaveSettings();
                     PopupWindow.Show(cells[3], new ControlTypePicker(target, types.propertyPath, prefix.stringValue));
                 }
                 if (GUI.Button(cells[4], new GUIContent("×", "删除此规则，可撤销；不删除节点、组件或已有页面绑定。"), EditorStyles.miniButton))
                 {
-                    for (var j = i; j < rules.arraySize - 1; j++) SessionState.SetBool(RuleFoldoutKey(j), SessionState.GetBool(RuleFoldoutKey(j + 1), false));
+                    for (var j = i; j < rules.arraySize - 1; j++)
+                        SessionState.SetBool(RuleFoldoutKey(j), SessionState.GetBool(RuleFoldoutKey(j + 1), false));
                     SessionState.EraseBool(RuleFoldoutKey(rules.arraySize - 1));
                     rules.DeleteArrayElementAtIndex(i);
                     break;
                 }
-                if (nextExpanded) DrawRuleDefaults(rule);
+                if (nextExpanded)
+                    DrawRuleDefaults(rule);
                 if (string.IsNullOrWhiteSpace(prefix.stringValue) || types.arraySize == 0)
                     EditorGUILayout.LabelField("请填写表达式并选择至少一种组件。", EditorStyles.miniLabel);
             }
@@ -97,7 +102,8 @@ namespace MUI.Editor
                 GUILayout.FlexibleSpace();
                 GUILayout.Label(rules.arraySize + " 条规则", EditorStyles.miniLabel);
             }
-            serializedObject.ApplyModifiedProperties();
+            if (authoringSettings.ApplyModifiedProperties())
+                MUIEditorSettings.instance.SaveSettings();
         }
 
         private void DrawMemberNameFormats()
@@ -105,15 +111,15 @@ namespace MUI.Editor
             using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
             {
                 EditorGUILayout.LabelField("全局 ViewModel 成员命名", EditorStyles.boldLabel);
-                DrawMemberNameFormat("valueMemberNameFormat", "值属性格式", MUISettings.DefaultValueMemberNameFormat, false);
-                DrawMemberNameFormat("commandMemberNameFormat", "命令格式", MUISettings.DefaultCommandMemberNameFormat, true);
+                DrawMemberNameFormat("valueMemberNameFormat", "值属性格式", MUIEditorSettings.DefaultValueMemberNameFormat, false);
+                DrawMemberNameFormat("commandMemberNameFormat", "命令格式", MUIEditorSettings.DefaultCommandMemberNameFormat, true);
                 EditorGUILayout.HelpBox("占位符（可复制到格式中）：\n{Name}：规则提取的控件名，如 Sld_Progress → Progress。\n{Component}：组件简写，如 Slider → Sld、Button → Btn。\n{Property}：当前属性或事件名，首字母大写，如 value → Value、Clicked → Clicked。\n{DefaultSuffix}：默认主属性、Content 和 Clicked 为空，其余为属性名。\n例如 {Name}Cmd → CloseCmd；{Name}{Component}{Property} → ProgressSldValue。\n可调整顺序或添加固定文字。全局格式留空恢复默认；展开下方规则可按组件覆盖。仅影响新建名称，已保存名称不会自动改写。", MessageType.Info);
             }
         }
 
         private void DrawMemberNameFormat(string field, string label, string fallback, bool command, string component = null)
         {
-            var property = serializedObject.FindProperty(field);
+            var property = authoringSettings.FindProperty(field);
             EditorGUILayout.PropertyField(property, new GUIContent(label));
             var format = string.IsNullOrWhiteSpace(property.stringValue) ? fallback : property.stringValue;
             var primary = ViewInspector.FormatBindingMemberName(format, command ? "Close" : "Progress", component ?? (command ? "Btn" : "Sld"), command ? "Clicked" : "Value", "");
@@ -126,23 +132,29 @@ namespace MUI.Editor
         private void DrawComponentMemberNames(SerializedProperty rule)
         {
             var types = rule.FindPropertyRelative("ComponentTypes");
-            var entries = serializedObject.FindProperty("componentMemberNaming");
+            var entries = authoringSettings.FindProperty("componentMemberNaming");
             for (var i = 0; i < types.arraySize; i++)
             {
                 var typeName = types.GetArrayElementAtIndex(i).stringValue;
-                if (string.IsNullOrEmpty(typeName)) continue;
+                if (string.IsNullOrEmpty(typeName))
+                    continue;
                 var type = Type.GetType(typeName, false);
                 var index = -1;
                 for (var j = 0; j < entries.arraySize; j++)
                 {
                     var saved = entries.GetArrayElementAtIndex(j).FindPropertyRelative("ComponentType").stringValue;
-                    if (saved == typeName || (type != null && !string.IsNullOrEmpty(saved) && Type.GetType(saved, false) == type)) { index = j; break; }
+                    if (saved == typeName || (type != null && !string.IsNullOrEmpty(saved) && Type.GetType(saved, false) == type))
+                    {
+                        index = j;
+                        break;
+                    }
                 }
                 var custom = EditorGUILayout.ToggleLeft(new GUIContent((type == null ? typeName.Split(',')[0] : type.Name) + "：自定义成员命名",
                     "同一组件类型在所有规则中共享此配置。未设置时继承基类配置或全局格式。"), index >= 0);
                 if (!custom)
                 {
-                    if (index >= 0) entries.DeleteArrayElementAtIndex(index);
+                    if (index >= 0)
+                        entries.DeleteArrayElementAtIndex(index);
                     continue;
                 }
                 if (index < 0)
@@ -154,7 +166,7 @@ namespace MUI.Editor
                     added.FindPropertyRelative("CommandFormat").stringValue = "";
                 }
                 var entry = entries.GetArrayElementAtIndex(index);
-                var settings = (MUISettings)target;
+                var settings = MUIEditorSettings.instance;
                 DrawMemberNameFormat(entry.FindPropertyRelative("ValueFormat").propertyPath, "值属性格式",
                     settings.ResolveMemberNameFormat(type == null ? null : type.BaseType, false), false, ViewInspector.BindingComponentSuffix(type));
                 DrawMemberNameFormat(entry.FindPropertyRelative("CommandFormat").propertyPath, "命令格式",
@@ -206,7 +218,8 @@ namespace MUI.Editor
                     if (EditorGUI.EndChangeCheck())
                     {
                         overrideDirection.boolValue = selectedDirection != 0;
-                        if (selectedDirection != 0) direction.intValue = selectedDirection - 1;
+                        if (selectedDirection != 0)
+                            direction.intValue = selectedDirection - 1;
                     }
                 }
             }
@@ -237,14 +250,23 @@ namespace MUI.Editor
                     var catalogs = new List<List<ViewInspector.BindingMember>>();
                     foreach (var type in componentTypes)
                     {
-                        if (type == null) { catalogs.Add(new List<ViewInspector.BindingMember>()); continue; }
+                        if (type == null)
+                        {
+                            catalogs.Add(new List<ViewInspector.BindingMember>());
+                            continue;
+                        }
                         // Inspect type metadata only; never create a GameObject or run adapter constructors here.
                         var adapter = TypeCache.GetTypesDerivedFrom<NativeControl>().Where(t => !t.IsAbstract && !t.ContainsGenericParameters &&
                             (t.Namespace == "MUI.UGUI" || t.Namespace == "MUI.TMP"))
-                            .Select(t => new { Type = t, Constructor = t.GetConstructors().FirstOrDefault(c => {
-                                var args = c.GetParameters();
-                                return args.Length == 2 && args[0].ParameterType == typeof(string) && args[1].ParameterType.IsAssignableFrom(type);
-                            }) }).Where(t => t.Constructor != null)
+                            .Select(t => new
+                            {
+                                Type = t,
+                                Constructor = t.GetConstructors().FirstOrDefault(c =>
+                                {
+                                    var args = c.GetParameters();
+                                    return args.Length == 2 && args[0].ParameterType == typeof(string) && args[1].ParameterType.IsAssignableFrom(type);
+                                })
+                            }).Where(t => t.Constructor != null)
                             .OrderBy(t => t.Constructor.GetParameters()[1].ParameterType == type ? 0 : t.Type == typeof(NativeComponent) ? 2 : 1)
                             .Select(t => t.Type).FirstOrDefault() ?? typeof(NativeComponent);
                         catalogs.Add(ViewInspector.BindableMembers(adapter, type).Where(m => m.Reason == null).ToList());
@@ -274,18 +296,31 @@ namespace MUI.Editor
             public override Vector2 GetWindowSize() => new Vector2(470, 390);
             public override void OnGUI(Rect rect)
             {
-                if (owner == null) { editorWindow.Close(); return; }
+                if (owner == null)
+                {
+                    editorWindow.Close();
+                    return;
+                }
                 using (var state = new SerializedObject(owner))
                 {
                     state.Update();
                     var rule = state.FindProperty(path);
-                    if (rule == null || rule.FindPropertyRelative("Expression").stringValue != pattern) { editorWindow.Close(); return; }
+                    if (rule == null || rule.FindPropertyRelative("Expression").stringValue != pattern)
+                    {
+                        editorWindow.Close();
+                        return;
+                    }
                     var selected = new HashSet<string>(ReadNames(rule), StringComparer.Ordinal);
                     GUI.SetNextControlName("MUI.RulePropertySearch");
                     EditorGUI.BeginChangeCheck();
                     search = EditorGUILayout.TextField(search, EditorStyles.toolbarSearchField);
-                    if (EditorGUI.EndChangeCheck()) scroll = Vector2.zero;
-                    if (focusSearch) { EditorGUI.FocusTextInControl("MUI.RulePropertySearch"); focusSearch = false; }
+                    if (EditorGUI.EndChangeCheck())
+                        scroll = Vector2.zero;
+                    if (focusSearch)
+                    {
+                        EditorGUI.FocusTextInControl("MUI.RulePropertySearch");
+                        focusSearch = false;
+                    }
                     using (new EditorGUILayout.HorizontalScope())
                     {
                         selectedOnly = GUILayout.Toggle(selectedOnly, "仅看已选", EditorStyles.miniButton, GUILayout.Width(80));
@@ -306,24 +341,37 @@ namespace MUI.Editor
                             bool next;
                             using (new EditorGUI.DisabledScope(!supported && !wasSelected))
                                 next = EditorGUILayout.ToggleLeft(new GUIContent(name + (supported ? "  ·  " + info : "  ·  不可用"), supported ? info : reason), wasSelected);
-                            if (next == wasSelected) continue;
+                            if (next == wasSelected)
+                                continue;
                             var ordered = ReadNames(rule).Where(n => n != name).ToList();
-                            if (next) ordered.Add(name);
+                            if (next)
+                                ordered.Add(name);
                             rule.FindPropertyRelative("OverrideDefaultProperties").boolValue = true;
                             var properties = rule.FindPropertyRelative("DefaultBindingProperties");
                             properties.arraySize = ordered.Count;
-                            for (var i = 0; i < ordered.Count; i++) properties.GetArrayElementAtIndex(i).stringValue = ordered[i];
+                            for (var i = 0; i < ordered.Count; i++)
+                                properties.GetArrayElementAtIndex(i).stringValue = ordered[i];
                             Undo.IncrementCurrentGroup();
                             Undo.SetCurrentGroupName("修改规则默认属性");
-                            state.ApplyModifiedProperties();
+                            if (state.ApplyModifiedProperties() && owner is MUIEditorSettings authoring)
+                                authoring.SaveSettings();
                             Undo.IncrementCurrentGroup();
-                            if (next) selected.Add(name); else selected.Remove(name);
+                            if (next)
+                                selected.Add(name);
+                            else
+                                selected.Remove(name);
                             UnityEditorInternal.InternalEditorUtility.RepaintAllViews();
                         }
-                        if (names.Length == 0) EditorGUILayout.HelpBox("没有匹配属性。请先选择组件类型，或更换搜索词。", MessageType.Info);
+                        if (names.Length == 0)
+                            EditorGUILayout.HelpBox("没有匹配属性。请先选择组件类型，或更换搜索词。", MessageType.Info);
                     }
-                    if (GUILayout.Button(new GUIContent("完成", "关闭选择器；勾选已即时保存，支持 Undo。"))) editorWindow.Close();
-                    if (Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Escape) { editorWindow.Close(); Event.current.Use(); }
+                    if (GUILayout.Button(new GUIContent("完成", "关闭选择器；勾选已即时保存，支持 Undo。")))
+                        editorWindow.Close();
+                    if (Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Escape)
+                    {
+                        editorWindow.Close();
+                        Event.current.Use();
+                    }
                 }
             }
         }

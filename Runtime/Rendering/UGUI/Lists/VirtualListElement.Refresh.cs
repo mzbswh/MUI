@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using MUI.ChildViews;
+using MUI.Widgets;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -284,7 +284,7 @@ namespace MUI.UGUI
                         yield break;
                     }
 
-                    draining.Add(((IChildViewElement)cell.Element).Preparation);
+                    draining.Add(((IWidgetElement)cell.Element).Preparation);
 
                     cell.Key = null;
                     if (!IsRefreshCurrent(revision, activation))
@@ -331,7 +331,7 @@ namespace MUI.UGUI
                 {
                     var cell = cells[i];
                     cells.RemoveAt(i);
-                    ReleaseCell(cell);
+                    cell.Release();
                     if (!IsRefreshCurrent(revision, activation))
                     {
                         InvalidateAbandonedRefreshRange(activation);
@@ -352,7 +352,7 @@ namespace MUI.UGUI
                 return;
             }
 
-            Cell cell = null;
+            VirtualListCell cell = null;
             try
             {
                 cell = FindReusableCell(item, revision, activation);
@@ -369,7 +369,7 @@ namespace MUI.UGUI
                     if (unused != null)
                     {
                         cells.Remove(unused);
-                        ReleaseCell(unused);
+                        unused.Release();
                     }
 
                     if (!IsRefreshCurrent(revision, activation))
@@ -408,7 +408,7 @@ namespace MUI.UGUI
                     return;
                 }
 
-                await ((IChildViewElement)cell.Element).Preparation;
+                await ((IWidgetElement)cell.Element).Preparation;
 
                 if (!IsRefreshCurrent(revision, activation))
                 {
@@ -418,15 +418,15 @@ namespace MUI.UGUI
 
                 if (cell.Selection != null)
                 {
-                    var selection = selectionRevision;
-                    var selected = Equals(cell.Key, selectedKey);
+                    var selection = selectionState.Revision;
+                    var selected = Equals(cell.Key, selectionState.Key);
                     if (!IsRefreshCurrent(revision, activation))
                     {
                         InvalidateAbandonedRefreshRange(activation);
                         return;
                     }
 
-                    if (selection == selectionRevision)
+                    if (selection == selectionState.Revision)
                     {
                         cell.Selection.SetSelected(selected);
                     }
@@ -456,7 +456,7 @@ namespace MUI.UGUI
                     {
                         cell.Root.gameObject.SetActive(false);
                         cell.Element.ViewModel = null;
-                        cleanupPreparation = ((IChildViewElement)cell.Element).Preparation;
+                        cleanupPreparation = ((IWidgetElement)cell.Element).Preparation;
                         await cleanupPreparation;
                     }
                     catch (Exception cleanup)
@@ -472,7 +472,7 @@ namespace MUI.UGUI
 
                     try
                     {
-                        ReleaseCell(cell);
+                        cell.Release();
                     }
                     catch (Exception cleanup)
                     {
@@ -492,9 +492,9 @@ namespace MUI.UGUI
             }
         }
 
-        private Cell FindReusableCell(VirtualListItem item, long revision, LifetimeScope activation)
+        private VirtualListCell FindReusableCell(VirtualListItem item, long revision, LifetimeScope activation)
         {
-            Cell unused = null;
+            VirtualListCell unused = null;
             for (var i = 0; i < cells.Count; i++)
             {
                 var cell = cells[i];
@@ -532,11 +532,11 @@ namespace MUI.UGUI
             }
         }
 
-        private Cell CreateCell(string templateKey, long revision, LifetimeScope activation, Func<bool> isCurrent = null)
+        private VirtualListCell CreateCell(string templateKey, long revision, LifetimeScope activation, Func<bool> isCurrent = null)
         {
             bool IsCurrent() => isCurrent == null ? IsRefreshCurrent(revision, activation) : isCurrent();
-            var root = new GameObject("Virtual Cell", typeof(RectTransform)).GetComponent<RectTransform>();
-            var cell = new Cell { Root = root, TemplateKey = templateKey };
+            var root = new GameObject("Virtual VirtualListCell", typeof(RectTransform)).GetComponent<RectTransform>();
+            var cell = new VirtualListCell { Root = root, TemplateKey = templateKey };
             var accepted = false;
             Exception creationFailure = null;
             try
@@ -575,7 +575,7 @@ namespace MUI.UGUI
                     return null;
                 }
 
-                ((IChildViewElement)element).BeginParentActivation(scope, activation);
+                ((IWidgetElement)element).BeginParentActivation(scope, activation);
                 if (!IsCurrent())
                 {
                     return null;
@@ -598,7 +598,7 @@ namespace MUI.UGUI
                 {
                     try
                     {
-                        ReleaseCell(cell);
+                        cell.Release();
                     }
                     catch (Exception cleanup)
                     {
@@ -613,50 +613,9 @@ namespace MUI.UGUI
             }
         }
 
-        private static void ReleaseCell(Cell cell)
-        {
-            if (cell.Element != null)
-            {
-                cell.Element.ReleaseOwnedNode(() => ReleaseNativeCell(cell), "VirtualListCell");
-            }
-            else
-            {
-                ReleaseNativeCell(cell);
-            }
-        }
 
-        private static void ReleaseNativeCell(Cell cell)
-        {
-            var errors = new List<Exception>();
-            try
-            {
-                View.ReleaseFocusWithin(cell.Root);
-            }
-            catch (Exception error)
-            {
-                errors.Add(error);
-            }
 
-            try
-            {
-                DetachSelection(cell);
-                DetachNativeFocus(cell);
-            }
-            catch (Exception error)
-            {
-                errors.Add(error);
-            }
 
-            if (errors.Count != 0)
-            {
-                throw new AggregateException("Virtual list cell cleanup failed.", errors);
-            }
-
-            if (cell.Root != null)
-            {
-                Destroy(cell.Root.gameObject);
-            }
-        }
 
         private static async Task ObserveAsync(Task task)
         {
@@ -673,19 +632,6 @@ namespace MUI.UGUI
             }
         }
 
-        private sealed class Cell
-        {
-            // 换源或 Reset 后，即使业务键相同，也必须解除旧来源的绑定和焦点。
-            public long SourceGeneration;
-            public RectTransform Root;
-            public RectTransform MeasurementRoot;
-            public NestedViewElement Element;
-            public object Key;
-            public string TemplateKey;
-            public VirtualListItemSelection Selection;
-            public Button SelectionButton;
-            public UnityEngine.Events.UnityAction SelectionHandler;
-            public readonly List<VirtualListFocusInput> FocusInputs = new List<VirtualListFocusInput>();
-        }
+
     }
 }

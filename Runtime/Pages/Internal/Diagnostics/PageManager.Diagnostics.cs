@@ -88,7 +88,7 @@ namespace MUI.Pages
                 !recomputingPresentation && !presentationDirty && presentationDeferrals == 0 && !IsReentrant,
                 focused, entries.Count, snapshots, history.Count, recentHistory, pending, posted.Count,
                 cachedContents.Count, retiringCachedViews, PreloadReservationCount, PendingCleanupCount,
-                hasCleanupFailure, DroppedLifecycleEventCount, host, cleanupCount, cleanup, cacheDiagnostics.ToArray(), renderOrder, reservedRenderOrders);
+                hasCleanupFailure, DroppedLifecycleEventCount, host, cleanupCount, cleanup, cacheDiagnostics.ToArray(), renderOrder, renderOrdering.Reserved);
         }
 
         /// <summary>取得仍在账本中的实例，包括准备中和等待清理的实例；终态历史不伪造活动快照。</summary>
@@ -161,7 +161,7 @@ namespace MUI.Pages
             {
                 operations |= PageOperationFlags.DependencyExit;
             }
-            renderSlots.TryGetValue(instance.Handle, out var renderSlot);
+            var renderSlot = renderOrdering.GetSlot(instance.Handle);
             return new PageInstanceSnapshot(instance, presentationIndex, historyIndex,
                 ownership.HasExplicitOwner(instance.Handle), ownership.OwnerCount(instance.Handle),
                 ownership.CaptureOwners(instance.Handle, SnapshotOwnerLimit), ownership.CaptureDependencies(instance.Handle), operations, executingCommands, definitionInstanceCount, renderSlot == null ? null : renderSlot.Start, renderSlot == null ? 0 : renderSlot.Span);

@@ -15,7 +15,7 @@ namespace MUI.Pages
             get
             {
                 AssertThread();
-                return activeOrder.Where(entry => entry.State == ViewState.Open && entry.ActivationCommitted &&
+                return activeOrder.Where(entry => entry.State == PageState.Open && entry.ActivationCommitted &&
                     entry.Definition.Policy.PageRole == PageRole.Main && ownership.HasExplicitOwner(entry.Handle))
                     .OrderByDescending(entry => entry.Order).Select(entry => entry.Handle).FirstOrDefault();
             }
@@ -60,7 +60,7 @@ namespace MUI.Pages
             {
                 return;
             }
-            if (!entries.TryGetValue(parent, out var instance) || instance.State != ViewState.Open ||
+            if (!entries.TryGetValue(parent, out var instance) || instance.State != PageState.Open ||
                 instance.HasCloseStarted || !instance.HostVisible || instance.PendingCloseIntent.HasValue || instance.CloseRequest != null ||
                 !IsInPageScope(instance, CurrentMainPage, new HashSet<PageHandle>()))
             {
@@ -86,13 +86,13 @@ namespace MUI.Pages
             {
                 if (instance.ParentPage.IsValid)
                 {
-                    return entries.TryGetValue(instance.ParentPage, out var parent) && parent.State == ViewState.Open &&
+                    return entries.TryGetValue(instance.ParentPage, out var parent) && parent.State == PageState.Open &&
                         IsInPageScope(parent, main, visiting);
                 }
                 if (!ownership.HasExplicitOwner(instance.Handle) && ownership.HasOwners(instance.Handle))
                 {
                     return ownership.CaptureOwners(instance.Handle).Any(handle => entries.TryGetValue(handle, out var parent) &&
-                        parent.State == ViewState.Open && IsInPageScope(parent, main, visiting));
+                        parent.State == PageState.Open && IsInPageScope(parent, main, visiting));
                 }
                 return instance.Definition.Policy.PageRole != PageRole.Main || instance.Handle == main;
             }
@@ -172,7 +172,7 @@ namespace MUI.Pages
             var closing = descendants.Where(entry => closingRoot || entry.Definition.Policy.OwnerDeparture == OwnerDeparture.Close ||
                 descendants.Any(parent => parent.Definition.Policy.OwnerDeparture == OwnerDeparture.Close && IsPageDescendant(entry, parent.Handle)))
                 .OrderByDescending(entry => entry.Order).ToArray();
-            var checkedPages = closing.Where(entry => entry.State == ViewState.Open).ToList();
+            var checkedPages = closing.Where(entry => entry.State == PageState.Open).ToList();
             if (guardRoot)
             {
                 checkedPages.Add(root);

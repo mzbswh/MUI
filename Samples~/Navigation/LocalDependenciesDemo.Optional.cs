@@ -103,7 +103,7 @@ namespace MUI.Samples.Navigation
             protected override void OnCreate() =>
                             InstanceLifetime.OnDispose(() => Debug.Log("可选依赖的实例资源已本地释放"));
 
-            protected override void OnOpen(Unit args)
+            protected override void OnPrepareOpen(Unit args)
             {
                 Context.Scope.OnDispose(() => Debug.Log("可选依赖的激活资源已本地释放"));
                 throw new InvalidOperationException("演示可选依赖已加载 Prefab 后准备失败。");

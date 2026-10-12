@@ -24,10 +24,10 @@ namespace MUI.Samples.Navigation
             ViewModel.PropertyChanged += ModelChanged;
         }
 
-        protected override void OnOpen(PageArgs args)
+        protected override void OnPrepareOpen(PageArgs args)
         {
             ++OpenCount;
-            base.OnOpen(args);
+            base.OnPrepareOpen(args);
         }
 
         protected override void OnViewModelChanged(PageViewModel previous)

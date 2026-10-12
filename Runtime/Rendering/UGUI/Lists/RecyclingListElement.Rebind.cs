@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using MUI.ChildViews;
+using MUI.Widgets;
 
 namespace MUI.UGUI
 {
@@ -54,7 +54,7 @@ namespace MUI.UGUI
         private sealed class PreparedRebind : IPreparedBindingTarget, ICleanupResponsibilitySource
         {
             private readonly RecyclingListElement element;
-            private readonly ChildViewScope scope;
+            private readonly WidgetScope scope;
             private readonly LifetimeScope lifetime;
             private Task priorChange;
             private readonly long assignment;
@@ -156,7 +156,7 @@ namespace MUI.UGUI
                 try
                 {
                     cell.Initialize();
-                    ((IChildViewElement)cell).BeginParentActivation(scope, lifetime);
+                    ((IWidgetElement)cell).BeginParentActivation(scope, lifetime);
                     return cell;
                 }
                 catch
@@ -264,7 +264,7 @@ namespace MUI.UGUI
                         var readiness = new Task[prepared.Count];
                         for (var index = 0; index < prepared.Count; ++index)
                         {
-                            readiness[index] = ((IChildViewElement)prepared[index].Cell).Preparation;
+                            readiness[index] = ((IWidgetElement)prepared[index].Cell).Preparation;
                         }
 
                         _ = CompleteCommitAsync(readiness, completion);
@@ -347,7 +347,7 @@ namespace MUI.UGUI
                     catch (Exception error)
                     {
                         errors.Add(error);
-                        cleanupConfirmations.Add(entry.Cell.CaptureChildViewCleanupConfirmation());
+                        cleanupConfirmations.Add(entry.Cell.CaptureWidgetCleanupConfirmation());
                     }
 
                     if (entry.Created && !entry.Adopted)

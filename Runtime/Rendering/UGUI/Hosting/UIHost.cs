@@ -46,7 +46,7 @@ namespace MUI.UGUI
         /// <summary>在初始化时捕获的主线程入口，可交给项目后台服务提交表现状态。</summary>
         public UIThreadDispatcher Dispatcher => dispatcher ?? throw new InvalidOperationException("UIHost has not been initialized.");
 
-        /// <summary>自动模式每帧使用 Unity 非缩放时间；关闭后由项目调用 AdvanceFrame。</summary>
+        /// <summary>自动模式每帧传入 Unity 缩放与非缩放时间；关闭后由项目调用 AdvanceFrame。</summary>
         public bool AutomaticFramePump => Settings == null || Settings.AutomaticFramePump;
 
         public PagePolicy ResolvePolicy(string preset = null, string layer = null, PagePolicyOverrides overrides = null)
@@ -282,12 +282,12 @@ namespace MUI.UGUI
         {
             if (AutomaticFramePump)
             {
-                DriveFrame(Time.unscaledDeltaTime);
+                DriveFrame(Time.deltaTime, Time.unscaledDeltaTime);
             }
         }
 
         /// <summary>启用的宿主可手动驱动请求派发和界面 Tick；自动模式下拒绝调用。</summary>
-        public void AdvanceFrame(float unscaledDeltaTime)
+        public void AdvanceFrame(float deltaTime, float unscaledDeltaTime)
         {
             UnityMainThread.Require();
             if (this == null || destroyed)
@@ -310,15 +310,12 @@ namespace MUI.UGUI
                 throw new InvalidOperationException("UIHost 尚未初始化。");
             }
 
-            DriveFrame(unscaledDeltaTime);
+            DriveFrame(deltaTime, unscaledDeltaTime);
         }
 
-        private void DriveFrame(float unscaledDeltaTime)
+        private void DriveFrame(float deltaTime, float unscaledDeltaTime)
         {
-            if (unscaledDeltaTime < 0 || float.IsNaN(unscaledDeltaTime) || float.IsInfinity(unscaledDeltaTime))
-            {
-                throw new ArgumentOutOfRangeException(nameof(unscaledDeltaTime));
-            }
+            PresenterUpdateClock.Validate(deltaTime, unscaledDeltaTime);
 
             if (drivingFrame)
             {
@@ -334,7 +331,7 @@ namespace MUI.UGUI
             try
             {
                 pages.Pump();
-                pages.Tick(unscaledDeltaTime);
+                pages.Tick(deltaTime, unscaledDeltaTime);
             }
             finally
             {

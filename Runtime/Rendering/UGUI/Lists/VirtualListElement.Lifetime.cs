@@ -67,7 +67,7 @@ namespace MUI.UGUI
             {
                 try
                 {
-                    ReleaseCell(cell);
+                    cell.Release();
                 }
                 catch (Exception error)
                 {
@@ -134,7 +134,7 @@ namespace MUI.UGUI
             ++revealSourceRevision;
             StopReveal(VirtualListRevealStatus.Inactive);
             ++revealRevision;
-            ++selectionRevision;
+            selectionState.Invalidate();
             hasPublishedViewport = false;
             publishedViewport = default;
             viewportMovementFrame = -1;
@@ -147,8 +147,8 @@ namespace MUI.UGUI
             rowIndex = null;
             keyIndices.Clear();
             intrinsicKeyIndex = true;
-            selectedKey = null;
-            selectedIndex = -1;
+            selectionState.ClearKey();
+            selectionState.ClearIndex();
             first = last = -1;
             pending = null;
             running = false;

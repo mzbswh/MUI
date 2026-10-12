@@ -1,6 +1,6 @@
 using System;
 using System.Threading.Tasks;
-using MUI.ChildViews;
+using MUI.Widgets;
 using MUI.Pages;
 using MUI.Resources;
 using MUI.UGUI;
@@ -29,7 +29,7 @@ namespace MUI.Samples.Navigation
                     throw new InvalidOperationException("Tick pages failed to open.");
                 }
 
-                pages.Tick(0.6f);
+                pages.Tick(0.6f, 0.6f);
                 Debug.Log($"MUI Tick initial: frame={frame.Calls}; low={slow.Calls}");
                 var cover = await pages.OpenAsync(PageDefinition("tick.cover", new PagePresenter(), host.ResolvePolicy(layer: "Popup", overrides: new PagePolicyOverrides { Coverage = CoveragePolicy.BlockInput, Modal = false })), new PageArgs("Tick cover", 0));
                 if (!cover.IsSuccess)
@@ -37,17 +37,19 @@ namespace MUI.Samples.Navigation
                     throw new InvalidOperationException("Tick cover failed.", cover.Error);
                 }
 
-                pages.Tick(0.2f);
+                pages.Tick(0.2f, 0.2f);
                 Debug.Log($"MUI Tick covered: frame={frame.Calls}; low={slow.Calls}");
                 await pages.CloseAsync(cover.Handle);
-                pages.Tick(0.2f);
+                pages.Tick(0.2f, 0.2f);
                 Debug.Log($"MUI Tick resumed: frame={frame.Calls}; low={slow.Calls}");
-                pages.Tick(2);
-                Debug.Log($"MUI Tick catchup bounded: low={slow.Calls}");
+                pages.Tick(2, 2);
+                Debug.Log($"MUI Update coalesced: low={slow.Calls}");
+                pages.Tick(0, 1f);
+                Debug.Log($"MUI Update paused scale: frame={frame.Calls}; scaled={slow.Calls}");
                 frame.CloseOnTick = true;
-                pages.Tick(0.1f);
+                pages.Tick(0.1f, 0.1f);
                 var countAtClose = frame.Calls;
-                pages.Tick(0.1f);
+                pages.Tick(0.1f, 0.1f);
                 Debug.Log($"MUI Tick closed source: noFurtherTicks={frame.Calls == countAtClose}");
             }
             finally
@@ -66,33 +68,33 @@ namespace MUI.Samples.Navigation
             }
         }
 
-        private async Task DemonstrateChildTicksAsync(View parent)
+        private async Task DemonstrateWidgetTicksAsync(View parent)
         {
             host.enabled = false;
             var item = parent.transform.Find("ThingItem").GetComponent<View>();
             var resource = new ViewResource("tick.child");
-            var presenter = new ChildTickPresenter();
-            var template = new ChildViewTemplate<ThingItemViewModel, Unit>(resource,
+            var presenter = new WidgetTickPresenter();
+            var template = new WidgetDefinition<ThingItemViewModel, Unit>(resource,
                 () => new ThingItemViewModel(), ThingItemViewModelBindingFactory.Create, _ => presenter,
                 pauseTickWhenHidden: true);
-            ChildViewHandle<ThingItemViewModel, Unit> childView = null;
+            WidgetHandle<ThingItemViewModel, Unit> childView = null;
             try
             {
-                childView = await parent.ChildViews.PrepareAsync(template, new BorrowedViewProvider(resource, item), Unit.Value);
+                childView = await parent.Widgets.PrepareAsync(template, new BorrowedViewProvider(resource, item), Unit.Value);
                 childView.Commit();
-                host.Pages.Tick(0.1f);
+                host.Pages.Tick(0.1f, 0.1f);
                 var activeCalls = presenter.Calls;
                 childView.SetLocalState(false, false);
-                host.Pages.Tick(0.1f);
+                host.Pages.Tick(0.1f, 0.1f);
                 Debug.Log($"MUI Child tick hidden: active={activeCalls}; paused={presenter.Calls == activeCalls}");
                 childView.SetLocalState(true, true);
-                host.Pages.Tick(0.1f);
+                host.Pages.Tick(0.1f, 0.1f);
                 Debug.Log($"MUI Child tick resumed: calls={presenter.Calls}");
                 presenter.CloseOnTick = true;
-                host.Pages.Tick(0.1f);
+                host.Pages.Tick(0.1f, 0.1f);
                 var closedCalls = presenter.Calls;
-                host.Pages.Tick(0.1f);
-                Debug.Log($"MUI Child tick closed: stopped={presenter.Calls == closedCalls}; parentHasTicks={parent.HasChildTicks}");
+                host.Pages.Tick(0.1f, 0.1f);
+                Debug.Log($"MUI Child tick closed: stopped={presenter.Calls == closedCalls}; parentHasTicks={parent.HasWidgetTicks}");
             }
             finally
             {
@@ -105,7 +107,7 @@ namespace MUI.Samples.Navigation
             }
         }
 
-        private sealed class ChildTickPresenter : Presenter<ThingItemViewModel, Unit, Unit>, IViewTick
+        private sealed class WidgetTickPresenter : Presenter<ThingItemViewModel, Unit, Unit>
         {
             public int Calls
             {
@@ -117,7 +119,9 @@ namespace MUI.Samples.Navigation
                 get; set;
             }
 
-            public void OnViewTick(float unscaledDeltaTime)
+            protected override UpdateOptions UpdateOptions => MUI.UpdateOptions.EveryFrame;
+
+            protected override void OnUpdate(UpdateTime time)
             {
                 ViewModel.Label = "Tick " + ++Calls;
                 if (CloseOnTick)
@@ -127,7 +131,7 @@ namespace MUI.Samples.Navigation
             }
         }
 
-        private sealed class FrameDemoPresenter : PagePresenter, IViewTick
+        private sealed class FrameDemoPresenter : PagePresenter
         {
             public int Calls
             {
@@ -139,7 +143,9 @@ namespace MUI.Samples.Navigation
                 get; set;
             }
 
-            public void OnViewTick(float unscaledDeltaTime)
+            protected override UpdateOptions UpdateOptions => MUI.UpdateOptions.EveryFrame;
+
+            protected override void OnUpdate(UpdateTime time)
             {
                 Calls++;
                 if (CloseOnTick)
@@ -149,18 +155,16 @@ namespace MUI.Samples.Navigation
             }
         }
 
-        private sealed class SlowDemoPresenter : PagePresenter, ILowFrequencyViewTickCatchUp
+        private sealed class SlowDemoPresenter : PagePresenter
         {
-            public float TickInterval => 0.25f;
-
-            public int MaxTickCatchUp => 2;
+            protected override UpdateOptions UpdateOptions => MUI.UpdateOptions.Every(0.25f, UpdateTimeMode.Scaled);
 
             public int Calls
             {
                 get; private set;
             }
 
-            public void OnLowFrequencyTick(float intervalSeconds)
+            protected override void OnUpdate(UpdateTime time)
             {
                 Calls++;
             }

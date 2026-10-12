@@ -40,9 +40,9 @@ namespace MUI.Samples.Tabs
         }
     }
 
-    public sealed class TabPagePresenter : Presenter<TabPageViewModel, TabPageArgs, Unit>, IAsyncOpenPresenter<TabPageArgs>
+    public sealed class TabPagePresenter : Presenter<TabPageViewModel, TabPageArgs, Unit>, IAsyncOpenPreparation<TabPageArgs>
     {
-        public async ValueTask OnOpenAsync(TabPageArgs args, CancellationToken token)
+        public async ValueTask OnPrepareOpenAsync(TabPageArgs args, CancellationToken token)
         {
             // 可选地模拟不能即时取消的外部 I/O；完成后仍检查激活资格，绝不回写已关闭页面。
             await Task.Delay(args.DelayMilliseconds, args.IgnorePreparationCancellation ? CancellationToken.None : token);

@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 namespace MUI
 {
     /// <summary>父子视图共用的实例资源清理。Presenter 销毁回调应在调用前完成。</summary>
-    internal static class PageInstanceCleanup
+    internal static class ViewInstanceCleanup
     {
         /// <summary>
         /// 先排空实例资源，再分别移除宿主监听，最后归还视图资源。

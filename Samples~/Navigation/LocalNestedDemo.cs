@@ -24,7 +24,7 @@ namespace MUI.Samples.Navigation
 
                 parentView.Initialize();
                 parentView.SetHostState(false, false);
-                parentView.BeginChildActivation(lifetime);
+                parentView.BeginWidgetActivation(lifetime);
                 model = new NestedPageViewModel();
                 var binding = BindingRegistry.Create(parentView, model);
                 lifetime.Own(binding);
@@ -38,8 +38,8 @@ namespace MUI.Samples.Navigation
 
                 binding.Bind();
                 binding.CommitSourceWrites();
-                await parentView.CompleteChildPreparationAsync(lifetime.Token);
-                parentView.CommitChildActivation();
+                await parentView.CompleteWidgetPreparationAsync(lifetime.Token);
+                parentView.CommitWidgetActivation();
                 parentView.SetHostState(true, true);
             }
             catch (Exception error)

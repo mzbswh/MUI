@@ -27,7 +27,7 @@ namespace MUI.Samples.Navigation
                 ThingItemViewModelBindingFactory.Register();
                 parentView.Initialize();
                 parentView.SetHostState(false, false);
-                parentView.BeginChildActivation(lifetime);
+                parentView.BeginWidgetActivation(lifetime);
                 lifetime.OnDispose(() =>
                 {
                     if (parentView != null && parentView.IsAlive)
@@ -43,8 +43,8 @@ namespace MUI.Samples.Navigation
 
                 items = new ObservableList<VirtualListItem>(values, itemKey: item => item.Key);
                 list.Items = items;
-                await parentView.CompleteChildPreparationAsync(lifetime.Token);
-                parentView.CommitChildActivation();
+                await parentView.CompleteWidgetPreparationAsync(lifetime.Token);
+                parentView.CommitWidgetActivation();
                 parentView.SetHostState(true, true);
             }
             catch (Exception error)

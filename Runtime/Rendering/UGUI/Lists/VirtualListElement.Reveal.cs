@@ -235,7 +235,7 @@ namespace MUI.UGUI
                 return RevealResult(VirtualListRevealStatus.Ready);
             }
 
-            Cell cell = null;
+            VirtualListCell cell = null;
             for (var i = 0; i < cells.Count; i++)
             {
                 var candidate = cells[i];

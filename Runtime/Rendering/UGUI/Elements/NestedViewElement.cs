@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using MUI.ChildViews;
+using MUI.Widgets;
 using MUI.Resources;
 using UnityEngine;
 
@@ -14,17 +14,17 @@ namespace MUI.UGUI
     /// 模型为借用对象，应将此边界放在子 View 上方的包装节点。
     /// </summary>
     [DisallowMultipleComponent]
-    public sealed partial class NestedViewElement : Element, IElementBoundary, IChildViewElement, IBindingRebindTarget
+    public sealed partial class NestedViewElement : Element, IElementBoundary, IWidgetElement, IBindingRebindTarget
     {
         [SerializeField]
         private View childView;
         private IViewProvider provider;
         private readonly List<CleanupResponsibility> childViewReleases = new List<CleanupResponsibility>();
         private CleanupResponsibility nodeCleanup;
-        private ChildViewTemplate<ViewModel, Unit> template;
-        private ChildViewScope scope;
+        private WidgetDefinition<ViewModel, Unit> template;
+        private WidgetScope scope;
         private LifetimeScope parentLifetime;
-        private ChildViewHandle<ViewModel, Unit> childHandle;
+        private WidgetHandle<ViewModel, Unit> childHandle;
         private ViewModel requestedModel;
         private long version;
         private bool preparing;
@@ -85,7 +85,7 @@ namespace MUI.UGUI
         /// <summary>当前调用链是否来自此子项，供列表延后同步回收并拒绝业务等待自身清理。</summary>
         internal bool IsExecutingChild => childHandle != null && childHandle.IsExecuting;
 
-        Task IChildViewElement.Preparation => (pendingChange ?? Task.CompletedTask);
+        Task IWidgetElement.Preparation => (pendingChange ?? Task.CompletedTask);
 
         protected override void OnInitialize()
         {
@@ -129,7 +129,7 @@ namespace MUI.UGUI
                 childViewReleases.Add(CleanupRegistry.GetResponsibility(acquired, "NestedViewAcquisition"));
                 return acquired;
             });
-            template = new ChildViewTemplate<ViewModel, Unit>(resource, () => throw new InvalidOperationException("Nested child views require an assigned model."), BindingRegistry.Create);
+            template = new WidgetDefinition<ViewModel, Unit>(resource, () => throw new InvalidOperationException("Nested child views require an assigned model."), BindingRegistry.Create);
             childView.SetHostState(false, false);
             OnDispose(() =>
             {
@@ -148,7 +148,7 @@ namespace MUI.UGUI
             });
         }
 
-        void IChildViewElement.BeginParentActivation(ChildViewScope parentScope, LifetimeScope lifetime)
+        void IWidgetElement.BeginParentActivation(WidgetScope parentScope, LifetimeScope lifetime)
         {
             RequireAlive();
             RequireAvailableNode();
@@ -254,11 +254,11 @@ namespace MUI.UGUI
             }
         }
 
-        private async ValueTask<bool> ChangeAsync(ChildViewHandle<ViewModel, Unit> previous,
+        private async ValueTask<bool> ChangeAsync(WidgetHandle<ViewModel, Unit> previous,
                     ViewModel previousModel,
                     Task precedingChange,
                     ViewModel model,
-                    ChildViewScope targetScope,
+                    WidgetScope targetScope,
                     long request,
                     bool rebind,
                     CancellationToken token)
@@ -350,7 +350,7 @@ namespace MUI.UGUI
                 return true;
             }
 
-            ChildViewHandle<ViewModel, Unit> candidate = null;
+            WidgetHandle<ViewModel, Unit> candidate = null;
             Exception failure;
             try
             {
@@ -386,7 +386,7 @@ namespace MUI.UGUI
                     throw new AggregateException("Nested binding and cleanup failed.", failure, cleanup);
                 }
             }
-            else if (failure is ChildViewPreparationException preparation)
+            else if (failure is WidgetPreparationException preparation)
             {
                 try
                 {
@@ -400,7 +400,7 @@ namespace MUI.UGUI
 
             if (previousModel != null && !ReferenceEquals(previousModel, model) && IsAlive && !token.IsCancellationRequested && request == version && targetScope.IsActive)
             {
-                ChildViewHandle<ViewModel, Unit> restored = null;
+                WidgetHandle<ViewModel, Unit> restored = null;
                 try
                 {
                     preparing = true;
@@ -423,7 +423,7 @@ namespace MUI.UGUI
                         {
                             await restored.DisposeAsync();
                         }
-                        else if (restoration is ChildViewPreparationException failedRestore)
+                        else if (restoration is WidgetPreparationException failedRestore)
                         {
                             await failedRestore.CleanupCompletion;
                         }

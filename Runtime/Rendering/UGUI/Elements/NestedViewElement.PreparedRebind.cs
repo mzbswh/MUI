@@ -1,6 +1,6 @@
 using System;
 using System.Threading.Tasks;
-using MUI.ChildViews;
+using MUI.Widgets;
 
 namespace MUI.UGUI
 {
@@ -9,16 +9,16 @@ namespace MUI.UGUI
         private sealed class PreparedRebind : IPreparedBindingTarget
         {
             private readonly NestedViewElement element;
-            private readonly ChildViewScope scope;
+            private readonly WidgetScope scope;
             private readonly LifetimeScope lifetime;
-            private readonly ChildViewHandle<ViewModel, Unit> previous;
+            private readonly WidgetHandle<ViewModel, Unit> previous;
             private readonly Task priorChange;
             private readonly long version;
             private readonly ViewModel model;
             private readonly bool bindsModel;
             private readonly bool unchanged;
             private readonly PreparedViewRebind staged;
-            private ChildViewHandle<ViewModel, Unit> candidate;
+            private WidgetHandle<ViewModel, Unit> candidate;
             private Task<bool> retirement;
             private ViewModel originalModel;
             private bool started;
@@ -26,10 +26,10 @@ namespace MUI.UGUI
             private bool committing;
             private int writes;
 
-            internal PreparedRebind(NestedViewElement element, ChildViewScope scope, LifetimeScope lifetime,
-                ChildViewHandle<ViewModel, Unit> previous, Task priorChange, long version,
+            internal PreparedRebind(NestedViewElement element, WidgetScope scope, LifetimeScope lifetime,
+                WidgetHandle<ViewModel, Unit> previous, Task priorChange, long version,
                 ViewModel model, bool bindsModel, bool unchanged, PreparedViewRebind staged,
-                ChildViewHandle<ViewModel, Unit> candidate)
+                WidgetHandle<ViewModel, Unit> candidate)
             {
                 this.element = element;
                 this.scope = scope;
@@ -56,7 +56,7 @@ namespace MUI.UGUI
                 }
 
                 staged?.Validate();
-                if (candidate != null && (!candidate.BelongsTo(scope) || candidate.State != ChildViewState.Prepared))
+                if (candidate != null && (!candidate.BelongsTo(scope) || candidate.State != WidgetState.Prepared))
                 {
                     throw new InvalidOperationException("Nested candidate is no longer prepared in its parent scope.");
                 }
@@ -213,7 +213,7 @@ namespace MUI.UGUI
             }
 
             private static async Task<bool> CompleteRemovalAsync(NestedViewElement element,
-                ChildViewHandle<ViewModel, Unit> previous, long committedVersion)
+                WidgetHandle<ViewModel, Unit> previous, long committedVersion)
             {
                 try
                 {

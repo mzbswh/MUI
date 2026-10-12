@@ -9,9 +9,9 @@ namespace MUI.Pages
     public sealed partial class PageManager
     {
         private readonly Queue<PageCacheDiagnostic> cacheDiagnostics = new Queue<PageCacheDiagnostic>();
-        private readonly int cacheCapacity;
+        private int cacheCapacity => cachedContents.Capacity;
         // 按最近归还顺序排列；命中移出，下一次关闭重新放到末尾。
-        private readonly List<CachedContent> cachedContents = new List<CachedContent>();
+        private readonly PageCacheCatalog cachedContents;
         private Task cacheClearing;
         private Task<Exception> cacheRetiring;
         private int retiringCachedViews;
@@ -58,14 +58,14 @@ namespace MUI.Pages
             return false;
         }
 
-        private static bool CacheExpired(CachedContent entry, long now) =>
+        private static bool CacheExpired(PageCacheEntry entry, long now) =>
                     entry.Definition.Policy.CacheMode == ViewCacheMode.Timed &&
                     (now - entry.CachedAt) / (double)Stopwatch.Frequency >= entry.Definition.Policy.CacheDuration.Value.TotalSeconds;
 
         internal CachedViewContent TakeCachedContent(PageDefinition route)
         {
             AssertThread();
-            RefreshFailedCacheBudget();
+            cacheBudget.Refresh();
             var providerVersion = CaptureProviderVersion();
             var now = Stopwatch.GetTimestamp();
             for (var index = cachedContents.Count - 1; index >= 0; --index)
@@ -101,7 +101,7 @@ namespace MUI.Pages
                         providerVersion = CaptureProviderVersion();
                         if (!IsShutdown && entry.Content.IsAlive && IsCacheCompatible(entry.Content, providerVersion))
                         {
-                            reservedCacheEstimatedBytes -= entry.Definition.EstimatedRetainedBytes ?? 0;
+                            cacheBudget.Release(entry.Definition.EstimatedRetainedBytes ?? 0);
                             RecordCacheDecision(route, PageCacheDecision.Reused);
                             return entry.Content;
                         }
@@ -149,8 +149,8 @@ namespace MUI.Pages
                     ? PageCacheDecision.HostUnavailable : PageCacheDecision.Incompatible);
             }
 
-            cachedContents.Add(new CachedContent { Definition = route, Content = content, CachedAt = Stopwatch.GetTimestamp() });
-            reservedCacheEstimatedBytes += route.EstimatedRetainedBytes ?? 0;
+            cachedContents.Add(new PageCacheEntry { Definition = route, Content = content, CachedAt = Stopwatch.GetTimestamp() });
+            cacheBudget.Reserve(route.EstimatedRetainedBytes ?? 0);
             RecordCacheDecision(route, PageCacheDecision.Retained);
             return true;
         }
@@ -169,7 +169,7 @@ namespace MUI.Pages
 
         private void SweepExpiredCache()
         {
-            RefreshFailedCacheBudget();
+            cacheBudget.Refresh();
             if (IsCacheClearing || IsCacheRetiring)
             {
                 return;
@@ -177,7 +177,7 @@ namespace MUI.Pages
 
             var providerVersion = CaptureProviderVersion();
             var now = Stopwatch.GetTimestamp();
-            var expired = new List<CachedContent>();
+            var expired = new List<PageCacheEntry>();
             for (var index = cachedContents.Count - 1; index >= 0; --index)
             {
                 if (!cachedContents[index].Content.IsAlive || !IsCacheCompatible(cachedContents[index].Content, providerVersion) || CacheExpired(cachedContents[index], now))
@@ -216,7 +216,7 @@ namespace MUI.Pages
             }
         }
 
-        private void BeginCacheRetirement(CachedContent[] saved)
+        private void BeginCacheRetirement(PageCacheEntry[] saved)
         {
             var completion = new TaskCompletionSource<Exception>(TaskCreationOptions.RunContinuationsAsynchronously);
             // 已报告的历史失败由有界错误目录保留，不把每次已完成的淘汰永久串成任务链。
@@ -275,7 +275,7 @@ namespace MUI.Pages
             return cacheClearing;
         }
 
-        private async Task FinishCacheClearAsync(CachedContent[] saved, Task<Exception> retirement,
+        private async Task FinishCacheClearAsync(PageCacheEntry[] saved, Task<Exception> retirement,
                     TaskCompletionSource<bool> completion)
         {
             var release = new TaskCompletionSource<Exception>(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -300,7 +300,7 @@ namespace MUI.Pages
             }
         }
 
-        private async Task ReleaseCachedContentsAsync(CachedContent[] saved, TaskCompletionSource<Exception> completion)
+        private async Task ReleaseCachedContentsAsync(PageCacheEntry[] saved, TaskCompletionSource<Exception> completion)
         {
             var errors = new List<Exception>();
             var trace = CurrentTraceOperation;
@@ -326,16 +326,12 @@ namespace MUI.Pages
                     var estimate = entry.Definition.EstimatedRetainedBytes ?? 0;
                     if (errors.Count == errorsBeforeRelease || entry.Content.IsCleanupConfirmed)
                     {
-                        reservedCacheEstimatedBytes -= estimate;
+                        cacheBudget.Release(estimate);
                     }
                     else
                     {
                         // 无法证明释放成功时不归还额度，避免错误路径重复透支。
-                        failedCacheEstimatedBytes += estimate;
-                        if (estimate != 0)
-                        {
-                            failedCacheBudgets.Add(new FailedCacheBudget { Content = entry.Content, EstimatedBytes = estimate });
-                        }
+                        cacheBudget.RecordFailure(entry.Content, estimate);
                     }
                 }
             }
@@ -372,11 +368,6 @@ namespace MUI.Pages
                 System.Linq.Enumerable.All(aggregate.InnerExceptions, IsRecordedCacheFailure);
         }
 
-        private sealed class CachedContent
-        {
-            public PageDefinition Definition;
-            public CachedViewContent Content;
-            public long CachedAt;
-        }
+
     }
 }

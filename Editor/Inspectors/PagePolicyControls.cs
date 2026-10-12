@@ -12,20 +12,20 @@ namespace MUI.Editor
 {
     internal static class PagePolicyControls
     {
-        internal static readonly (MUIPagePolicyFields mask, string[] fields)[] Groups =
+        internal static readonly (PagePolicyFields mask, string[] fields)[] Groups =
         {
-            (MUIPagePolicyFields.PageScope, new[] { "PageRole", "OwnerDeparture" }),
-            (MUIPagePolicyFields.Layer, new[] { "Layer" }),
-            (MUIPagePolicyFields.Coverage, new[] { "Coverage" }),
-            (MUIPagePolicyFields.Input, new[] { "ReceivesInput" }),
-            (MUIPagePolicyFields.Focus, new[] { "TakesFocus" }),
-            (MUIPagePolicyFields.Modal, new[] { "Modal" }),
-            (MUIPagePolicyFields.Back, new[] { "BackBehavior" }),
-            (MUIPagePolicyFields.Instances, new[] { "AllowMultiple", "MaxInstances", "ExistingInstance", "Overflow" }),
-            (MUIPagePolicyFields.Tick, new[] { "TickPause" }),
-            (MUIPagePolicyFields.RenderOrder, new[] { "RenderOrderSpan" }),
-            (MUIPagePolicyFields.Cache, new[] { "CacheMode", "CacheDurationSeconds" }),
-            (MUIPagePolicyFields.Timeouts, new[] { "EnterTimeout", "ExitTimeout", "PrepareTimeoutSeconds", "CloseTimeoutSeconds", "CloseDecisionTimeoutSeconds" })
+            (PagePolicyFields.PageScope, new[] { "PageRole", "OwnerDeparture" }),
+            (PagePolicyFields.Layer, new[] { "Layer" }),
+            (PagePolicyFields.Coverage, new[] { "Coverage" }),
+            (PagePolicyFields.Input, new[] { "ReceivesInput" }),
+            (PagePolicyFields.Focus, new[] { "TakesFocus" }),
+            (PagePolicyFields.Modal, new[] { "Modal" }),
+            (PagePolicyFields.Back, new[] { "BackBehavior" }),
+            (PagePolicyFields.Instances, new[] { "AllowMultiple", "MaxInstances", "ExistingInstance", "Overflow" }),
+            (PagePolicyFields.Tick, new[] { "TickPause" }),
+            (PagePolicyFields.RenderOrder, new[] { "RenderOrderSpan" }),
+            (PagePolicyFields.Cache, new[] { "CacheMode", "CacheDurationSeconds" }),
+            (PagePolicyFields.Timeouts, new[] { "EnterTimeout", "ExitTimeout", "PrepareTimeoutSeconds", "CloseTimeoutSeconds", "CloseDecisionTimeoutSeconds" })
         };
 
         internal static void DrawPagePreset(SerializedObject state, SerializedProperty entry, MUISettings settings)
@@ -36,7 +36,8 @@ namespace MUI.Editor
             foreach (var item in settings.Presets)
             {
                 choices.Add(item.Name);
-                if (item.Name == preset.stringValue) index = choices.Count - 1;
+                if (item.Name == preset.stringValue)
+                    index = choices.Count - 1;
             }
             if (!string.IsNullOrEmpty(preset.stringValue) && index == 0)
             {
@@ -53,7 +54,7 @@ namespace MUI.Editor
         }
 
         internal static void DrawPagePolicyGroup(SerializedObject state, SerializedProperty entry, MUISettings settings,
-            MUIPagePolicyFields mask, string[] fields, PagePolicy inherited, HashSet<MUIPagePolicyFields> expandedPagePolicyGroups)
+            PagePolicyFields mask, string[] fields, PagePolicy inherited, HashSet<PagePolicyFields> expandedPagePolicyGroups)
         {
             var overrides = entry.FindPropertyRelative("Overrides");
             var enabled = (overrides.intValue & (int)mask) != 0;
@@ -66,24 +67,29 @@ namespace MUI.Editor
                 if (EditorGUI.EndChangeCheck())
                 {
                     if (next && inherited != null)
-                        foreach (var field in fields) SetPolicyValue(entry.FindPropertyRelative("Values." + field), PolicyValue(inherited, field));
+                        foreach (var field in fields)
+                            SetPolicyValue(entry.FindPropertyRelative("Values." + field), PolicyValue(inherited, field));
                     overrides.intValue = next ? overrides.intValue | (int)mask : overrides.intValue & ~(int)mask;
                     state.ApplyModifiedProperties();
                     enabled = next;
-                    if (next && multiple) expandedPagePolicyGroups.Add(mask);
+                    if (next && multiple)
+                        expandedPagePolicyGroups.Add(mask);
                 }
                 if (!multiple)
                     DrawPagePolicyField(state, entry, settings, fields[0], inherited, enabled);
                 else
                 {
                     var expanded = EditorGUILayout.Foldout(expandedPagePolicyGroups.Contains(mask), L.Value(mask), true);
-                    if (expanded) expandedPagePolicyGroups.Add(mask);
-                    else expandedPagePolicyGroups.Remove(mask);
+                    if (expanded)
+                        expandedPagePolicyGroups.Add(mask);
+                    else
+                        expandedPagePolicyGroups.Remove(mask);
                     GUILayout.Label(L.Get(enabled ? "viewPanel.policy.localValue" : "viewPanel.policy.inheritedValue"),
                         EditorStyles.miniLabel, GUILayout.Width(64));
                 }
             }
-            if (!multiple || !expandedPagePolicyGroups.Contains(mask)) return;
+            if (!multiple || !expandedPagePolicyGroups.Contains(mask))
+                return;
             using (new EditorGUI.IndentLevelScope())
                 foreach (var field in fields)
                 {
@@ -91,9 +97,11 @@ namespace MUI.Editor
                         ? (object)entry.FindPropertyRelative("Values." + name).intValue
                         : inherited == null ? null : PolicyValue(inherited, name);
                     if (field == "OwnerDeparture" && Value("PageRole") != null &&
-                        Convert.ToInt32(Value("PageRole")) != (int)PageRole.Overlay) continue;
+                        Convert.ToInt32(Value("PageRole")) != (int)PageRole.Overlay)
+                        continue;
                     if (field == "CacheDurationSeconds" && Value("CacheMode") != null &&
-                        Convert.ToInt32(Value("CacheMode")) != (int)ViewCacheMode.Timed) continue;
+                        Convert.ToInt32(Value("CacheMode")) != (int)ViewCacheMode.Timed)
+                        continue;
                     DrawPagePolicyField(state, entry, settings, field, inherited, enabled);
                 }
         }
@@ -112,35 +120,56 @@ namespace MUI.Editor
             if (field == "Layer")
             {
                 var names = new List<string>();
-                foreach (var layer in settings.Layers) names.Add(layer.Name);
+                foreach (var layer in settings.Layers)
+                    names.Add(layer.Name);
                 var index = names.IndexOf(property.stringValue);
-                if (index < 0) { names.Add(property.stringValue); index = names.Count - 1; }
+                if (index < 0)
+                {
+                    names.Add(property.stringValue);
+                    index = names.Count - 1;
+                }
                 EditorGUI.BeginChangeCheck();
                 var selectedLayer = EditorGUILayout.Popup(L.Get("property.Layer"), index, names.ToArray());
-                if (EditorGUI.EndChangeCheck()) { property.stringValue = names[selectedLayer]; state.ApplyModifiedProperties(); }
+                if (EditorGUI.EndChangeCheck())
+                {
+                    property.stringValue = names[selectedLayer];
+                    state.ApplyModifiedProperties();
+                }
             }
-            else Localization.MUIEditorInspector.DrawFields(state, property.propertyPath);
+            else
+                Localization.MUIEditorInspector.DrawFields(state, property.propertyPath);
         }
 
         private static void SetPolicyValue(SerializedProperty property, object value)
         {
-            if (value is bool boolean) property.boolValue = boolean;
-            else if (value is string text) property.stringValue = text;
-            else if (value is float number) property.floatValue = number;
-            else property.intValue = Convert.ToInt32(value);
+            if (value is bool boolean)
+                property.boolValue = boolean;
+            else if (value is string text)
+                property.stringValue = text;
+            else if (value is float number)
+                property.floatValue = number;
+            else
+                property.intValue = Convert.ToInt32(value);
         }
 
         private static object PolicyValue(PagePolicy policy, string field)
         {
             switch (field)
             {
-                case "Layer": return policy.LayerName ?? "Default";
-                case "Coverage": return policy.RequestedCoverage;
-                case "CacheDurationSeconds": return (float)(policy.CacheDuration.HasValue ? policy.CacheDuration.Value.TotalSeconds : 60);
-                case "PrepareTimeoutSeconds": return (float)policy.PrepareTimeout.TotalSeconds;
-                case "CloseTimeoutSeconds": return (float)policy.CloseTimeout.TotalSeconds;
-                case "CloseDecisionTimeoutSeconds": return (float)policy.CloseDecisionTimeout.TotalSeconds;
-                default: return typeof(PagePolicy).GetProperty(field).GetValue(policy);
+                case "Layer":
+                    return policy.LayerName ?? "Default";
+                case "Coverage":
+                    return policy.RequestedCoverage;
+                case "CacheDurationSeconds":
+                    return (float)(policy.CacheDuration.HasValue ? policy.CacheDuration.Value.TotalSeconds : 60);
+                case "PrepareTimeoutSeconds":
+                    return (float)policy.PrepareTimeout.TotalSeconds;
+                case "CloseTimeoutSeconds":
+                    return (float)policy.CloseTimeout.TotalSeconds;
+                case "CloseDecisionTimeoutSeconds":
+                    return (float)policy.CloseDecisionTimeout.TotalSeconds;
+                default:
+                    return typeof(PagePolicy).GetProperty(field).GetValue(policy);
             }
         }
     }

@@ -393,7 +393,7 @@ namespace MUI.Samples.Navigation
                 return new ValueTask<IPreparedArgsUpdate>(new PreparedTitle(ViewModel, args));
             }
 
-            protected override void OnOpen(string title)
+            protected override void OnPrepareOpen(string title)
             {
                 if (title == FailingOpenTitle)
                 {

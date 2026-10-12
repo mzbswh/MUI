@@ -1,7 +1,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using MUI.ChildViews;
+using MUI.Widgets;
 
 namespace MUI.Tabs
 {
@@ -21,7 +21,7 @@ namespace MUI.Tabs
             Exception recoveryFailure = null;
             cancelled |= target.Cancellation.IsCancellationRequested;
             if ((cancelled || failureDisplay == TabFailureDisplay.RestorePrevious) && saved != null &&
-                saved.Handle.State == ChildViewState.Retained)
+                saved.Handle.State == WidgetState.Retained)
             {
                 // 被取消的目标不再拥有恢复令牌；父关闭与新选择仍可撤销旧页恢复。
                 var cancellation = CancellationTokenSource.CreateLinkedTokenSource(scope.Token);
@@ -34,7 +34,7 @@ namespace MUI.Tabs
                         (owner, token) => PrepareRecoveryAsync(target, saved, owner, token),
                         cancellation.Token,
                         _ => CommitRecovery(target, saved), () => RequireRecoveryCurrent(target, saved));
-                    restored = recovery.Status == ChildViewChangeStatus.Ready;
+                    restored = recovery.Status == WidgetChangeStatus.Ready;
                     if (recovery.Error != null)
                     {
                         recoveryFailure = recovery.Error;
@@ -107,16 +107,16 @@ namespace MUI.Tabs
                 error: cancelled ? recoveryFailure : failure);
         }
 
-        private async ValueTask<ChildViewHandle> PrepareRecoveryAsync(
+        private async ValueTask<WidgetHandle> PrepareRecoveryAsync(
             Operation target,
             RetainedContent saved,
-            ChildViewScope owner,
+            WidgetScope owner,
             CancellationToken token)
         {
             var previous = preparing.Value;
             var frame = new PreparationFrame();
             preparing.Value = frame;
-            ChildViewHandle prepared = null;
+            WidgetHandle prepared = null;
             try
             {
                 RequireRecoveryCurrent(target, saved);

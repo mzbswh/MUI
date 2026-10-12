@@ -31,7 +31,7 @@ namespace MUI.Samples.Navigation
                 var provider = lifetime.OwnDisposable(new PrefabViewProvider(parentView.transform,
                     new[] { new KeyValuePair<ViewResource, GameObject>(new ViewResource("ThingItem"), itemPrefab) }));
                 content.Configure(provider);
-                parentView.BeginChildActivation(lifetime);
+                parentView.BeginWidgetActivation(lifetime);
                 lifetime.OnDispose(() =>
                 {
                     if (parentView != null && parentView.IsAlive)
@@ -43,7 +43,7 @@ namespace MUI.Samples.Navigation
                 content.SetContent("ThingItem", new ThingItemViewModel { Label = "动态道具 × 10" });
                 await content.PendingChange;
                 lifetime.Token.ThrowIfCancellationRequested();
-                parentView.CommitChildActivation();
+                parentView.CommitWidgetActivation();
                 parentView.SetHostState(true, true);
             }
             catch (Exception error)

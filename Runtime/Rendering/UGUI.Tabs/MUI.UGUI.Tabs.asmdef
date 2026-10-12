@@ -7,7 +7,7 @@
     "MUI.Tabs",
     "Unity.ugui",
     "MUI.Resources",
-    "MUI.ChildViews"
+    "MUI.Widgets"
   ],
   "autoReferenced": true
 }

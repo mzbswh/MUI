@@ -1,7 +1,7 @@
 {
   "name": "MUI.Tabs",
   "rootNamespace": "MUI.Tabs",
-  "references": ["MUI.Core", "MUI.ChildViews"],
+  "references": ["MUI.Core", "MUI.Widgets"],
   "autoReferenced": true,
   "noEngineReferences": true
 }

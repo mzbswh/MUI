@@ -4,22 +4,22 @@ namespace MUI.UGUI
 {
     public sealed partial class View
     {
-        public event Action ChildTickActivityChanged;
+        public event Action WidgetTickActivityChanged;
 
-        public bool HasChildTicks => IsAlive && childViews != null && childViews.HasTicks;
+        public bool HasWidgetTicks => IsAlive && childViews != null && childViews.HasTicks;
 
-        public void TickChildren(float unscaledDeltaTime)
+        public void TickChildren(float deltaTime, float unscaledDeltaTime)
         {
             RequireAlive();
             if (childViews != null && childViews.HasTicks)
             {
-                childViews.Tick(unscaledDeltaTime);
+                childViews.Tick(deltaTime, unscaledDeltaTime);
             }
         }
 
-        private void NotifyChildTicks()
+        private void NotifyWidgetTicks()
         {
-            var handlers = ChildTickActivityChanged;
+            var handlers = WidgetTickActivityChanged;
             if (handlers == null)
             {
                 return;

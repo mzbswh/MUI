@@ -197,7 +197,7 @@ namespace MUI.Pages.Diagnostics
             get;
         }
 
-        public ViewState State
+        public PageState State
         {
             get;
         }

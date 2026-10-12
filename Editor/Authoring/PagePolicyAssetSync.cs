@@ -20,17 +20,21 @@ namespace MUI.Editor
 
         static PagePolicyAssetSync()
         {
-            if (!string.IsNullOrEmpty(SessionState.GetString(PendingKey, string.Empty))) Schedule();
+            if (!string.IsNullOrEmpty(SessionState.GetString(PendingKey, string.Empty)))
+                Schedule();
         }
 
         private static void OnPostprocessAllAssets(string[] imported, string[] deleted, string[] moved, string[] movedFrom)
         {
             var relevant = deleted.Length != 0 || moved.Length != 0;
-            foreach (var path in imported) relevant |= path.EndsWith(".prefab", StringComparison.OrdinalIgnoreCase);
-            if (!relevant) return;
+            foreach (var path in imported)
+                relevant |= path.EndsWith(".prefab", StringComparison.OrdinalIgnoreCase);
+            if (!relevant)
+                return;
             var pending = ReadPending();
             var paths = new HashSet<string>(pending.Deleted, StringComparer.Ordinal);
-            foreach (var path in deleted) paths.Add(path);
+            foreach (var path in deleted)
+                paths.Add(path);
             pending.Deleted = new List<string>(paths).ToArray();
             SessionState.SetString(PendingKey, JsonUtility.ToJson(pending));
             Schedule();
@@ -44,7 +48,8 @@ namespace MUI.Editor
 
         private static void Schedule()
         {
-            if (scheduled) return;
+            if (scheduled)
+                return;
             scheduled = true;
             EditorApplication.delayCall += Synchronize;
         }
@@ -59,7 +64,8 @@ namespace MUI.Editor
             }
             var pending = ReadPending();
             SessionState.EraseString(PendingKey);
-            if (!MUIProjectSettings.TryGet(out var settings, out _) || settings == null) return;
+            if (!RuntimeSettingsAsset.TryGet(out var settings, out _) || settings == null)
+                return;
             using (var state = new SerializedObject(settings))
             {
                 var pages = state.FindProperty("pagePolicies");
@@ -67,7 +73,8 @@ namespace MUI.Editor
                 {
                     var entry = pages.GetArrayElementAtIndex(i);
                     var guid = entry.FindPropertyRelative("PrefabGuid").stringValue;
-                    if (string.IsNullOrEmpty(guid)) continue;
+                    if (string.IsNullOrEmpty(guid))
+                        continue;
                     var previous = entry.FindPropertyRelative("PrefabPath").stringValue;
                     var path = AssetDatabase.GUIDToAssetPath(guid);
                     if (string.IsNullOrEmpty(path) || !System.IO.File.Exists(path))
@@ -80,23 +87,29 @@ namespace MUI.Editor
                             }
                         continue;
                     }
-                    if (path == previous) continue;
+                    if (path == previous)
+                        continue;
                     entry.FindPropertyRelative("PrefabPath").stringValue = path;
-                    if (!entry.FindPropertyRelative("ResourceKeyFromPath").boolValue) continue;
+                    if (!entry.FindPropertyRelative("ResourceKeyFromPath").boolValue)
+                        continue;
                     var key = ResourcesKey(path);
-                    if (key == null) continue;
+                    if (key == null)
+                        continue;
                     var version = entry.FindPropertyRelative("ResourceVersion").stringValue;
                     var duplicate = false;
                     for (var other = 0; other < pages.arraySize; other++)
                     {
-                        if (other == i) continue;
+                        if (other == i)
+                            continue;
                         var candidate = pages.GetArrayElementAtIndex(other);
                         duplicate |= candidate.FindPropertyRelative("ResourceKey").stringValue == key &&
                             candidate.FindPropertyRelative("ResourceVersion").stringValue == version;
                     }
-                    if (!duplicate) entry.FindPropertyRelative("ResourceKey").stringValue = key;
+                    if (!duplicate)
+                        entry.FindPropertyRelative("ResourceKey").stringValue = key;
                 }
-                if (state.ApplyModifiedProperties()) AssetDatabase.SaveAssetIfDirty(settings);
+                if (state.ApplyModifiedProperties())
+                    AssetDatabase.SaveAssetIfDirty(settings);
             }
         }
 
@@ -104,21 +117,25 @@ namespace MUI.Editor
         {
             const string marker = "/Resources/";
             var start = path.LastIndexOf(marker, StringComparison.Ordinal);
-            if (start < 0) return null;
+            if (start < 0)
+                return null;
             var key = path.Substring(start + marker.Length);
             return key.Substring(0, key.Length - System.IO.Path.GetExtension(key).Length);
         }
 
         internal static void LinkFromView(SerializedProperty entry, View view, bool keyFromPath)
         {
-            if (!string.IsNullOrEmpty(entry.FindPropertyRelative("PrefabGuid").stringValue)) return;
+            if (!string.IsNullOrEmpty(entry.FindPropertyRelative("PrefabGuid").stringValue))
+                return;
             var stage = UnityEditor.SceneManagement.PrefabStageUtility.GetPrefabStage(view.gameObject);
             string path;
-            if (stage != null && stage.prefabContentsRoot == view.gameObject) path = stage.assetPath;
+            if (stage != null && stage.prefabContentsRoot == view.gameObject)
+                path = stage.assetPath;
             else
             {
                 var source = EditorUtility.IsPersistent(view) ? view : PrefabUtility.GetCorrespondingObjectFromSource(view);
-                if (source == null || source.transform.parent != null) return;
+                if (source == null || source.transform.parent != null)
+                    return;
                 path = AssetDatabase.GetAssetPath(source);
             }
             Link(entry, path, keyFromPath);

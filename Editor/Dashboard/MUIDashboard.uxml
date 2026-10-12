@@ -66,12 +66,11 @@
             <ui:VisualElement class="mui-dashboard-settings-body">
                 <ui:VisualElement class="mui-card">
                     <ui:Label text="@dashboard.configuration.title" class="mui-heading" />
-                    <uie:ObjectField name="settings" label="@uxml.MUIDashboard.36155a4b2f" />
+                    <uie:ObjectField name="settings" label="@globalSettings.label" />
                     <ui:VisualElement class="mui-actions">
                         <ui:Button name="createSettings" text="@uxml.MUIDashboard.3b5f994fce" />
                         <ui:Button name="locateSettings" text="@dashboard.configuration.locate" />
-                        <ui:Button name="hostSettings" text="@uxml.MUIDashboard.01da0634c3" />
-                        <ui:Button name="assignSettings" text="@uxml.MUIDashboard.ebb7e27d3b" class="mui-primary-button" />
+                        <ui:Button name="hostSettings" text="@globalSettings.refresh" />
                     </ui:VisualElement>
                     <ui:Label text="@dashboard.configuration.help" class="mui-note" />
                 </ui:VisualElement>

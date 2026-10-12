@@ -210,7 +210,7 @@ namespace MUI.Editor
             }
         }
 
-        [MenuItem("Tools/MUI/校验构建目录 (Validate Build Catalogs)")]
+        [MenuItem("Tools/MUI/检查 (Inspect)/构建目录 (Build Catalogs)", false, 61)]
         private static void ValidateFromMenu()
         {
             var result = Validate();

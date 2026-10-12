@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -6,24 +5,31 @@ namespace MUI.UGUI
 {
     public sealed partial class View
     {
+        [SerializeField] private bool useGlobalModalBackdrop = false;
+
         [SerializeField, Tooltip("可复用的模态遮罩样式。为空时使用本页遮罩颜色；自定义视觉只负责显示，输入屏障仍由框架提供。")]
         private ModalBackdropStyle modalBackdropStyle = null;
         private GameObject modalBackdropVisual;
 
-        private Color ModalBackdropTint => modalBackdropStyle == null ? modalBarrierColor : modalBackdropStyle.Tint;
+        private Color resolvedModalBackdropTint;
+        private Color ModalBackdropTint => resolvedModalBackdropTint;
 
-        private void CreateModalBackdropVisual()
+        private RectTransform ResolveModalBackdrop()
         {
-            if (modalBackdropStyle == null || modalBackdropStyle.VisualPrefab == null)
-            {
-                return;
-            }
-            var prefab = modalBackdropStyle.VisualPrefab;
-            if (prefab.GetComponentInChildren<Canvas>(true) != null || prefab.GetComponentInChildren<Renderer>(true) != null ||
-                prefab.GetComponentInChildren<Selectable>(true) != null || prefab.GetComponentInChildren<View>(true) != null)
-            {
-                throw new InvalidOperationException("模态遮罩视觉 Prefab 不能包含 Canvas、Renderer、Selectable 或 View；请使用 Image/RawImage 与项目材质。");
-            }
+            var settings = useGlobalModalBackdrop ? MUISettings.Global : null;
+            var prefab = useGlobalModalBackdrop
+                ? (settings == null ? null : settings.DefaultModalBackdropPrefab)
+                : (modalBackdropStyle == null ? null : modalBackdropStyle.VisualPrefab);
+            resolvedModalBackdropTint = useGlobalModalBackdrop
+                ? (settings == null ? new Color(0, 0, 0, 0.45f) : settings.DefaultModalBackdropColor)
+                : (modalBackdropStyle == null ? modalBarrierColor : modalBackdropStyle.Tint);
+            ModalBackdropStyle.ValidateVisualPrefab(prefab);
+            return prefab;
+        }
+
+        private void CreateModalBackdropVisual(RectTransform prefab)
+        {
+            if (prefab == null) return;
             // 屏障此时为 inactive，项目脚本只能在框架正式显示遮罩时收到 OnEnable。
             var visual = Instantiate(prefab, modalBarrier.transform, false);
             modalBackdropVisual = visual.gameObject;

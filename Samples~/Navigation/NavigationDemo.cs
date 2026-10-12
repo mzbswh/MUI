@@ -15,7 +15,6 @@ namespace MUI.Samples.Navigation
 {
     public sealed partial class NavigationDemo : MonoBehaviour
     {
-        [SerializeField] private MUISettings settings = null;
         [SerializeField] private bool automaticWalkthrough;
         [SerializeField] private bool showEnterTransitionPreview;
         [SerializeField] private bool showMeasuredListPreview = false;
@@ -30,19 +29,6 @@ namespace MUI.Samples.Navigation
         private GameObject canvasObject;
         private GameObject eventSystemObject;
         private UIHost host;
-
-        public MUISettings Settings
-        {
-            get => settings;
-            set
-            {
-                if (host != null)
-                {
-                    throw new InvalidOperationException("请在示例创建宿主前配置 Settings。");
-                }
-                settings = value;
-            }
-        }
 
         public bool ShowEnterTransitionPreview
         {
@@ -166,7 +152,6 @@ namespace MUI.Samples.Navigation
                 PageViewModelBindingFactory.Register();
                 ThingItemViewModelBindingFactory.Register();
                 host = canvasObject.AddComponent<UIHost>();
-                host.Settings = settings;
                 host.Initialize(provider, ownsProvider: true, cacheCapacity: showCacheWalkthrough ? (int?)2 : null,
                     maxCachedEstimatedBytes: showCacheWalkthrough ? (long?)(2 * 1024 * 1024) : null,
                     cleanupCapacity: showCloseTimeoutWalkthrough ? (int?)1 : null);

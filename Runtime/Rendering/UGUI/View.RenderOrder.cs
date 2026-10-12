@@ -13,9 +13,13 @@ namespace MUI.UGUI
 
     public sealed partial class View : IRenderOrderedView
     {
-        [SerializeField] private List<ViewRenderOrderTarget> renderOrderTargets = new List<ViewRenderOrderTarget>();
+        [SerializeField, HideInInspector] private List<ViewRenderOrderTarget> renderOrderTargets = new List<ViewRenderOrderTarget>();
         private readonly Dictionary<Component, int> dynamicRenderTargets = new Dictionary<Component, int>();
         private readonly Dictionary<Renderer, bool> rendererVisibility = new Dictionary<Renderer, bool>();
+        // 保留首次发现时的作者排序，不能把框架写入的绝对 Order 当成下一次排序依据。
+        private readonly Dictionary<Component, (int layer, int order)> authoredRenderOrders = new Dictionary<Component, (int, int)>();
+        private readonly Dictionary<Component, int> resolvedRenderTargets = new Dictionary<Component, int>();
+        public IReadOnlyDictionary<Component, int> ResolvedRenderOrderTargets => resolvedRenderTargets;
         private Canvas orderedCanvas;
         private bool hasRenderOrder;
         private int renderSortingLayerId;
@@ -204,19 +208,45 @@ namespace MUI.UGUI
                 ValidateRenderTarget(binding.Key, binding.Value, span);
                 targets[binding.Key] = binding.Value;
             }
+            var automatic = new List<Component>();
             foreach (var canvas in GetComponentsInChildren<Canvas>(true))
             {
                 if (canvas.gameObject != gameObject && canvas.overrideSorting && !targets.ContainsKey(canvas))
-                {
-                    throw new InvalidOperationException("独立排序的子 Canvas 必须配置页面相对 Order：" + canvas.name);
-                }
+                    automatic.Add(canvas);
             }
             foreach (var renderer in GetComponentsInChildren<Renderer>(true))
             {
-                if (!targets.ContainsKey(renderer))
+                if (!targets.ContainsKey(renderer)) automatic.Add(renderer);
+            }
+            foreach (var target in new List<Component>(authoredRenderOrders.Keys))
+            {
+                if (target == null || !target.transform.IsChildOf(transform)) authoredRenderOrders.Remove(target);
+            }
+            foreach (var target in automatic)
+            {
+                if (authoredRenderOrders.ContainsKey(target)) continue;
+                var canvas = target as Canvas;
+                var renderer = target as Renderer;
+                authoredRenderOrders.Add(target, canvas != null
+                    ? (SortingLayer.GetLayerValueFromID(canvas.sortingLayerID), canvas.sortingOrder)
+                    : (SortingLayer.GetLayerValueFromID(renderer.sortingLayerID), renderer.sortingOrder));
+            }
+            automatic.Sort((left, right) => authoredRenderOrders[left].CompareTo(authoredRenderOrders[right]));
+            var reserved = new HashSet<int>(targets.Values);
+            var offset = 1;
+            (int layer, int order)? previous = null;
+            foreach (var target in automatic)
+            {
+                var authored = authoredRenderOrders[target];
+                if (!previous.HasValue || !previous.Value.Equals(authored))
                 {
-                    throw new InvalidOperationException("Renderer 必须配置页面相对 Order：" + renderer.name);
+                    do { offset++; } while (reserved.Contains(offset));
+                    previous = authored;
                 }
+                if (offset >= span)
+                    throw new InvalidOperationException("页面内部排序层数超过可用跨度，请增加页面排序跨度：" + name);
+                ValidateRenderTarget(target, offset, span);
+                targets.Add(target, offset);
             }
             return targets;
         }
@@ -264,22 +294,18 @@ namespace MUI.UGUI
                     }
                 }
             }
+            resolvedRenderTargets.Clear();
+            foreach (var binding in targets) resolvedRenderTargets.Add(binding.Key, binding.Value);
             ApplyRendererVisibility();
         }
 
         private void ApplyRendererVisibility()
         {
-            // Prefab 配置的 Renderer 在首次隐藏准备阶段就受门控，不必等到导航提交。
-            if (renderOrderTargets != null)
+            // 未提交显示前也收集特效，避免未登记的原生 Renderer 提前露出。
+            foreach (var renderer in GetComponentsInChildren<Renderer>(true))
             {
-                foreach (var binding in renderOrderTargets)
-                {
-                    if (binding != null && binding.Target is Renderer renderer && renderer != null &&
-                        renderer.transform.IsChildOf(transform) && !rendererVisibility.ContainsKey(renderer))
-                    {
-                        rendererVisibility.Add(renderer, renderer.forceRenderingOff);
-                    }
-                }
+                if (!rendererVisibility.ContainsKey(renderer))
+                    rendererVisibility.Add(renderer, renderer.forceRenderingOff);
             }
             var visible = !disposed && (retainingVisuals ? retainedVisible && exitVisible : hostVisible && localVisible);
             foreach (var binding in rendererVisibility)
@@ -333,7 +359,7 @@ namespace MUI.UGUI
             {
                 return false;
             }
-            if (canvas == orderedCanvas || dynamicRenderTargets.ContainsKey(canvas))
+            if (canvas == orderedCanvas || resolvedRenderTargets.ContainsKey(canvas) || dynamicRenderTargets.ContainsKey(canvas))
             {
                 return true;
             }

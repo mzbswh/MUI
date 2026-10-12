@@ -8,7 +8,7 @@ namespace MUI.BasicExample.Editor
     {
         private const string SceneGuid = "c1237d8dbbdbb46c78a66de5682afdcf";
 
-        [MenuItem("MUI/基础示例 (Basic Example)/打开场景 (Open Scene)")]
+        [MenuItem("Tools/MUI/示例 (Samples)/基础场景 (Basic Scene)", false, 100)]
         public static void OpenScene()
         {
             if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo())

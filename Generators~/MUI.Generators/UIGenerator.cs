@@ -30,9 +30,11 @@ namespace MUI.Generators
         {
             if (!TryGetModule(context, out var moduleNamespace, out var registryName))
             {
+                context.PublishSourceIndex();
                 return;
             }
 
+            context = AddPrefabBindings(context, ref candidates);
             var seen = new HashSet<INamedTypeSymbol>(SymbolEqualityComparer.Default);
             var generated = new List<string>();
             foreach (var type in candidates)
@@ -63,6 +65,7 @@ namespace MUI.Generators
             }
             if (generated.Count == 0)
             {
+                context.PublishSourceIndex();
                 return;
             }
 
@@ -75,6 +78,7 @@ namespace MUI.Generators
 
             registry.Append("        }\n    }\n}\n");
             context.AddSource(Identifier(moduleNamespace + "." + registryName) + ".g.cs", SourceText.From(registry.ToString(), Encoding.UTF8));
+            context.PublishSourceIndex();
         }
 
         private static bool Relevant(INamedTypeSymbol type)
@@ -253,10 +257,44 @@ namespace MUI.Generators
                         Fail(member, "Multiple bindings write the same Element property: " + elementName + "." + targetName);
                     }
 
-                    var target = FindElementMember<IPropertySymbol>(elementType, targetName);
+                    var componentType = attribute.NamedArguments.FirstOrDefault(pair => pair.Key == "ComponentType").Value.Value as INamedTypeSymbol;
+                    if (componentType != null && (mode == 1 || mode == 2) && !attribute.NamedArguments.Any(pair => pair.Key == "NativeNotifications" && pair.Value.Value is bool enabled && enabled)) Fail(member, "Native component properties without notifications support OneWay or OneTime only.");
+                    if (componentType != null && (!DerivesFrom(componentType, "UnityEngine.Component") || !DerivesFrom(elementType, "MUI.UGUI.NativeControl") && elementType.ToDisplayString() != "MUI.UGUI.NativeControl"))
+                        Fail(member, "ComponentType requires a Unity component and NativeControl element.");
+                    var targetReceiver = componentType == null ? "element" : "((" + TypeName(componentType) + ")element.Target)";
+                    var propertyAdapterType = attribute.NamedArguments.FirstOrDefault(pair => pair.Key == "PropertyAdapterType").Value.Value as INamedTypeSymbol;
+                    if (propertyAdapterType != null)
+                    {
+                        var adapterBase = propertyAdapterType.BaseType;
+                        while (adapterBase != null && !adapterBase.OriginalDefinition.ToDisplayString().StartsWith("MUI.UGUI.GeneratedPropertyAdapter<", StringComparison.Ordinal)) adapterBase = adapterBase.BaseType;
+                        if (componentType == null || adapterBase == null || !SymbolEqualityComparer.Default.Equals(adapterBase.TypeArguments[0], componentType) || propertyAdapterType.IsAbstract ||
+                            !propertyAdapterType.InstanceConstructors.Any(c => c.DeclaredAccessibility == Accessibility.Public && c.Parameters.Length == 1 && c.Parameters[0].Type.ToDisplayString() == "MUI.UGUI.NativeControl"))
+                            Fail(member, "Invalid generated property adapter.");
+                        targetReceiver = "element.GetPropertyAdapter<" + TypeName(propertyAdapterType) + ">(owner => new " + TypeName(propertyAdapterType) + "(owner))";
+                    }
+                    var target = FindElementMember<IPropertySymbol>(propertyAdapterType ?? componentType ?? elementType, targetName);
                     if (target == null || target.IsStatic || target.IsIndexer)
                     {
                         Fail(member, "Missing or ambiguous instance Element property: " + targetName);
+                    }
+
+                    var readAccessorField = attribute.NamedArguments.FirstOrDefault(pair => pair.Key == "ReadAccessorField").Value.Value as string;
+                    if (readAccessorField != null)
+                    {
+                        var slot = type.GetMembers(readAccessorField).OfType<IFieldSymbol>().FirstOrDefault();
+                        var function = slot?.Type as INamedTypeSymbol;
+                        if (slot == null || slot.IsStatic || slot.IsReadOnly || function == null || function.OriginalDefinition.ToDisplayString() != "System.Func<TResult>" ||
+                            !SymbolEqualityComparer.Default.Equals(function.TypeArguments[0], target.Type) || !Accessible(target.GetMethod) || !SymbolEqualityComparer.Default.Equals(source.Type, target.Type))
+                            Fail(member, "Invalid generated read accessor.");
+                        bindings.Append("            builder.ReadAccess<").Append(TypeName(elementType)).Append(", ").Append(TypeName(target.Type)).Append(">(").Append(Literal(elementName))
+                            .Append(", (model, read) => { if (model.").Append(Escape(readAccessorField)).Append(" != null) throw new global::System.InvalidOperationException(\"Read accessor already bound.\"); model.").Append(Escape(readAccessorField))
+                            .Append(" = read; return () => { if (global::System.Object.ReferenceEquals(model.").Append(Escape(readAccessorField)).Append(", read)) model.").Append(Escape(readAccessorField)).Append(" = null; }; }, element => ")
+                            .Append(targetReceiver).Append('.').Append(Escape(targetName)).Append(");\n");
+                        manifest.Append("                new global::MUI.BindingEntry(").Append(Literal(source.Name)).Append(", ").Append(Literal(elementName)).Append(", typeof(").Append(TypeName(elementType)).Append("), ")
+                            .Append(Literal(targetName)).Append(", global::MUI.BindingMode.OneWayToSource, global::MUI.BindingEntryKind.Property, \"Interactable\"");
+                        AppendSourceLocation(manifest, attribute, member);
+                        manifest.Append(") { IsReadAccess = true").Append(componentType == null ? "" : ", ComponentType = typeof(" + TypeName(componentType) + ")").Append(" },\n");
+                        continue;
                     }
 
                     if (mode != 2 && (!source.Readable || !Accessible(target.SetMethod)))
@@ -316,14 +354,16 @@ namespace MUI.Generators
                             Fail(member, "Reverse types require an explicit binding converter.");
                         }
                     }
+                    var notificationName = propertyAdapterType != null && propertyAdapterType.GetAttributes().Any(a => a.AttributeClass?.ToDisplayString() == "MUI.UGUI.ControlPropertyExtensionAttribute")
+                        ? propertyAdapterType.ToDisplayString() + "." + targetName : targetName;
                     var modeName = mode == 3 ? "OneTime" : mode == 0 ? "OneWay" : mode == 1 ? "TwoWay" : "OneWayToSource";
                     bindings.Append("            builder.Property<").Append(TypeName(elementType)).Append(", ").Append(TypeName(source.Type)).Append(", ").Append(TypeName(target.Type)).Append(">(\n")
                         .Append("                ").Append(Literal(elementName)).Append(", ").Append(Literal(source.Name)).Append(", ")
                         .Append(mode == 2 || source.Definition != null ? "null" : "model => " + source.Expression).Append(", ")
                         .Append((mode == 0 || mode == 3 || source.Definition != null) ? "null" : "(model, value) => " + source.Expression + " = value").Append(",\n")
-                        .Append("                ").Append(Literal(targetName)).Append(", ")
-                        .Append((mode == 0 || mode == 3) ? "null" : "element => element." + Escape(targetName)).Append(", ")
-                        .Append(mode == 2 ? "null" : "(element, value) => element." + Escape(targetName) + " = value").Append(",\n")
+                        .Append("                ").Append(Literal(notificationName)).Append(", ")
+                        .Append((mode == 0 || mode == 3) ? "null" : "element => " + targetReceiver + "." + Escape(targetName)).Append(", ")
+                        .Append(mode == 2 ? "null" : "(element, value) => " + targetReceiver + "." + Escape(targetName) + " = value").Append(",\n")
                         .Append("                ").Append(mode == 2 ? "null" : forward).Append(", ").Append((mode == 0 || mode == 3) ? "null" : reverse)
                         .Append(", global::MUI.BindingMode.").Append(modeName);
                     if (validationConverter != null || validationWriter != null)
@@ -340,7 +380,7 @@ namespace MUI.Generators
                         .Append(", typeof(").Append(TypeName(elementType)).Append("), ").Append(Literal(targetName)).Append(", global::MUI.BindingMode.").Append(modeName)
                         .Append(", global::MUI.BindingEntryKind.Property, \"Interactable\"");
                     AppendSourceLocation(manifest, attribute, member);
-                    manifest.Append("),\n");
+                    manifest.Append(componentType == null ? "),\n" : ") { ComponentType = typeof(" + TypeName(componentType) + ") },\n");
                     bindingCount++;
                 }
             }
@@ -400,9 +440,13 @@ namespace MUI.Generators
         private readonly struct GenerationContext
         {
             private readonly SourceProductionContext output;
+            private readonly List<string> sourceNames;
 
-            public GenerationContext(SourceProductionContext output, Compilation compilation)
+            public GenerationContext(SourceProductionContext output, Compilation compilation) : this(output, compilation, new List<string>()) { }
+
+            private GenerationContext(SourceProductionContext output, Compilation compilation, List<string> sourceNames)
             {
+                this.sourceNames = sourceNames;
                 this.output = output;
                 Compilation = compilation;
             }
@@ -412,7 +456,9 @@ namespace MUI.Generators
                 get;
             }
 
-            public void AddSource(string name, SourceText source)
+            public GenerationContext WithCompilation(Compilation compilation) => new GenerationContext(output, compilation, sourceNames);
+
+            public string AddSource(string name, SourceText source)
             {
                 // 保留模板有意拆开的参数、绑定和清单行，避免规范化将长声明压到一行。
                 var layout = new MemberLayout();
@@ -422,10 +468,22 @@ namespace MUI.Generators
                 {
                     throw new InvalidOperationException(string.Join("\n", layout.Conflicts));
                 }
+                var assemblyPrefix = Identifier(Compilation.AssemblyName) + ".";
+                if (!name.StartsWith(assemblyPrefix, StringComparison.Ordinal)) name = assemblyPrefix + name;
                 output.AddSource(name, SourceText.From(formatted, Encoding.UTF8));
+                sourceNames.Add(name);
+                return formatted;
             }
 
-            public void ReportDiagnostic(Diagnostic diagnostic) => output.ReportDiagnostic(diagnostic);
+            public void PublishSourceIndex()
+            {
+                var content = "// <auto-generated/>\n" + string.Join("\n", sourceNames.Select(name => "// MUI-SOURCE: " + name));
+                output.AddSource(Identifier(Compilation.AssemblyName) + ".SourceIndex.g.cs", SourceText.From(content, Encoding.UTF8));
+            }
+
+            public void ReportDiagnostic(Diagnostic diagnostic) => output.ReportDiagnostic(
+                diagnostic.Location.SourceTree != null && diagnostic.Location.SourceTree.FilePath.EndsWith(".AutoBindings.g.cs", StringComparison.Ordinal)
+                    ? Diagnostic.Create(InvalidContract, Location.None, diagnostic.GetMessage()) : diagnostic);
         }
     }
 }

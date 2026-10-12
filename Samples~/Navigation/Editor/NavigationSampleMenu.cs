@@ -15,19 +15,19 @@ namespace MUI.Samples.Navigation.Editor
         private static bool failed;
         private static bool completed;
 
-        [MenuItem("Tools/MUI/示例 (Samples)/打开回收列表场景 (Open Recycling List Scene)")]
+        [MenuItem("Tools/MUI/示例 (Samples)/打开回收列表场景 (Open Recycling List Scene)", false, 105)]
         public static void OpenRecyclingList()
         {
             OpenStandaloneSample<LocalRecyclingListDemo>("RecyclingList");
         }
 
-        [MenuItem("Tools/MUI/示例 (Samples)/打开固定槽位列表场景 (Open Fixed Slot List Scene)")]
+        [MenuItem("Tools/MUI/示例 (Samples)/打开固定槽位列表场景 (Open Fixed Slot List Scene)", false, 106)]
         public static void OpenFixedSlots()
         {
             OpenStandaloneSample<LocalRecyclingListDemo>("FixedSlots", sample => sample.ConfigureFixedSlots());
         }
 
-        [MenuItem("Tools/MUI/示例 (Samples)/打开资源绑定场景 (Open Resource Binding Scene)")]
+        [MenuItem("Tools/MUI/示例 (Samples)/打开资源绑定场景 (Open Resource Binding Scene)", false, 107)]
         public static void OpenResourceBinding()
         {
             OpenStandaloneSample<ResourceImageDemo>("ResourceBinding");
@@ -60,10 +60,10 @@ namespace MUI.Samples.Navigation.Editor
             Selection.activeGameObject = sample;
         }
 
-        [MenuItem("Tools/MUI/示例 (Samples)/打开导航场景 (Open Navigation Scene)")]
+        [MenuItem("Tools/MUI/示例 (Samples)/打开导航场景 (Open Navigation Scene)", false, 103)]
         public static void Open() => OpenNavigationScene(false);
 
-        [MenuItem("Tools/MUI/示例 (Samples)/打开导航生命周期追踪场景 (Open Navigation Lifecycle Trace Scene)")]
+        [MenuItem("Tools/MUI/示例 (Samples)/打开导航生命周期追踪场景 (Open Navigation Lifecycle Trace Scene)", false, 104)]
         public static void OpenLifecycleTrace() => OpenNavigationScene(true);
 
         private static void OpenNavigationScene(bool lifecycleTrace)
@@ -86,23 +86,9 @@ namespace MUI.Samples.Navigation.Editor
             }
 
             var path = AssetDatabase.GenerateUniqueAssetPath("Assets/MUI Samples/Navigation.unity");
-            var configuration = ScriptableObject.CreateInstance<MUISettings>();
-            var settingsPath = AssetDatabase.GenerateUniqueAssetPath("Assets/MUI Samples/NavigationSettings.asset");
-            try
+            if (!EditorSceneManager.SaveScene(scene, path))
             {
-                AssetDatabase.CreateAsset(configuration, settingsPath);
-                sample.Settings = configuration;
-                if (!EditorSceneManager.SaveScene(scene, path))
-                {
-                    throw new InvalidOperationException(L.Format("sample.navigation.sceneSaveFailed", path));
-                }
-            }
-            finally
-            {
-                if (configuration != null && !EditorUtility.IsPersistent(configuration))
-                {
-                    UnityEngine.Object.DestroyImmediate(configuration);
-                }
+                throw new InvalidOperationException(L.Format("sample.navigation.sceneSaveFailed", path));
             }
             Selection.activeGameObject = sample.gameObject;
         }

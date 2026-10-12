@@ -20,7 +20,7 @@ namespace MUI.Editor
         {
             settingsField.objectType = typeof(MUISettings);
             settingsField.allowSceneObjects = false;
-            settingsField.RegisterValueChangedCallback(_ => ShowSettings());
+            settingsField.SetEnabled(false);
             Bind("createSettings", CreateSettings);
             Bind("locateSettings", () =>
             {
@@ -32,7 +32,7 @@ namespace MUI.Editor
                 }
             });
             Bind("hostSettings", ShowHostSettings);
-            Bind("assignSettings", AssignSettings);
+
             Bind("validateSettings", ValidateSettings);
             Bind("validateCatalogs", () => Run(() =>
             {
@@ -67,12 +67,20 @@ namespace MUI.Editor
             {
                 return;
             }
-            settingsField.SetValueWithoutNotify(selectedHost == null ? null : selectedHost.Settings);
+            RefreshGlobalSettings();
             ShowSettings();
+        }
+
+        private void RefreshGlobalSettings()
+        {
+            MUIProjectSettings.TryGet(out var settings, out var error);
+            settingsField.SetValueWithoutNotify(settings);
+            if (error != null) SetMessage(error, HelpBoxMessageType.Error);
         }
 
         private void ShowSettings()
         {
+            RefreshGlobalSettings();
             var settings = settingsField.value as MUISettings;
             inspectedSettings = settings;
             if (settingsDisplayed && displayedSettings == settings)
@@ -102,49 +110,10 @@ namespace MUI.Editor
 
         private void CreateSettings() => Run(() =>
         {
-            var path = EditorUtility.SaveFilePanelInProject(L.Get("editor.MUIDashboard.Configuration.08f8a4af53"), "MUISettings", "asset", L.Get("editor.MUIDashboard.Configuration.735d2beebb"));
-            if (string.IsNullOrEmpty(path))
-            {
-                return;
-            }
-            var settings = CreateInstance<MUISettings>();
-            try
-            {
-                AssetDatabase.CreateAsset(settings, path);
-                AssetDatabase.SaveAssets();
-                settingsField.SetValueWithoutNotify(settings);
-                ShowSettings();
-                EditorGUIUtility.PingObject(settings);
-            }
-            finally
-            {
-                if (settings != null && !EditorUtility.IsPersistent(settings))
-                {
-                    DestroyImmediate(settings);
-                }
-            }
-        });
-
-        private void AssignSettings() => Run(() =>
-        {
-            if (selectedHost == null)
-            {
-                throw new InvalidOperationException(L.Get("editor.MUIDashboard.Configuration.29a1fe691e"));
-            }
-            if (Application.isPlaying || selectedHost.IsInitialized)
-            {
-                throw new InvalidOperationException(L.Get("editor.MUIDashboard.Configuration.d81da0cfb4"));
-            }
-            var settings = settingsField.value as MUISettings;
-            if (settings != null)
-            {
-                settings.RequireValid();
-            }
-            var serialized = new SerializedObject(selectedHost);
-            serialized.FindProperty("settings").objectReferenceValue = settings;
-            serialized.ApplyModifiedProperties();
-            SetMessage(L.Get("editor.MUIDashboard.Configuration.a4664c33b1"), HelpBoxMessageType.Info);
-            UpdateActions();
+            var settings = MUIProjectSettings.GetOrCreate();
+            settingsField.SetValueWithoutNotify(settings);
+            ShowSettings();
+            EditorGUIUtility.PingObject(settings);
         });
 
         private void ValidateSettings() => Run(() =>

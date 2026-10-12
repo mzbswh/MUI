@@ -10,9 +10,9 @@
 
 创建 Navigation 场景时，菜单同时在 `Assets/MUI Samples` 创建 `NavigationSettings.asset` 并赋给 NavigationDemo。运行时创建的 UIHost 绑定同一资产；普通页面解析默认策略，弹窗解析 Popup，覆盖、缓存、Tick、返回及超时演示通过 `RoutePolicyOverrides` 显式覆盖相关字段。缓存和关闭超时演示分别显式使用容量 2 和 1，其余宿主容量继承资产。修改配置后重新进入 Play Mode，观察新建路由的策略。
 
-UIHost Inspector 只保留 Settings、View Root、简短状态和 Dashboard 按钮。本地 Prefab 目录默认折叠。自动更新界面统一在 MUISettings 的“运行设置”中配置；关闭后需通过代码调用 UIHost.AdvanceFrame。运行后打开 `Tools/MUI/控制台 (Dashboard)`，选择 **MUI Navigation Canvas**，采集页面状态及最终策略；在“生命周期”页开始记录和复制报告。快照上限可调整为 1—4096。
+UIHost Inspector 只保留 Settings、View Root、简短状态和 Dashboard 按钮。页面资源由加载器按标识解析，宿主不维护 Prefab 目录。自动更新界面统一在 MUISettings 的“运行设置”中配置；关闭后需通过代码调用 UIHost.AdvanceFrame。运行后打开 `Tools/MUI/控制台 (Dashboard)`，选择 **MUI Navigation Canvas**，采集页面状态及最终策略；在“生命周期”页开始记录和复制报告。快照上限可调整为 1—4096。
 
-LocalNavigationDemo、LocalDependenciesDemo 与 AsynchronousDependenciesDemo 使用各自 UIHost 的 Settings；未绑定资产时使用内置预设。创建配置可使用 `Assets/Create/MUI/配置 (Settings)`。依赖示例使用 Background 的非交互规则，显式保持单实例，并覆盖到父页面的默认层，保留同层 RequiredBefore/AttachedAfter 演示的显示关系。独立列表、子视图和资源绑定示例由 View 的生命周期管理，不需要添加 UIHost。
+LocalNavigationDemo、LocalDependenciesDemo 与 AsynchronousDependenciesDemo 自动共享项目唯一的 MUISettings；不存在配置资产时使用内置预设。创建配置可使用 `Assets/Create/MUI/配置 (Settings)`。依赖示例使用 Background 的非交互规则，显式保持单实例，并覆盖到父页面的默认层，保留同层 RequiredBefore/AttachedAfter 演示的显示关系。独立列表、子视图和资源绑定示例由 View 的生命周期管理，不需要添加 UIHost。
 
 Enable Automatic Walkthrough for a guided sequence. The batch entry point `MUI.Samples.Navigation.Editor.NavigationSampleMenu.RunPreviewBatch` enables it automatically in a disposable project.
 
@@ -190,7 +190,7 @@ ContentViewProvider 通过 IViewProvider.AcquireAsync 获取凭证。本地准�
 // 在 View 的资源接入代码中调用，icon 为 ImageElement。
 // itemLifetime 为本次激活的 LifetimeScope，由条目所有者等待结束。
 icon.ConfigureSpriteSource(itemLifetime,
-    new MUI.Samples.ResourceIntegration.UnityResourcesLoader());
+    new MUI.UGUI.UnityResourcesLoader());
 icon.SpriteSource = "Icons/Stone";
 // SpriteSourceSnapshot 提供请求键、显示键与加载状态。
 // 换键保留旧图标直到候选成功；赋值 null 请求清空并归还旧凭证。
@@ -285,7 +285,7 @@ LabelFont 演示 TextElement.Font 的直接对象绑定，绑定前应赋予实�
 
 运行并成功初始化 `LocalDependenciesDemo` 后，使用组件右键菜单“查看路由依赖图”。窗口可切换五个示例路由根，搜索节点，点击父拥有者或直接依赖跳转，查看必需/可选策略与静态错误，并复制报告。参数冲突示例应静态通过，因为冲突由运行时参数工厂的结果决定。
 
-项目自己的编辑器程序集引用 `MUI.Navigation.Editor` 与 `MUI.Navigation`，即可调用 `MUI.Navigation.Editor.RouteGraphWindow.Show(rootRoute)`；也可以传入不超过 32 个根。`Tools/MUI/路由依赖图 (Route Graph)` 可打开或恢复窗口，首次没有数据时会显示接入说明。路由元数据只在显式调用时采集，窗口不自动调用项目代码。
+项目自己的编辑器程序集引用 `MUI.Navigation.Editor` 与 `MUI.Navigation`，即可调用 `MUI.Navigation.Editor.RouteGraphWindow.Show(rootRoute)`；也可以传入不超过 32 个根。`Tools/MUI/检查 (Inspect)/路由依赖图 (Route Graph)` 可打开或恢复窗口，首次没有数据时会显示接入说明。路由元数据只在显式调用时采集，窗口不自动调用项目代码。
 
 工具使用独立 UXML/USS 以及 UI Toolkit。已完成编辑器 C# 离线编译和 XML 结构检查；Unity 实际模板导入、明暗主题、关系跳转和域重载后快照恢复仍需运行验收。
 
@@ -389,7 +389,7 @@ private static void RegisterUIBuildCatalog()
 }
 ```
 
-手动菜单为 `Tools/MUI/校验构建目录 (Validate Build Catalogs)`，Player 构建前自动调用同一检查。项目目录必须覆盖全部依赖；不同宿主的互不相关路由集合使用不同目录标识。目录回调应只提供静态声明和资产引用，不能打开界面或创建业务模型。
+手动菜单为 `Tools/MUI/检查 (Inspect)/构建目录 (Build Catalogs)`，Player 构建前自动调用同一检查。项目目录必须覆盖全部依赖；不同宿主的互不相关路由集合使用不同目录标识。目录回调应只提供静态声明和资产引用，不能打开界面或创建业务模型。
 
 检查路由图、跨根重复键、资源键/版本到 Prefab 的冲突及绑定资产。错误阻止构建；完全未登记时只报告未覆盖，不表示通过。校验不会安装或修改资源提供方，项目必须保证运行时映射与目录一致。报告可通过 `UIBuildValidation.Validate().ExportText()` 获取；实际 Unity 构建回调尚未运行验收。
 

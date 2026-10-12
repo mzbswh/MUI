@@ -29,7 +29,7 @@ namespace MUI.Navigation.Editor
 
         private RouteGraphSnapshot Current => graphs.Count == 0 ? null : graphs[selectedGraph];
 
-        [MenuItem("Tools/MUI/路由依赖图 (Route Graph)")]
+        [MenuItem("Tools/MUI/检查 (Inspect)/路由依赖图 (Route Graph)", false, 62)]
         public static void Open() => GetWindow<RouteGraphWindow>(L.Get("editor.RouteGraphWindow.be20609b83"));
 
         /// <summary>在编辑器主线程显式采集并展示一个根；不执行参数、模型、绑定或资源工厂。</summary>

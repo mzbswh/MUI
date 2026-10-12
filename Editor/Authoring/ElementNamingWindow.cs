@@ -14,7 +14,7 @@ namespace MUI.Editor
         private Vector2 scroll;
         private string message;
 
-        [MenuItem("Tools/MUI/控件命名 (Element Naming)")]
+        [MenuItem("Tools/MUI/创建 (Create)/控件命名 (Element Naming)", false, 21)]
         private static void Open()
         {
             var window = GetWindow<ElementNamingWindow>(L.Get("editor.ElementNamingWindow.358bb9962f"));

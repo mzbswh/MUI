@@ -38,6 +38,17 @@ namespace MUI
         }
 
         /// <summary>生成器可从 nameof(Element.Property) 推断类型时，此项可省略。</summary>
+        /// <summary>原生组件类型；生成强类型访问，不使用运行时反射。回写需提供变化通知。</summary>
+        public Type ComponentType { get; set; }
+
+        /// <summary>编译器生成的属性包装或外部属性扩展类型。</summary>
+        public Type PropertyAdapterType { get; set; }
+
+        public bool NativeNotifications { get; set; }
+
+        /// <summary>生成的实时只读访问入口使用的内部委托字段。</summary>
+        public string ReadAccessorField { get; set; }
+
         public Type ElementType
         {
             get; set;

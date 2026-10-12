@@ -112,6 +112,10 @@ namespace MUI
             get;
         }
 
+        /// <summary>原生属性绑定要求的组件类型。</summary>
+        public Type ComponentType { get; set; }
+        public bool IsReadAccess { get; set; }
+
         public string TargetProperty
         {
             get;

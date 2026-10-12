@@ -13,7 +13,8 @@ namespace MUI.TMP.Editor
     {
         static TMPPageTextBackend()
         {
-            PageTextBackend.Register("tmp", "TextMeshPro", typeof(TMPTextElement), Validate, CreateText);
+            NativeTMPText.RegisterAdapter();
+            PageTextBackend.Register("tmp", "TextMeshPro", typeof(NativeTMPText), Validate, CreateText, typeof(TMPTextElement));
         }
 
         private static string Validate()

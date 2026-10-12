@@ -3,10 +3,9 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using MUI.Resources;
-using MUI.UGUI;
 using UnityEngine;
 
-namespace MUI.Samples.ResourceIntegration
+namespace MUI.UGUI
 {
     /// <summary>
     /// 将项目异步资源加载器适配为 UGUI Prefab 创建器。
@@ -32,7 +31,7 @@ namespace MUI.Samples.ResourceIntegration
         /// configureView 在每个新实例激活前同步配置 View；缓存复用不重复调用。
         /// 回调不能激活、销毁、重新挂载实例或启动异步工作，配置失败沿用创建回滚。
         /// </summary>
-        public LoadedPrefabViewProvider(Transform parent, IResourceLoader loader, Func<ViewResource, string> resolveKey,
+        public LoadedPrefabViewProvider(Transform parent, IResourceLoader loader, Func<ViewResource, string> resolveKey = null,
             int loadCapacity = 16, Action<View> configureView = null)
         {
             UnityMainThread.Require();
@@ -49,7 +48,7 @@ namespace MUI.Samples.ResourceIntegration
             this.parent = parent;
             this.configureView = configureView;
             this.loader = loader ?? throw new ArgumentNullException(nameof(loader));
-            this.resolveKey = resolveKey ?? throw new ArgumentNullException(nameof(resolveKey));
+            this.resolveKey = resolveKey ?? (resource => resource.Key);
             this.loadCapacity = loadCapacity;
             staging = new GameObject("MUI Loaded Prefab Staging", typeof(RectTransform));
             staging.SetActive(false);

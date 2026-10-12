@@ -23,39 +23,23 @@ namespace MUI.Editor
             var summary = new Label();
             summary.AddToClassList("mui-status");
             header.Add(summary);
+            var dashboard = new Button(() => MUIDashboard.Show(target as UIHost));
+            header.Add(dashboard);
             root.Add(header);
             var references = new VisualElement();
             references.AddToClassList("mui-card");
-            var configuration = new PropertyField(serializedObject.FindProperty("settings"), L.Get("editor.UIHostInspector.74a883a037"));
-            configuration.tooltip = L.Get("editor.UIHostInspector.6a909f3547");
+            var configuration = new ObjectField(L.Get("globalSettings.label")) { objectType = typeof(MUISettings), allowSceneObjects = false };
+            configuration.SetEnabled(false);
+            configuration.tooltip = L.Get("globalSettings.help");
             references.Add(configuration);
+            var settingsError = new HelpBox();
+            references.Add(settingsError);
+            var openSettings = new Button(MUIProjectSettings.OpenOrCreate);
+            references.Add(openSettings);
             var viewRoot = new PropertyField(serializedObject.FindProperty("viewRoot"), L.Get("editor.UIHostInspector.6447c4dd81"));
             viewRoot.tooltip = L.Get("editor.UIHostInspector.15bfd7c74a");
             references.Add(viewRoot);
             root.Add(references);
-            var actions = new VisualElement();
-            actions.AddToClassList("mui-actions");
-            var dashboard = new Button(() => MUIDashboard.Show(target as UIHost));
-            dashboard.AddToClassList("mui-primary-button");
-            actions.Add(dashboard);
-            var editSettings = new Button(() =>
-            {
-                var host = target as UIHost;
-                if (host != null && host.Settings != null)
-                {
-                    Selection.activeObject = host.Settings;
-                    EditorGUIUtility.PingObject(host.Settings);
-                }
-            });
-            actions.Add(editSettings);
-            root.Add(actions);
-
-            var catalog = MUIEditorControls.Section("editor.UIHostInspector.900d3819f9", false, "MUI.Host.Catalog");
-            var catalogHelp = MUIEditorControls.Text("host.catalog.help");
-            catalog.Add(catalogHelp);
-            var prefabs = new IMGUIContainer(() => Localization.MUIEditorInspector.Draw(serializedObject, "prefabs", false));
-            catalog.Add(prefabs);
-            root.Add(catalog);
 
             void RefreshStatus()
             {
@@ -64,10 +48,13 @@ namespace MUI.Editor
                 {
                     return;
                 }
-                configuration.SetEnabled(!Application.isPlaying && !host.IsInitialized);
+                var found = MUIProjectSettings.TryGet(out var global, out var error);
+                configuration.SetValueWithoutNotify(global);
+                settingsError.text = error ?? L.Get("globalSettings.help");
+                settingsError.messageType = found ? HelpBoxMessageType.Info : HelpBoxMessageType.Error;
+                openSettings.text = L.Get(global == null ? "globalSettings.create" : "globalSettings.locate");
+                openSettings.SetEnabled(found && !Application.isPlaying);
                 viewRoot.SetEnabled(!Application.isPlaying && !host.IsInitialized);
-                prefabs.SetEnabled(!Application.isPlaying && !host.IsInitialized);
-                editSettings.SetEnabled(host.Settings != null);
                 var state = !Application.isPlaying ? L.Get("editor.UIHostInspector.20fe85fc53") : host.IsShutdown ? L.Get("editor.UIHostInspector.899df7e244") : host.IsInitialized ? L.Get("editor.UIHostInspector.c6d125d5b7") : L.Get("editor.UIHostInspector.07564e6524");
                 summary.text = state;
                 summary.EnableInClassList("mui-status-error", host.IsShutdown);
@@ -75,12 +62,11 @@ namespace MUI.Editor
             RefreshStatus();
             void RefreshLanguage()
             {
-                configuration.label = L.Get("property.settings");
-                configuration.tooltip = L.Get("editor.UIHostInspector.6a909f3547");
+                configuration.label = L.Get("globalSettings.label");
+                configuration.tooltip = L.Get("globalSettings.help");
                 viewRoot.label = L.Get("property.viewRoot");
                 viewRoot.tooltip = L.Get("editor.UIHostInspector.15bfd7c74a");
                 dashboard.text = L.Get("editor.UIHostInspector.652ac53466");
-                editSettings.text = L.Get("host.editSettings");
                 RefreshStatus();
             }
             L.Track(root, RefreshLanguage);

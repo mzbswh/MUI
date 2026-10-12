@@ -341,7 +341,7 @@
     },
     {
       "key": "editor.MUIDashboard.Configuration.baf3aacd5d",
-      "text": "Use the asset picker above or Create Configuration. Hosts without an asset use the built-in defaults."
+      "text": "Create global settings to customize the built-in defaults. Resolve any duplicate-asset error shown above first."
     },
     {
       "key": "editor.MUIDashboard.Configuration.d4116b321f",
@@ -805,7 +805,7 @@
     },
     {
       "key": "editor.PageWizard.7fe8b9bce7",
-      "text": "Pass UIHost.Settings when creating the route. Settings are resolved at creation; active pages retain their existing policy."
+      "text": "Routes read global settings when created. Existing routes retain their resolved policies."
     },
     {
       "key": "editor.PageWizard.89b4e4e0de",
@@ -837,7 +837,7 @@
     },
     {
       "key": "editor.PageWizard.ExistingView.2585437490",
-      "text": "Graphics in noninteractive notices must disable Raycast Target; the existing Prefab will not be modified automatically."
+      "text": "Graphics in noninteractive pages must disable Raycast Target; the existing Prefab will not be modified automatically."
     },
     {
       "key": "editor.PageWizard.ExistingView.358fc7efeb",
@@ -853,7 +853,7 @@
     },
     {
       "key": "editor.PageWizard.ExistingView.885a18c4c8",
-      "text": "Noninteractive notices cannot contain Selectable controls; the existing Prefab will not be modified automatically."
+      "text": "Noninteractive pages cannot contain Selectable controls; the existing Prefab will not be modified automatically."
     },
     {
       "key": "editor.PageWizard.ExistingView.9267775c67",
@@ -2181,7 +2181,7 @@
     },
     {
       "key": "editor.ViewInspector.ad9d661681",
-      "text": "Select the ViewModel contract used by this View before validating bindings. Structure validation does not require a contract."
+      "text": "Choose one of this prefab’s contracts before validating bindings. Structure validation does not require a contract."
     },
     {
       "key": "editor.ViewInspector.b104369e08",
@@ -4601,7 +4601,7 @@
     },
     {
       "key": "diagnostic.settings.rulesRequired",
-      "text": "Default rules cannot be null.",
+      "text": "Default rules cannot be "Generate Bindings".",
       "source": "默认规则不能为空。"
     },
     {
@@ -5121,7 +5121,7 @@
     },
     {
       "key": "dashboard.configuration.help",
-      "text": "Select an asset to edit it. Assign to Host updates the host reference."
+      "text": "The unique project settings automatically apply to all hosts. New routes use edited rules; existing routes retain their policies."
     },
     {
       "key": "dashboard.configuration.empty",
@@ -5221,11 +5221,11 @@
     },
     {
       "key": "property.hiddenMode",
-      "text": "Hidden implementation"
+      "text": "When hidden"
     },
     {
       "key": "property.hiddenContentRoot",
-      "text": "Content child to deactivate"
+      "text": "Content root"
     },
     {
       "key": "policy.layer.help",
@@ -5353,11 +5353,11 @@
     },
     {
       "key": "enum.MUI.UGUI.ViewHiddenMode.CanvasGroupOnly",
-      "text": "CanvasGroup only (default)"
+      "text": "Keep content running"
     },
     {
       "key": "enum.MUI.UGUI.ViewHiddenMode.DeactivateContent",
-      "text": "Deactivate content subtree"
+      "text": "Deactivate content"
     },
     {
       "key": "enum.MUI.Navigation.ViewCacheDecision.Retained",
@@ -5481,7 +5481,7 @@
     },
     {
       "key": "sorting.targets.help",
-      "text": "Register independent Canvases and all Renderers below. Offsets must be smaller than the page span. Ordinary particles require a camera Canvas and compatible materials; order does not provide UI clipping."
+      "text": "Child Canvases with independent sorting and Renderers are collected automatically. Regular particles require a camera Canvas and compatible materials; sorting does not provide UI clipping."
     },
     {
       "key": "property.renderSortingLayer",
@@ -5766,6 +5766,838 @@
     {
       "key": "settings.preset.invalid",
       "text": "Fix the configuration errors below to preview effective values."
+    },
+    {
+      "key": "wizard.title",
+      "text": "Create a new page"
+    },
+    {
+      "key": "wizard.subtitle",
+      "text": "Build your UI scaffold in three guided steps."
+    },
+    {
+      "key": "wizard.step0",
+      "text": "Page details"
+    },
+    {
+      "key": "wizard.step1",
+      "text": "Behavior"
+    },
+    {
+      "key": "wizard.step2",
+      "text": "Review & create"
+    },
+    {
+      "key": "wizard.step0Hint",
+      "text": "Set the name, destination and view source."
+    },
+    {
+      "key": "wizard.step1Hint",
+      "text": "Choose page behavior and logic scaffolding."
+    },
+    {
+      "key": "wizard.step2Hint",
+      "text": "Review output files and assembly requirements."
+    },
+    {
+      "key": "wizard.identity",
+      "text": "Name & location"
+    },
+    {
+      "key": "wizard.view",
+      "text": "View source"
+    },
+    {
+      "key": "wizard.logic",
+      "text": "Page logic"
+    },
+    {
+      "key": "wizard.nameHint",
+      "text": "A C# identifier such as Inventory. Used for class and file names; no spaces."
+    },
+    {
+      "key": "wizard.namespaceHint",
+      "text": "A configurable C# namespace, e.g. MyGame.UI. Game.UI is only a default example; it need not match the ViewModule registration namespace."
+    },
+    {
+      "key": "wizard.destinationHint",
+      "text": "An existing Assets folder. A new page subfolder is created without overwriting files."
+    },
+    {
+      "key": "wizard.locationNote",
+      "text": "Generation follows the global directory rules. Review the resolved paths before creating."
+    },
+    {
+      "key": "wizard.backendHint",
+      "text": "Text component backend. TMP requires its package and an MUI.TMP assembly reference."
+    },
+    {
+      "key": "wizard.newPrefabNote",
+      "text": "Leave empty to create a Prefab with a Content child that is deactivated when fully hidden. The selected preset determines whether a close button is generated."
+    },
+    {
+      "key": "wizard.existingHint",
+      "text": "Optional Prefab with View and RectTransform on its root. Generates source only; leaves the Prefab unchanged."
+    },
+    {
+      "key": "wizard.titleHint",
+      "text": "The title text Element name in the existing Prefab; must match the binding target."
+    },
+    {
+      "key": "wizard.closeHint",
+      "text": "The close ButtonElement name in the existing Prefab."
+    },
+    {
+      "key": "wizard.settingsHint",
+      "text": "Automatically finds the unique project MUISettings shared by hosts and pages, and includes it in Player builds."
+    },
+    {
+      "key": "wizard.typedHint",
+      "text": "Generates Args and Result types and enables Presenter for opening arguments and business results."
+    },
+    {
+      "key": "wizard.presenterHint",
+      "text": "Generates Presenter lifecycle hooks for data loading and service coordination. Optional for simple pages."
+    },
+    {
+      "key": "wizard.typedNote",
+      "text": "Presenter is enabled to receive typed arguments. Extend the result type for your feature."
+    },
+    {
+      "key": "wizard.logicNote",
+      "text": "A ViewModel is enough for simple pages. Enable Presenter for services or lifecycle work."
+    },
+    {
+      "key": "wizard.preflight",
+      "text": "Assembly checks"
+    },
+    {
+      "key": "wizard.success",
+      "text": "Page created"
+    },
+    {
+      "key": "wizard.openPrefab",
+      "text": "Open Prefab"
+    },
+    {
+      "key": "wizard.openPrefabHint",
+      "text": "Edit the layout in Prefab Mode."
+    },
+    {
+      "key": "wizard.showScripts",
+      "text": "Show scripts"
+    },
+    {
+      "key": "wizard.showScriptsHint",
+      "text": "Locate the generated Scripts folder in the Project window."
+    },
+    {
+      "key": "wizard.nextSteps",
+      "text": "Next steps"
+    },
+    {
+      "key": "wizard.nextStepsBody",
+      "text": "1. Edit the Prefab and configure Elements for bound controls.\n\n2. Add ViewModel state and commands, and initialize the assembly’s generated bindings.\n\n3. Initialize UIHost, call Page.CreateRoute(), then Navigator.OpenAsync. Global MUISettings apply automatically.\n\nPrefabs under Resources load directly; other directories require a project resource loader."
+    },
+    {
+      "key": "wizard.existingResourceNote",
+      "text": "The existing Prefab GUID identifies the asset only. Ensure the page resource key resolves to it through Resources or your project loader."
+    },
+    {
+      "key": "wizard.busy",
+      "text": "Wait for compilation and leave Play Mode to continue."
+    },
+    {
+      "key": "wizard.completedNote",
+      "text": "The scaffold is ready for your layout and page logic."
+    },
+    {
+      "key": "wizard.footerNote",
+      "text": "Hover over fields and options for guidance."
+    },
+    {
+      "key": "wizard.back",
+      "text": "Back"
+    },
+    {
+      "key": "wizard.backHint",
+      "text": "Go back without losing your input."
+    },
+    {
+      "key": "wizard.next",
+      "text": "Next"
+    },
+    {
+      "key": "wizard.nextHint",
+      "text": "Check the current settings and continue."
+    },
+    {
+      "key": "wizard.createHint",
+      "text": "Create files at the reviewed paths, creating missing folders without overwriting files."
+    },
+    {
+      "key": "wizard.another",
+      "text": "Create another page"
+    },
+    {
+      "key": "wizard.anotherHint",
+      "text": "Keep the current settings and return to change the page name."
+    },
+    {
+      "key": "globalSettings.label",
+      "text": "Global MUI settings"
+    },
+    {
+      "key": "globalSettings.help",
+      "text": "All hosts and pages share the unique project MUISettings. Built-in defaults apply when absent; duplicate assets must be resolved."
+    },
+    {
+      "key": "globalSettings.create",
+      "text": "Create global settings"
+    },
+    {
+      "key": "globalSettings.locate",
+      "text": "Locate global settings"
+    },
+    {
+      "key": "globalSettings.refresh",
+      "text": "Refresh global settings"
+    },
+    {
+      "key": "globalSettings.duplicates",
+      "text": "Multiple MUISettings assets found. Merge them and keep one global settings asset:"
+    },
+    {
+      "key": "wizard.policySource",
+      "text": "Page presets from global settings. The resolved behavior includes inherited defaults; add or edit presets in global settings."
+    },
+    {
+      "key": "wizard.policyMissing",
+      "text": "Preset \"{0}\" was removed or renamed. Choose another preset in Behavior."
+    },
+    {
+      "key": "wizard.policySummary",
+      "text": "Role: {0} · Layer: {1}\nCoverage: {2} · Modal: {5} · Back: {6}\nInput: {3} · Focus: {4}"
+    },
+    {
+      "key": "wizard.policyDetails",
+      "text": "Cache: {0} · Multiple instances: {1} · Instance limit: {2} · Tick pause: {3}"
+    },
+    {
+      "key": "wizard.interactiveScaffold",
+      "text": "Generates a title and close button under Content, which is deactivated when the page is fully hidden."
+    },
+    {
+      "key": "wizard.passiveScaffold",
+      "text": "No close button or raycast blocking; close from your code. Content is deactivated when the page is fully hidden."
+    },
+    {
+      "key": "wizard.overlayOwner",
+      "text": "Overlay pages default to the current main page as owner. Specify PageOwner.Host when no main page exists."
+    },
+    {
+      "key": "wizard.policySelect",
+      "text": "Behavior preset"
+    },
+    {
+      "key": "wizard.rulesTitle",
+      "text": "Resolved behavior"
+    },
+    {
+      "key": "wizard.rule.role",
+      "text": "Page role"
+    },
+    {
+      "key": "wizard.rule.layer",
+      "text": "Display layer"
+    },
+    {
+      "key": "wizard.rule.coverage",
+      "text": "Underlying pages"
+    },
+    {
+      "key": "wizard.rule.modal",
+      "text": "Modal blocking"
+    },
+    {
+      "key": "wizard.rule.back",
+      "text": "Back behavior"
+    },
+    {
+      "key": "wizard.rule.input",
+      "text": "Receives input"
+    },
+    {
+      "key": "wizard.rule.focus",
+      "text": "Takes focus"
+    },
+    {
+      "key": "wizard.rule.roleHint",
+      "text": "Whether the page is a main page, an overlay or independent."
+    },
+    {
+      "key": "wizard.rule.layerHint",
+      "text": "The layer name and order. Higher values appear above lower ones."
+    },
+    {
+      "key": "wizard.rule.coverageHint",
+      "text": "How this page affects lower pages: no coverage, blocked input or hidden."
+    },
+    {
+      "key": "wizard.rule.modalHint",
+      "text": "Whether modal blocking prevents interaction with underlying pages."
+    },
+    {
+      "key": "wizard.rule.backHint",
+      "text": "What happens when a back request is received."
+    },
+    {
+      "key": "wizard.rule.inputHint",
+      "text": "Whether this page accepts user interaction."
+    },
+    {
+      "key": "wizard.rule.focusHint",
+      "text": "Whether this page takes navigation focus."
+    },
+    {
+      "key": "wizard.logicQuestion",
+      "text": "What does this page need?"
+    },
+    {
+      "key": "wizard.logicChoiceHint",
+      "text": "Choose by use case. This only affects the code scaffold; you can extend it later."
+    },
+    {
+      "key": "wizard.logicMode0",
+      "text": "Display content and handle simple clicks"
+    },
+    {
+      "key": "wizard.logicMode1",
+      "text": "Load data or call services on opening"
+    },
+    {
+      "key": "wizard.logicMode2",
+      "text": "Accept opening arguments or return a result"
+    },
+    {
+      "key": "wizard.logicDescription0",
+      "text": "For simple help or information pages. Put display state and button logic in the ViewModel; no Presenter is generated."
+    },
+    {
+      "key": "wizard.logicDescription1",
+      "text": "For pages that read business data. Generates a Presenter with an opening hook where you can load data and update the ViewModel."
+    },
+    {
+      "key": "wizard.logicDescription2",
+      "text": "For pages with opening arguments or results. Generates Args for input, Result for completion, and Presenter to receive arguments and handle logic."
+    },
+    {
+      "key": "wizard.logicExample0",
+      "text": "Example: a help page shows instructions and closes when the user clicks Close."
+    },
+    {
+      "key": "wizard.logicExample1",
+      "text": "Example: open inventory → read the inventory service → update the item list."
+    },
+    {
+      "key": "wizard.logicExample2",
+      "text": "Example: pass a materials-only filter → select iron ore → confirm to return its item ID. Canceling does not complete a result."
+    },
+    {
+      "key": "wizard.logicFiles",
+      "text": "Business files to generate"
+    },
+    {
+      "key": "wizard.logicScaffoldNote",
+      "text": "Only scaffolding is generated. Add data loading, argument fields and result logic yourself. If unsure, start with the first option and extend later."
+    },
+    {
+      "key": "settings.directories",
+      "text": "Page generation directories"
+    },
+    {
+      "key": "settings.directories.help",
+      "text": "Configure independent full project paths for Prefabs and scripts, using {PageName}. For example Assets/LocalResource/{PageName} and Assets/Scripts/UI/{PageName}. No shared root; changes do not move existing files."
+    },
+    {
+      "key": "property.pageRootDirectory",
+      "text": "Page root directory"
+    },
+    {
+      "key": "property.pagePrefabDirectory",
+      "text": "Prefab directory rule"
+    },
+    {
+      "key": "property.pageScriptDirectory",
+      "text": "Script directory rule"
+    },
+    {
+      "key": "settings.pageRootDirectory.help",
+      "text": "A project path under Assets, e.g. Assets/UI. Missing folders are created when generating a page."
+    },
+    {
+      "key": "settings.pagePrefabDirectory.help",
+      "text": "A full directory rule starting with Assets/, e.g. Assets/LocalResource/{PageName}. Trailing slashes are supported. Resources outside Resources folders require a project loader."
+    },
+    {
+      "key": "settings.pageScriptDirectory.help",
+      "text": "A full directory rule starting with Assets/, e.g. Assets/Scripts/UI/{PageName}. Independent of the Prefab directory; trailing slashes are supported."
+    },
+    {
+      "key": "wizard.directoryRootHint",
+      "text": "Page root from global settings. Edit directory rules to change Prefab and script locations."
+    },
+    {
+      "key": "wizard.editDirectories",
+      "text": "Edit global directory rules"
+    },
+    {
+      "key": "wizard.pathOccupied",
+      "text": "The target path already exists and will not be overwritten: {0}"
+    },
+    {
+      "key": "wizard.resourceKey",
+      "text": "Page resource key: {0}"
+    },
+    {
+      "key": "wizard.customDirectoryLoader",
+      "text": "This Prefab is outside Resources. Connect your project loader with UIHost.Initialize(resourceLoader: loader) and map the page resource key to this Prefab."
+    },
+    {
+      "key": "viewPanel.title",
+      "text": "MUI View"
+    },
+    {
+      "key": "viewPanel.description",
+      "text": "Configure this view’s appearance and interaction, inspect bindings, and diagnose runtime behavior."
+    },
+    {
+      "key": "viewPanel.configuration",
+      "text": "Configuration"
+    },
+    {
+      "key": "viewPanel.configuration.help",
+      "text": "Edit appearance and interaction for this view."
+    },
+    {
+      "key": "viewPanel.bindings",
+      "text": "Bindings"
+    },
+    {
+      "key": "viewPanel.bindings.help",
+      "text": "Identifies the ViewModel from this prefab to check bindings and structure. This inspection does not run the page."
+    },
+    {
+      "key": "viewPanel.diagnostics",
+      "text": "Diagnostics"
+    },
+    {
+      "key": "viewPanel.diagnostics.help",
+      "text": "Capture input, visibility, resource readiness and raycast details on demand. Snapshots are read-only; opening this tab does not run queries."
+    },
+    {
+      "key": "viewPanel.transitions",
+      "text": "Transitions"
+    },
+    {
+      "key": "viewPanel.transitions.help",
+      "text": "Fade durations in seconds. Set either value to 0 to disable that effect."
+    },
+    {
+      "key": "viewPanel.interaction",
+      "text": "Focus & visibility"
+    },
+    {
+      "key": "viewPanel.interaction.help",
+      "text": "Configure default selection and behavior when fully hidden. Content stays active when visible behind a popup."
+    },
+    {
+      "key": "viewPanel.modal",
+      "text": "Modal backdrop"
+    },
+    {
+      "key": "viewPanel.modal.help",
+      "text": "Applies only to modal routes. Use the global backdrop or customize this page."
+    },
+    {
+      "key": "viewPanel.resources",
+      "text": "Resource loading"
+    },
+    {
+      "key": "viewPanel.resources.help",
+      "text": "Configure loader inheritance and initial resource readiness. Defaults suit most views."
+    },
+    {
+      "key": "viewPanel.sorting",
+      "text": "Internal render order"
+    },
+    {
+      "key": "viewPanel.sorting.help",
+      "text": "Independent child Canvases and Renderers are collected automatically and ordered by their original Sorting Layer and Order. Normal UI keeps hierarchy order."
+    },
+    {
+      "key": "viewPanel.component",
+      "text": "Component information"
+    },
+    {
+      "key": "viewPanel.component.help",
+      "text": "View is the framework’s runtime entry point; a subclass is usually unnecessary."
+    },
+    {
+      "key": "viewPanel.field.enterFadeDuration",
+      "text": "Fade-in duration in seconds; 0 shows immediately."
+    },
+    {
+      "key": "viewPanel.field.exitFadeDuration",
+      "text": "Fade-out duration in seconds; 0 exits immediately."
+    },
+    {
+      "key": "viewPanel.field.defaultSelection",
+      "text": "The default selected control when this page takes focus, for keyboard or controller navigation."
+    },
+    {
+      "key": "viewPanel.field.hiddenMode",
+      "text": "Deactivate content: disable the designated child while fully hidden and restore it when shown. Keep content running: hide visuals and block interaction while scripts remain active. Hiding does not close the page."
+    },
+    {
+      "key": "viewPanel.field.hiddenContentRoot",
+      "text": "New pages automatically use Content. Must be a child of View. Deactivation triggers OnDisable and stops attached coroutines; reactivation triggers OnEnable. Keep page loading and business lifecycle in Presenter or services."
+    },
+    {
+      "key": "viewPanel.field.modalBackdropStyle",
+      "text": "Reusable backdrop style. When absent, uses the color below."
+    },
+    {
+      "key": "viewPanel.field.modalBarrierColor",
+      "text": "Backdrop color and opacity when no style is assigned."
+    },
+    {
+      "key": "viewPanel.field.inheritParentResources",
+      "text": "Borrow the nearest parent View’s active loader when no local loader is configured."
+    },
+    {
+      "key": "viewPanel.field.waitForResourceSources",
+      "text": "Wait for default-loader resource-key bindings before first display. Later updates still load progressively."
+    },
+    {
+      "key": "property.useGlobalModalBackdrop",
+      "text": "Use global backdrop"
+    },
+    {
+      "key": "property.defaultModalBackdropPrefab",
+      "text": "Default backdrop prefab"
+    },
+    {
+      "key": "property.defaultModalBackdropColor",
+      "text": "Default backdrop color"
+    },
+    {
+      "key": "viewPanel.field.useGlobalModalBackdrop",
+      "text": "Use the prefab and color from global MUI Settings; uncheck for a page-specific style. Applies only to modal pages and does not change route policy."
+    },
+    {
+      "key": "viewPanel.modal.fallback",
+      "text": "No prefab configured; a solid-color backdrop will be used."
+    },
+    {
+      "key": "viewPanel.modal.openSettings",
+      "text": "Edit global backdrop"
+    },
+    {
+      "key": "settings.modalBackdrop.help",
+      "text": "Shared by pages using the global backdrop. Without a prefab, uses a solid color. Changes apply when a new backdrop instance is created."
+    },
+    {
+      "key": "settings.defaultModalBackdropPrefab.help",
+      "text": "Optional visual prefab with a RectTransform root, stretched to the host region. May contain Image/RawImage, but not Canvas, Renderer, Selectable or View. The framework blocks input."
+    },
+    {
+      "key": "settings.defaultModalBackdropColor.help",
+      "text": "Color drawn beneath the prefab. Set alpha to 0 to use only the prefab visual. Without a prefab, this color is the backdrop."
+    },
+    {
+      "key": "viewPanel.sorting.inactive",
+      "text": "Final orders are available after the host assigns a page range."
+    },
+    {
+      "key": "viewPanel.sorting.range",
+      "text": "Page order range"
+    },
+    {
+      "key": "viewPanel.binding.unmatched",
+      "text": "No matching ViewModel contract for this prefab. Wait for compilation, or set PrefabAssetGuid on [ViewContract] for an existing page. Save standalone scene Views as prefabs first. Structure validation remains available."
+    },
+    {
+      "key": "viewPanel.binding.multiple",
+      "text": "Multiple contracts match this prefab. Choose the ViewModel to validate."
+    },
+    {
+      "key": "bindingRow.locate",
+      "text": "Locate"
+    },
+    {
+      "key": "bindingRow.source",
+      "text": "Code"
+    },
+    {
+      "key": "bindingRow.locate.help",
+      "text": "Ping the matching control in the Hierarchy; show candidates when multiple controls match."
+    },
+    {
+      "key": "nativeBindings.title",
+      "text": "Native control bindings"
+    },
+    {
+      "key": "nativeBindings.help",
+      "text": "Reference buttons, text and images without Element components. Names match code binding identifiers; references survive node renaming."
+    },
+    {
+      "key": "nativeBindings.collect",
+      "text": "Collect page controls"
+    },
+    {
+      "key": "property.nativeBindings",
+      "text": "Control references"
+    },
+    {
+      "key": "nativeRules.title",
+      "text": "Control binding rules"
+    },
+    {
+      "key": "nativeRules.help",
+      "text": "Configure matching mode, expression and component types. Supports chained prefixes, suffixes, contained text and regex with a named (?<name>...) capture."
+    },
+    {
+      "key": "property.controlNamingRules",
+      "text": "Naming rules"
+    },
+    {
+      "key": "property.Prefix",
+      "text": "Prefix"
+    },
+    {
+      "key": "property.Kind",
+      "text": "Component kind"
+    },
+    {
+      "key": "nativeRules.generate",
+      "text": "Generate Bindings"
+    },
+    {
+      "key": "nativeRules.apply",
+      "text": "Save binding references"
+    },
+    {
+      "key": "nativeRules.settings",
+      "text": "Naming rules"
+    },
+    {
+      "key": "nativeRules.empty",
+      "text": "No controls declared. Name nodes using global rules (Img_Icon, Txt_Title, Btn_Close), or declare bindings in code."
+    },
+    {
+      "key": "nativeRules.invalidName",
+      "text": "A nonempty C# identifier and an IElement adapter type are required."
+    },
+    {
+      "key": "nativeRules.typeConflict",
+      "text": "Conflicting types for the same binding name."
+    },
+    {
+      "key": "nativeRules.missingComponent",
+      "text": "The component required by the naming rule is missing."
+    },
+    {
+      "key": "nativeRules.missingOrMultiple",
+      "text": "Missing or ambiguous match; check or assign the reference."
+    },
+    {
+      "key": "nativeRules.wrongTarget",
+      "text": "Incompatible type, another view boundary, or an existing Element component."
+    },
+    {
+      "key": "nativeRules.legacy",
+      "text": "Existing Element binding (compatible)"
+    },
+    {
+      "key": "nativeRules.missing",
+      "text": "Missing reference: assign the component"
+    },
+    {
+      "key": "nativeRules.bound",
+      "text": "Bound"
+    },
+    {
+      "key": "nativeRules.matched",
+      "text": "Matched · reference recorded on code generation"
+    },
+    {
+      "key": "nativeRules.fixErrors",
+      "text": "Resolve missing references, duplicate targets, names, or type conflicts first."
+    },
+    {
+      "key": "nativeRules.savePrefab",
+      "text": "Save the page as a prefab before generating code."
+    },
+    {
+      "key": "nativeRules.output",
+      "text": "Choose the generated file location; reuse it when regenerating."
+    },
+    {
+      "key": "nativeRules.noOverwrite",
+      "text": "Cannot overwrite handwritten code or another page’s generated file."
+    },
+    {
+      "key": "nativeRules.generated",
+      "text": "Generated: "
+    },
+    {
+      "key": "nativeRules.removeUnused",
+      "text": "Remove unused references"
+    },
+    {
+      "key": "nativeRules.chooseTypes",
+      "text": "Search and select component types"
+    },
+    {
+      "key": "nativeRules.addRule",
+      "text": "+ Add rule"
+    },
+    {
+      "key": "nativeRules.removeMissing",
+      "text": "Remove missing type"
+    },
+    {
+      "key": "ruleMatch.prefix",
+      "text": "Prefix"
+    },
+    {
+      "key": "ruleMatch.suffix",
+      "text": "Suffix"
+    },
+    {
+      "key": "ruleMatch.contains",
+      "text": "Contains"
+    },
+    {
+      "key": "ruleMatch.regex",
+      "text": "Regex"
+    },
+    {
+      "key": "ruleMatch.help",
+      "text": "Prefix/suffix/contains removes the matched text. Regex uses a named capture, e.g. ^UI_(?<name>.+)_Text$."
+    },
+    {
+      "key": "typePicker.title",
+      "text": "Select components · multiple selection"
+    },
+    {
+      "key": "typePicker.all",
+      "text": "All"
+    },
+    {
+      "key": "typePicker.common",
+      "text": "Common"
+    },
+    {
+      "key": "typePicker.selected",
+      "text": "Selected"
+    },
+    {
+      "key": "typePicker.empty",
+      "text": "No matching components"
+    },
+    {
+      "key": "typePicker.done",
+      "text": "Done"
+    },
+    {
+      "key": "typePicker.count",
+      "text": "Showing {0} · Selected {1}"
+    },
+    {
+      "key": "typePicker.project",
+      "text": "Project"
+    },
+    {
+      "key": "typePicker.missing",
+      "text": "Missing"
+    },
+    {
+      "key": "nativeRules.saveCount",
+      "text": "Save references ({0})"
+    },
+    {
+      "key": "nativeRules.apply.help",
+      "text": "Save pending matches to this View with Undo support. Does not generate code or run the page; missing or invalid rows are skipped. Save the scene or prefab to persist to disk. Code generation also saves these references."
+    },
+    {
+      "key": "nativeRules.saveConflict.help",
+      "text": "A component is already saved under another name. Review and remove redundant references first."
+    },
+    {
+      "key": "nativeRules.saved",
+      "text": "Saved {0} references to the View with Undo support. Save the scene or prefab to persist them."
+    },
+    {
+      "key": "nativeRules.generate.help",
+      "text": "Generate ViewModel properties and commands from rules. Authored bindings take precedence; no Assets C# files are created."
+    },
+    {
+      "key": "nativeRules.settings.help",
+      "text": "Open global settings to edit naming rules and component types."
+    },
+    {
+      "key": "nativeRules.removeUnused.help",
+      "text": "Remove saved references unused by the current rules and code declarations, with Undo support. Keeps objects, components and code. Declare any reference still used by other business logic before cleaning up."
+    },
+    {
+      "key": "nativeRules.removed",
+      "text": "Removed {0} unused references; objects and components are unchanged."
+    },
+    {
+      "key": "nativeRules.removeOne.help",
+      "text": "Remove this saved reference with Undo support. Keeps the component. Matching rules or code may still show it as an unsaved candidate."
+    },
+    {
+      "key": "bindingRow.source.help",
+      "text": "Open the binding declaration in source code."
+    },
+    {
+      "key": "nativeRules.autoSync",
+      "text": "Synchronize code bindings"
+    },
+    {
+      "key": "nativeRules.autoSynced",
+      "text": "Recorded {0} code-declared binding references with Undo support. Save the scene or prefab to persist them."
+    },
+    {
+      "key": "nativeRules.duplicateName",
+      "text": "Duplicate binding name \"{0}\". Rename these nodes:"
+    },
+    {
+      "key": "nativeRules.duplicateFile",
+      "text": "Multiple binding declaration files belong to this page. Remove the duplicates first."
+    },
+    {
+      "key": "nativeRules.generatorQueued",
+      "text": "Binding metadata saved in the Prefab; compiler generation requested. No extra C# files are created."
+    },
+    {
+      "key": "nativeRules.requireModel",
+      "text": "Associate a unique ViewModel contract to determine the target assembly and namespace."
+    },
+    {
+      "key": "nativeRules.requireText",
+      "text": "Binding generation requires text Prefabs. Set Asset Serialization to Force Text in Editor Settings."
+    },
+    {
+      "key": "nativeRules.logRejected",
+      "text": "[MUI Binding Sync] Could not complete synchronization"
+    },
+    {
+      "key": "nativeRules.referencesSynced",
+      "text": "Saved {0} references and automatic declarations; compilation requested (not yet confirmed). Access ViewModel properties after compilation."
     }
   ]
 }

@@ -13,7 +13,7 @@ namespace MUI.Editor
         private bool showBindingSources;
         private string sourceOpenError;
         private BindingEntry locatedBinding;
-        private IReadOnlyList<Element> locatedElements;
+        private IReadOnlyList<Component> locatedElements;
         private string targetLookupError;
 
         private void ClearBindingTargets()
@@ -25,12 +25,29 @@ namespace MUI.Editor
 
         private void OnBindingHierarchyChanged()
         {
+            QueueBindingValidation();
             ClearBindingTargets();
+            Repaint();
+        }
+
+        private void OnBindingUndoRedo()
+        {
+            if (this == null || target == null) return;
+            serializedObject.Update();
+            ClearBindingTargets();
+            results = null;
+            nativeBindingMessage = "已撤销 / 重做绑定配置；需要时重新生成绑定。";
+            QueueBindingValidation();
             Repaint();
         }
 
         private void OnDisable()
         {
+            inspectorReady = false;
+            EditorApplication.update -= RunPendingBindingValidation;
+            Undo.postprocessModifications -= OnBindingModifications;
+            Undo.undoRedoPerformed -= OnBindingUndoRedo;
+            EditorApplication.delayCall -= SyncCodeBindingReferences;
             EditorApplication.hierarchyChanged -= OnBindingHierarchyChanged;
         }
 
@@ -45,23 +62,27 @@ namespace MUI.Editor
 
             foreach (var entry in manifest.Entries)
             {
-                using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
+                var hasLocation = !string.IsNullOrEmpty(entry.SourcePath) && entry.SourceLine > 0;
+                var relation = entry.Source + " → " + entry.ElementName + "." + entry.TargetProperty;
+                var location = hasLocation ? Path.GetFileName(entry.SourcePath) + ":" + entry.SourceLine
+                    : L.Get("editor.ViewInspector.Sources.ba7542980d");
+                using (new EditorGUILayout.HorizontalScope())
                 {
-                    EditorGUILayout.LabelField(entry.Source + " → " + entry.ElementName + "." + entry.TargetProperty);
-                    DrawBindingTargets(entry);
-                    var hasLocation = !string.IsNullOrEmpty(entry.SourcePath) && entry.SourceLine > 0;
-                    if (!hasLocation)
+                    EditorGUILayout.LabelField(new GUIContent(relation, relation + "\n" + location), GUILayout.MinWidth(40));
+                    if (GUILayout.Button(new GUIContent(L.Get("bindingRow.locate"), L.Get("bindingRow.locate.help")),
+                        EditorStyles.miniButton, GUILayout.Width(48)))
+                        LocateBindingTargets(entry);
+                    using (new EditorGUI.DisabledScope(!hasLocation))
                     {
-                        EditorGUILayout.LabelField(L.Get("editor.ViewInspector.Sources.ba7542980d"));
-                        continue;
-                    }
-
-                    EditorGUILayout.LabelField(new GUIContent(Path.GetFileName(entry.SourcePath) + ":" + entry.SourceLine, entry.SourcePath));
-                    if (GUILayout.Button(L.Get("editor.ViewInspector.Sources.a7f7f7a203")))
-                    {
-                        OpenBindingSource(entry);
+                        if (GUILayout.Button(new GUIContent(L.Get("bindingRow.source"),
+                            hasLocation ? entry.SourcePath + ":" + entry.SourceLine : location),
+                            EditorStyles.miniButton, GUILayout.Width(48)))
+                            OpenBindingSource(entry);
                     }
                 }
+                DrawBindingTargets(entry);
+                var divider = EditorGUILayout.GetControlRect(false, 1);
+                EditorGUI.DrawRect(divider, new Color(0.5f, 0.5f, 0.5f, 0.18f));
             }
 
             if (manifest.Entries.Count == 0)
@@ -75,27 +96,27 @@ namespace MUI.Editor
             }
         }
 
-        private void DrawBindingTargets(BindingEntry entry)
+        private void LocateBindingTargets(BindingEntry entry)
         {
-            if (GUILayout.Button(L.Get("editor.ViewInspector.Sources.d90e1d2f55")))
+            ClearBindingTargets();
+            locatedBinding = entry;
+            try
             {
-                ClearBindingTargets();
-                locatedBinding = entry;
-                try
+                locatedElements = ViewContractValidator.FindBindingTargets((View)target, entry);
+                if (locatedElements.Count == 1 && locatedElements[0] != null)
                 {
-                    locatedElements = ViewContractValidator.FindBindingTargets((View)target, entry);
-                    if (locatedElements.Count == 1 && locatedElements[0] != null)
-                    {
-                        // 只高亮目标，不切走当前 Inspector，便于继续对照声明。
-                        EditorGUIUtility.PingObject(locatedElements[0].gameObject);
-                    }
-                }
-                catch (Exception error)
-                {
-                    targetLookupError = L.Get("editor.ViewInspector.Sources.67bb7dc1f7") + error.Message;
+                    // 唯一匹配直接高亮，不展开重复的对象行，也不切走当前 Inspector。
+                    EditorGUIUtility.PingObject(locatedElements[0].gameObject);
                 }
             }
+            catch (Exception error)
+            {
+                targetLookupError = L.Get("editor.ViewInspector.Sources.67bb7dc1f7") + error.Message;
+            }
+        }
 
+        private void DrawBindingTargets(BindingEntry entry)
+        {
             if (!ReferenceEquals(locatedBinding, entry))
             {
                 return;
@@ -118,13 +139,15 @@ namespace MUI.Editor
                 EditorGUILayout.HelpBox(L.Get("editor.ViewInspector.Sources.8efab5e68f"), MessageType.Error);
             }
 
+            // 多个匹配时才展示候选，供用户逐一定位；正常匹配保持单行。
+            if (locatedElements.Count == 1) return;
             foreach (var element in locatedElements)
             {
                 using (new EditorGUILayout.HorizontalScope())
                 {
                     using (new EditorGUI.DisabledScope(true))
                     {
-                        EditorGUILayout.ObjectField(element, typeof(Element), true);
+                        EditorGUILayout.ObjectField(element, typeof(Component), true);
                     }
 
                     using (new EditorGUI.DisabledScope(element == null))
@@ -145,6 +168,20 @@ namespace MUI.Editor
             {
                 // AssetDatabase 能解析虚拟 Packages 路径；本地绝对路径则交给外部代码编辑器。
                 var path = entry.SourcePath.Replace('\\', '/');
+                if (IsAutoBinding(entry))
+                {
+                    if (EditorApplication.isCompiling)
+                        throw new InvalidOperationException("Unity 正在编译，请等待编译完成后打开生成源码。");
+                    path = CompilerGeneratedSources.Find(path);
+                    if (path == null)
+                    {
+                        CompilerGeneratedSources.Enable();
+                        sourceOpenError = "已启用编译器源码输出并请求重新编译。请等待编译完成后再次点击源码；若仍未生成，请检查 Console 编译错误。";
+                        return;
+                    }
+                    UnityEditorInternal.InternalEditorUtility.OpenFileAtLineExternal(path, Math.Max(1, entry.SourceLine));
+                    return;
+                }
                 var script = path.StartsWith("Assets/", StringComparison.Ordinal) || path.StartsWith("Packages/", StringComparison.Ordinal)
                     ? AssetDatabase.LoadAssetAtPath<MonoScript>(path)
                     : null;

@@ -12,7 +12,7 @@ namespace MUI.Editor
         [SerializeField] private GameObject existingPrefab;
         [SerializeField] private string titleElementName = "Title";
         [SerializeField] private string closeElementName = "Close";
-        private (int Instance, string Path, string Backend, string Title, string Close, PagePreset Preset)? existingValidationKey;
+        private (int Instance, string Path, string Backend, string Title, string Close, bool ReceivesInput)? existingValidationKey;
         private string existingValidationError;
 
         private string ExistingPrefabGuid => existingPrefab == null ? null :
@@ -20,13 +20,13 @@ namespace MUI.Editor
 
         private void DrawExistingView()
         {
-            existingPrefab = (GameObject)EditorGUILayout.ObjectField(L.Get("editor.PageWizard.ExistingView.593ff81861"), existingPrefab, typeof(GameObject), false);
+            existingPrefab = (GameObject)EditorGUILayout.ObjectField(Hint("editor.PageWizard.ExistingView.593ff81861", "existingHint"), existingPrefab, typeof(GameObject), false);
             if (existingPrefab != null)
             {
-                titleElementName = EditorGUILayout.TextField(L.Get("editor.PageWizard.ExistingView.f7f2eaad00"), titleElementName);
-                if (preset != PagePreset.Notice)
+                titleElementName = EditorGUILayout.TextField(Hint("editor.PageWizard.ExistingView.f7f2eaad00", "titleHint"), titleElementName);
+                if (ReceivesInput)
                 {
-                    closeElementName = EditorGUILayout.TextField(L.Get("editor.PageWizard.ExistingView.9267775c67"), closeElementName);
+                    closeElementName = EditorGUILayout.TextField(Hint("editor.PageWizard.ExistingView.9267775c67", "closeHint"), closeElementName);
                 }
                 EditorGUILayout.HelpBox(L.Get("editor.PageWizard.ExistingView.358fc7efeb"), MessageType.Info);
             }
@@ -45,7 +45,7 @@ namespace MUI.Editor
                 return null;
             }
             var path = AssetDatabase.GetAssetPath(existingPrefab);
-            var key = (existingPrefab.GetInstanceID(), path, backend.Id, titleElementName, closeElementName, preset);
+            var key = (existingPrefab.GetInstanceID(), path, backend.Id, titleElementName, closeElementName, ReceivesInput);
             if (existingValidationKey.HasValue && key == existingValidationKey.Value)
             {
                 return existingValidationError;
@@ -76,15 +76,15 @@ namespace MUI.Editor
                 return L.Get("editor.PageWizard.ExistingView.b5f1d7bd40");
             }
             if (string.IsNullOrWhiteSpace(titleElementName) ||
-                preset != PagePreset.Notice && string.IsNullOrWhiteSpace(closeElementName))
+                ReceivesInput && string.IsNullOrWhiteSpace(closeElementName))
             {
                 return L.Get("editor.PageWizard.ExistingView.36ea1f9e66");
             }
             var entries = new List<BindingEntry>
             {
-                new BindingEntry("Title", titleElementName, backend.ElementType, "Content", BindingMode.OneWay)
+                new BindingEntry("Title", titleElementName, ExistingTitleBindingType, "Content", BindingMode.OneWay)
             };
-            if (preset == PagePreset.Notice)
+            if (!ReceivesInput)
             {
                 if (existingPrefab.GetComponentsInChildren<UnityEngine.UI.Selectable>(true).Length != 0)
                 {
@@ -100,7 +100,7 @@ namespace MUI.Editor
             }
             else
             {
-                entries.Add(new BindingEntry("Close", closeElementName, typeof(ButtonElement), nameof(ButtonElement.Clicked),
+                entries.Add(new BindingEntry("Close", closeElementName, (typeof(NativeControl).IsAssignableFrom(ExistingTitleBindingType) ? typeof(NativeButton) : typeof(ButtonElement)), nameof(ButtonElement.Clicked),
                     BindingMode.OneWay, BindingEntryKind.Command));
             }
             var manifest = new BindingManifest(typeof(ViewModel), entries);

@@ -35,6 +35,21 @@ namespace MUI.Editor
             root.Add(header);
             root.Add(MUIEditorControls.Text("settings.description"));
 
+            var directories = Section("settings.directories", "directories", true);
+            directories.Add(MUIEditorControls.Text("settings.directories.help"));
+            directories.Add(new IMGUIContainer(() => DrawSettingsFields("pagePrefabDirectory", "pageScriptDirectory")));
+            root.Add(directories);
+
+            var modal = Section("viewPanel.modal", "modalBackdrop", true);
+            Tooltip(modal, "settings.modalBackdrop.help");
+            modal.Add(new IMGUIContainer(() => DrawSettingsFields("defaultModalBackdropPrefab", "defaultModalBackdropColor")));
+            root.Add(modal);
+
+            var bindingRules = Section("nativeRules.title", "controlNamingRules", true);
+            bindingRules.Add(MUIEditorControls.Text("nativeRules.help", "mui-note"));
+            bindingRules.Add(new IMGUIContainer(DrawControlNamingRules));
+            root.Add(bindingRules);
+
             var layers = Section("property.layers", "layers", true);
             Tooltip(layers, "settings.layers.help");
             layers.Add(new IMGUIContainer(() => DrawSettingsFields("preferredOrderGap", "preferredLayerGap")));

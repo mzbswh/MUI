@@ -12,10 +12,10 @@ namespace MUI.Editor
 {
     internal static class OverlayPrefabWizard
     {
-        [MenuItem("Tools/MUI/创建上下文菜单 (Create Context Menu Prefab)")]
+        [MenuItem("Tools/MUI/创建 (Create)/上下文菜单 (Context Menu)", false, 43)]
         private static void CreateContextMenu() => Create(true);
 
-        [MenuItem("Tools/MUI/创建悬浮提示 (Create Tooltip Prefab)")]
+        [MenuItem("Tools/MUI/创建 (Create)/悬浮提示 (Tooltip)", false, 42)]
         private static void CreateTooltip() => Create(false);
 
         private static void Create(bool menu)

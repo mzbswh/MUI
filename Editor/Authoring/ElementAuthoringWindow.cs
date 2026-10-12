@@ -15,7 +15,7 @@ namespace MUI.Editor
         private Vector2 scroll;
         private string message;
 
-        [MenuItem("Tools/MUI/控件创建 (Element Authoring)")]
+        [MenuItem("Tools/MUI/创建 (Create)/控件创建 (Element Authoring)", false, 20)]
         private static void Open()
         {
             var window = GetWindow<ElementAuthoringWindow>(L.Get("editor.ElementAuthoringWindow.f27fa1ad5c"));

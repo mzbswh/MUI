@@ -204,6 +204,7 @@ namespace MUI.UGUI
 
             if (modalBarrier == null)
             {
+                var backdropPrefab = ResolveModalBackdrop();
                 modalBarrier = new GameObject("MUI Modal Barrier", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(ModalPointerBarrier));
                 modalBarrier.SetActive(false);
                 modalBarrier.transform.SetParent(parent, false);
@@ -215,7 +216,7 @@ namespace MUI.UGUI
                 var graphic = modalBarrier.GetComponent<Image>();
                 graphic.color = ModalBackdropTint;
                 graphic.raycastTarget = true;
-                CreateModalBackdropVisual();
+                CreateModalBackdropVisual(backdropPrefab);
             }
             else if (modalBarrier.transform.parent != parent)
             {

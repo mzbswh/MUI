@@ -5,8 +5,7 @@ using UnityEngine;
 
 namespace MUI.UGUI
 {
-    [CreateAssetMenu(menuName = "MUI/配置 (Settings)", fileName = "MUISettings")]
-    public sealed class MUISettings : ScriptableObject
+    public sealed partial class MUISettings : ScriptableObject
     {
         [SerializeField, HideInInspector] private int pageScopeVersion = 0;
         [SerializeField, HideInInspector] private int inputPolicyVersion;
@@ -20,6 +19,8 @@ namespace MUI.UGUI
         [SerializeField] private int defaultPageOrderSpan = 32;
         [SerializeField] private int preferredOrderGap = 32;
         [SerializeField] private int preferredLayerGap = 128;
+        [SerializeField] private RectTransform defaultModalBackdropPrefab = null;
+        [SerializeField] private Color defaultModalBackdropColor = new Color(0, 0, 0, 0.45f);
         [SerializeField] private bool automaticFramePump = true;
         [SerializeField, Min(0)] private int cacheCapacity = 16;
         [SerializeField, Min(1)] private int queueCapacity = 64;
@@ -29,9 +30,16 @@ namespace MUI.UGUI
 
         public IReadOnlyList<MUILayer> Layers => layers == null ? (IReadOnlyList<MUILayer>)Array.Empty<MUILayer>() : layers.AsReadOnly();
 
+        /// <summary>无项目配置时使用的内置预设名称，与内置规则共用同一来源。</summary>
+        public static IReadOnlyList<string> BuiltInPresetNames => CreatePresets().ConvertAll(item => item.Name).AsReadOnly();
+
         public IReadOnlyList<MUIPagePolicy> Presets => presets == null ? (IReadOnlyList<MUIPagePolicy>)Array.Empty<MUIPagePolicy>() : presets.AsReadOnly();
 
         public string DefaultPreset => defaultPreset;
+
+        public RectTransform DefaultModalBackdropPrefab => defaultModalBackdropPrefab;
+
+        public Color DefaultModalBackdropColor => defaultModalBackdropColor;
 
         public bool AutomaticFramePump => automaticFramePump;
 
@@ -47,6 +55,7 @@ namespace MUI.UGUI
 
         private void OnEnable()
         {
+            UpgradeDirectoryRules();
             if (inputPolicyVersion == 0)
             {
                 if (presets != null)
@@ -164,6 +173,19 @@ namespace MUI.UGUI
         public IReadOnlyList<string> Validate()
         {
             var errors = new List<string>();
+            var prefixes = new HashSet<string>(StringComparer.Ordinal);
+            if (controlNamingRules != null)
+                foreach (var rule in controlNamingRules)
+                    if (rule == null || string.IsNullOrWhiteSpace(rule.Prefix) || !prefixes.Add(rule.Match + ":" + rule.Prefix) || !Enum.IsDefined(typeof(ControlNameMatch), rule.Match) || rule.EffectiveComponentTypes.Count == 0)
+                        errors.Add("控件命名前缀不能为空或重复，且必须配置组件类型。");
+            try { ModalBackdropStyle.ValidateVisualPrefab(defaultModalBackdropPrefab); }
+            catch (InvalidOperationException error) { errors.Add(error.Message); }
+            try
+            {
+                ResolvePageDirectory(pagePrefabDirectory, "Example");
+                ResolvePageDirectory(pageScriptDirectory, "Example");
+            }
+            catch (ArgumentException error) { errors.Add(error.Message); }
             try
             {
                 CreateRenderOrderOptions();

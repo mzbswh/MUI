@@ -5,14 +5,14 @@
 ## 场景配置
 
 1. 在 Package Manager 导入 **Dialogs** 示例。此示例的程序集单独引用标准 Dialogs 模块，不给基础 Navigation 示例增加模块依赖。
-2. 使用菜单 `Tools/MUI/创建确认弹窗 (Create Confirmation Dialog Prefab)` 和 `Tools/MUI/创建提示弹窗 (Create Alert Dialog Prefab)` 创建两个 Prefab。文本使用 uGUI；项目应给文本配置支持所用中文的字体。
+2. 使用菜单 `Tools/MUI/创建 (Create)/确认弹窗 (Confirmation Dialog)` 和 `Tools/MUI/创建 (Create)/提示弹窗 (Alert Dialog)` 创建两个 Prefab。文本使用 uGUI；项目应给文本配置支持所用中文的字体。
 3. 创建 Canvas、GraphicRaycaster 和 EventSystem，配置项目使用的输入模块。Canvas 下创建带 RectTransform 的界面容器，在其上添加 `UIHost`，将 View Root 指向该容器。
-4. 通过 `Assets/Create/MUI/配置 (Settings)` 创建配置并绑定 UIHost.Settings。在 UIHost 的“本地 Prefab 目录”折叠区登记下面两项，Version 均为 `1`：
+4. 通过 `Assets/Create/MUI/配置 (Settings)` 创建配置并绑定 UIHost.Settings。将两个 Prefab 放入项目的 Resources 文件夹，并按页面资源标识命名：
 
-   | Key | Prefab |
+   | 资源标识 | Resources 下的文件 |
    |---|---|
-   | `demo.confirmation` | 确认框 Prefab |
-   | `demo.alert` | 提示框 Prefab |
+   | `demo.confirmation` | `demo.confirmation.prefab`（确认框） |
+   | `demo.alert` | `demo.alert.prefab`（提示框） |
 
 5. 在另一个对象添加 `LocalDialogsDemo`，将 Host 指向此 UIHost。该宿主由示例独占，不再添加其他调用 Initialize 的启动组件。
 6. 进入播放后自动显示确认框。也可通过组件上下文菜单显示确认框、提示框、关闭当前对话框或执行返回。

@@ -1,10 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using MUI.UGUI;
 using UnityEngine;
 
-namespace MUI.Samples.ResourceIntegration
+namespace MUI.UGUI
 {
     public sealed partial class LoadedPrefabViewProvider
     {

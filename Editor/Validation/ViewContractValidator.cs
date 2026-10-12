@@ -11,7 +11,7 @@ namespace MUI.Editor
     public static partial class ViewContractValidator
     {
         /// <summary>按校验器相同的 View/Element 边界定位目标，返回所有匹配项而不猜测重名对象。</summary>
-        internal static IReadOnlyList<Element> FindBindingTargets(View view, BindingEntry entry)
+        internal static IReadOnlyList<Component> FindBindingTargets(View view, BindingEntry entry)
         {
             if (view == null)
             {
@@ -25,7 +25,7 @@ namespace MUI.Editor
 
             var elements = new List<Element>();
             Collect(view.transform, view.transform, elements, new List<string>(), true);
-            var matches = new List<Element>();
+            var matches = new List<Component>();
             foreach (var element in elements)
             {
                 if (element != null && element.Name == entry.ElementName && entry.ElementType.IsInstanceOfType(element))
@@ -34,6 +34,14 @@ namespace MUI.Editor
                 }
             }
 
+            if (typeof(NativeControl).IsAssignableFrom(entry.ElementType) || entry.ElementType.IsInterface)
+                foreach (var binding in view.NativeBindings)
+                    if (binding != null && binding.Target != null && binding.Name == entry.ElementName &&
+                        view.OwnsNativeControl(binding.Target) && (entry.ComponentType == null || entry.ComponentType.IsInstanceOfType(binding.Target)))
+                    {
+                        using (var adapter = NativeControl.Create(binding.Name, binding.Target))
+                            if (entry.ElementType.IsInstanceOfType(adapter)) matches.Add(binding.Target);
+                    }
             return matches;
         }
 
@@ -56,8 +64,37 @@ namespace MUI.Editor
             var scrollOwners = view.GetComponentsInChildren<ScrollRect>(true);
             var targetWriters = new Dictionary<(Element element, string property), string>();
             var sourceWriters = new Dictionary<string, string>(StringComparer.Ordinal);
+            var nativeWriters = new HashSet<(Component, string)>();
             foreach (var entry in manifest.Entries)
             {
+                var nativeContract = typeof(NativeControl).IsAssignableFrom(entry.ElementType);
+                if (entry.ElementType.IsInterface)
+                    foreach (var reference in view.NativeBindings)
+                        if (reference != null && reference.Name == entry.ElementName) nativeContract = true;
+                if (nativeContract)
+                {
+                    try
+                    {
+                        var found = FindBindingTargets(view, entry);
+                        if (found.Count != 1) errors.Add(entry.Source + ": 原生控件绑定必须唯一匹配：" + entry.ElementName);
+                        else
+                        {
+                            if (entry.IsReadAccess) continue;
+                            var property = entry.Kind == BindingEntryKind.Command ? entry.InteractableProperty : entry.TargetProperty;
+                            if (entry.Mode != BindingMode.OneWayToSource && !nativeWriters.Add((found[0], property)))
+                                errors.Add(entry.ElementName + "." + property + ": 重复写入绑定。");
+                            if (found[0] is Image image && property == "FillAmount" && image.type != Image.Type.Filled)
+                                errors.Add(entry.ElementName + ": FillAmount 绑定需要 Filled 图片。");
+                            if (entry.Mode == BindingMode.TwoWay || entry.Mode == BindingMode.OneWayToSource)
+                            {
+                                if (sourceWriters.ContainsKey(entry.Source)) errors.Add(entry.Source + ": 多个控件回写同一属性。");
+                                else sourceWriters.Add(entry.Source, entry.ElementName + "." + property);
+                            }
+                        }
+                    }
+                    catch (Exception error) { errors.Add(error.Message); }
+                    continue;
+                }
                 var count = 0;
                 var matches = new List<string>();
                 Element matched = null;
@@ -201,6 +238,19 @@ namespace MUI.Editor
                 errors.Add(L.Get("policy.hidden.invalid"));
             }
 
+            var nativeTargets = new HashSet<Component>();
+            var nativeNames = new HashSet<string>(StringComparer.Ordinal);
+            foreach (var binding in view.NativeBindings)
+            {
+                if (binding == null || string.IsNullOrWhiteSpace(binding.Name) || !view.OwnsNativeControl(binding.Target) ||
+                    !nativeTargets.Add(binding.Target) || !nativeNames.Add(binding.Name) || binding.Target.GetComponent<Element>() != null)
+                {
+                    errors.Add("原生控件绑定名称和引用必须唯一、属于当前页面，且不能与 Element 重复绑定。");
+                    continue;
+                }
+                try { using (NativeControl.Create(binding.Name, binding.Target)) { } }
+                catch (Exception error) { errors.Add(error.Message); }
+            }
             var sortingTargets = new HashSet<Component>();
             if (view.RenderOrderTargets != null)
             {

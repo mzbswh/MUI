@@ -4,13 +4,6 @@ using System.Text;
 
 namespace MUI.Editor
 {
-    internal enum PagePreset
-    {
-        FullScreen,
-        Popup,
-        Notice
-    }
-
     internal static class PageSourceTemplate
     {
         internal static bool IsIdentifier(string value)
@@ -54,9 +47,9 @@ namespace MUI.Editor
             return true;
         }
 
-        internal static string Policy(PagePreset preset)
+        internal static string Policy(string preset)
         {
-            return "global::MUI.UGUI.MUISettings.ResolveBuiltInPolicy(" + StringLiteral(preset.ToString()) + ")";
+            return "global::MUI.UGUI.MUISettings.ResolveGlobalPolicy(" + StringLiteral(preset) + ")";
         }
 
         /// <summary>保留 Element 原名，转义为合法 C# 字符串，不将节点名称当作源码拼接。</summary>
@@ -85,18 +78,19 @@ namespace MUI.Editor
         internal static IReadOnlyDictionary<string, string> Create(
             string name,
             string ns,
-            PagePreset preset,
+            string preset,
+            bool receivesInput,
             bool presenter,
             bool typed,
             Type titleElementType = null,
-            string titleElementName = "Title", string closeElementName = "Close", string prefabAssetGuid = null)
+            string titleElementName = "Title", string closeElementName = "Close", string prefabAssetGuid = null, string resourceKey = null)
         {
             if (!IsIdentifier(name) || !IsNamespace(ns))
             {
                 throw new ArgumentException("Invalid page name or namespace.");
             }
 
-            if (!Enum.IsDefined(typeof(PagePreset), preset))
+            if (string.IsNullOrWhiteSpace(preset))
             {
                 throw new ArgumentOutOfRangeException(nameof(preset));
             }
@@ -107,12 +101,12 @@ namespace MUI.Editor
                 ? typeof(ITextElement) : titleElementType;
             var titleTypeName = "global::@" + titleContract.FullName.Replace(".", ".@");
             if (string.IsNullOrWhiteSpace(titleElementName) ||
-                preset != PagePreset.Notice && string.IsNullOrWhiteSpace(closeElementName))
+                receivesInput && string.IsNullOrWhiteSpace(closeElementName))
             {
                 throw new ArgumentException("页面骨架需要标题和关闭按钮的 Element 名称。");
             }
             var titleName = StringLiteral(titleElementName);
-            var closeName = preset == PagePreset.Notice ? null : StringLiteral(closeElementName);
+            var closeName = !receivesInput ? null : StringLiteral(closeElementName);
             var escapedNamespace = "@" + ns.Replace(".", ".@");
             string Wrap(params string[] lines)
             {
@@ -120,6 +114,7 @@ namespace MUI.Editor
                     "namespace " + escapedNamespace + "\n{\n" + string.Join("\n", lines) + "\n}\n";
             }
 
+            var buttonType = typeof(MUI.UGUI.NativeControl).IsAssignableFrom(titleElementType) ? "global::MUI.IButtonElement" : "global::MUI.UGUI.ButtonElement";
             var args = typed ? name + "Args" : "global::MUI.Unit";
             var result = typed ? name + "Result" : "global::MUI.Unit";
             var routeDeclaration = $"    [global::MUI.Navigation.ViewRoute(typeof({args}), typeof({result}), Key = {StringLiteral(ns + "." + name)}";
@@ -134,7 +129,7 @@ namespace MUI.Editor
             var modelLines = new List<string>
             {
                 "    /// <summary>页面表现状态，通过生成绑定连接到预制控件。</summary>",
-                $"    [global::MUI.ViewContract(\"{name}View\")]",
+                $"    [global::MUI.ViewContract({StringLiteral(resourceKey ?? name + "View")}{(string.IsNullOrEmpty(prefabAssetGuid) ? string.Empty : ", PrefabAssetGuid = " + StringLiteral(prefabAssetGuid))})]",
                 routeDeclaration,
                 $"    public partial class {name}ViewModel : global::MUI.ViewModel",
                 "    {",
@@ -144,15 +139,15 @@ namespace MUI.Editor
                 $"            ElementType = typeof({titleTypeName}))]",
                 $"        private string title = \"{name}\";"
             };
-            if (preset != PagePreset.Notice)
+            if (receivesInput)
             {
                 modelLines.AddRange(new[]
                 {
                     "",
                     "        /// <summary>请求关闭本次激活，不等待自身命令清理。</summary>",
                     "        [global::MUI.Command]",
-                    $"        [global::MUI.BindCommand({closeName}, nameof(global::MUI.UGUI.ButtonElement.Clicked),",
-                    "            ElementType = typeof(global::MUI.UGUI.ButtonElement))]",
+                    $"        [global::MUI.BindCommand({closeName}, nameof({buttonType}.Clicked),",
+                    $"            ElementType = typeof({buttonType}))]",
                     "        private void Close(global::MUI.CommandContext context)",
                     "        {",
                     "            context.RequestClose();",
@@ -227,8 +222,8 @@ namespace MUI.Editor
             }
 
             pageLines.Add("                policy: settings == null");
-            pageLines.Add("                    ? global::MUI.UGUI.MUISettings.ResolveBuiltInPolicy(" + StringLiteral(preset.ToString()) + ", overrides: overrides)");
-            pageLines.Add("                    : settings.ResolvePolicy(" + StringLiteral(preset.ToString()) + ", overrides: overrides));");
+            pageLines.Add("                    ? global::MUI.UGUI.MUISettings.ResolveGlobalPolicy(" + StringLiteral(preset) + ", overrides: overrides)");
+            pageLines.Add("                    : settings.ResolvePolicy(" + StringLiteral(preset) + ", overrides: overrides));");
             pageLines.Add("        }");
             pageLines.Add("    }");
             if (!string.IsNullOrEmpty(prefabAssetGuid))

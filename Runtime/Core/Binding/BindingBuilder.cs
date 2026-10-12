@@ -26,6 +26,22 @@ namespace MUI
             diagnosticContext = session.DiagnosticContext;
         }
 
+        /// <summary>安装实时读取入口，绑定会话结束时失效，不缓存组件引用到模型状态。</summary>
+        public void ReadAccess<TElement, TValue>(string elementName,
+            Func<TViewModel, Func<TValue>, Action> attach, Func<TElement, TValue> read)
+            where TElement : class, IElement
+        {
+            var element = view.GetElement<TElement>(elementName);
+            Func<TValue> getter = () =>
+            {
+                if (!IsBindingThread() || !session.IsActive || !element.IsAlive)
+                    throw new InvalidOperationException("View read access is unavailable outside its active binding session.");
+                return read(element);
+            };
+            var detach = attach(model, getter);
+            session.AddDetach(detach);
+        }
+
         public void Property<TElement, TValue>(string elementName,
                     string sourceProperty,
                     Func<TViewModel, TValue> readSource,

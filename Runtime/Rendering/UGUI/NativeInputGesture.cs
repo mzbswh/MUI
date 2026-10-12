@@ -14,6 +14,7 @@ namespace MUI.UGUI
     {
         private readonly List<PointerCapture> captures = new List<PointerCapture>();
         private View owner;
+        private PointerEventData clickingPointer;
         private Selectable selectable;
         private ScrollRect scroll;
 
@@ -47,7 +48,20 @@ namespace MUI.UGUI
             return observer;
         }
 
-        public void OnPointerDown(PointerEventData eventData) => Capture(eventData);
+        public void OnPointerDown(PointerEventData eventData)
+        {
+            clickingPointer = CanCapture ? eventData : null;
+            Capture(eventData);
+        }
+
+        internal void CaptureClickForModal()
+        {
+            var pointer = clickingPointer;
+            clickingPointer = null;
+            if (owner != null && pointer != null && pointer.button == PointerEventData.InputButton.Left &&
+                pointer.eligibleForClick && pointer.pointerPress == gameObject)
+                owner.CaptureModalPointer(pointer);
+        }
 
         // 不实现 IDragHandler，避免让普通按钮变成输入模块的拖动目标。
         public void OnInitializePotentialDrag(PointerEventData eventData)
@@ -109,6 +123,7 @@ namespace MUI.UGUI
 
         internal void Invalidate()
         {
+            clickingPointer = null;
             if (captures.Count == 0)
             {
                 if (scroll != null)

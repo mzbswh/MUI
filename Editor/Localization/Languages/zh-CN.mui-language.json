@@ -341,7 +341,7 @@
     },
     {
       "key": "editor.MUIDashboard.Configuration.baf3aacd5d",
-      "text": "可使用上方资产选择器或“创建配置”。宿主未绑定资产时使用内置默认规则。"
+      "text": "暂无全局配置，可点击创建；未创建时使用内置默认值。若有重复配置，请先解决上方提示的冲突。"
     },
     {
       "key": "editor.MUIDashboard.Configuration.d4116b321f",
@@ -805,7 +805,7 @@
     },
     {
       "key": "editor.PageWizard.7fe8b9bce7",
-      "text": "创建路由时传入 UIHost.Settings；配置在创建时解析，活动页面保持原策略。"
+      "text": "路由创建时读取全局配置；已经创建的路由保持原策略。"
     },
     {
       "key": "editor.PageWizard.89b4e4e0de",
@@ -837,7 +837,7 @@
     },
     {
       "key": "editor.PageWizard.ExistingView.2585437490",
-      "text": "非交互提示的 Graphic 必须关闭 Raycast Target；已有 Prefab 不会被自动修改。"
+      "text": "非交互页面的 Graphic 必须关闭 Raycast Target；已有 Prefab 不会被自动修改。"
     },
     {
       "key": "editor.PageWizard.ExistingView.358fc7efeb",
@@ -853,7 +853,7 @@
     },
     {
       "key": "editor.PageWizard.ExistingView.885a18c4c8",
-      "text": "非交互提示不能包含 Selectable 控件；已有 Prefab 不会被自动修改。"
+      "text": "非交互页面不能包含 Selectable 控件；已有 Prefab 不会被自动修改。"
     },
     {
       "key": "editor.PageWizard.ExistingView.9267775c67",
@@ -2181,7 +2181,7 @@
     },
     {
       "key": "editor.ViewInspector.ad9d661681",
-      "text": "选择此 View 使用的 ViewModel 契约后再校验绑定。结构校验不需要选择契约。"
+      "text": "请选择此 Prefab 对应的一个契约后再校验绑定。结构校验不需要选择契约。"
     },
     {
       "key": "editor.ViewInspector.b104369e08",
@@ -5121,7 +5121,7 @@
     },
     {
       "key": "dashboard.configuration.help",
-      "text": "选择资产可直接编辑；点击“绑定到宿主”才更新宿主引用。"
+      "text": "项目唯一配置自动关联所有宿主。编辑后新建路由使用新规则；已有路由保持原策略。"
     },
     {
       "key": "dashboard.configuration.empty",
@@ -5221,11 +5221,11 @@
     },
     {
       "key": "property.hiddenMode",
-      "text": "隐藏实现"
+      "text": "隐藏后如何处理"
     },
     {
       "key": "property.hiddenContentRoot",
-      "text": "隐藏时停用的内容子节点"
+      "text": "内容节点"
     },
     {
       "key": "policy.layer.help",
@@ -5353,11 +5353,11 @@
     },
     {
       "key": "enum.MUI.UGUI.ViewHiddenMode.CanvasGroupOnly",
-      "text": "仅透明隐藏（默认）"
+      "text": "保持内容运行"
     },
     {
       "key": "enum.MUI.UGUI.ViewHiddenMode.DeactivateContent",
-      "text": "停用内容子树"
+      "text": "停用内容"
     },
     {
       "key": "enum.MUI.Navigation.ViewCacheDecision.Retained",
@@ -5481,7 +5481,7 @@
     },
     {
       "key": "sorting.targets.help",
-      "text": "在下方排序目标中登记独立 Canvas 和全部 Renderer，相对偏移必须小于页面跨度。普通粒子需相机 Canvas 和兼容材质；Order 不提供 UI 裁剪。"
+      "text": "自动收集独立排序的子 Canvas 和 Renderer。普通粒子需相机 Canvas 和兼容材质；排序不提供 UI 裁剪。"
     },
     {
       "key": "property.renderSortingLayer",
@@ -5766,6 +5766,838 @@
     {
       "key": "settings.preset.invalid",
       "text": "配置无效，修正下方错误后显示生效值。"
+    },
+    {
+      "key": "wizard.title",
+      "text": "创建一个新页面"
+    },
+    {
+      "key": "wizard.subtitle",
+      "text": "从页面信息到生成预览，三步完成 UI 骨架。"
+    },
+    {
+      "key": "wizard.step0",
+      "text": "页面信息"
+    },
+    {
+      "key": "wizard.step1",
+      "text": "行为与逻辑"
+    },
+    {
+      "key": "wizard.step2",
+      "text": "检查并创建"
+    },
+    {
+      "key": "wizard.step0Hint",
+      "text": "设置页面名称、保存位置和视图来源。"
+    },
+    {
+      "key": "wizard.step1Hint",
+      "text": "选择页面行为和需要的业务代码。"
+    },
+    {
+      "key": "wizard.step2Hint",
+      "text": "检查输出文件和程序集后创建。"
+    },
+    {
+      "key": "wizard.identity",
+      "text": "命名与位置"
+    },
+    {
+      "key": "wizard.view",
+      "text": "视图来源"
+    },
+    {
+      "key": "wizard.logic",
+      "text": "业务代码"
+    },
+    {
+      "key": "wizard.nameHint",
+      "text": "输入 C# 标识符，例如 Inventory。用于生成类名和文件名，不要包含空格。"
+    },
+    {
+      "key": "wizard.namespaceHint",
+      "text": "可自由修改的 C# 命名空间，例如 MyGame.UI；Game.UI 只是默认示例，不要求与 ViewModule 的生成命名空间相同。"
+    },
+    {
+      "key": "wizard.destinationHint",
+      "text": "填写已存在的 Assets 目录。向导会在其中创建页面同名子目录，不覆盖已有内容。"
+    },
+    {
+      "key": "wizard.locationNote",
+      "text": "生成位置遵循全局配置的目录规则，最终路径可在“检查并创建”中预览。"
+    },
+    {
+      "key": "wizard.backendHint",
+      "text": "选择新建文本的组件类型。TMP 需要项目已安装对应包并引用 MUI.TMP。"
+    },
+    {
+      "key": "wizard.newPrefabNote",
+      "text": "留空将新建带 Content 子节点的 Prefab，完全隐藏时默认停用 Content。下一步根据预设决定是否生成关闭按钮。"
+    },
+    {
+      "key": "wizard.existingHint",
+      "text": "可选：拖入根节点含 View 和 RectTransform 的 Prefab。仅生成源码，不修改原 Prefab。"
+    },
+    {
+      "key": "wizard.titleHint",
+      "text": "已有 Prefab 中标题文本 Element 的名称，必须与绑定目标一致。"
+    },
+    {
+      "key": "wizard.closeHint",
+      "text": "已有 Prefab 中关闭按钮 ButtonElement 的名称。"
+    },
+    {
+      "key": "wizard.settingsHint",
+      "text": "自动查找项目唯一的 MUISettings，无需拖入。所有宿主与页面共享；构建时自动包含这份配置。"
+    },
+    {
+      "key": "wizard.typedHint",
+      "text": "生成 Args 和 Result 类型，并启用 Presenter；用于传入打开参数、返回业务结果。"
+    },
+    {
+      "key": "wizard.presenterHint",
+      "text": "生成 Presenter 生命周期骨架，用于加载数据或协调服务。简单页面不需要。"
+    },
+    {
+      "key": "wizard.typedNote",
+      "text": "已启用 Presenter，用于接收类型化打开参数；结果结构可按业务扩展。"
+    },
+    {
+      "key": "wizard.logicNote",
+      "text": "简单页面只需 ViewModel。需要协调服务或处理生命周期时，再启用 Presenter。"
+    },
+    {
+      "key": "wizard.preflight",
+      "text": "编译环境检查"
+    },
+    {
+      "key": "wizard.success",
+      "text": "页面已创建"
+    },
+    {
+      "key": "wizard.openPrefab",
+      "text": "打开 Prefab"
+    },
+    {
+      "key": "wizard.openPrefabHint",
+      "text": "在 Prefab 编辑模式中制作界面。"
+    },
+    {
+      "key": "wizard.showScripts",
+      "text": "定位代码"
+    },
+    {
+      "key": "wizard.showScriptsHint",
+      "text": "在 Project 窗口中定位生成的 Scripts 文件夹。"
+    },
+    {
+      "key": "wizard.nextSteps",
+      "text": "接下来"
+    },
+    {
+      "key": "wizard.nextStepsBody",
+      "text": "1. 编辑 Prefab，为绑定控件配置 Element。\n\n2. 在 ViewModel 中补充状态与命令，并确认所属程序集的生成绑定已初始化。\n\n3. 初始化 UIHost，通过 Page.CreateRoute() 创建路由，再调用 Navigator.OpenAsync。全局 MUISettings 自动生效。\n\nResources 下的 Prefab 可直接加载；其他目录需接入项目资源加载器。"
+    },
+    {
+      "key": "wizard.existingResourceNote",
+      "text": "已有 Prefab 的 GUID 仅用于资产定位。请确保页面资源标识能通过 Resources 路径或项目资源加载器找到此 Prefab。"
+    },
+    {
+      "key": "wizard.busy",
+      "text": "请等待编译完成，并退出播放模式后继续。"
+    },
+    {
+      "key": "wizard.completedNote",
+      "text": "骨架已就绪，可继续编辑界面和业务逻辑。"
+    },
+    {
+      "key": "wizard.footerNote",
+      "text": "悬停字段或选项可查看说明。"
+    },
+    {
+      "key": "wizard.back",
+      "text": "上一步"
+    },
+    {
+      "key": "wizard.backHint",
+      "text": "返回修改上一步，保留当前输入。"
+    },
+    {
+      "key": "wizard.next",
+      "text": "下一步"
+    },
+    {
+      "key": "wizard.nextHint",
+      "text": "检查当前配置并继续。"
+    },
+    {
+      "key": "wizard.createHint",
+      "text": "按预览路径生成文件；自动创建缺失目录，不覆盖已有文件。"
+    },
+    {
+      "key": "wizard.another",
+      "text": "继续创建页面"
+    },
+    {
+      "key": "wizard.anotherHint",
+      "text": "保留当前配置，返回第一步修改页面名称。"
+    },
+    {
+      "key": "globalSettings.label",
+      "text": "全局 MUI 配置"
+    },
+    {
+      "key": "globalSettings.help",
+      "text": "自动使用项目唯一的 MUISettings，所有宿主与页面共享。没有资产时使用内置默认值；存在多份时需先保留唯一配置。"
+    },
+    {
+      "key": "globalSettings.create",
+      "text": "创建全局配置"
+    },
+    {
+      "key": "globalSettings.locate",
+      "text": "定位全局配置"
+    },
+    {
+      "key": "globalSettings.refresh",
+      "text": "刷新全局配置"
+    },
+    {
+      "key": "globalSettings.duplicates",
+      "text": "发现多份 MUISettings。全局配置必须唯一，请合并并保留一份："
+    },
+    {
+      "key": "wizard.policySource",
+      "text": "来自全局配置的页面行为预设。以下为合并默认规则后的实际行为；可在全局配置中新增或修改。"
+    },
+    {
+      "key": "wizard.policyMissing",
+      "text": "预设“{0}”已删除或改名，请在“行为与逻辑”中重新选择。"
+    },
+    {
+      "key": "wizard.policySummary",
+      "text": "角色：{0} · 层级：{1}\n下层：{2} · 模态：{5} · 返回：{6}\n接收输入：{3} · 获取焦点：{4}"
+    },
+    {
+      "key": "wizard.policyDetails",
+      "text": "缓存：{0} · 允许多实例：{1} · 实例上限：{2} · Tick 暂停：{3}"
+    },
+    {
+      "key": "wizard.interactiveScaffold",
+      "text": "生成标题和关闭按钮，放在 Content 下；页面完全隐藏时默认停用 Content。"
+    },
+    {
+      "key": "wizard.passiveScaffold",
+      "text": "不生成关闭按钮或射线阻挡，由业务关闭。内容放在 Content 下，页面完全隐藏时默认停用。"
+    },
+    {
+      "key": "wizard.overlayOwner",
+      "text": "依附页面默认归当前主页面所有；无主页面时，打开时需指定 PageOwner.Host。"
+    },
+    {
+      "key": "wizard.policySelect",
+      "text": "行为预设"
+    },
+    {
+      "key": "wizard.rulesTitle",
+      "text": "实际生效规则"
+    },
+    {
+      "key": "wizard.rule.role",
+      "text": "页面角色"
+    },
+    {
+      "key": "wizard.rule.layer",
+      "text": "显示层级"
+    },
+    {
+      "key": "wizard.rule.coverage",
+      "text": "对下层页面"
+    },
+    {
+      "key": "wizard.rule.modal",
+      "text": "模态阻挡"
+    },
+    {
+      "key": "wizard.rule.back",
+      "text": "返回行为"
+    },
+    {
+      "key": "wizard.rule.input",
+      "text": "接收输入"
+    },
+    {
+      "key": "wizard.rule.focus",
+      "text": "获取焦点"
+    },
+    {
+      "key": "wizard.rule.roleHint",
+      "text": "决定页面是主页面、依附页面还是独立页面。"
+    },
+    {
+      "key": "wizard.rule.layerHint",
+      "text": "层级名称与排序值。数值越大，显示越靠上。"
+    },
+    {
+      "key": "wizard.rule.coverageHint",
+      "text": "当前页面对下层页面的影响：不覆盖、阻挡输入或隐藏。"
+    },
+    {
+      "key": "wizard.rule.modalHint",
+      "text": "是否启用模态阻挡，防止操作穿透到下层页面。"
+    },
+    {
+      "key": "wizard.rule.backHint",
+      "text": "收到返回请求时执行的行为。"
+    },
+    {
+      "key": "wizard.rule.inputHint",
+      "text": "当前页面是否允许用户操作。"
+    },
+    {
+      "key": "wizard.rule.focusHint",
+      "text": "当前页面是否获取导航焦点。"
+    },
+    {
+      "key": "wizard.logicQuestion",
+      "text": "这个页面需要做什么？"
+    },
+    {
+      "key": "wizard.logicChoiceHint",
+      "text": "根据页面用途选择，只影响生成的代码骨架；以后可以手动扩展。"
+    },
+    {
+      "key": "wizard.logicMode0",
+      "text": "仅展示内容、处理简单点击"
+    },
+    {
+      "key": "wizard.logicMode1",
+      "text": "打开时加载数据或调用服务"
+    },
+    {
+      "key": "wizard.logicMode2",
+      "text": "接收打开参数或返回操作结果"
+    },
+    {
+      "key": "wizard.logicDescription0",
+      "text": "适合静态说明、帮助等简单页面。文字和按钮逻辑写在 ViewModel 中，不额外生成 Presenter。"
+    },
+    {
+      "key": "wizard.logicDescription1",
+      "text": "适合需要读取业务数据的页面。额外生成 Presenter，提供打开页面时的逻辑入口，再由你把数据写入 ViewModel。"
+    },
+    {
+      "key": "wizard.logicDescription2",
+      "text": "适合不同打开条件或需要取回结果的页面。生成 Args（打开参数）、Result（完成结果）和 Presenter（接收参数并处理业务）。"
+    },
+    {
+      "key": "wizard.logicExample0",
+      "text": "例如：帮助页显示操作说明，点击“关闭”退出。"
+    },
+    {
+      "key": "wizard.logicExample1",
+      "text": "例如：打开背包 → 读取背包服务 → 更新道具列表。"
+    },
+    {
+      "key": "wizard.logicExample2",
+      "text": "例如：传入“只选材料” → 玩家选中铁矿 → 点击确定后返回道具 ID。取消关闭不算完成结果。"
+    },
+    {
+      "key": "wizard.logicFiles",
+      "text": "将生成的业务文件"
+    },
+    {
+      "key": "wizard.logicScaffoldNote",
+      "text": "这里只生成代码骨架，数据加载、参数字段和返回逻辑仍需补充。不确定时可先选第一项，后续再扩展。"
+    },
+    {
+      "key": "settings.directories",
+      "text": "页面生成目录"
+    },
+    {
+      "key": "settings.directories.help",
+      "text": "Prefab 和脚本分别配置独立的完整项目路径，支持 {PageName}。例如 Assets/LocalResource/{PageName} 和 Assets/Scripts/UI/{PageName}。不共用根目录；修改规则不移动已有文件。"
+    },
+    {
+      "key": "property.pageRootDirectory",
+      "text": "页面根目录"
+    },
+    {
+      "key": "property.pagePrefabDirectory",
+      "text": "Prefab 目录规则"
+    },
+    {
+      "key": "property.pageScriptDirectory",
+      "text": "脚本目录规则"
+    },
+    {
+      "key": "settings.pageRootDirectory.help",
+      "text": "Assets 下的项目路径，例如 Assets/UI；缺失目录会在创建页面时自动建立。"
+    },
+    {
+      "key": "settings.pagePrefabDirectory.help",
+      "text": "从 Assets/ 开始的完整目录规则，例如 Assets/LocalResource/{PageName}。支持末尾斜杠。Resources 以外的资源由项目加载器加载。"
+    },
+    {
+      "key": "settings.pageScriptDirectory.help",
+      "text": "从 Assets/ 开始的完整目录规则，例如 Assets/Scripts/UI/{PageName}。与 Prefab 目录独立，支持末尾斜杠。"
+    },
+    {
+      "key": "wizard.directoryRootHint",
+      "text": "来自全局配置的页面根目录。点击编辑目录规则可调整 Prefab 和脚本的位置。"
+    },
+    {
+      "key": "wizard.editDirectories",
+      "text": "编辑全局目录规则"
+    },
+    {
+      "key": "wizard.pathOccupied",
+      "text": "目标路径已存在，不会覆盖：{0}"
+    },
+    {
+      "key": "wizard.resourceKey",
+      "text": "页面资源键：{0}"
+    },
+    {
+      "key": "wizard.customDirectoryLoader",
+      "text": "此 Prefab 不在 Resources 目录下。请通过 UIHost.Initialize(resourceLoader: loader) 接入项目加载器，并将页面资源键映射到此 Prefab。"
+    },
+    {
+      "key": "viewPanel.title",
+      "text": "MUI 视图"
+    },
+    {
+      "key": "viewPanel.description",
+      "text": "配置当前界面的显示与交互，连接控件绑定，并检查运行状态。"
+    },
+    {
+      "key": "viewPanel.configuration",
+      "text": "界面配置"
+    },
+    {
+      "key": "viewPanel.configuration.help",
+      "text": "编辑当前视图的表现和交互规则。"
+    },
+    {
+      "key": "viewPanel.bindings",
+      "text": "绑定与校验"
+    },
+    {
+      "key": "viewPanel.bindings.help",
+      "text": "根据当前 Prefab 自动识别 ViewModel，检查控件绑定和视图结构。这里仅用于检查，不会运行页面。"
+    },
+    {
+      "key": "viewPanel.diagnostics",
+      "text": "运行诊断"
+    },
+    {
+      "key": "viewPanel.diagnostics.help",
+      "text": "按需采集输入、可见性、资源准备和射线信息。这里显示只读快照，展开面板不会自动执行查询。"
+    },
+    {
+      "key": "viewPanel.transitions",
+      "text": "进入与退出"
+    },
+    {
+      "key": "viewPanel.transitions.help",
+      "text": "设置页面淡入淡出时间，单位为秒。填 0 即可关闭对应效果。"
+    },
+    {
+      "key": "viewPanel.interaction",
+      "text": "焦点与隐藏"
+    },
+    {
+      "key": "viewPanel.interaction.help",
+      "text": "设置默认选中控件和完全隐藏后的处理方式。被弹窗遮挡但仍可见时，不会停用内容。"
+    },
+    {
+      "key": "viewPanel.modal",
+      "text": "模态遮罩"
+    },
+    {
+      "key": "viewPanel.modal.help",
+      "text": "仅在路由启用模态时生效。可使用全局默认遮罩，或为当前页面单独设置。"
+    },
+    {
+      "key": "viewPanel.resources",
+      "text": "资源加载"
+    },
+    {
+      "key": "viewPanel.resources.help",
+      "text": "配置加载器继承与首次显示的等待规则。通常保留默认值即可。"
+    },
+    {
+      "key": "viewPanel.sorting",
+      "text": "页面内部排序"
+    },
+    {
+      "key": "viewPanel.sorting.help",
+      "text": "自动收集独立排序的子 Canvas 和 Renderer，按原始 Sorting Layer 与 Order 保留相对顺序。普通 UI 仍按层级顺序显示。"
+    },
+    {
+      "key": "viewPanel.component",
+      "text": "组件信息"
+    },
+    {
+      "key": "viewPanel.component.help",
+      "text": "View 是框架的运行时入口，一般无需编写子类。"
+    },
+    {
+      "key": "viewPanel.field.enterFadeDuration",
+      "text": "页面进入时的淡入时间（秒）；0 表示立即显示。"
+    },
+    {
+      "key": "viewPanel.field.exitFadeDuration",
+      "text": "页面退出时的淡出时间（秒）；0 表示立即退出。"
+    },
+    {
+      "key": "viewPanel.field.defaultSelection",
+      "text": "页面获取焦点时默认选中的控件，供键盘或手柄导航使用。"
+    },
+    {
+      "key": "viewPanel.field.hiddenMode",
+      "text": "停用内容：完全隐藏时停用指定子节点，重新显示时恢复。保持内容运行：仅隐藏画面并关闭交互，内容脚本仍可运行。隐藏不代表关闭页面。"
+    },
+    {
+      "key": "viewPanel.field.hiddenContentRoot",
+      "text": "新建页面自动配置 Content。必须是 View 下的子节点；停用会触发 OnDisable 并停止其协程，恢复会触发 OnEnable。页面加载与业务生命周期建议放在 Presenter 或服务中。"
+    },
+    {
+      "key": "viewPanel.field.modalBackdropStyle",
+      "text": "可复用的遮罩样式。为空时使用下方颜色。"
+    },
+    {
+      "key": "viewPanel.field.modalBarrierColor",
+      "text": "未配置遮罩样式时使用的颜色及透明度。"
+    },
+    {
+      "key": "viewPanel.field.inheritParentResources",
+      "text": "未配置自身加载器时，借用最近父 View 的活动加载器。"
+    },
+    {
+      "key": "viewPanel.field.waitForResourceSources",
+      "text": "首次显示前等待默认加载器的资源键绑定完成；后续资源变化仍渐进加载。"
+    },
+    {
+      "key": "property.useGlobalModalBackdrop",
+      "text": "使用全局默认遮罩"
+    },
+    {
+      "key": "property.defaultModalBackdropPrefab",
+      "text": "默认遮罩预制体"
+    },
+    {
+      "key": "property.defaultModalBackdropColor",
+      "text": "默认遮罩底色"
+    },
+    {
+      "key": "viewPanel.field.useGlobalModalBackdrop",
+      "text": "勾选后使用全局 MUI 配置中的遮罩预制体和底色；取消后使用本页样式。仅模态页面生效，不改变路由策略。"
+    },
+    {
+      "key": "viewPanel.modal.fallback",
+      "text": "未配置预制体，将使用纯色遮罩。"
+    },
+    {
+      "key": "viewPanel.modal.openSettings",
+      "text": "编辑全局遮罩"
+    },
+    {
+      "key": "settings.modalBackdrop.help",
+      "text": "供勾选“使用全局默认遮罩”的页面共用。未配置预制体时使用纯色遮罩。修改在新建遮罩实例时生效。"
+    },
+    {
+      "key": "settings.defaultModalBackdropPrefab.help",
+      "text": "可选。拖入根节点为 RectTransform 的纯视觉预制体，运行时自动铺满宿主区域。可含 Image/RawImage，不可含 Canvas、Renderer、Selectable 或 View；点击阻挡由框架处理。"
+    },
+    {
+      "key": "settings.defaultModalBackdropColor.help",
+      "text": "绘制在预制体下方的底色。仅使用预制体自身效果时，将此颜色的透明度设为 0；没有预制体时直接显示此颜色。"
+    },
+    {
+      "key": "viewPanel.sorting.inactive",
+      "text": "宿主分配页面排序范围后，可在此查看最终排序值。"
+    },
+    {
+      "key": "viewPanel.sorting.range",
+      "text": "页面排序范围"
+    },
+    {
+      "key": "viewPanel.binding.unmatched",
+      "text": "未找到此 Prefab 对应的 ViewModel 契约。请等待代码编译完成；旧页面可在 [ViewContract] 中设置 PrefabAssetGuid 建立关联。场景中的独立 View 需先保存为 Prefab。结构校验仍可使用。"
+    },
+    {
+      "key": "viewPanel.binding.multiple",
+      "text": "此 Prefab 对应多个契约，请选择本次要校验的 ViewModel。"
+    },
+    {
+      "key": "bindingRow.locate",
+      "text": "定位"
+    },
+    {
+      "key": "bindingRow.source",
+      "text": "源码"
+    },
+    {
+      "key": "bindingRow.locate.help",
+      "text": "在 Hierarchy 中高亮对应控件；多个匹配时展开候选列表。"
+    },
+    {
+      "key": "nativeBindings.title",
+      "text": "原生控件绑定"
+    },
+    {
+      "key": "nativeBindings.help",
+      "text": "直接引用按钮、文本和图片，无需挂 Element。名称对应代码中的绑定标识，可编辑；引用不随节点改名失效。"
+    },
+    {
+      "key": "nativeBindings.collect",
+      "text": "收集页面控件"
+    },
+    {
+      "key": "property.nativeBindings",
+      "text": "控件引用"
+    },
+    {
+      "key": "nativeRules.title",
+      "text": "控件绑定规则"
+    },
+    {
+      "key": "nativeRules.help",
+      "text": "设置匹配方式、表达式与组件类型。支持前缀组合、后缀、包含文本和正则；正则用 (?<name>...) 提取绑定名。"
+    },
+    {
+      "key": "property.controlNamingRules",
+      "text": "命名规则"
+    },
+    {
+      "key": "property.Prefix",
+      "text": "前缀"
+    },
+    {
+      "key": "property.Kind",
+      "text": "组件类型"
+    },
+    {
+      "key": "nativeRules.generate",
+      "text": "生成绑定"
+    },
+    {
+      "key": "nativeRules.apply",
+      "text": "保存绑定引用"
+    },
+    {
+      "key": "nativeRules.settings",
+      "text": "命名规则"
+    },
+    {
+      "key": "nativeRules.empty",
+      "text": "没有需要绑定的控件。按全局规则命名节点（如 Img_Icon、Txt_Title、Btn_Close），或在代码中声明绑定。"
+    },
+    {
+      "key": "nativeRules.invalidName",
+      "text": "绑定名称必须是有效且非空的 C# 标识符，声明类型必须实现 IElement。"
+    },
+    {
+      "key": "nativeRules.typeConflict",
+      "text": "同名绑定声明了不同类型，请统一。"
+    },
+    {
+      "key": "nativeRules.missingComponent",
+      "text": "命名规则要求的组件缺失。"
+    },
+    {
+      "key": "nativeRules.missingOrMultiple",
+      "text": "匹配缺失或不唯一，请检查或指定引用。"
+    },
+    {
+      "key": "nativeRules.wrongTarget",
+      "text": "引用类型不匹配、属于其他页面，或仍挂有 Element。"
+    },
+    {
+      "key": "nativeRules.legacy",
+      "text": "已有 Element 绑定（保留兼容）"
+    },
+    {
+      "key": "nativeRules.missing",
+      "text": "缺少引用：请拖入对应组件"
+    },
+    {
+      "key": "nativeRules.bound",
+      "text": "已绑定"
+    },
+    {
+      "key": "nativeRules.matched",
+      "text": "已匹配 · 生成代码时记录引用"
+    },
+    {
+      "key": "nativeRules.fixErrors",
+      "text": "请先解决缺失引用、重复目标、重名或类型冲突。"
+    },
+    {
+      "key": "nativeRules.savePrefab",
+      "text": "请先将页面保存为 Prefab，再生成代码。"
+    },
+    {
+      "key": "nativeRules.output",
+      "text": "选择自动生成文件的位置；重复生成请选择同一个文件。"
+    },
+    {
+      "key": "nativeRules.noOverwrite",
+      "text": "不能覆盖手写文件或其他页面的生成文件。"
+    },
+    {
+      "key": "nativeRules.generated",
+      "text": "已生成："
+    },
+    {
+      "key": "nativeRules.removeUnused",
+      "text": "清理多余引用"
+    },
+    {
+      "key": "nativeRules.chooseTypes",
+      "text": "搜索并选择组件类型"
+    },
+    {
+      "key": "nativeRules.addRule",
+      "text": "+ 添加规则"
+    },
+    {
+      "key": "nativeRules.removeMissing",
+      "text": "移除未找到的类型"
+    },
+    {
+      "key": "ruleMatch.prefix",
+      "text": "前缀"
+    },
+    {
+      "key": "ruleMatch.suffix",
+      "text": "后缀"
+    },
+    {
+      "key": "ruleMatch.contains",
+      "text": "包含"
+    },
+    {
+      "key": "ruleMatch.regex",
+      "text": "正则"
+    },
+    {
+      "key": "ruleMatch.help",
+      "text": "前缀/后缀/包含：移除匹配文本作为绑定名。正则：使用 (?<name>...) 捕获绑定名，例如 ^UI_(?<name>.+)_Text$。"
+    },
+    {
+      "key": "typePicker.title",
+      "text": "选择组件 · 可连续勾选"
+    },
+    {
+      "key": "typePicker.all",
+      "text": "全部"
+    },
+    {
+      "key": "typePicker.common",
+      "text": "常用"
+    },
+    {
+      "key": "typePicker.selected",
+      "text": "已选"
+    },
+    {
+      "key": "typePicker.empty",
+      "text": "没有匹配的组件"
+    },
+    {
+      "key": "typePicker.done",
+      "text": "完成"
+    },
+    {
+      "key": "typePicker.count",
+      "text": "显示 {0} 项 · 已选 {1} 项"
+    },
+    {
+      "key": "typePicker.project",
+      "text": "项目"
+    },
+    {
+      "key": "typePicker.missing",
+      "text": "类型缺失"
+    },
+    {
+      "key": "nativeRules.saveCount",
+      "text": "保存绑定引用 ({0})"
+    },
+    {
+      "key": "nativeRules.apply.help",
+      "text": "将待保存的匹配写入当前 View，可撤销。不会生成代码或运行页面；缺失和错误项不保存。保存场景或 Prefab 后才会写入磁盘。生成绑定代码时也会保存引用，无需重复点击。"
+    },
+    {
+      "key": "nativeRules.saveConflict.help",
+      "text": "某个控件已用其他绑定名称保存。请先检查并清理多余引用，避免同一组件重复绑定。"
+    },
+    {
+      "key": "nativeRules.saved",
+      "text": "已保存 {0} 个绑定引用到 View，可撤销。请按需保存场景或 Prefab。"
+    },
+    {
+      "key": "nativeRules.generate.help",
+      "text": "按命名规则自动生成 ViewModel 属性与命令；已有手写绑定优先。声明存于 Prefab，代码由编译器生成，不创建 Assets C# 文件。"
+    },
+    {
+      "key": "nativeRules.settings.help",
+      "text": "打开全局配置，编辑控件命名规则和可匹配的组件类型。"
+    },
+    {
+      "key": "nativeRules.removeUnused.help",
+      "text": "删除当前规则和代码声明未使用的已保存引用，可撤销。不会删除节点、组件或代码。旧引用如仍由其他业务使用，请先保留并补充声明。"
+    },
+    {
+      "key": "nativeRules.removed",
+      "text": "已清理 {0} 个多余引用，节点和组件保持不变。"
+    },
+    {
+      "key": "nativeRules.removeOne.help",
+      "text": "移除此名称的已保存引用，不删除组件，可撤销。若仍符合规则或代码声明，候选会再次显示，需要保存后才生效。"
+    },
+    {
+      "key": "bindingRow.source.help",
+      "text": "打开这条绑定在代码中的声明位置。"
+    },
+    {
+      "key": "nativeRules.autoSync",
+      "text": "自动同步代码绑定"
+    },
+    {
+      "key": "nativeRules.autoSynced",
+      "text": "已自动记录 {0} 个代码声明的绑定引用，可撤销；请按需保存场景或 Prefab。"
+    },
+    {
+      "key": "nativeRules.duplicateName",
+      "text": "绑定名称“{0}”重复，请修改以下节点的名称："
+    },
+    {
+      "key": "nativeRules.duplicateFile",
+      "text": "发现多个属于此页面的绑定声明文件，请先移除重复声明。"
+    },
+    {
+      "key": "nativeRules.generatorQueued",
+      "text": "绑定数据已保存到 Prefab，已请求编译生成；不会创建额外 C# 文件。"
+    },
+    {
+      "key": "nativeRules.requireModel",
+      "text": "请先关联唯一的 ViewModel 契约，以确定生成类型所属的程序集和命名空间。"
+    },
+    {
+      "key": "nativeRules.requireText",
+      "text": "绑定生成需要文本序列化的 Prefab，请将 Editor Settings 的 Asset Serialization 改为 Force Text。"
+    },
+    {
+      "key": "nativeRules.logRejected",
+      "text": "[MUI 绑定同步] 未能完成同步"
+    },
+    {
+      "key": "nativeRules.referencesSynced",
+      "text": "已保存 {0} 个控件引用及自动声明，已请求编译（尚未确认成功）。编译后可直接访问 ViewModel 属性。"
     }
   ]
 }

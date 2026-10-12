@@ -11,7 +11,8 @@ namespace MUI.Editor
     [CustomEditor(typeof(View))]
     public sealed partial class ViewInspector : UnityEditor.Editor
     {
-        private readonly List<BindingManifest> manifests = new List<BindingManifest>();
+        private List<BindingManifest> manifests = new List<BindingManifest>();
+        private bool inspectorReady;
         private string[] labels = Array.Empty<string>();
         private int selected;
         private string displayedLanguage;
@@ -20,7 +21,17 @@ namespace MUI.Editor
 
         private void OnEnable()
         {
+            RestoreBindingColumnWidths();
+            InitializeInspectorState();
+        }
+
+        private void InitializeInspectorState()
+        {
+            inspectorReady = false;
+            if (manifests == null) manifests = new List<BindingManifest>();
             ClearBindingTargets();
+            Undo.undoRedoPerformed -= OnBindingUndoRedo;
+            Undo.undoRedoPerformed += OnBindingUndoRedo;
             EditorApplication.hierarchyChanged -= OnBindingHierarchyChanged;
             EditorApplication.hierarchyChanged += OnBindingHierarchyChanged;
             resourcePreparationSnapshot = null;
@@ -52,7 +63,7 @@ namespace MUI.Editor
 
                 try
                 {
-                    if (property.GetValue(null) is BindingManifest manifest)
+                    if (property.GetValue(null) is BindingManifest manifest && manifest.ViewModelType != null)
                     {
                         manifests.Add(manifest);
                     }
@@ -63,6 +74,7 @@ namespace MUI.Editor
                 }
             }
 
+            manifests.RemoveAll(manifest => !MatchesCurrentPrefab(manifest));
             manifests.Sort((left, right) => string.Compare(left.ViewModelType.FullName, right.ViewModelType.FullName, StringComparison.Ordinal));
             labels = new string[manifests.Count + 1];
             labels[0] = L.Get("editor.ViewInspector.6541599e58");
@@ -71,53 +83,89 @@ namespace MUI.Editor
                 labels[i + 1] = manifests[i].ViewModelType.FullName;
             }
 
-            // 资源键不等于节点名；多个契约时不猜测当前 View 属于哪个模型。
+            // 只有唯一匹配当前 Prefab 的契约才自动选中。
             if (manifests.Count == 1)
             {
                 selected = 0;
             }
+            inspectorReady = true;
+            Undo.postprocessModifications -= OnBindingModifications;
+            Undo.postprocessModifications += OnBindingModifications;
+            QueueCodeBindingSync();
+            QueueBindingValidation();
         }
 
-        public override void OnInspectorGUI()
+        private bool MatchesCurrentPrefab(BindingManifest manifest)
         {
-            if (displayedLanguage != L.LanguageId)
+            var view = (View)target;
+            // 只关联 Prefab 根 View，不能把页面契约误认给内部嵌套 View。
+            var source = EditorUtility.IsPersistent(view) ? view : PrefabUtility.GetCorrespondingObjectFromSource(view);
+            string path;
+            if (source != null)
             {
-                displayedLanguage = L.LanguageId;
-                labels[0] = L.Get("editor.ViewInspector.6541599e58");
-                resourceManifest = null;
-                results = null;
-            }
-            Localization.MUIEditorInspector.Draw(serializedObject);
-            var inspectedView = (View)target;
-            EditorGUILayout.HelpBox(L.Get("sorting.targets.help"), MessageType.Info);
-            if (inspectedView.HiddenMode == ViewHiddenMode.DeactivateContent)
-            {
-                var root = inspectedView.HiddenContentRoot;
-                var valid = root != null && root != inspectedView.gameObject && root.transform.IsChildOf(inspectedView.transform);
-                EditorGUILayout.HelpBox(L.Get(valid ? "policy.hidden.help" : "policy.hidden.invalid"),
-                    valid ? MessageType.Info : MessageType.Error);
-            }
-            DrawInputDiagnostics();
-            DrawResourcePreparationDiagnostics();
-            DrawRaycastDiagnostics();
-            EditorGUILayout.Space();
-            EditorGUILayout.LabelField(L.Get("editor.ViewInspector.dceaeea259"), EditorStyles.boldLabel);
-            if (GUILayout.Button(L.Get("editor.ViewInspector.52e088acdc")))
-            {
-                validationKind = ValidationKind.Structure;
-                results = ViewContractValidator.ValidateStructure((View)target);
-            }
-
-            if (manifests.Count == 0)
-            {
-                EditorGUILayout.HelpBox(L.Get("editor.ViewInspector.e32a3bfa20"), MessageType.Info);
+                if (source.transform.parent != null) return false;
+                path = AssetDatabase.GetAssetPath(source);
             }
             else
             {
-                var next = EditorGUILayout.Popup(L.Get("editor.ViewInspector.b741b9457b"), selected + 1, labels) - 1;
+                var stage = UnityEditor.SceneManagement.PrefabStageUtility.GetPrefabStage(view.gameObject);
+                if (stage == null || stage.prefabContentsRoot != view.gameObject) return false;
+                path = stage.assetPath;
+            }
+            if (string.IsNullOrEmpty(path)) return false;
+            var model = manifest.ViewModelType;
+            var contract = model.GetCustomAttribute<ViewContractAttribute>();
+            var guid = contract == null ? null : contract.PrefabAssetGuid;
+            // 兼容旧版向导放在 Page 类中的 GUID 常量，只读取常量，不执行业务代码。
+            if (string.IsNullOrEmpty(guid) && model.Name.EndsWith("ViewModel", StringComparison.Ordinal))
+            {
+                var pageName = model.FullName.Substring(0, model.FullName.Length - "ViewModel".Length) + "Page";
+                var field = model.Assembly.GetType(pageName)?.GetField("PrefabAssetGuid", BindingFlags.Public | BindingFlags.Static);
+                if (field != null && field.IsLiteral && field.FieldType == typeof(string))
+                    guid = field.GetRawConstantValue() as string;
+            }
+            if (!string.IsNullOrEmpty(guid))
+                return string.Equals(guid, AssetDatabase.AssetPathToGUID(path), StringComparison.OrdinalIgnoreCase);
+            const string marker = "/Resources/";
+            var start = path.LastIndexOf(marker, StringComparison.Ordinal);
+            if (start < 0 || contract == null) return false;
+            var key = path.Substring(start + marker.Length);
+            key = key.Substring(0, key.Length - System.IO.Path.GetExtension(key).Length);
+            return string.Equals(contract.ResourceKey, key, StringComparison.Ordinal);
+        }
+
+        private void DrawBindings()
+        {
+            if (this == null || !inspectorReady || target == null || manifests == null) return;
+            if (selected >= manifests.Count) selected = -1;
+            if (displayedLanguage != L.LanguageId)
+            {
+                displayedLanguage = L.LanguageId;
+                if (labels != null && labels.Length > 0) labels[0] = L.Get("editor.ViewInspector.6541599e58");
+                resourceManifest = null;
+                results = null;
+            }
+            if (manifests.Count == 0)
+            {
+                EditorGUILayout.HelpBox(L.Get("viewPanel.binding.unmatched"), MessageType.Info);
+                DrawNativeBindings();
+            }
+            else
+            {
+                var next = selected;
+                if (manifests.Count == 1)
+                    EditorGUILayout.LabelField(new GUIContent(L.Get("editor.ViewInspector.b741b9457b")),
+                        new GUIContent(manifests[0].ViewModelType.FullName, manifests[0].ViewModelType.FullName));
+                else
+                {
+                    EditorGUILayout.HelpBox(L.Get("viewPanel.binding.multiple"), MessageType.Info);
+                    next = EditorGUILayout.Popup(L.Get("editor.ViewInspector.b741b9457b"), selected + 1, labels) - 1;
+                }
                 if (next != selected)
                 {
                     selected = next;
+                    QueueCodeBindingSync();
+                    QueueBindingValidation();
                     ClearBindingTargets();
                     sourceOpenError = null;
                     if (validationKind != ValidationKind.Structure)
@@ -126,9 +174,9 @@ namespace MUI.Editor
                     }
                 }
 
+                DrawNativeBindings();
                 if (selected >= 0)
                 {
-                    DrawBindingSources(manifests[selected]);
                     DrawResourceBindings(manifests[selected]);
                 }
                 else
@@ -136,30 +184,11 @@ namespace MUI.Editor
                     EditorGUILayout.HelpBox(L.Get("editor.ViewInspector.ad9d661681"), MessageType.Info);
                 }
 
-                using (new EditorGUI.DisabledScope(selected < 0))
-                {
-                    if (GUILayout.Button(L.Get("editor.ViewInspector.5f472e2647")))
-                    {
-                        validationKind = ValidationKind.Contract;
-                        results = ViewContractValidator.Validate((View)target, manifests[selected]);
-                    }
-                }
-            }
-
-            if (GUILayout.Button(L.Get("editor.ViewInspector.b104369e08")))
-            {
-                validationKind = ValidationKind.Accessibility;
-                results = ViewContractValidator.ValidateAccessibility((View)target, selected < 0 ? null : manifests[selected]);
             }
 
             if (results == null)
             {
                 return;
-            }
-
-            if (results.Count == 0)
-            {
-                EditorGUILayout.HelpBox(validationKind == ValidationKind.Accessibility ? L.Get("editor.ViewInspector.f9d933d15c") : validationKind == ValidationKind.Structure ? L.Get("editor.ViewInspector.48bcffa0d4") : L.Get("editor.ViewInspector.3f95319fe9"), MessageType.Info);
             }
 
             foreach (var result in results)
@@ -171,8 +200,7 @@ namespace MUI.Editor
         private enum ValidationKind
         {
             Structure,
-            Contract,
-            Accessibility
+            Contract
         }
     }
 }

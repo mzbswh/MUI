@@ -9,12 +9,12 @@ namespace MUI.Editor
 {
     internal static class ViewValidationMenu
     {
-        private const string MenuPath = "Tools/MUI/校验所选视图结构 (Validate Selected View Structures)";
+        private const string MenuPath = "Tools/MUI/检查 (Inspect)/所选视图结构 (Selected View Structure)";
 
-        [MenuItem(MenuPath, true)]
+        [MenuItem(MenuPath, true, 60)]
         private static bool CanValidate() => !EditorApplication.isPlayingOrWillChangePlaymode && Selection.gameObjects.Length != 0;
 
-        [MenuItem(MenuPath)]
+        [MenuItem(MenuPath, false, 60)]
         private static void ValidateSelected()
         {
             if (!CanValidate())

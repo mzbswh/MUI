@@ -7,7 +7,7 @@ using UnityEngine.UI;
 namespace MUI.UGUI
 {
     [DisallowMultipleComponent, RequireComponent(typeof(Button))]
-    public sealed class ButtonElement : Element, IPointerDownHandler
+    public sealed class ButtonElement : Element, IPointerDownHandler, IButtonElement
     {
         private Button target;
         private PointerEventData pressedPointer;

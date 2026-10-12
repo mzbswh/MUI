@@ -14,7 +14,7 @@ namespace MUI.Samples.Tabs.Editor
         private static bool failed;
         private static bool completed;
 
-        [MenuItem("Tools/MUI/示例 (Samples)/打开页签场景 (Open Tabs Scene)")]
+        [MenuItem("Tools/MUI/示例 (Samples)/打开页签场景 (Open Tabs Scene)", false, 102)]
         public static void Open()
         {
             if (!Application.isBatchMode && !EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo())

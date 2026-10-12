@@ -44,7 +44,7 @@ namespace MUI.Editor
         private double nextRefresh;
         private bool runtimeAvailable;
 
-        [MenuItem("Tools/MUI/控制台 (Dashboard)")]
+        [MenuItem("Tools/MUI/控制台 (Dashboard)", false, 0)]
         public static void Open() => GetWindow<MUIDashboard>(L.Get("editor.MUIDashboard.788f44b794"));
 
         public static void Show(UIHost host)
@@ -63,6 +63,7 @@ namespace MUI.Editor
             EditorApplication.update += OnEditorUpdate;
             EditorApplication.playModeStateChanged += OnPlayModeChanged;
             EditorApplication.hierarchyChanged += RefreshHosts;
+            EditorApplication.projectChanged += ShowHostSettings;
         }
 
         private void OnDisable()
@@ -70,6 +71,7 @@ namespace MUI.Editor
             EditorApplication.update -= OnEditorUpdate;
             EditorApplication.playModeStateChanged -= OnPlayModeChanged;
             EditorApplication.hierarchyChanged -= RefreshHosts;
+            EditorApplication.projectChanged -= ShowHostSettings;
             snapshot = null;
             trace = null;
             hosts.Clear();
@@ -250,6 +252,12 @@ namespace MUI.Editor
             {
                 return;
             }
+            if (!MUIProjectSettings.TryGet(out _, out var configurationError))
+            {
+                ResetSnapshots();
+                SetMessage(configurationError, HelpBoxMessageType.Error);
+                return;
+            }
             if (!Application.isPlaying || selectedHost == null || !selectedHost.IsInitialized)
             {
                 ResetSnapshots();
@@ -309,11 +317,9 @@ namespace MUI.Editor
             rootVisualElement.Q<Button>("locateHost").SetEnabled(selectedHost != null);
             rootVisualElement.Q<Button>("copySnapshot").SetEnabled(snapshot != null);
             rootVisualElement.Q<Button>("overview").SetEnabled(snapshot != null);
-            rootVisualElement.Q<Button>("hostSettings").SetEnabled(selectedHost != null);
+            rootVisualElement.Q<Button>("hostSettings").SetEnabled(true);
             rootVisualElement.Q<Button>("locateSettings").SetEnabled(settings != null);
             rootVisualElement.Q<Button>("validateSettings").SetEnabled(settings != null);
-            rootVisualElement.Q<Button>("assignSettings").SetEnabled(settings != null && selectedHost != null &&
-                !Application.isPlaying && !selectedHost.IsInitialized && selectedHost.Settings != settings);
             rootVisualElement.Q<Button>("startTrace").SetEnabled(canCapture && (trace == null || !trace.IsRecording));
             rootVisualElement.Q<Button>("stopTrace").SetEnabled(canCapture && trace != null && trace.IsRecording);
             rootVisualElement.Q<Button>("clearTrace").SetEnabled(canCapture && trace != null && (trace.IsRecording || trace.Entries.Count != 0));

@@ -14,7 +14,7 @@ namespace MUI.Samples.Settings.Editor
         private static bool failed;
         private static bool completed;
 
-        [MenuItem("Tools/MUI/示例 (Samples)/打开设置场景 (Open Settings Scene)")]
+        [MenuItem("Tools/MUI/示例 (Samples)/打开设置场景 (Open Settings Scene)", false, 101)]
         public static void Open()
         {
             if (!Application.isBatchMode && !EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo())

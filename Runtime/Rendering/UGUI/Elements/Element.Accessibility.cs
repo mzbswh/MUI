@@ -6,19 +6,19 @@ namespace MUI.UGUI
 {
     public abstract partial class Element
     {
-        [SerializeField]
+        [SerializeField, HideInInspector]
         private string accessibilityLabel = string.Empty;
-        [SerializeField]
+        [SerializeField, HideInInspector]
         private string accessibilityDescription = string.Empty;
-        [SerializeField]
+        [SerializeField, HideInInspector]
         private string accessibilityValue = string.Empty;
-        [SerializeField]
+        [SerializeField, HideInInspector]
         private AccessibilityRole semanticRole = AccessibilityRole.Unspecified;
-        [SerializeField]
+        [SerializeField, HideInInspector]
         private AccessibilityState semanticState;
-        [SerializeField]
+        [SerializeField, HideInInspector]
         private int accessibilityOrder;
-        [SerializeField]
+        [SerializeField, HideInInspector]
         private bool accessibilityHidden;
 
         protected virtual AccessibilityRole DefaultAccessibilityRole => AccessibilityRole.Generic;

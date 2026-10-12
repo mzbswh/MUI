@@ -12,10 +12,10 @@ namespace MUI.Editor
 {
     internal static class ConfirmationDialogWizard
     {
-        [MenuItem("Tools/MUI/创建确认弹窗 (Create Confirmation Dialog Prefab)")]
+        [MenuItem("Tools/MUI/创建 (Create)/确认弹窗 (Confirmation Dialog)", false, 40)]
         private static void Create() => Create(false);
 
-        [MenuItem("Tools/MUI/创建提示弹窗 (Create Alert Dialog Prefab)")]
+        [MenuItem("Tools/MUI/创建 (Create)/提示弹窗 (Alert Dialog)", false, 41)]
         private static void CreateAlert() => Create(true);
 
         // 两种标准对话框共用正文滚动区与保存流程，按钮契约分别校验。

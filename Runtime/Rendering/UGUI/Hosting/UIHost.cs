@@ -11,12 +11,9 @@ namespace MUI.UGUI
     [DisallowMultipleComponent]
     public sealed partial class UIHost : MonoBehaviour
     {
-        [SerializeField]
-        private MUISettings settings = null;
+        private MUISettings settings;
         [SerializeField]
         private RectTransform viewRoot = null;
-        [SerializeField]
-        private List<PrefabEntry> prefabs = new List<PrefabEntry>();
         private Navigator navigator;
         private UIThreadDispatcher dispatcher;
         private HostProviderCleanup ownedProviderCleanup;
@@ -32,18 +29,17 @@ namespace MUI.UGUI
 
         public bool IsShutdown => navigator != null && navigator.IsShutdown;
 
+        /// <summary>所有宿主共享项目全局配置。初始化后保留本次使用的资产。</summary>
         public MUISettings Settings
         {
-            get => settings;
+            get => IsInitialized ? settings : MUISettings.Global;
             set
             {
                 UnityMainThread.Require();
                 RequireInitializationCurrent();
-                if (initializing)
-                {
-                    throw new InvalidOperationException("初始化期间不能更换宿主配置。");
-                }
-                settings = value;
+                if (initializing) throw new InvalidOperationException("初始化期间不能更换宿主配置。");
+                if (value != MUISettings.Global)
+                    throw new InvalidOperationException("UIHost uses the unique project MUISettings; per-host overrides are not supported.");
             }
         }
 
@@ -51,13 +47,14 @@ namespace MUI.UGUI
         public UIThreadDispatcher Dispatcher => dispatcher ?? throw new InvalidOperationException("UIHost has not been initialized.");
 
         /// <summary>自动模式每帧使用 Unity 非缩放时间；关闭后由项目调用 AdvanceFrame。</summary>
-        public bool AutomaticFramePump => settings == null || settings.AutomaticFramePump;
+        public bool AutomaticFramePump => Settings == null || Settings.AutomaticFramePump;
 
         public RoutePolicy ResolvePolicy(string preset = null, string layer = null, RoutePolicyOverrides overrides = null)
         {
             UnityMainThread.Require();
-            return settings == null ? MUISettings.ResolveBuiltInPolicy(preset, layer, overrides)
-                : settings.ResolvePolicy(preset, layer, overrides);
+            var configuration = Settings;
+            return configuration == null ? MUISettings.ResolveBuiltInPolicy(preset, layer, overrides)
+                : configuration.ResolvePolicy(preset, layer, overrides);
         }
 
         /// <summary>只读定位当前页面原生对象；不会创建、激活或调用业务。</summary>
@@ -75,7 +72,8 @@ namespace MUI.UGUI
 
         /// <summary>
         /// 显式启动允许先安装生成的注册信息和项目服务。
-        /// configureDefaultView 仅用于 Inspector 目录创建的 View，在新实例激活前同步配置；外部提供方自行配置。
+        /// resourceLoader 由项目持有；未指定时使用 Unity Resources，按页面 Key 加载。
+        /// configureDefaultView 仅用于默认提供方创建的 View，在新实例激活前同步配置；外部提供方自行配置。
         /// </summary>
         public void Initialize(IViewProvider provider = null,
             bool ownsProvider = false,
@@ -89,11 +87,13 @@ namespace MUI.UGUI
             TimeSpan? terminalDuration = null,
             int? queueCapacity = null,
             int? preloadCapacity = null,
-            RenderOrderOptions renderOrder = null)
+            RenderOrderOptions renderOrder = null,
+            IResourceLoader resourceLoader = null)
         {
             BeginInitialization();
             try
             {
+                settings = MUISettings.Global;
                 if (settings != null)
                 {
                     settings.RequireValid();
@@ -142,14 +142,19 @@ namespace MUI.UGUI
 
                 if (provider != null && configureDefaultView != null)
                 {
-                    throw new ArgumentException("外部提供方请通过自己的实例配置入口接入，不能同时设置默认目录回调。", nameof(configureDefaultView));
+                    throw new ArgumentException("外部提供方请通过自己的实例配置入口接入，不能同时设置默认加载器回调。", nameof(configureDefaultView));
+                }
+
+                if (provider != null && resourceLoader != null)
+                {
+                    throw new ArgumentException("An explicit provider manages its own resource loader.", nameof(resourceLoader));
                 }
 
                 var capturedDispatcher = UIThreadDispatcher.CaptureCurrent();
                 var createdProvider = provider == null;
                 if (createdProvider)
                 {
-                    provider = CreateDefaultProvider(configureDefaultView);
+                    provider = CreateDefaultProvider(resourceLoader ?? new UnityResourcesLoader(), configureDefaultView);
                     ownsProvider = true;
                 }
 
@@ -184,7 +189,7 @@ namespace MUI.UGUI
                 {
                     if (createdProvider)
                     {
-                        RollbackDefaultProvider((IDisposable)provider, failure);
+                        RollbackDefaultProvider((IAsyncDisposable)provider, failure);
                     }
 
                     throw;
@@ -205,7 +210,7 @@ namespace MUI.UGUI
             }
         }
 
-        /// <summary>默认目录会修改原生层级，初始化期间必须拒绝回调再次进入任一初始化入口。</summary>
+        /// <summary>默认提供方会修改原生层级，初始化期间必须拒绝回调再次进入任一初始化入口。</summary>
         private void BeginInitialization()
         {
             UnityMainThread.Require();
@@ -231,11 +236,20 @@ namespace MUI.UGUI
             }
         }
 
-        private static void RollbackDefaultProvider(IDisposable provider, Exception failure)
+        private static void RollbackDefaultProvider(IAsyncDisposable provider, Exception failure)
         {
             try
             {
-                provider.Dispose();
+                var cleanup = provider.DisposeAsync();
+                if (!cleanup.IsCompleted)
+                {
+                    throw new ResourceLoadException(failure, cleanup.AsTask());
+                }
+                cleanup.GetAwaiter().GetResult();
+            }
+            catch (ResourceLoadException)
+            {
+                throw;
             }
             catch (Exception cleanupFailure)
             {
@@ -243,7 +257,7 @@ namespace MUI.UGUI
             }
         }
 
-        private PrefabViewProvider CreateDefaultProvider(Action<View> configureView = null)
+        private LoadedPrefabViewProvider CreateDefaultProvider(IResourceLoader loader, Action<View> configureView)
         {
             if (viewRoot == null)
             {
@@ -255,18 +269,11 @@ namespace MUI.UGUI
                 throw new InvalidOperationException("UIHost requires a RectTransform root or an explicit provider.");
             }
 
-            var catalog = new List<KeyValuePair<ViewResource, GameObject>>();
-            foreach (var entry in prefabs)
+            return new LoadedPrefabViewProvider(viewRoot, loader, configureView: view =>
             {
-                if (entry == null || entry.Prefab == null)
-                {
-                    throw new InvalidOperationException("UIHost catalog contains an invalid Prefab.");
-                }
-
-                catalog.Add(new KeyValuePair<ViewResource, GameObject>(new ViewResource(entry.Key, entry.Version), entry.Prefab));
-            }
-
-            return new PrefabViewProvider(viewRoot, catalog, configureView);
+                view.ConfigureResources(loader);
+                configureView?.Invoke(view);
+            });
         }
 
         private void Update()
@@ -481,14 +488,6 @@ namespace MUI.UGUI
             {
                 UnityErrorLogging.Report(error);
             }
-        }
-
-        [Serializable]
-        private sealed class PrefabEntry
-        {
-            public string Key = string.Empty;
-            public string Version = "1";
-            public GameObject Prefab = null;
         }
     }
 }

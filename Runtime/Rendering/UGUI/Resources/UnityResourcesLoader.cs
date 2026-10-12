@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using MUI.Resources;
 using UnityEngine;
 
-namespace MUI.Samples.ResourceIntegration
+namespace MUI.UGUI
 {
     /// <summary>
     /// 在 Unity 主线程创建和调用，键为相对 Resources 的无扩展名路径。

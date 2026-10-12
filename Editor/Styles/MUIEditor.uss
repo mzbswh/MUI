@@ -82,3 +82,24 @@
 .mui-rule-group > .unity-foldout__toggle { color: var(--mui-muted); }
 .mui-empty { padding: 18px 12px; flex-grow: 1; justify-content: center; }
 .mui-empty-title { font-size: 14px; -unity-font-style: bold; white-space: normal; margin-bottom: 6px; }
+
+.mui-view-inspector { padding: 2px; }
+.mui-view-tabs { flex-direction: row; flex-wrap: wrap; margin-top: 2px; margin-bottom: 5px; }
+.mui-view-tab { flex-grow: 1; flex-basis: 90px; min-height: 23px; margin-left: 1px; margin-right: 1px; }
+.mui-view-tab-active { background-color: var(--mui-active); border-bottom-color: var(--mui-accent); border-bottom-width: 2px; -unity-font-style: bold; }
+.mui-view-inspector .mui-card { padding: 6px; margin-bottom: 4px; }
+.mui-view-inspector .mui-section {
+    background-color: transparent;
+    border-left-width: 0;
+    border-right-width: 0;
+    border-top-width: 0;
+    border-bottom-width: 1px;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    padding: 4px 2px 6px 2px;
+}
+.mui-view-inspector .mui-section > .unity-foldout__toggle { font-size: 12px; margin-bottom: 2px; }
+.mui-view-inspector .mui-section > .unity-foldout__content { padding-top: 0; }
+.mui-view-inspector .mui-note { margin-top: 2px; margin-bottom: 5px; }

@@ -197,6 +197,7 @@ namespace MUI.UGUI
                 ApplyGates();
                 var candidate = new ElementIndex();
                 Collect(transform, candidate, true);
+                CollectNativeBindings(candidate);
                 foreach (var selectable in GetComponentsInChildren<UnityEngine.UI.Selectable>(true))
                 {
                     if (selectable.GetComponentInParent<View>(true) == this)

@@ -35,7 +35,7 @@ namespace MUI.Editor
         private PageAssemblyInspection InspectAssembly(bool refresh = false)
         {
             var backend = PageTextBackend.Find(textBackendId);
-            var scriptPath = destination + "/" + pageName + "/Scripts/" + pageName + "ViewModel.cs";
+            var scriptPath = ScriptDirectory + "/" + pageName + "ViewModel.cs";
             var key = (scriptPath, textBackendId);
             if (refresh || assemblyInspection == null || !assemblyInspectionKey.HasValue || assemblyInspectionKey.Value != key)
             {

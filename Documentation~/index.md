@@ -8,13 +8,15 @@ Core 不引用 Unity；Resources、Navigation 与 ChildViews 分别定义资源�
 
 ## 从 Basic 开始
 
-导入 Basic Example 并打开 Basic.unity。BasicPageViewModel 声明标题绑定与 Confirm 命令，BasicView.prefab 包含名为 Title 和 Confirm 的 Element。场景已绑定 BasicMUISettings 资产并在 UIHost 的本地目录登记 BasicView。BasicExampleModule 声明生成注册入口，BasicDemo 负责注册、解析配置策略、初始化 UIHost 的默认提供方并调用 OpenAsync。
+导入 Basic Example 并打开 Basic.unity。BasicPageViewModel 声明标题绑定与 Confirm 命令，BasicView.prefab 包含名为 Title 和 Confirm 的 Element。导入的 BasicMUISettings 可作为项目唯一全局配置；页面资源标识 BasicView 直接对应 Resources/BasicView.prefab，无需在 UIHost 登记。BasicExampleModule 声明生成注册入口，BasicDemo 负责注册、解析配置策略、初始化 UIHost 的默认提供方并调用 OpenAsync。
 
 普通页面不要求 Presenter；需要跨服务协调时再引入。不要手写或编辑生成的绑定订阅、命令属性和 Route 接线。若看不到生成类型，先检查 Console 中的声明诊断，以及包内 Analyzers 的 RoslynAnalyzer 导入标签。
 
 ## 项目 UI 配置
 
-通过 `Assets/Create/MUI/配置 (Settings)` 创建 `MUISettings` 资产，在 UIHost 的 Settings 字段绑定；也可以在初始化前给 `host.Settings` 赋值。宿主仍由项目显式调用 `Initialize()`，配置资产不会启动导航或注册页面。未绑定资产时使用内置默认值。
+项目只保留一份 `MUISettings`。页面向导、控制台和 UIHost 自动查找 Assets 下唯一的配置资产，无需在每个宿主拖入。通过 `Assets/Create/MUI/配置 (Settings)` 定位已有资产；不存在时创建 `Assets/MUI/MUISettings.asset`。有多份资产时报告冲突路径，运行与构建不任意选取；请合并并保留一份。没有配置时使用内置默认值。
+
+编辑器自动将唯一配置登记到 Player 的 Preloaded Assets，保留其他预加载资产；构建前再次检查唯一性、配置有效性并同步引用，Player 与 Editor 使用同一资产。配置不会启动宿主，仍需项目显式调用 `Initialize()`。旧 UIHost 的局部配置引用不再生效，Settings 读取全局配置。
 
 Layers 为命名层级。排序值越大越靠上，同层按导航顺序排列；拥有者与依赖约束仍参与最终显示顺序。命名层映射为 `RoutePolicy.Layer`，页面仍挂在同一宿主根节点，不会自动创建独立 Canvas。内置层级与预设如下：
 
@@ -51,11 +53,11 @@ var route = InventoryViewModelRoute.Create(
 
 打开 `Tools/MUI/控制台 (Dashboard)`，或点击 UIHost Inspector 的“打开控制台”。窗口顶部可切换编辑器语言。选择当前场景的宿主，进入 Play Mode 并完成初始化后点击“采集运行状态”。默认手动采集，可启用每 0.5 秒自动刷新；未初始化时提供引导并禁用运行操作。
 
-UIHost Inspector 只提供 Settings、View Root、简短状态及 Dashboard 快捷入口；本地 Prefab 目录默认折叠，自动更新界面统一在 MUISettings 的“运行设置”中配置，初始化后配置引用及默认目录不可编辑。完整导航快照与生命周期追踪统一在 Dashboard 操作，快照上限为 1—4096。
+UIHost Inspector 只提供只读全局 Settings、View Root、简短状态及 Dashboard 快捷入口；页面资源通过标识加载，不在宿主维护目录；自动更新界面统一在 MUISettings 的“运行设置”中配置，初始化后配置引用不可编辑。完整导航快照与生命周期追踪统一在 Dashboard 操作，快照上限为 1—4096。
 
 - 页面与宿主：按最终显示顺序查看状态、层级、解析后的策略及配置来源、焦点、隐藏和输入阻挡来源、返回历史、依赖及清理责任。支持定位原生 View、单独采集页面输入与资源准备、复制状态报告。绑定和射线检查继续通过 View Inspector 操作。
 - 生命周期：开始新一轮记录、停止、清除、筛选和复制已有时间线；记录容量为 1—8192，满时覆盖最旧事件。关闭窗口不会停止导航器记录，需要显式停止。
-- 配置与校验：创建或编辑配置资产，在编辑模式绑定到宿主，校验配置和已登记的页面目录。层级以名称与排序值表格编辑，实际顺序由排序值决定。预设分别折叠，只显示启用的覆盖项；默认规则按类别分组，名称引用通过选择器填写，缺失引用保留原值并报告错误。列表增删及字段修改支持撤销，配置自动校验。配置资产选择用于查看与编辑，点击“绑定到宿主”才修改宿主引用。
+- 配置与校验：创建或编辑配置资产，自动关联所有宿主，校验配置和已登记的页面目录。层级以名称与排序值表格编辑，实际顺序由排序值决定。预设分别折叠，只显示启用的覆盖项；默认规则按类别分组，名称引用通过选择器填写，缺失引用保留原值并报告错误。列表增删及字段修改支持撤销，配置自动校验。配置资产自动关联所有宿主，无需逐个绑定。
 
 状态采集不启动宿主，也不打开、关闭页面。导航门控反映策略账本，控件实际点击资格需结合原生页面输入与射线检查；快照截断时会标明。页面目录校验仍只覆盖项目通过 `UIBuildValidation.RegisterCatalog` 登记的页面，不会把所有 Prefab 自动视为已验证。
 
@@ -253,7 +255,7 @@ UGUI `View` 的最终控件责任同样稳定：它在初始化控件前登记�
 
 `PrefabViewProvider.DisposeAsync()` 等待提供方 staging 根实际销毁；现有同步 Dispose 只启动并观察原生兜底清理。退出立即拒绝新获取，但有未确认回滚实例时保留 staging 和清理责任。项目提供方可用 `PrefabViewFactory.CreateStagingCleanup(root, owner, endAdmission)` 管理同一责任：第一次调用结束准入，只有子实例全部实际归还才请求根销毁。节点收尾和结束准入的未知失败不重放。Resource Integration 示例在原生实例确认后才归还加载引用，显式恢复不会重复扣减已尝试的后端引用。
 
-UIHost 的 `ownsProvider: true` 将提供方最终释放交给宿主；默认 Prefab 目录同样由宿主持有。退出接纳后，`UIHost.Provider` 责任保留导航及迟到准备的等待、依赖确认和最终提供方释放。组件销毁后用保存的 HostId 查询 CleanupRegistry，仍能看到在途或失败责任。只有当前导航持有权全部确认后才调用提供方释放；历史清理错误不阻止这一步，但首次 Shutdown 失败结果保持不变。取消 Shutdown 等待只结束调用方观察，不停止该责任。
+UIHost 的 `ownsProvider: true` 将提供方最终释放交给宿主；默认资源加载提供方同样由宿主持有。退出接纳后，`UIHost.Provider` 责任保留导航及迟到准备的等待、依赖确认和最终提供方释放。组件销毁后用保存的 HostId 查询 CleanupRegistry，仍能看到在途或失败责任。只有当前导航持有权全部确认后才调用提供方释放；历史清理错误不阻止这一步，但首次 Shutdown 失败结果保持不变。取消 Shutdown 等待只结束调用方观察，不停止该责任。
 
 导航叶资源释放失败时，先显式恢复允许重试的叶责任，再通过 `CleanupRegistry.RetryAsync(id)` 确认 `UIHost.Provider`；依赖仍未确认时不会调用提供方。提供方实现 `ICleanupResponsibilitySource` 时，宿主捕获其稳定责任，只调用真实释放入口一次；提供方叶责任显式恢复后，外层重试只确认结果，不重新执行项目回调。没有该契约的同步或异步提供方使用不可安全重试的 `UIHost.ProviderRelease` 回退责任；部分释放抛错后，外层可重试资格只允许核对依赖，不代表允许重放未知释放。责任属性抛错或返回 null 时同样保留一次真实释放及属性错误，不能以内部叶状态猜测外层 callback 已完成。提供方释放回调直接等待本宿主 Shutdown 会立即失败。
 
@@ -287,12 +289,183 @@ Unity 2022.3.62f3 的真实窗口 IL2CPP 观察已覆盖上述两种 Canvas 模�
 
 ## 页面向导与 Editor 校验
 
-`Tools/MUI/页面向导 (Page Wizard)` 提供 FullScreen、Popup、Notice 三类预设，内置行为见“项目 UI 配置”。向导可选择 MUISettings 预览解析后的策略；生成代码通过 `Page.CreateRoute(host.Settings)` 使用项目配置，`Page.CreateRoute()` 使用内置预设，也可传入 `Page.CreateRoute(host.Settings, overrides)`。向导不会把所选资产引用写入静态 Page。Notice 的提示 Prefab 没有关闭按钮或射线目标，由业务保存打开句柄并显式关闭。预设解析为现有 RoutePolicy，不引入运行时页面类型；默认只生成 ViewModel 与 Page 源码，不要求 Presenter。新目录已有任何内容时拒绝覆盖。
+`Tools/MUI/页面向导 (Page Wizard)` 从全局配置读取全部页面行为预设（包括自定义项），通过下拉框选择预设，下方仅显示当前选中项继承项目默认规则后的实际层级、遮挡、输入、焦点、模态及返回策略。无配置时读取框架内置预设列表。预设删除或改名后需重新选择，不能沿用失效名称生成代码。向导自动使用全局 MUISettings 预览策略；生成代码通过 `Page.CreateRoute()` 自动读取全局配置，也可传入 `Page.CreateRoute(overrides: overrides)` 覆盖该页面的具体行为。不接收输入的预设生成无关闭按钮和射线目标的 Prefab，由业务保存打开句柄并显式关闭；接收输入的预设生成关闭按钮。预设解析为现有 RoutePolicy，不引入运行时页面类型；默认只生成 ViewModel 与 Page 源码，不要求 Presenter。已有目录可复用，目标文件已存在时拒绝覆盖。
 
-复用已有 Notice Prefab 时必须移除 Selectable 并关闭所有 Graphic 的 Raycast Target；向导只生成业务源码，不修改原资产。类型化参数/结果和可选 Presenter 沿用同一生成绑定及导航入口。
+为不接收输入的预设向导新建的页面保留 View 根节点，将背景、标题和按钮放入拉伸的 `Content` 子节点，默认设置为“隐藏后如何处理 → 停用内容”。仅当页面完全不可见时停用 Content；可见但禁止交互、以及仍需显示的退出转场不会因此停用。重新显示时恢复框架先前停用的节点，不激活原本已停用的内容。已有 Prefab 和手动添加的 View 保留原有行为，不自动迁移。
+
+需要隐藏后继续更新的页面可选择“保持内容运行”。停用内容会触发原生启停回调，并停止挂在该子树上的协程；页面的数据加载与业务生命周期应由 Presenter 或服务管理，不能假定协程会在重新显示时自动续跑。
+
+复用已有 Prefab 时，必须移除 Selectable 并关闭所有 Graphic 的 Raycast Target；向导只生成业务源码，不修改原资产。类型化参数/结果和可选 Presenter 沿用同一生成绑定及导航入口。
 
 项目通过 `UIBuildValidation.RegisterCatalog(id, collect)` 登记每个导航配置，用 `UIBuildCatalog.AddPage(route, prefab, manifest)` 提供页面及依赖闭合。手动 `Validate()` 和构建前检查每次重新采集全部目录，不依赖增量结果缓存。未登记目录仅提示没有覆盖；已登记目录的错误阻断构建，并在报告中包含路由及 Prefab 路径。
 
 Prefab 保存、导入及其依赖资产变化按路径合并，在 Editor 空闲后校验受影响目录，复用相同规则。脚本或程序集变化、资产删除/移动及域重载重新采集全部登记目录。编译、导入或 Play Mode 期间保留待检查标记，结束后补跑；队列最多保存 2,048 个路径，达到上限改为完整检查。检查不初始化业务模型、不写资产，也不触发递归导入；未变化的增量报告不重复输出。
 
 打开记录由框架自动维护：显式打开的页面加入 `Navigator.History`，关闭后移除，仅随父页面打开的依赖不单独记录。此列表用于查询和诊断，不保存页面状态，也不参与返回目标选择。原 `EnterHistory` / `enterHistory` 配置已移除，调用方无需再设置。
+
+### 页面生成目录
+
+全局 MUISettings 的“页面生成目录”分别配置 Prefab 与脚本的完整项目路径，支持 `{PageName}`，不共用根目录。例如：
+
+- Prefab：`Assets/LocalResource/{PageName}/`
+- 脚本：`Assets/Scripts/UI/{PageName}/`
+
+Inventory 会生成到 `Assets/LocalResource/Inventory/InventoryView.prefab` 和 `Assets/Scripts/UI/Inventory/`。路径以 `Assets/` 开始，接受末尾斜杠；输入的 `assets/` 会统一为 Unity 的 `Assets/`。旧版根目录加相对规则自动转换为等价完整路径，不移动已有文件。
+
+默认规则仍保持 `Assets/{PageName}/Resources` 和 `Assets/{PageName}/Scripts`。缺失目录自动创建，已有文件不覆盖；预览、程序集检查和实际写入使用同一套解析路径。
+
+Resources 子目录中的 Prefab 自动生成对应资源键；例如 `Assets/Resources/UI/Inventory/InventoryView.prefab` 的键为 `UI/Inventory/InventoryView`。Resources 外的 Prefab 默认键仍为页面名加 View，项目需通过资源加载器映射到实际资源。关联已有 Prefab 时保留原位置。
+
+### 页面资源加载
+
+`host.Initialize()` 默认按页面的 `ViewResource.Key` 从 Unity Resources 加载 Prefab（相对 Resources 的路径，不含扩展名）。页面向导新建的 Prefab 放入 Resources 文件夹。`Version` 用于提供方的资源身份区分，不自动拼接到加载路径。
+
+已有资源系统通过 `host.Initialize(resourceLoader: loader)` 一次接入 `IResourceLoader`；页面和子控件使用该加载器，无需在 UIHost 重复登记。加载器由项目持有，应在宿主 Shutdown 完成后释放。高级项目仍可传入 `IViewProvider`，它与 `resourceLoader` 参数互斥。
+
+迁移旧场景时移除 UIHost 本地列表依赖，将 Prefab 放入对应 Resources 路径，或接入项目加载器。基础示例需重新导入。资源接入示例中的 `LoadedPrefabViewProvider` 和 `UnityResourcesLoader` 现位于 `MUI.UGUI` 命名空间；重新导入旧示例时应清除旧版本脚本。构建校验目录仅用于校验，不参与运行时资源解析。
+
+### 全局模态遮罩
+
+在全局 MUI Settings 的“模态遮罩”中设置默认遮罩预制体和底色。View 勾选“使用全局默认遮罩”后共用此配置，取消勾选则使用本页的样式资产或颜色。页面向导新建的 View 默认勾选；已有 View 保留原配置。该选项只控制外观，是否模态仍由路由策略决定。
+
+预制体根节点需为 RectTransform，可使用 Image/RawImage，不可包含 Canvas、Renderer、Selectable 或 View。框架会将其铺满宿主区域并独立处理输入阻挡。底色绘制在预制体下方；只需要预制体自身效果时将底色透明度设为 0。没有预制体时显示纯色遮罩，没有全局配置时使用黑色、45% 不透明度。配置在遮罩实例创建时读取，已创建实例保持原外观。
+
+### 页面内部自动排序
+
+无需在 View Inspector 登记排序目标。框架自动收集页面内开启 `overrideSorting` 的子 Canvas 及 Renderer（包括 inactive 节点），按首次发现时的 Sorting Layer 顺序和 sortingOrder 分组，再映射到页面排序范围内。相同原始排序值使用相同偏移，普通 UI 仍按 Hierarchy 顺序显示。偏移 0、1 留给遮罩和页面主体；自动收集的对象从 2 开始，位于主体之上。要让按钮位于特效上方，可将按钮放入独立子 Canvas 并设置更高的原始 sortingOrder。
+
+旧资产的显式偏移与 `RegisterRenderOrderTarget(s)` 继续生效；自动分配避开这些保留值。运行时新增特效后调用 `view.RefreshRenderOrderTargets()`，无需逐项登记。请先在 inactive 节点下创建、完成刷新后再显示，避免未排序的特效提前露出。自动排序不会每帧扫描排序或重新读取已经接管对象的作者排序。
+
+“运行诊断”中只读显示页面排序范围及对象最终 Order。排序层数超出页面跨度时仍会报错，需要增加跨度；普通 Renderer 与 Overlay Canvas 混排、启用的 SortingGroup 仍不支持。
+
+### Inspector 自动识别页面契约
+
+向导生成的 `[ViewContract]` 会记录 `PrefabAssetGuid`，检查器按 GUID 自动关联当前 Prefab 根节点的 ViewModel。唯一匹配时只读显示；多个匹配时仅列出该 Prefab 的候选契约。此关联不改变运行时资源加载或路由。
+
+旧版向导的 `Page.PrefabAssetGuid` 常量和 Resources 资源键匹配仍受支持。自定义加载路径的旧页面可为 ViewModel 补充 `[ViewContract("资源键", PrefabAssetGuid = "Prefab 的 GUID")]`。未匹配时只提供结构校验，不按对象名称或项目契约数量猜测。独立场景对象需要先保存为 Prefab；内部嵌套 View 不沿用外层页面契约。
+
+### 原生控件绑定与代码双向声明
+
+全局 MUI Settings 的“控件绑定规则”配置前缀与类型，默认 `Img_` → Image、`Txt_` → Text/TMP、`Btn_` → Button。前缀后的部分作为绑定名称，例如 `Img_Icon` 对应 `Icon`；不带前缀的装饰节点不会收集。每个前缀可多选组件类型；每次取最长前缀并继续解析后续前缀。规则支持修改、添加和删除，名称必须满足生成代码的 C# 标识符要求。
+
+View 的“绑定与校验”统一展示规则扫描结果及 ViewModel 已有 `[Bind]` / `[BindCommand]` 声明。名称、引用、状态、定位、源码放在同一行区域。已有有效引用优先保留；新增目标按前缀、绑定名称和类型自动匹配，不会靠猜测消除重名。代码声明在检查器初始化（含编译后重建）或切换契约时自动同步唯一匹配，可撤销；不在重绘时写入。缺失目标可以拖入并立即记录，已有非空引用不会被自动替换。规则扫描候选在生成绑定时记录，不再提供独立的保存引用按钮。旧 Element 契约只读显示，保留兼容，不隐式删除组件或改写源码。
+
+点击“生成绑定”保存控件引用和自动声明，并请求重新编译。匹配到的文本默认生成同名字符串属性，图片生成 Sprite 属性，滑块/开关/输入框/下拉框生成 Value 对应的属性，滚动区域生成 Vector2 属性。输入类默认双向绑定，显示类默认单向绑定。全局命名规则可覆盖属性或 Action 事件名、绑定方向；属性类型从适配器推导，自定义组件需要注册适配器。
+
+声明保存在 Prefab，`.AutoBindings.g.cs` 和 `.Bindings.g.cs` 由编译器生成，不向 Assets 写 C# 文件，也不修改手写 ViewModel。编译后 Presenter 可直接写 `ViewModel.Title = "背包";`、`ViewModel.ItemList = new Vector2(0, 1);`。在 IDE 对属性转到定义可查看生成文档；Unity 的源文件打开接口不能直接打开编译器虚拟文档。生成日志会列出文档名、成员和调用方式；“已请求编译”不等于编译成功。
+
+按钮 `Btn_Close` 自动生成 `CloseCommand`，业务只需在 ViewModel 分部类实现钩子（不再写 Command/BindCommand 声明）：
+
+```csharp
+partial void OnClose(CommandContext context) => context.RequestClose();
+```
+
+没有实现钩子时点击不执行业务操作；可直接手写 `[Command]` / `[BindCommand]` 接管该控件。已有手写绑定按目标属性或事件优先，包括转换器和路径；同一控件的其他属性仍可自动生成。重复控件名、成员名冲突和不支持的适配属性会报错。旧业务中的 UI/Controls 直接调用需要改成更新 ViewModel。
+
+在 View Inspector 展开控件后，点击“添加属性”搜索适配器的可绑定属性或事件。默认只列出已选项，可以编辑 ViewModel 名称、绑定方向，或移除不需要的属性。例如 Title 选择 text → Title、color → TitleColor、fontSize → TitleFontSize；类型沿用实际组件（Text.fontSize 为 int，TMP.fontSize 为 float）。旧的 Content 等选择在重新生成时迁移为原生属性，保留 ViewModel 成员名。代码声明单独显示并可定位源码。选择保存在 Prefab，支持 Undo；修改选择后点击“生成绑定”更新编译器文档。生成时读取文本、布尔值、int/float、Color 和 Vector2 的控件当前值作为初值；资源引用等其他类型仍需业务赋值。移除已生成成员后，业务中仍使用该成员的代码需要同步调整。
+
+属性选择器列出原生组件的全部公开实例属性（含继承属性），支持按名称、属性类型和声明类型搜索，多个关键词用空格分隔；只读属性可选择为实时读取入口；索引器和弃用成员默认隐藏，可通过“显示不可用 / 已弃用属性”查看原因。仅选中的原生属性生成强类型属性包装，包装实例由框架缓存并随 View 释放，无需业务 new，也不使用运行时属性反射。全局命名规则可设置默认属性列表（逗号分隔，如 text, color），仅影响未保存选择的控件。
+
+原生属性默认支持单向/首次赋值。Slider、Scrollbar、Toggle 的数值、UGUI/TMP 输入框文本、下拉框数值、ScrollRect 归一化位置复用适配器的通知映射，可以双向绑定；生成 setter 沿用适配器的无通知赋值，事件输入沿用门控。其他自定义组件属性可以自动生成单向包装，反向通知仍需属性扩展或自定义适配器提供，不凭空监听原生属性变化。
+
+只读属性生成 getter，例如 `ViewModel.TitlePreferredWidth` 每次读取当前计算值，`ViewModel.TitleRectTransform.sizeDelta = ...` 可修改返回引用对象的内部属性，但不能替换 rectTransform 引用。此入口仅在绑定会话有效时可用，解绑后会清除读取委托，提前或解绑后访问会抛出明确异常。它不保存独立状态、不自动产生变化通知；返回值类型（结构体）的副本不能用于改写原对象。不要将此类 UI 引用长期缓存到业务对象。
+
+自动生成目前支持 Assets 下的 Prefab 和非嵌套、非泛型 ViewModel；同一模型只能由一个 Prefab 提供自动声明。Prefab 是编译输入，必须提交到版本控制。修改规则或引用后再次点击生成；仅保存场景不会更新自动声明。
+
+旧手写代码仍可通过公共契约声明（兼容接口保留，新属性选择不再显示 Content 等别名）：
+
+```csharp
+[ObservableProperty]
+[Bind("Title", nameof(ITextElement.Content))]
+private string title;
+
+[ObservableProperty]
+[Bind("Volume", nameof(IValueElement<float>.Value), bindingMode: BindingMode.TwoWay)]
+private float volume;
+
+[ObservableProperty]
+[Bind("ItemList", nameof(MUI.UGUI.IScrollElement.NormalizedPosition), bindingMode: BindingMode.TwoWay)]
+private UnityEngine.Vector2 listPosition;
+
+[Command]
+[BindCommand("Close", nameof(IButtonElement.Clicked))]
+private void Close(CommandContext context) => context.RequestClose();
+```
+
+Presenter 只修改 `ViewModel.Title`、`ViewModel.ListPosition` 等状态，不持有原生控件。简单页面可不编写 Presenter。Text/TMP 共享 ITextElement；按钮使用 IButtonElement；Slider/Scrollbar 使用 IValueElement<float>，Toggle 使用 IValueElement<bool>；UGUI/TMP 输入框、下拉框分别使用 IInputFieldElement、IDropdownElement。图片、RawImage、滚动区域契约位于 MUI.UGUI。输入框支持逐字或结束编辑后回写；下拉框支持文本选项。ScrollRect 包含归一化位置、速度和方向；它不是虚拟化列表，列表数据与资源加载继续使用已有列表/资源能力。
+
+模型写入使用无通知原生 setter 或同步保护，不发布用户操作命令。有效交互先发布 PropertyChanged，再发布业务事件；门控检查 View、Host 和控件交互状态。绑定上下文负责激活阶段的业务解绑，适配器负责自身原生事件清理，不通过 RemoveAllListeners 清除他人的监听。绕过适配器直接修改 Text、Image 等原生属性不会自动通知模型。
+
+#### 附加属性扩展（推荐）
+
+只扩展属性逻辑时无需注册或替换整个适配器。声明公开、非嵌套、非泛型的扩展类，添加 `[ControlPropertyExtension]` 并继承 `ControlPropertyExtension<TComponent>`，提供公共 `NativeControl` 构造函数。Inspector 自动发现适用于当前组件及其基类的扩展，在“添加属性”中可搜索扩展类名和属性名。选择后生成器直接构造并缓存扩展，不使用运行时反射。不要在构造函数中修改组件值。
+
+```csharp
+using MUI.UGUI;
+using UnityEngine.UI;
+
+[ControlPropertyExtension]
+public sealed class PriceProperties : ControlPropertyExtension<Text>
+{
+    public PriceProperties(NativeControl owner) : base(owner) { }
+    public decimal Price
+    {
+        get => decimal.TryParse(Component.text, out var value) ? value : 0m;
+        set => Component.text = value.ToString("0.00");
+    }
+}
+```
+
+选择 `Price` 后，业务只需给生成的 ViewModel 属性赋值。扩展不会在编辑器中实例化或读取初值，业务应设置需要的初值。只读扩展属性同样支持实时读取。同名原生属性与扩展属性会标出来源，由用户选择，禁止同时生成同一个目标名的两套绑定，避免隐式覆盖。扩展内部如果写入另一个已绑定属性，用户仍需避免两者同时控制同一状态。
+
+需要界面回写时，在属性上标记 `[NotifiesChange]`，并在真实变化回调调用 `Changed(nameof(Property))`。该标记是通知契约，不会自动监听变化。Unity 输入事件使用 `Listen(Component.onValueChanged, value => Changed(nameof(Property)))`，自动执行输入门控并随控件释放解绑；普通 C# 事件使用 `TrackCleanup` 注册解绑，在用户输入回调中先检查 `CanReceiveInput()`。模型写入应使用 `SetValueWithoutNotify` 等无通知 API，避免触发用户命令。`ForwardChanges("Value", nameof(Property))` 可复用原适配器通知；扩展通知按类型隔离，不会串到同名原生属性。
+
+#### 完整控件适配器（兼容与高级扩展）
+
+
+
+自定义接口继承 `IElement`，自定义适配器继承 `NativeControl<TComponent>` 并实现接口。实现属性 setter 时调用 `Changed()`；外部值变化调用 `Changed(nameof(...))`。UnityEvent 可通过受保护的 `Listen` 接入输入门控和自动解绑；普通 C# 事件用 `TrackCleanup` 登记解绑，并在用户操作回调中检查 `CanReceiveInput()`。不要在构造函数里修改控件状态，编辑器校验也会创建并释放适配器。
+
+```csharp
+public interface IProgressDisplay : IElement
+{
+    float Progress { get; set; }
+}
+
+// MyGauge 是项目已有组件，此例假设它具有 Value 属性。
+public sealed class GaugeAdapter : MUI.UGUI.NativeControl<MyGauge>, IProgressDisplay
+{
+    public GaugeAdapter(string name, MyGauge target) : base(name, target) { }
+    public float Progress
+    {
+        get => Component.Value;
+        set { if (Component.Value == value) return; Component.Value = value; Changed(); }
+    }
+}
+
+public static class GaugeBindingSetup
+{
+    [UnityEngine.RuntimeInitializeOnLoadMethod(UnityEngine.RuntimeInitializeLoadType.BeforeSceneLoad)]
+#if UNITY_EDITOR
+    [UnityEditor.InitializeOnLoadMethod]
+#endif
+    public static void Register() => MUI.UGUI.NativeControl.Register<MyGauge>(
+        (name, component) => new GaugeAdapter(name, component));
+}
+```
+
+业务声明 `[Bind("Gauge", nameof(IProgressDisplay.Progress))]` 即可；同时在命名规则里添加 MyGauge 或手动绑定引用。注册在编辑器与运行时都需要执行。按实际组件类型优先、再按最近基类匹配；自定义注册优先于内置适配器，同类型重复注册覆盖原工厂，可使用 `Unregister<T>()` 撤销。工厂必须保留绑定名称和目标引用。未注册的自定义 MonoBehaviour 仅有通用引用/可见性能力，不能自动推断任意业务属性。适配器、转换器和自定义 Element 都是扩展入口，不需要修改框架生成器。
+
+#### 多组件及自定义组件规则
+
+规则面板使用“前缀 + 组件多选”的紧凑行，不再展开数量和条目。`Txt_` 默认同时接受 Text、TMP_Text；未安装 TMP 时仍可使用 Text。类型菜单支持项目中的公开、非泛型 MonoBehaviour，取消已有勾选可移除类型。
+
+`Img_Btn_Confirm` 会依次使用 Img_ 与 Btn_ 规则，在同一节点查找 Image 和 Button，生成 `ConfirmImage`、`ConfirmButton` 两个独立引用。单前缀仍沿用原名称：`Img_Icon` → `Icon`。一个规则命中多个不同组件类型时也追加实际类型名；同类型组件有多个时提示歧义，不自动挑选。重复命中的同一个组件只保留一次。
+
+例如配置 `Widget_` 匹配 MyGauge，节点 `Widget_Gauge` 对应绑定名称 `Gauge`；注册上面的 GaugeAdapter 后即可通过 IProgressDisplay 绑定，不生成原生组件访问属性。
+
+#### 搜索组件与名称匹配方式
+
+组件选择器支持搜索类名、命名空间和程序集，多个空格分隔的词同时匹配；提供“全部 / 常用 / 已选”过滤。勾选立即写入配置并支持 Undo，弹窗保持打开，可连续多选。已选但找不到的类型仍保留显示，允许取消选择。
+
+规则可切换“前缀 / 后缀 / 包含 / 正则”。前缀、后缀、包含会移除匹配文本，继续尝试其他规则，例如 `Icon_Img` 使用后缀 `_Img` 得到 `Icon`。包含只移除当次首次出现的文本；同一位置多个规则匹配时取表达式字符串较长的规则，同长度按列表顺序。正则使用 `(?<name>...)` 捕获最终绑定名称，例如 `^UI_(?<name>.+)_Text$` 将 `UI_Title_Text` 映射为 `Title`，匹配后停止继续解析；正则采用 50ms 超时限制，错误或超时在 View 面板提示并阻止生成。旧规则默认继续使用前缀模式。

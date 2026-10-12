@@ -41,7 +41,7 @@ namespace MUI.Samples.Navigation
                 if (!string.IsNullOrWhiteSpace(resourcesPath))
                 {
                     var path = resourcesPath;
-                    var loader = new MUI.Samples.ResourceIntegration.UnityResourcesLoader();
+                    var loader = new MUI.UGUI.UnityResourcesLoader();
                     provider = new LoadedPrefabViewProvider(host.transform, loader, _ => path,
                         configureView: view => view.ConfigureResources(loader));
                 }

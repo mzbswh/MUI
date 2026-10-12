@@ -457,10 +457,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   settings: {fileID: 11400000, guid: 90d9552856a54619a6d3bcd6c087c754, type: 2}
   viewRoot: {fileID: 1614527433}
-  prefabs:
-  - Key: BasicView
-    Version: "1"
-    Prefab: {fileID: 5585269923075176462, guid: e2bfbc679d5ad4db984d56f676928255, type: 3}
 --- !u!114 &1614527430
 MonoBehaviour:
   m_ObjectHideFlags: 0

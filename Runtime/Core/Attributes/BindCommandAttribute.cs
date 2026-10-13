@@ -26,6 +26,8 @@ namespace MUI
             get; set;
         }
 
+        public Type ComponentType { get; set; }
+
         public string InteractableProperty { get; set; } = "Interactable";
     }
 }

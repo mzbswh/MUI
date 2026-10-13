@@ -28,10 +28,10 @@ namespace MUI
 
         /// <summary>安装实时读取入口，绑定会话结束时失效，不缓存组件引用到模型状态。</summary>
         public void ReadAccess<TElement, TValue>(string elementName,
-            Func<TViewModel, Func<TValue>, Action> attach, Func<TElement, TValue> read)
+            Func<TViewModel, Func<TValue>, Action> attach, Func<TElement, TValue> read, Type componentType = null)
             where TElement : class, IElement
         {
-            var element = view.GetElement<TElement>(elementName);
+            var element = ResolveElement<TElement>(elementName, componentType);
             Func<TValue> getter = () =>
             {
                 if (!IsBindingThread() || !session.IsActive || !element.IsAlive)
@@ -49,10 +49,10 @@ namespace MUI
                     string targetProperty,
                     Func<TElement, TValue> readTarget,
                     Action<TElement, TValue> writeTarget,
-                    BindingMode mode = BindingMode.OneWay)
+                    BindingMode mode = BindingMode.OneWay, Type componentType = null)
                     where TElement : class, IElement
         {
-            Property<TElement, TValue, TValue>(elementName, sourceProperty, readSource, writeSource, targetProperty, readTarget, writeTarget, value => value, value => value, mode);
+            Property<TElement, TValue, TValue>(elementName, sourceProperty, readSource, writeSource, targetProperty, readTarget, writeTarget, value => value, value => value, mode, componentType: componentType);
         }
 
         public void Property<TElement, TSource, TTarget>(string elementName,
@@ -68,7 +68,7 @@ namespace MUI
                     Func<TTarget, BindingConversionResult<TSource>> tryConvertBack = null,
                     Action<TViewModel, BindingValidationState> writeValidation = null,
                     BindingSourcePath<TViewModel, TSource> sourcePath = null,
-                    TTarget nullValue = default)
+                    TTarget nullValue = default, Type componentType = null)
                     where TElement : class, IElement
         {
             if (string.IsNullOrEmpty(sourceProperty))
@@ -124,7 +124,7 @@ namespace MUI
                 }
             }
 
-            var element = view.GetElement<TElement>(elementName);
+            var element = ResolveElement<TElement>(elementName, componentType);
             session.RegisterPropertyWriter(element, sourceProperty, targetProperty, mode);
             TSource ReadSource(INotifyPropertyChanged owner) => sourcePath == null ? readSource(model) : sourcePath.Read(owner);
             void WriteSource(INotifyPropertyChanged owner, TSource value)
@@ -426,6 +426,13 @@ namespace MUI
                     session.OnReady(() => PublishValidation(default));
                 }
             }
+        }
+
+        private TElement ResolveElement<TElement>(string name, Type componentType) where TElement : class, IElement
+        {
+            if (componentType == null) return view.GetElement<TElement>(name);
+            if (view is IComponentView typedView) return typedView.GetElement<TElement>(name, componentType);
+            throw new InvalidOperationException("This view does not support component type binding: " + componentType.FullName);
         }
 
         private bool IsBindingThread()

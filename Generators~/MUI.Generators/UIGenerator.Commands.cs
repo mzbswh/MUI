@@ -148,11 +148,20 @@ namespace MUI.Generators
                 }
 
                 var element = ResolveElement(context, attribute);
+                if (element != null && DerivesFrom(element, "UnityEngine.Component") &&
+                    !element.AllInterfaces.Any(contract => contract.ToDisplayString() == "MUI.IElement"))
+                {
+                    AppendNativeCommandBinding(context, member, attribute, element, propertyName, receiver, bindings, manifest, targetWriters, commandEvents);
+                    continue;
+                }
                 if (element == null || !element.AllInterfaces.Any(i => i.ToDisplayString() == "MUI.IElement"))
                 {
                     Fail(member, "Use nameof(Element.Event) or explicitly specify an IElement type.");
                 }
 
+                var componentType = attribute.NamedArguments.FirstOrDefault(pair => pair.Key == "ComponentType").Value.Value as INamedTypeSymbol;
+                if (componentType != null && !DerivesFrom(componentType, "UnityEngine.Component"))
+                    Fail(member, "Command ComponentType must be a Unity component type.");
                 ValidateElementType(context, member, element);
                 var targetEvent = FindElementMember<IEventSymbol>(element, eventName);
                 if (targetEvent == null || targetEvent.IsStatic || targetEvent.Type.ToDisplayString() != "System.Action" ||
@@ -177,12 +186,12 @@ namespace MUI.Generators
                     Fail(member, "Command target requires a writable bool Interactable property (or configured equivalent).");
                 }
 
-                if (!commandEvents.Add(targetName + "\0" + eventName))
+                if (!commandEvents.Add(targetName + "\0" + TypeName(componentType ?? element) + "\0" + eventName))
                 {
                     Fail(member, "Multiple commands bind the same Element event: " + targetName + "." + eventName);
                 }
 
-                if (!targetWriters.Add(targetName + "\0" + TypeName(element) + "\0" + interactableName))
+                if (!targetWriters.Add(targetName + "\0" + TypeName(componentType ?? element) + "\0" + interactableName))
                 {
                     Fail(member, "Command CanExecute conflicts with another writer to " + targetName + "." + interactableName);
                 }
@@ -190,14 +199,60 @@ namespace MUI.Generators
                 bindings.Append("            builder.Command<").Append(TypeName(element)).Append(">(\n                ").Append(Literal(targetName))
                     .Append(", model => ").Append(receiver).Append('.').Append(Escape(propertyName)).Append(",\n                (element, handler) => element.").Append(Escape(eventName))
                     .Append(" += handler, (element, handler) => element.").Append(Escape(eventName)).Append(" -= handler,\n                (element, value) => element.")
-                    .Append(Escape(interactableName)).Append(" = value, ").Append(Literal(interactableName)).Append(", ").Append(Literal(eventName)).Append(");\n");
+                    .Append(Escape(interactableName)).Append(" = value, ").Append(Literal(interactableName)).Append(", ").Append(Literal(eventName)).Append(componentType == null ? "" : ", componentType: typeof(" + TypeName(componentType) + ")").Append(");\n");
                 manifest.Append("                new global::MUI.BindingEntry(").Append(Literal(propertyName)).Append(", ").Append(Literal(targetName))
                     .Append(", typeof(").Append(TypeName(element)).Append("), ").Append(Literal(eventName))
                     .Append(", global::MUI.BindingMode.OneWay, global::MUI.BindingEntryKind.Command, ").Append(Literal(interactableName));
                 AppendSourceLocation(manifest, attribute, member);
-                manifest.Append("),\n");
+                manifest.Append(componentType == null ? "),\n" : ") { ComponentType = typeof(" + TypeName(componentType) + ") },\n");
             }
             return true;
+        }
+
+        private static void ValidateNativeCommand(ISymbol source, INamedTypeSymbol component, string eventName, string interactableName)
+        {
+            var signal = FindElementMember<IPropertySymbol>(component, eventName);
+            var field = FindElementMember<IFieldSymbol>(component, eventName);
+            var signalType = signal != null && !signal.IsStatic && !signal.IsIndexer && Accessible(signal.GetMethod) ? signal.Type :
+                field != null && !field.IsStatic && field.DeclaredAccessibility == Accessibility.Public ? field.Type : null;
+            var isEvent = false;
+            for (var current = signalType as INamedTypeSymbol; current != null; current = current.BaseType)
+                if (current.ContainingNamespace.ToDisplayString() == "UnityEngine.Events" && current.Name == "UnityEvent" && current.Arity <= 4)
+                    isEvent = true;
+            if (!isEvent) Fail(source, "Command signal must be a public UnityEvent: " + eventName);
+            var interactable = FindElementMember<IPropertySymbol>(component, interactableName);
+            if (interactable == null || interactable.IsStatic || interactable.IsIndexer ||
+                interactable.Type.SpecialType != SpecialType.System_Boolean || !Accessible(interactable.SetMethod))
+                Fail(source, "Command state requires a writable bool property: " + interactableName);
+        }
+
+        private static void AppendNativeCommandBinding(GenerationContext context, ISymbol member, AttributeData attribute,
+            INamedTypeSymbol component, string propertyName, string receiver, StringBuilder bindings, StringBuilder manifest,
+            HashSet<string> writers, HashSet<string> events)
+        {
+            var name = (string)attribute.ConstructorArguments[0].Value;
+            var signal = (string)attribute.ConstructorArguments[1].Value;
+            var interactable = attribute.NamedArguments.FirstOrDefault(pair => pair.Key == "InteractableProperty").Value.Value as string ?? "interactable";
+            ValidateNativeCommand(member, component, signal, interactable);
+            var selector = attribute.NamedArguments.FirstOrDefault(pair => pair.Key == "ComponentType").Value.Value as INamedTypeSymbol ?? component;
+            if (!DerivesFrom(selector, component.ToDisplayString()))
+                Fail(member, "Command component selector is incompatible with " + component.ToDisplayString());
+            var key = name + "\0" + TypeName(selector) + "\0";
+            if (!events.Add(key + signal) || !writers.Add(key + interactable))
+                Fail(member, "Duplicate command signal or state writer: " + name + "." + signal);
+            var target = "((" + TypeName(component) + ")element.Target)";
+            bindings.Append("            builder.Command<global::MUI.UGUI.NativeControl>(\n                ").Append(Literal(name))
+                .Append(", model => ").Append(receiver).Append('.').Append(Escape(propertyName))
+                .Append(",\n                (element, handler) => element.AddCommandListener(").Append(target).Append('.').Append(Escape(signal))
+                .Append(", handler),\n                (element, handler) => element.RemoveCommandListener(").Append(target).Append('.').Append(Escape(signal))
+                .Append(", handler),\n                (element, value) => ").Append(target).Append('.').Append(Escape(interactable))
+                .Append(" = value, ").Append(Literal(interactable)).Append(", ").Append(Literal(signal))
+                .Append(", componentType: typeof(").Append(TypeName(selector)).Append("));\n");
+            manifest.Append("                new global::MUI.BindingEntry(").Append(Literal(propertyName)).Append(", ").Append(Literal(name))
+                .Append(", typeof(global::MUI.UGUI.NativeControl), ").Append(Literal(signal))
+                .Append(", global::MUI.BindingMode.OneWay, global::MUI.BindingEntryKind.Command, ").Append(Literal(interactable));
+            AppendSourceLocation(manifest, attribute, member);
+            manifest.Append(") { ComponentType = typeof(").Append(TypeName(selector)).Append(") },\n");
         }
 
         /// <summary>生成和基类名称预留使用同一命名规则，避免首次编译时漏掉尚未生成的成员。</summary>

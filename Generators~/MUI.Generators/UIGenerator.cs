@@ -21,13 +21,15 @@ namespace MUI.Generators
             var types = context.SyntaxProvider.CreateSyntaxProvider(
                 (node, token) => node is ClassDeclarationSyntax,
                 (syntax, token) => syntax.SemanticModel.GetDeclaredSymbol((ClassDeclarationSyntax)syntax.Node) as INamedTypeSymbol);
-            context.RegisterSourceOutput(types.Collect().Combine(context.CompilationProvider),
-                (output, input) => Execute(new GenerationContext(output, input.Right), input.Left));
+            context.RegisterSourceOutput(types.Collect().Combine(context.CompilationProvider).Combine(
+                    context.AdditionalTextsProvider.Where(file => file.Path.EndsWith(".prefab", StringComparison.OrdinalIgnoreCase)).Collect()),
+                (output, input) => Execute(new GenerationContext(output, input.Left.Right, input.Right), input.Left.Left));
         }
 
         /// <summary>合并同一类型的分部声明，逐个输出绑定并汇总程序集注册入口。</summary>
         private static void Execute(GenerationContext context, ImmutableArray<INamedTypeSymbol> candidates)
         {
+            context = AddControlProperties(context, ref candidates);
             if (!TryGetModule(context, out var moduleNamespace, out var registryName))
             {
                 context.PublishSourceIndex();
@@ -36,6 +38,7 @@ namespace MUI.Generators
 
             context = AddOpenEntries(context, ref candidates);
             context = AddPrefabBindings(context, ref candidates);
+            context = AddNativeProperties(context, ref candidates);
             var seen = new HashSet<INamedTypeSymbol>(SymbolEqualityComparer.Default);
             var generated = new List<string>();
             foreach (var type in candidates)
@@ -265,22 +268,42 @@ namespace MUI.Generators
                     var elementType = ResolveElement(context, attribute);
                     if (elementType == null)
                     {
-                        Fail(member, "Use nameof(ElementType.Property), or set Bind.ElementType explicitly.");
+                        Fail(member, "Use nameof(Component.property), nameof(ElementType.Property), or set Bind.ElementType explicitly.");
                     }
 
+                    var inferredExtension = elementType.GetAttributes().Any(a => a.AttributeClass?.ToDisplayString() == "MUI.UGUI.ControlPropertyExtensionAttribute") ? elementType : null;
+                    var extensionComponent = inferredExtension?.BaseType;
+                    while (extensionComponent != null && extensionComponent.OriginalDefinition.ToDisplayString() != "MUI.UGUI.ControlPropertyExtension<TComponent>")
+                        extensionComponent = extensionComponent.BaseType;
+                    var inferredComponent = DerivesFrom(elementType, "UnityEngine.Component") && !DerivesFrom(elementType, "MUI.UGUI.Element") ? elementType : null;
+                    if (inferredExtension != null)
+                        inferredComponent = extensionComponent?.TypeArguments[0] as INamedTypeSymbol;
+                    if (inferredComponent != null)
+                        elementType = context.Compilation.GetTypeByMetadataName("MUI.UGUI.NativeControl");
+                    var componentType = inferredComponent ?? attribute.NamedArguments.FirstOrDefault(pair => pair.Key == "ComponentType").Value.Value as INamedTypeSymbol;
+                    var lookupComponentType = attribute.NamedArguments.FirstOrDefault(pair => pair.Key == "BindingComponentType").Value.Value as INamedTypeSymbol ?? componentType;
+                    if (lookupComponentType != null && !DerivesFrom(lookupComponentType, "UnityEngine.Component"))
+                        Fail(member, "BindingComponentType must be a Unity component type.");
                     ValidateElementType(context, member, elementType);
-                    if (mode != 2 && !targetWriters.Add(elementName + "\0" + TypeName(elementType) + "\0" + targetName))
+                    if (mode != 2 && !targetWriters.Add(elementName + "\0" + TypeName(lookupComponentType ?? elementType) + "\0" + targetName))
                     {
                         Fail(member, "Multiple bindings write the same Element property: " + elementName + "." + targetName);
                     }
 
-                    var componentType = attribute.NamedArguments.FirstOrDefault(pair => pair.Key == "ComponentType").Value.Value as INamedTypeSymbol;
-                    if (componentType != null && (mode == 1 || mode == 2) && !attribute.NamedArguments.Any(pair => pair.Key == "NativeNotifications" && pair.Value.Value is bool enabled && enabled))
+                    var hasNativeNotifications = inferredExtension != null
+                        ? FindElementMember<IPropertySymbol>(inferredExtension, targetName)?.GetAttributes().Any(a => a.AttributeClass?.ToDisplayString() == "MUI.UGUI.NotifiesChangeAttribute") == true
+                        : inferredComponent != null && TryBuiltInNotification(inferredComponent, targetName, out _);
+                    hasNativeNotifications |= attribute.NamedArguments.Any(pair => pair.Key == "NativeNotifications" && pair.Value.Value is bool enabled && enabled);
+                    if (componentType != null && (mode == 1 || mode == 2) && !hasNativeNotifications)
                         Fail(member, "Native component properties without notifications support OneWay or OneTime only.");
                     if (componentType != null && (!DerivesFrom(componentType, "UnityEngine.Component") || !DerivesFrom(elementType, "MUI.UGUI.NativeControl") && elementType.ToDisplayString() != "MUI.UGUI.NativeControl"))
                         Fail(member, "ComponentType requires a Unity component and NativeControl element.");
                     var targetReceiver = componentType == null ? "element" : "((" + TypeName(componentType) + ")element.Target)";
-                    var propertyAdapterType = attribute.NamedArguments.FirstOrDefault(pair => pair.Key == "PropertyAdapterType").Value.Value as INamedTypeSymbol;
+                    var propertyAdapterType = inferredExtension ?? (inferredComponent == null
+                        ? attribute.NamedArguments.FirstOrDefault(pair => pair.Key == "PropertyAdapterType").Value.Value as INamedTypeSymbol
+                        : context.Compilation.GetTypeByMetadataName(NativeAdapterName(inferredComponent, targetName)));
+                    if (inferredComponent != null && propertyAdapterType == null)
+                        Fail(member, "Native property adapter generation failed: " + targetName);
                     if (propertyAdapterType != null)
                     {
                         var adapterBase = propertyAdapterType.BaseType;
@@ -308,11 +331,11 @@ namespace MUI.Generators
                         bindings.Append("            builder.ReadAccess<").Append(TypeName(elementType)).Append(", ").Append(TypeName(target.Type)).Append(">(").Append(Literal(elementName))
                             .Append(", (model, read) => { if (model.").Append(Escape(readAccessorField)).Append(" != null) throw new global::System.InvalidOperationException(\"Read accessor already bound.\"); model.").Append(Escape(readAccessorField))
                             .Append(" = read; return () => { if (global::System.Object.ReferenceEquals(model.").Append(Escape(readAccessorField)).Append(", read)) model.").Append(Escape(readAccessorField)).Append(" = null; }; }, element => ")
-                            .Append(targetReceiver).Append('.').Append(Escape(targetName)).Append(");\n");
+                            .Append(targetReceiver).Append('.').Append(Escape(targetName)).Append(lookupComponentType == null ? "" : ", componentType: typeof(" + TypeName(lookupComponentType) + ")").Append(");\n");
                         manifest.Append("                new global::MUI.BindingEntry(").Append(Literal(source.Name)).Append(", ").Append(Literal(elementName)).Append(", typeof(").Append(TypeName(elementType)).Append("), ")
                             .Append(Literal(targetName)).Append(", global::MUI.BindingMode.OneWayToSource, global::MUI.BindingEntryKind.Property, \"Interactable\"");
                         AppendSourceLocation(manifest, attribute, member);
-                        manifest.Append(") { IsReadAccess = true").Append(componentType == null ? "" : ", ComponentType = typeof(" + TypeName(componentType) + ")").Append(" },\n");
+                        manifest.Append(") { IsReadAccess = true").Append(lookupComponentType == null ? "" : ", ComponentType = typeof(" + TypeName(lookupComponentType) + ")").Append(" },\n");
                         continue;
                     }
 
@@ -394,12 +417,13 @@ namespace MUI.Generators
                     {
                         bindings.Append(", sourcePath: ").Append(source.Definition).Append(", nullValue: ").Append(nullValue);
                     }
+                    if (lookupComponentType != null) bindings.Append(", componentType: typeof(").Append(TypeName(lookupComponentType)).Append(")");
                     bindings.Append(");\n");
                     manifest.Append("                new global::MUI.BindingEntry(").Append(Literal(source.Name)).Append(", ").Append(Literal(elementName))
                         .Append(", typeof(").Append(TypeName(elementType)).Append("), ").Append(Literal(targetName)).Append(", global::MUI.BindingMode.").Append(modeName)
                         .Append(", global::MUI.BindingEntryKind.Property, \"Interactable\"");
                     AppendSourceLocation(manifest, attribute, member);
-                    manifest.Append(componentType == null ? "),\n" : ") { ComponentType = typeof(" + TypeName(componentType) + ") },\n");
+                    manifest.Append(lookupComponentType == null ? "),\n" : ") { ComponentType = typeof(" + TypeName(lookupComponentType) + ") },\n");
                     bindingCount++;
                 }
             }
@@ -469,11 +493,14 @@ namespace MUI.Generators
             private readonly SourceProductionContext output;
             private readonly List<string> sourceNames;
 
-            public GenerationContext(SourceProductionContext output, Compilation compilation) : this(output, compilation, new List<string>()) { }
+            public GenerationContext(SourceProductionContext output, Compilation compilation, ImmutableArray<AdditionalText> prefabs) : this(output, compilation, prefabs, new List<string>()) { }
 
-            private GenerationContext(SourceProductionContext output, Compilation compilation, List<string> sourceNames)
+            public ImmutableArray<AdditionalText> Prefabs { get; }
+
+            private GenerationContext(SourceProductionContext output, Compilation compilation, ImmutableArray<AdditionalText> prefabs, List<string> sourceNames)
             {
                 this.sourceNames = sourceNames;
+                Prefabs = prefabs;
                 this.output = output;
                 Compilation = compilation;
             }
@@ -483,7 +510,7 @@ namespace MUI.Generators
                 get;
             }
 
-            public GenerationContext WithCompilation(Compilation compilation) => new GenerationContext(output, compilation, sourceNames);
+            public GenerationContext WithCompilation(Compilation compilation) => new GenerationContext(output, compilation, Prefabs, sourceNames);
 
             public string AddSource(string name, SourceText source)
             {

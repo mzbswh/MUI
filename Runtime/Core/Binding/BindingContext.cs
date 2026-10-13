@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -8,6 +9,29 @@ namespace MUI
     /// <summary>界面与表现模型之间的绑定会话入口，负责绑定、命令归属和解绑。</summary>
     public abstract class BindingContext : IAsyncDisposable
     {
+        // 弱引用诊断索引不延长 View、会话或 Model 的生命周期。
+        private static readonly ConditionalWeakTable<IView, WeakReference<BindingContext>> activeBindings =
+            new ConditionalWeakTable<IView, WeakReference<BindingContext>>();
+
+        internal void TrackBoundModel()
+        {
+            var view = BoundView;
+            if (view == null || State != BindingState.Bound)
+                return;
+            activeBindings.Remove(view);
+            activeBindings.Add(view, new WeakReference<BindingContext>(this));
+        }
+
+        /// <summary>只读查询当前实际绑定的模型；解绑开始或绑定失败后不再返回旧模型。</summary>
+        public static ViewModel GetBoundModel(IView view)
+        {
+            if (view == null || !view.IsAlive || !activeBindings.TryGetValue(view, out var reference) ||
+                !reference.TryGetTarget(out var binding))
+                return null;
+            return binding.State == BindingState.Bound || binding.State == BindingState.Frozen
+                ? binding.Model : null;
+        }
+
         /// <summary>当前绑定阶段，不等同于界面的导航状态。</summary>
         public abstract BindingState State
         {
@@ -315,6 +339,7 @@ namespace MUI
                 BuildAllBindings(new BindingBuilder<TViewModel>(View, ViewModel, candidate));
                 session = candidate;
                 state = BindingState.Bound;
+                TrackBoundModel();
             }
             catch (Exception failure)
             {

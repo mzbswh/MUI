@@ -8,6 +8,7 @@ namespace MUI.UGUI
     /// 纹理为借用引用，其创建、更新与释放仍由资源所有者负责。
     /// </summary>
     [DisallowMultipleComponent, RequireComponent(typeof(UnityEngine.UI.RawImage))]
+    [GenerateControlProperty(nameof(Target), "uvRect", "UVRect")]
     public sealed partial class RawImageElement : GraphicElement
     {
         private UnityEngine.UI.RawImage target;
@@ -54,27 +55,10 @@ namespace MUI.UGUI
             }
         }
 
-        /// <summary>纹理采样区域；允许越界平铺和负宽高翻转，但拒绝非有限数值。</summary>
-        public Rect UVRect
+        partial void OnUVRectChanging(Rect value)
         {
-            get => Target.uvRect;
-            set
-            {
-                var image = Target;
-                if (!IsFinite(value.x) || !IsFinite(value.y) ||
-                    !IsFinite(value.width) || !IsFinite(value.height))
-                {
-                    throw new ArgumentOutOfRangeException(nameof(value), "纹理采样区域必须使用有限数值。");
-                }
-
-                if (image.uvRect.Equals(value))
-                {
-                    return;
-                }
-
-                image.uvRect = value;
-                NotifyChanged();
-            }
+            if (!IsFinite(value.x) || !IsFinite(value.y) || !IsFinite(value.width) || !IsFinite(value.height))
+                throw new ArgumentOutOfRangeException(nameof(value), "纹理采样区域必须使用有限数值。");
         }
 
         protected override UnityEngine.UI.MaskableGraphic GraphicComponent => Target;

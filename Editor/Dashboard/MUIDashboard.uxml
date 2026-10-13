@@ -4,8 +4,6 @@
         <ui:VisualElement class="mui-dashboard-header mui-card">
             <ui:VisualElement class="mui-dashboard-toolbar mui-dashboard-titlebar">
                 <ui:Label text="@dashboard.title" class="mui-title mui-grow" />
-                <ui:DropdownField name="editorLanguage" label="@language.label" class="mui-dashboard-language" />
-                <ui:Button name="reloadLanguages" text="↻" class="mui-icon-button" />
             </ui:VisualElement>
             <ui:VisualElement class="mui-dashboard-toolbar">
                 <ui:DropdownField name="hosts" label="@uxml.MUIDashboard.d8456739a2" class="mui-dashboard-hosts" />

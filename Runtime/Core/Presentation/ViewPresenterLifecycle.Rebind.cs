@@ -234,6 +234,7 @@ namespace MUI
 
                 invoke(Binding.Bind);
                 RequireCurrent();
+                Binding.TrackBoundModel();
                 invoke(Binding.CommitSourceWrites);
                 RequireCurrent();
                 invoke(preparedBindingCommit.Commit);

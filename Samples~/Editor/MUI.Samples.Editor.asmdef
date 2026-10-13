@@ -1,0 +1,9 @@
+{
+  "name": "MUI.Examples.Editor",
+  "references": [
+    "MUI.Examples"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ]
+}

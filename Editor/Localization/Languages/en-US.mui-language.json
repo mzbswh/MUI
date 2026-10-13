@@ -721,7 +721,7 @@
     },
     {
       "key": "editor.PageTextBackend.36e1635db2",
-      "text": "Text Elements must be public, concrete, non-nested, nongeneric types with a readable and writable string Content property."
+      "text": "Text backends must be public, non-nested, nongeneric Graphic component types with a readable and writable string text property."
     },
     {
       "key": "editor.PageTextBackend.865c6e02de",

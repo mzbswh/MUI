@@ -50,7 +50,7 @@ namespace MUI.Editor
             {
                 foreach (var choice in GetBindingChoices(row))
                 {
-                    if (manifest.Entries.Any(entry => entry.ElementName == row.Name && CanonicalBindingProperty(entry.TargetProperty) == CanonicalBindingProperty(choice.Property) && !IsAutoBinding(entry)))
+                    if (manifest.Entries.Any(entry => MatchesEntry(row, entry) && CanonicalBindingProperty(entry.TargetProperty) == CanonicalBindingProperty(choice.Property) && !IsAutoBinding(entry)))
                         continue;
                     using (var adapter = NativeControl.Create(row.Name, row.Target))
                     {
@@ -62,19 +62,20 @@ namespace MUI.Editor
                         var mode = choice.Mode;
                         var targetProperty = type.GetProperty(property);
                         var targetEvent = type.GetEvent(property);
-                        var command = targetEvent != null;
+                        var nativeCommand = choice.Native && IsNativeCommand(type, property);
+                        var command = nativeCommand || targetEvent != null;
                         var readOnly = targetProperty != null && (targetProperty.SetMethod == null || !targetProperty.SetMethod.IsPublic);
-                        if (command && targetEvent.EventHandlerType != typeof(Action))
+                        if (!nativeCommand && command && targetEvent.EventHandlerType != typeof(Action))
                             throw new InvalidOperationException(row.Name + "：自动命令需要 Action 事件。");
                         if (!command && (targetProperty == null || (readOnly && (targetProperty.GetMethod == null || !targetProperty.GetMethod.IsPublic)) || targetProperty.GetIndexParameters().Length != 0))
                             throw new InvalidOperationException(row.Name + "：找不到公开可读写属性 " + property);
                         if (command)
                         {
-                            var interactable = type.GetProperty("Interactable");
+                            var interactable = type.GetProperty(nativeCommand ? "interactable" : "Interactable");
                             if (interactable == null || interactable.PropertyType != typeof(bool) || interactable.GetMethod == null || interactable.SetMethod == null)
                                 throw new InvalidOperationException(row.Name + "：命令适配器需要公开的 bool Interactable 属性。");
                         }
-                        if (choice.Native && !readOnly && (command || (mode == BindingMode.TwoWay || mode == BindingMode.OneWayToSource) && NativeNotificationProperty(row.Target.GetType(), property) == null))
+                        if (choice.Native && !readOnly && (!nativeCommand && command || (mode == BindingMode.TwoWay || mode == BindingMode.OneWayToSource) && NativeNotificationProperty(row.Target.GetType(), property) == null))
                             throw new InvalidOperationException(row.Name + "." + property + "：原生属性没有变更通知，只支持单向或首次赋值。");
                         if (extension != null && (command || !readOnly && (mode == BindingMode.TwoWay || mode == BindingMode.OneWayToSource) && !targetProperty.IsDefined(typeof(NotifiesChangeAttribute), true)))
                             throw new InvalidOperationException(row.Name + "." + property + "：扩展回写需要 NotifiesChange 和真实变化通知。");
@@ -84,15 +85,16 @@ namespace MUI.Editor
                             (command ? i.GetEvent(property) != null : i.GetProperty(property) != null)).OrderBy(i => i.FullName, StringComparer.Ordinal).FirstOrDefault() ?? type;
                         if (!contract.IsVisible || contract.IsGenericType)
                             throw new InvalidOperationException(row.Name + "：绑定适配器必须是公开的非泛型类型或接口。");
-                        if (!writes.Add(row.Name + "\0" + CanonicalBindingProperty(property)))
+                        if (!writes.Add(row.Key + "\0" + CanonicalBindingProperty(property)))
                             throw new InvalidOperationException("重复绑定目标：" + row.Name + "." + property);
                         var source = choice.Source;
                         if (!PageSourceTemplate.IsIdentifier(source) || !names.Add(source) || source == model.Name)
                             throw new InvalidOperationException("生成成员名称重复：" + source);
-                        if (!generated.Contains(source) && model.GetMember(source, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static).Length != 0)
+                        if (!command && !generated.Contains(source) && model.GetMember(source, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static).Length != 0)
                             throw new InvalidOperationException(source + " 与已有代码成员重名。请为已有成员添加 Bind 声明，或调整控件名称。");
                         var declaration = new XElement("binding", new XAttribute("name", row.Name), new XAttribute("contract", contract.FullName),
                             new XAttribute("source", source), new XAttribute("property", property), new XAttribute("mode", mode), new XAttribute("command", command ? "true" : "false"));
+                        declaration.SetAttributeValue("targetComponent", (row.ComponentType ?? row.Target.GetType()).FullName);
                         if (readOnly)
                             declaration.SetAttributeValue("readOnly", "true");
                         if (extension != null)

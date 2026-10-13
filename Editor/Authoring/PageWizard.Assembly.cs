@@ -41,7 +41,7 @@ namespace MUI.Editor
             var key = (scriptPath, textBackendId, createWidget);
             if (refresh || assemblyInspection == null || !assemblyInspectionKey.HasValue || assemblyInspectionKey.Value != key)
             {
-                assemblyInspection = PageAssemblyInspection.Capture(scriptPath, backend.ElementType, createWidget);
+                assemblyInspection = PageAssemblyInspection.Capture(scriptPath, backend.ComponentType, createWidget);
                 assemblyInspectionKey = key;
             }
             return assemblyInspection;

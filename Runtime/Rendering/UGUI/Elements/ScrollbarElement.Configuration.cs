@@ -3,83 +3,35 @@ using UnityEngine.UI;
 
 namespace MUI.UGUI
 {
+    [GenerateControlProperty(nameof(Target), "size", "Size")]
+    [GenerateControlProperty(nameof(Target), "numberOfSteps", "NumberOfSteps", NotifyAll = true)]
+    [GenerateControlProperty(nameof(Target), "direction", "Direction")]
     public sealed partial class ScrollbarElement
     {
         /// <summary>手柄占轨道比例；有限输入沿原生语义裁剪到 0–1。</summary>
-        public float Size
+        partial void OnSizeChanging(float value)
         {
-            get => Target.size;
-            set
+            if (float.IsNaN(value) || float.IsInfinity(value))
             {
-                if (float.IsNaN(value) || float.IsInfinity(value))
-                {
-                    throw new ArgumentOutOfRangeException(nameof(value));
-                }
-
-                var control = Target;
-                var previous = control.size;
-                if (previous.Equals(value))
-                {
-                    return;
-                }
-
-                control.size = value;
-                if (IsAlive && control != null && !previous.Equals(control.size))
-                {
-                    NotifyChanged();
-                }
+                throw new ArgumentOutOfRangeException(nameof(value));
             }
         }
 
         /// <summary>离散步数；零或一沿原生语义保持连续值，大于一启用分档。</summary>
-        public int NumberOfSteps
+        partial void OnNumberOfStepsChanging(int value)
         {
-            get => Target.numberOfSteps;
-            set
+            if (value < 0)
             {
-                if (value < 0)
-                {
-                    throw new ArgumentOutOfRangeException(nameof(value));
-                }
-
-                var control = Target;
-                var previous = control.numberOfSteps;
-                if (previous.Equals(value))
-                {
-                    return;
-                }
-
-                control.numberOfSteps = value;
-                if (IsAlive && control != null && !previous.Equals(control.numberOfSteps))
-                {
-                    NotifyChanged(string.Empty);
-                }
+                throw new ArgumentOutOfRangeException(nameof(value));
             }
         }
 
         /// <summary>滚动条方向，不翻转整个 RectTransform。</summary>
-        public Scrollbar.Direction Direction
+        partial void OnDirectionChanging(Scrollbar.Direction value)
         {
-            get => Target.direction;
-            set
+            if (!Enum.IsDefined(typeof(Scrollbar.Direction), value))
             {
-                if (!Enum.IsDefined(typeof(Scrollbar.Direction), value))
-                {
-                    throw new ArgumentOutOfRangeException(nameof(value));
-                }
-
-                var control = Target;
-                var previous = control.direction;
-                if (previous.Equals(value))
-                {
-                    return;
-                }
-
-                control.direction = value;
-                if (IsAlive && control != null && !previous.Equals(control.direction))
-                {
-                    NotifyChanged();
-                }
+                throw new ArgumentOutOfRangeException(nameof(value));
             }
         }
     }

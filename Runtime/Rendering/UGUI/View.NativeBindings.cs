@@ -10,6 +10,8 @@ namespace MUI.UGUI
     {
         public string Name;
         public Component Target;
+        public string ComponentType;
+        public Type BindingType => string.IsNullOrEmpty(ComponentType) ? (Target == null ? null : Target.GetType()) : Type.GetType(ComponentType, false);
     }
 
     [Serializable]
@@ -26,6 +28,7 @@ namespace MUI.UGUI
     public sealed class AutoBindingSelection
     {
         public string Control;
+        public string ComponentType;
         public List<AutoBindingProperty> Properties = new List<AutoBindingProperty>();
     }
 
@@ -56,13 +59,15 @@ namespace MUI.UGUI
         private void CollectNativeBindings(ElementIndex candidate)
         {
             var targets = new HashSet<Component>();
-            var names = new HashSet<string>(StringComparer.Ordinal);
+            var names = new HashSet<(string, Type)>();
             foreach (var binding in nativeBindings)
             {
                 if (binding == null || string.IsNullOrWhiteSpace(binding.Name) || !OwnsNativeControl(binding.Target) ||
-                    !targets.Add(binding.Target) || !names.Add(binding.Name) || binding.Target.GetComponent<Element>() != null)
-                    throw new InvalidOperationException("原生控件绑定需要唯一的页面内组件引用和名称，不能与 Element 重复绑定。");
+                    binding.BindingType == null || !binding.BindingType.IsInstanceOfType(binding.Target) ||
+                    !targets.Add(binding.Target) || !names.Add((binding.Name, binding.BindingType)) || binding.Target.GetComponent<Element>() != null)
+                    throw new InvalidOperationException("原生控件绑定需要唯一的名称与组件类型组合、有效的页面内组件引用，不能与 Element 重复绑定。");
                 var adapter = NativeControl.Create(binding.Name, binding.Target);
+                adapter.ComponentType = binding.BindingType;
                 GetCleanupScope().OnDispose(adapter.Dispose);
                 candidate.Add(adapter);
             }

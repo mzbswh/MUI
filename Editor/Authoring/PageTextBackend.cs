@@ -16,16 +16,16 @@ namespace MUI.Editor
 
         static PageTextBackend()
         {
-            Register("ugui", L.Get("editor.PageTextBackend.19baaca2f4"), typeof(NativeText), () => null,
+            Register("ugui", L.Get("editor.PageTextBackend.19baaca2f4"), typeof(Text), () => null,
                 (name, parent, content) => PrefabAuthoring.CreateText(name, parent, content));
         }
 
-        private PageTextBackend(string id, string label, Type elementType, Func<string> validate,
+        private PageTextBackend(string id, string label, Type componentType, Func<string> validate,
                     Func<string, Transform, string, Graphic> create)
         {
             Id = id;
             Label = label;
-            ElementType = elementType;
+            ComponentType = componentType;
             this.validate = validate;
             this.create = create;
         }
@@ -40,13 +40,13 @@ namespace MUI.Editor
             get;
         }
 
-        public Type ElementType
+        public Type ComponentType
         {
             get;
         }
 
         /// <summary>同一标识只允许注册一次；工厂创建非射线目标文本，生命周期由向导拥有。</summary>
-        public static void Register(string id, string label, Type elementType, Func<string> validate,
+        public static void Register(string id, string label, Type componentType, Func<string> validate,
             Func<string, Transform, string, Graphic> create)
         {
             if (string.IsNullOrWhiteSpace(id) || string.IsNullOrWhiteSpace(label))
@@ -57,19 +57,19 @@ namespace MUI.Editor
             {
                 throw new ArgumentNullException(validate == null ? nameof(validate) : nameof(create));
             }
-            RequireElementType(elementType);
+            RequireComponentType(componentType);
             if (Find(id) != null)
             {
                 throw new InvalidOperationException(L.Get("editor.PageTextBackend.ce0434eb31") + id);
             }
-            registered.Add(new PageTextBackend(id, label, elementType, validate, create));
+            registered.Add(new PageTextBackend(id, label, componentType, validate, create));
         }
 
-        internal static void RequireElementType(Type type)
+        internal static void RequireComponentType(Type type)
         {
-            var content = type == null ? null : type.GetProperty("Content");
-            if (type == null || !type.IsVisible || type.IsAbstract || type.IsGenericType || type.IsNested ||
-                !typeof(IElement).IsAssignableFrom(type) || content == null || content.PropertyType != typeof(string) ||
+            var content = type == null ? null : type.GetProperty("text");
+            if (type == null || !type.IsVisible || type.IsGenericType || type.IsNested ||
+                !typeof(Graphic).IsAssignableFrom(type) || content == null || content.PropertyType != typeof(string) ||
                 content.GetGetMethod() == null || content.GetSetMethod() == null ||
                 content.GetGetMethod().IsStatic || content.GetSetMethod().IsStatic || content.GetIndexParameters().Length != 0)
             {
@@ -86,7 +86,7 @@ namespace MUI.Editor
         internal Graphic CreateText(string name, Transform parent, string content)
         {
             var graphic = create(name, parent, content);
-            if (graphic == null || graphic.transform.parent != parent || graphic.name != name)
+            if (graphic == null || !ComponentType.IsInstanceOfType(graphic) || graphic.transform.parent != parent || graphic.name != name)
             {
                 throw new InvalidOperationException(L.Get("editor.PageTextBackend.865c6e02de"));
             }

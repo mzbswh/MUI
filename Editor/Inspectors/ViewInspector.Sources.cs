@@ -38,13 +38,19 @@ namespace MUI.Editor
             InitializeInspectorState();
             ClearBindingTargets();
             results = null;
-            nativeBindingMessage = "已撤销 / 重做绑定配置；需要时重新生成绑定。";
+            nativeBindingMessage = "已撤销 / 重做绑定配置；将自动同步并编译。";
             QueueBindingValidation();
             Repaint();
         }
 
         private void OnDisable()
         {
+            // A selection change must not discard edits waiting for the debounce timer.
+            if (validationPending && !EditorApplication.isCompiling)
+            {
+                validationDue = 0;
+                RunPendingBindingValidation();
+            }
             inspectorReady = false;
             EditorApplication.update -= RunPendingBindingValidation;
             Undo.postprocessModifications -= OnBindingModifications;

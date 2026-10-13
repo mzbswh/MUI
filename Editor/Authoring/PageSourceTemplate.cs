@@ -111,10 +111,9 @@ namespace MUI.Editor
                 throw new ArgumentOutOfRangeException(nameof(preset));
             }
 
-            titleElementType = titleElementType ?? typeof(MUI.UGUI.NativeText);
-            PageTextBackend.RequireElementType(titleElementType);
-            var titleContract = typeof(ITextElement).IsAssignableFrom(titleElementType)
-                ? typeof(ITextElement) : titleElementType;
+            titleElementType = titleElementType ?? typeof(UnityEngine.UI.Text);
+            PageTextBackend.RequireComponentType(titleElementType);
+            var titleContract = titleElementType;
             var titleTypeName = "global::" + EscapeQualifiedName(titleContract.FullName);
             if (string.IsNullOrWhiteSpace(titleElementName) ||
                 receivesInput && string.IsNullOrWhiteSpace(closeElementName))
@@ -130,7 +129,7 @@ namespace MUI.Editor
                     "namespace " + escapedNamespace + "\n{\n" + string.Join("\n", lines) + "\n}\n";
             }
 
-            var buttonType = "global::MUI.IButtonElement";
+            var buttonType = "global::UnityEngine.UI.Button";
             var args = typed ? name + "Args" : "global::MUI.Unit";
             var result = "global::MUI.Unit";
             var pageOptions = new List<string>();
@@ -156,7 +155,7 @@ namespace MUI.Editor
             {
                 "        /// <summary>页面标题，由生成的 Title 属性发布变化。</summary>",
                 "        [global::MUI.ObservableProperty]",
-                $"        [global::MUI.Bind({titleName}, nameof({titleTypeName}.Content),",
+                $"        [global::MUI.Bind({titleName}, nameof({titleTypeName}.text),",
                 $"            ElementType = typeof({titleTypeName}))]",
                 $"        private string title = \"{name}\";"
             });
@@ -170,7 +169,7 @@ namespace MUI.Editor
                 else
                 {
                     modelLines.Add("        [global::MUI.Command]");
-                    modelLines.Add($"        [global::MUI.BindCommand({closeName}, nameof({buttonType}.Clicked),");
+                    modelLines.Add($"        [global::MUI.BindCommand({closeName}, nameof({buttonType}.onClick),");
                     modelLines.Add($"            ElementType = typeof({buttonType}))]");
                     modelLines.Add("        private void Close(global::MUI.CommandContext context)");
                 }

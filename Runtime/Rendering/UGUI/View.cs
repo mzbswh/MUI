@@ -8,7 +8,7 @@ namespace MUI.UGUI
 {
     [DisallowMultipleComponent]
     [RequireComponent(typeof(CanvasGroup))]
-    public sealed partial class View : MonoBehaviour, IOrderedView, IWidgetHost, IModalView, IInputGestureView, IFocusView, IVisibilityView, IWidgetTickHost, ITransitionPlaybackView, ICacheableView, IDisposable, IAsyncDisposable, ICleanupResponsibilitySource
+    public sealed partial class View : MonoBehaviour, IComponentView, IOrderedView, IWidgetHost, IModalView, IInputGestureView, IFocusView, IVisibilityView, IWidgetTickHost, ITransitionPlaybackView, ICacheableView, IDisposable, IAsyncDisposable, ICleanupResponsibilitySource
     {
         private InputGate inputGate;
         private bool lastInputEnabled;
@@ -276,6 +276,12 @@ namespace MUI.UGUI
         {
             Initialize();
             return index.Get<TElement>(elementName);
+        }
+
+        public TElement GetElement<TElement>(string elementName, Type componentType) where TElement : class, IElement
+        {
+            Initialize();
+            return index.Get<TElement>(elementName, componentType);
         }
 
         public void MoveToFront()

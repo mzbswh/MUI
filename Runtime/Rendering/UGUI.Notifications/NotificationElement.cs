@@ -8,7 +8,8 @@ namespace MUI.UGUI
 {
     /// <summary>借用通知来源进行显示，不拥有来源，也不推进其时钟。</summary>
     [DisallowMultipleComponent]
-    public sealed class NotificationElement : Element
+    [GenerateControlEvent(nameof(DismissControl), "onClick", Handler = nameof(Dismiss), Optional = true)]
+    public sealed partial class NotificationElement : Element
     {
         [SerializeField]
         private GameObject indicator = null;
@@ -183,23 +184,6 @@ namespace MUI.UGUI
 
                 source = null;
                 displayedId = 0;
-                if (dismissButton != null)
-                {
-                    try
-                    {
-                        dismissButton.onClick.RemoveListener(Dismiss);
-                    }
-                    catch (Exception error)
-                    {
-                        if (errors == null)
-                        {
-                            errors = new List<Exception>();
-                        }
-
-                        errors.Add(error);
-                    }
-                }
-
                 if (indicator != null)
                 {
                     try
@@ -222,17 +206,14 @@ namespace MUI.UGUI
                     throw new AggregateException("通知控件清理失败。", errors);
                 }
             });
-            if (dismissButton != null)
-            {
-                dismissButton.onClick.AddListener(Dismiss);
-            }
-
             indicator.SetActive(false);
         }
 
+        private Button DismissControl => dismissButton;
+
         private void Dismiss()
         {
-            if (source == null || !CanReceiveInput(dismissButton))
+            if (source == null)
             {
                 return;
             }

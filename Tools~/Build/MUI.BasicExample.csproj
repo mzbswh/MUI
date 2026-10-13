@@ -8,7 +8,7 @@
     <CompilerGeneratedFilesOutputPath>$(BaseIntermediateOutputPath)generated</CompilerGeneratedFilesOutputPath>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="../../Samples~/BasicExample/Scripts/*.cs" />
+    <Compile Include="../Diagnostics/Samples/BasicExample/Scripts/*.cs" />
     <ProjectReference Include="MUI.Core.csproj" />
     <ProjectReference Include="MUI.Pages.csproj" />
     <ProjectReference Include="MUI.Resources.csproj" />

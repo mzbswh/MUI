@@ -33,7 +33,9 @@ namespace MUI
 
             foreach (var candidate in candidates)
             {
-                if (candidate.GetType() == element.GetType())
+                if (candidate is IComponentElement existing && element is IComponentElement incoming
+                    ? existing.ComponentType == incoming.ComponentType
+                    : candidate.GetType() == element.GetType())
                 {
                     throw new InvalidOperationException($"Duplicate Element '{element.Name}' ({element.GetType().FullName}).");
                 }
@@ -42,7 +44,7 @@ namespace MUI
             candidates.Add(element);
         }
 
-        public TElement Get<TElement>(string name)
+        public TElement Get<TElement>(string name, Type componentType = null)
                     where TElement : class, IElement
         {
             if (name == null)
@@ -51,6 +53,8 @@ namespace MUI
             }
 
             TElement found = null;
+            var exact = componentType != null && entries.TryGetValue(name, out var typedCandidates) &&
+                typedCandidates.Exists(candidate => candidate is TElement && candidate is IComponentElement typed && typed.ComponentType == componentType);
             if (entries.TryGetValue(name, out var candidates))
             {
                 foreach (var candidate in candidates)
@@ -60,6 +64,9 @@ namespace MUI
                         continue;
                     }
 
+                    if (componentType != null && (!(match is IComponentElement typed) ||
+                        (exact ? typed.ComponentType != componentType : !componentType.IsInstanceOfType(typed.ComponentTarget))))
+                        continue;
                     if (!match.IsAlive)
                     {
                         throw new InvalidOperationException($"Element '{name}' has been destroyed.");

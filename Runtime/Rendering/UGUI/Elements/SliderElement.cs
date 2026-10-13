@@ -1,10 +1,12 @@
 using UnityEngine;
-using UnityEngine.Events;
 using UnityEngine.UI;
 
 namespace MUI.UGUI
 {
     [DisallowMultipleComponent, RequireComponent(typeof(Slider))]
+    [GenerateControlProperty(nameof(Target), "interactable", "Interactable")]
+    [GenerateControlProperty(nameof(Target), "value", "Value", Setter = "SetValueWithoutNotify")]
+    [GenerateControlEvent(nameof(Target), "onValueChanged", NotifyProperty = "Value")]
     public sealed partial class SliderElement : Element, IUIAutomationInput<float>
     {
         private Slider target;
@@ -25,38 +27,10 @@ namespace MUI.UGUI
 
         UnityEngine.UI.Selectable IUIAutomationInput<float>.InputControl => Target;
 
-        public float Value
+        partial void OnValueChanging(float value)
         {
-            get => Target.value;
-            set
-            {
-                if (float.IsNaN(value) || float.IsInfinity(value))
-                {
-                    throw new System.ArgumentOutOfRangeException(nameof(value), "滑动条数值必须为有限值。");
-                }
-
-                var old = Target.value;
-                Target.SetValueWithoutNotify(value);
-                if (!old.Equals(Target.value))
-                {
-                    NotifyChanged();
-                }
-            }
-        }
-
-        public bool Interactable
-        {
-            get => Target.interactable;
-            set
-            {
-                if (Target.interactable == value)
-                {
-                    return;
-                }
-
-                Target.interactable = value;
-                NotifyChanged();
-            }
+            if (float.IsNaN(value) || float.IsInfinity(value))
+                throw new System.ArgumentOutOfRangeException(nameof(value), "控件数值必须为有限值。");
         }
 
         protected override AccessibilityRole DefaultAccessibilityRole => AccessibilityRole.Slider;
@@ -71,26 +45,6 @@ namespace MUI.UGUI
 
             control.value = value;
             return true;
-        }
-
-        protected override void OnInitialize()
-        {
-            target = RequireComponent<Slider>();
-            UnityAction<float> handler = value =>
-            {
-                if (CanReceiveInput(target))
-                {
-                    NotifyChanged(nameof(Value));
-                }
-            };
-            OnDispose(() =>
-            {
-                if (target != null)
-                {
-                    target.onValueChanged.RemoveListener(handler);
-                }
-            });
-            target.onValueChanged.AddListener(handler);
         }
     }
 }

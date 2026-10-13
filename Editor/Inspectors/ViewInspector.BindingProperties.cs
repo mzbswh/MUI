@@ -48,18 +48,11 @@ namespace MUI.Editor
                 SessionState.SetBool(BindingFoldoutKey(control), expanded);
         }
 
-        private static string NativePropertyForContract(Type adapter, Type component, string property)
+        private static bool IsComponent(Type component, string fullName)
         {
-            if (adapter.Assembly != typeof(NativeControl).Assembly && adapter.FullName != "MUI.TMP.NativeTMPText" && adapter.FullName != "MUI.TMP.NativeTMPInputField" && adapter.FullName != "MUI.TMP.NativeTMPDropdown")
-                return null;
-            string native = null;
-            if (property == "Content" && typeof(ITextElement).IsAssignableFrom(adapter))
-                native = "text";
-            else if (property == "Value")
-                native = typeof(IInputFieldElement).IsAssignableFrom(adapter) ? "text" : typeof(UnityEngine.UI.Toggle).IsAssignableFrom(component) ? "isOn" : "value";
-            else if (new[] { "Color", "FontSize", "Sprite", "FillAmount", "Texture", "Interactable", "ReadOnly", "NormalizedPosition", "Velocity", "Horizontal", "Vertical" }.Contains(property))
-                native = char.ToLowerInvariant(property[0]) + property.Substring(1);
-            return native != null && component.GetProperty(native) != null ? native : null;
+            for (var type = component; type != null; type = type.BaseType)
+                if (type.FullName == fullName) return true;
+            return false;
         }
 
         private static Type ExtensionType(string name) => string.IsNullOrEmpty(name) ? null :
@@ -76,7 +69,8 @@ namespace MUI.Editor
         private List<AutoBindingProperty> GetBindingChoices(ControlRow row)
         {
             var view = (View)target;
-            var saved = view.AutoBindingSelections.FirstOrDefault(item => item.Control == row.Name);
+            var saved = view.AutoBindingSelections.FirstOrDefault(item => item.Control == row.Name && item.ComponentType == row.ComponentType?.AssemblyQualifiedName)
+                ?? view.AutoBindingSelections.FirstOrDefault(item => item.Control == row.Name && string.IsNullOrEmpty(item.ComponentType) && view.NativeBindings.Count(binding => binding != null && binding.Name == row.Name) <= 1);
             if (saved != null)
                 return saved.Properties.Select(item => new AutoBindingProperty { Property = item.Property, Source = item.Source, Mode = item.Mode, Native = item.Native, Extension = item.Extension }).ToList();
             if (row.Target == null)
@@ -91,7 +85,7 @@ namespace MUI.Editor
                         if (native && row.Target.GetType().GetProperty(name) == null && extensionMembers.Length > 1)
                             throw new InvalidOperationException("默认扩展属性不唯一，请在页面选择：" + name);
                         var extension = native && row.Target.GetType().GetProperty(name) == null ? extensionMembers.FirstOrDefault() : null;
-                        var choice = NewBindingChoice(row, name, !native && adapter.GetType().GetEvent(name) != null);
+                        var choice = NewBindingChoice(row, name, !native && adapter.GetType().GetEvent(name) != null || native && IsNativeCommand(row.Target.GetType(), name));
                         if (extension != null)
                         {
                             choice.Extension = extension.Extension;
@@ -109,27 +103,25 @@ namespace MUI.Editor
                     property = "value";
                 else if (row.Target is UnityEngine.UI.Toggle)
                     property = "isOn";
-                else if (adapter is ITextElement)
+                else if (row.Target is UnityEngine.UI.Text || IsComponent(row.Target.GetType(), "TMPro.TMP_Text"))
                     property = "text";
-                else if (adapter is IButtonElement)
-                    property = "Clicked";
-                else if (adapter is IImageElement)
+                else if (row.Target is UnityEngine.UI.Button)
+                    property = "onClick";
+                else if (row.Target is UnityEngine.UI.Image)
                     property = "sprite";
-                else if (adapter is IRawImageElement)
+                else if (row.Target is UnityEngine.UI.RawImage)
                     property = "texture";
-                else if (adapter is IScrollElement)
+                else if (row.Target is UnityEngine.UI.ScrollRect)
                     property = "normalizedPosition";
-                else if (adapter is IInputFieldElement)
+                else if (row.Target is UnityEngine.UI.InputField || IsComponent(row.Target.GetType(), "TMPro.TMP_InputField"))
                     property = "text";
-                else if (adapter is IDropdownElement)
+                else if (row.Target is UnityEngine.UI.Dropdown || IsComponent(row.Target.GetType(), "TMPro.TMP_Dropdown"))
                     property = "value";
-                else if (adapter.GetType().GetInterfaces().Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IValueElement<>)))
-                    property = "Value";
                 if (string.IsNullOrWhiteSpace(property))
                     return new List<AutoBindingProperty>();
-                var command = adapter.GetType().GetEvent(property) != null;
+                var command = adapter.GetType().GetEvent(property) != null || IsNativeCommand(row.Target.GetType(), property);
                 var choice = NewBindingChoice(row, property, command, true);
-                choice.Native = !command && adapter.GetType().GetProperty(property) == null;
+                choice.Native = adapter.GetType().GetEvent(property) == null && adapter.GetType().GetProperty(property) == null;
                 if (choice.Native && row.Target.GetType().GetProperty(property) == null)
                 {
                     var extension = BindableMembers(adapter.GetType(), row.Target.GetType()).Where(m => m.Extension != null && m.Name == property).SingleOrDefault();
@@ -154,11 +146,11 @@ namespace MUI.Editor
                 ? (command ? MUIEditorSettings.DefaultCommandMemberNameFormat : MUIEditorSettings.DefaultValueMemberNameFormat)
                 : settings.ResolveMemberNameFormat(row.Target == null ? null : row.Target.GetType(), command);
             var propertyName = string.IsNullOrEmpty(property) ? "" : char.ToUpperInvariant(property[0]) + property.Substring(1);
-            var suffix = command ? (property == "Clicked" ? "" : propertyName) : primary || property == "Content" ? "" : propertyName;
+            var suffix = command ? (property == "onClick" ? "" : propertyName) : primary || property == "Content" ? "" : propertyName;
             return new AutoBindingProperty
             {
                 Property = property,
-                Source = FormatBindingMemberName(format, row.Name, BindingComponentSuffix(row.Target == null ? null : row.Target.GetType()), propertyName, suffix),
+                Source = FormatBindingMemberName(format, row.Name, row.SharedName ? (row.ComponentType ?? row.Target.GetType()).Name : BindingComponentSuffix(row.Target == null ? null : row.Target.GetType()), propertyName, suffix),
                 Mode = property == "Value" || property == "NormalizedPosition" ? BindingMode.TwoWay : BindingMode.OneWay
             };
         }
@@ -213,18 +205,26 @@ namespace MUI.Editor
             return componentType.Name;
         }
 
-        private void SaveBindingChoices(string control, List<AutoBindingProperty> choices, bool separateUndo = true)
+        private void SaveBindingChoices(ControlRow row, List<AutoBindingProperty> choices, bool separateUndo = true)
         {
+            var control = row.Name;
+            var componentType = row.ComponentType?.AssemblyQualifiedName ?? "";
             serializedObject.Update();
             var selections = serializedObject.FindProperty("autoBindingSelections");
             var index = -1;
             for (var i = 0; i < selections.arraySize; i++)
-                if (selections.GetArrayElementAtIndex(i).FindPropertyRelative("Control").stringValue == control)
+                if (selections.GetArrayElementAtIndex(i).FindPropertyRelative("Control").stringValue == control && selections.GetArrayElementAtIndex(i).FindPropertyRelative("ComponentType").stringValue == componentType)
                     index = i;
+            if (index < 0 && ((View)target).NativeBindings.Count(binding => binding != null && binding.Name == control) <= 1)
+                for (var i = 0; i < selections.arraySize; i++)
+                    if (selections.GetArrayElementAtIndex(i).FindPropertyRelative("Control").stringValue == control &&
+                        string.IsNullOrEmpty(selections.GetArrayElementAtIndex(i).FindPropertyRelative("ComponentType").stringValue))
+                        index = i;
             if (index < 0)
                 index = selections.arraySize++;
             var selection = selections.GetArrayElementAtIndex(index);
             selection.FindPropertyRelative("Control").stringValue = control;
+            selection.FindPropertyRelative("ComponentType").stringValue = componentType;
             var properties = selection.FindPropertyRelative("Properties");
             properties.arraySize = choices.Count;
             for (var i = 0; i < choices.Count; i++)
@@ -243,7 +243,7 @@ namespace MUI.Editor
             serializedObject.ApplyModifiedProperties();
             if (separateUndo)
                 Undo.IncrementCurrentGroup();
-            nativeBindingMessage = "绑定选择已修改；点击“生成绑定”更新代码。";
+            nativeBindingMessage = "绑定选择已修改；将自动同步并编译。";
             QueueBindingValidation();
             Repaint();
         }
@@ -276,6 +276,23 @@ namespace MUI.Editor
 
         private static string NativeNotificationProperty(Type component, string property) => NativeNotification(component, property)?.Event;
 
+        private static bool IsNativeCommand(Type component, string member)
+        {
+            var type = component.GetProperty(member)?.PropertyType ?? component.GetField(member)?.FieldType;
+            return IsUnityEvent(type);
+        }
+
+        private static bool IsUnityEvent(Type type)
+        {
+            for (var current = type; current != null; current = current.BaseType)
+                if (current.Namespace == "UnityEngine.Events" &&
+                    (current == typeof(UnityEngine.Events.UnityEvent) || current.IsGenericType &&
+                    new[] { typeof(UnityEngine.Events.UnityEvent<>), typeof(UnityEngine.Events.UnityEvent<,>),
+                        typeof(UnityEngine.Events.UnityEvent<,,>), typeof(UnityEngine.Events.UnityEvent<,,,>) }.Contains(current.GetGenericTypeDefinition())))
+                    return true;
+            return false;
+        }
+
         internal sealed class BindingMember
         {
             public MemberInfo Member;
@@ -283,6 +300,9 @@ namespace MUI.Editor
             public string Extension;
             public bool Notifies => Member.IsDefined(typeof(NotifiesChangeAttribute), true);
             public string Reason;
+            public bool Command => Member is EventInfo || Native &&
+                (Member is PropertyInfo signal && IsUnityEvent(signal.PropertyType) ||
+                 Member is FieldInfo field && IsUnityEvent(field.FieldType));
             public bool ReadOnly => Member is PropertyInfo property && (property.SetMethod == null || !property.SetMethod.IsPublic);
             public string Name => Member.Name;
         }
@@ -297,7 +317,7 @@ namespace MUI.Editor
             foreach (var type in new[] { adapterType, componentType }.Concat(extensions))
                 foreach (var property in type.GetProperties(BindingFlags.Instance | BindingFlags.Public))
                 {
-                    if (type == adapterType && (NativePropertyForContract(adapterType, componentType, property.Name) != null || new[] { "Name", "Target", "IsAlive" }.Contains(property.Name)))
+                    if (type == adapterType && (new[] { "Name", "Target", "IsAlive", "ComponentType" }.Contains(property.Name)))
                         continue;
                     var reason = property.GetIndexParameters().Length != 0 ? "索引器需要参数" :
                         property.IsDefined(typeof(ObsoleteAttribute), true) ? "已弃用" :
@@ -305,6 +325,10 @@ namespace MUI.Editor
                         property.PropertyType.IsByRef || property.PropertyType.IsPointer || property.PropertyType.ContainsGenericParameters || !property.PropertyType.IsVisible ? "类型不能用于生成属性" : null;
                     result.Add(new BindingMember { Member = property, Native = type == componentType, Extension = extensions.Contains(type) ? type.FullName : null, Reason = reason });
                 }
+            result.AddRange(componentType.GetFields(BindingFlags.Instance | BindingFlags.Public)
+                .Where(field => IsUnityEvent(field.FieldType))
+                .Select(field => new BindingMember { Member = field, Native = true,
+                    Reason = field.IsDefined(typeof(ObsoleteAttribute), true) ? "已弃用" : null }));
             result.AddRange(adapterType.GetEvents(BindingFlags.Instance | BindingFlags.Public)
                 .Where(item => item.EventHandlerType == typeof(Action) && adapterType.GetProperty("Interactable") != null)
                 .Select(item => new BindingMember { Member = item }));
@@ -313,12 +337,12 @@ namespace MUI.Editor
 
         private void DrawBindingProperties(ControlRow row)
         {
-            if (row.IsElementBinding || row.Target == null || !IsBindingExpanded(row.Name))
+            if (row.IsElementBinding || row.Target == null || !IsBindingExpanded(row.Key))
                 return;
             try
             {
                 var choices = GetBindingChoices(row);
-                var authored = selected < 0 ? new List<BindingEntry>() : manifests[selected].Entries.Where(entry => entry.ElementName == row.Name && !IsAutoBinding(entry)).ToList();
+                var authored = selected < 0 ? new List<BindingEntry>() : manifests[selected].Entries.Where(entry => MatchesEntry(row, entry) && !IsAutoBinding(entry)).ToList();
                 using (var adapter = NativeControl.Create(row.Name, row.Target))
                 {
                     var members = BindableMembers(adapter.GetType(), row.Target.GetType());
@@ -326,7 +350,7 @@ namespace MUI.Editor
                     {
                         using (new EditorGUILayout.HorizontalScope())
                         {
-                            GUILayout.Label(new GUIContent("控件属性 → ViewModel 属性名", "右侧输入框填写生成的代码成员名，例如 text → Title，代码使用 ViewModel.Title。修改后重新生成绑定才会更新代码。"), EditorStyles.miniLabel);
+                            GUILayout.Label(new GUIContent("控件属性 → ViewModel 属性名", "右侧输入框填写生成的代码成员名，例如 text → Title，代码使用 ViewModel.Title。修改后自动同步并编译。"), EditorStyles.miniLabel);
                             if (GUILayout.Button(new GUIContent("添加属性", "搜索原生组件的全部公开实例属性，以及扩展属性和控件事件；只读属性生成实时读取入口。"), EditorStyles.miniButton, GUILayout.Width(80)))
                             {
                                 var available = members.Where(member => !choices.Any(c => c.Property == member.Name && c.Native == member.Native && (c.Extension ?? "") == (member.Extension ?? "")) && !authored.Any(entry => entry.TargetProperty == member.Name && (entry.ComponentType != null) == member.Native)).ToList();
@@ -337,13 +361,13 @@ namespace MUI.Editor
                                     var current = GetBindingChoices(row);
                                     if (current.Any(c => c.Property == member.Name && c.Native == member.Native && (c.Extension ?? "") == (member.Extension ?? "")))
                                         return;
-                                    var choice = NewBindingChoice(row, member.Name, member.Member is EventInfo);
+                                    var choice = NewBindingChoice(row, member.Name, member.Command);
                                     choice.Native = member.Native;
                                     choice.Extension = member.Extension;
                                     if (member.Native)
                                         choice.Mode = NativeNotificationProperty(row.Target.GetType(), member.Name) == null ? BindingMode.OneWay : BindingMode.TwoWay;
                                     current.Add(choice);
-                                    SaveBindingChoices(row.Name, current);
+                                    SaveBindingChoices(row, current);
                                 }));
                             }
                         }
@@ -367,8 +391,8 @@ namespace MUI.Editor
                                 var cells = BindingTableRow(tableRow++);
                                 GUI.Label(cells[0], new GUIContent(choice.Property, choice.Property + "\n" + (member != null && member.Member is PropertyInfo property ? property.PropertyType.FullName : "命令事件")));
                                 EditorGUI.BeginChangeCheck();
-                                choice.Source = EditorGUI.TextField(cells[1], new GUIContent("", "生成的 ViewModel 属性名，初始名称由全局命名模板决定，例如 ProgressSld。修改即时保存，支持撤销；重新生成绑定后生效。"), choice.Source);
-                                if (member != null && member.Member is EventInfo)
+                                choice.Source = EditorGUI.TextField(cells[1], new GUIContent("", "生成的 ViewModel 属性名，初始名称由全局命名模板决定，例如 ProgressSld。修改即时保存，支持撤销；自动同步并编译后生效。"), choice.Source);
+                                if (member != null && member.Command)
                                     GUI.Label(cells[2], "命令", EditorStyles.miniLabel);
                                 else if (member != null && member.ReadOnly)
                                     GUI.Label(cells[2], new GUIContent("实时读取", "绑定期间读取当前值；引用对象可访问其内部属性。不是可写绑定，也不自动通知变化。"), EditorStyles.miniLabel);
@@ -379,11 +403,11 @@ namespace MUI.Editor
                                 else
                                     choice.Mode = BindingModePopup.Draw(cells[2], choice.Mode);
                                 if (EditorGUI.EndChangeCheck())
-                                    SaveBindingChoices(row.Name, choices);
+                                    SaveBindingChoices(row, choices);
                                 if (GUI.Button(cells[3], new GUIContent("×", "移除此属性选择，可撤销；重新生成绑定后才会移除生成成员，不删除控件或手写源码。"), EditorStyles.miniButton))
                                 {
                                     choices.RemoveAt(i);
-                                    SaveBindingChoices(row.Name, choices);
+                                    SaveBindingChoices(row, choices);
                                     break;
                                 }
                             }
@@ -391,7 +415,7 @@ namespace MUI.Editor
                                 EditorGUILayout.HelpBox("适配器不再支持 " + choice.Property + "，请移除此绑定或调整适配器。", MessageType.Error);
                             else if (member.Reason != null)
                                 EditorGUILayout.HelpBox(choice.Property + "：" + member.Reason, MessageType.Error);
-                            else if (choices.Count(item => item.Source == choice.Source) > 1 || ((View)target).AutoBindingSelections.Any(selection => selection.Control != row.Name && selection.Properties.Any(item => item.Source == choice.Source)))
+                            else if (choices.Count(item => item.Source == choice.Source) > 1 || ((View)target).AutoBindingSelections.Any(selection => (selection.Control != row.Name || selection.ComponentType != row.ComponentType?.AssemblyQualifiedName) && selection.Properties.Any(item => item.Source == choice.Source)))
                                 EditorGUILayout.HelpBox("生成名称重复：" + choice.Source, MessageType.Error);
                             else if (!PageSourceTemplate.IsIdentifier(choice.Source))
                                 EditorGUILayout.HelpBox("ViewModel 成员名称不是有效的 C# 标识符。", MessageType.Error);

@@ -1,12 +1,12 @@
 using System;
 using UnityEngine;
-using UnityEngine.Events;
 using UnityEngine.UI;
 
 namespace MUI.UGUI
 {
     /// <summary>普通 ScrollRect 位置绑定，不能用于虚拟列表的 ScrollRect。</summary>
     [DisallowMultipleComponent, RequireComponent(typeof(ScrollRect))]
+    [GenerateControlEvent(nameof(Target), "onValueChanged", Handler = nameof(PublishPosition))]
     public sealed partial class ScrollRectElement : Element, IBindingPropertyPolicy
     {
         private ScrollRect target;
@@ -75,29 +75,7 @@ namespace MUI.UGUI
             lastNotified = target.normalizedPosition;
             lastContentPosition = target.content.anchoredPosition;
             lastVelocity = target.velocity;
-            UnityAction<Vector2> changed = value =>
-            {
-                if (!IsAlive || !isActiveAndEnabled || target == null || !target.isActiveAndEnabled)
-                {
-                    return;
-                }
 
-                var owner = GetComponentInParent<View>(true);
-                if (owner != null && !owner.IsInputEnabled)
-                {
-                    return;
-                }
-
-                PublishPosition();
-            };
-            OnDispose(() =>
-            {
-                if (target != null)
-                {
-                    target.onValueChanged.RemoveListener(changed);
-                }
-            });
-            target.onValueChanged.AddListener(changed);
         }
 
         private void PublishPosition()

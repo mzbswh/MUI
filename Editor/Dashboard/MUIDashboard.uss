@@ -3,8 +3,6 @@
 .mui-dashboard-toolbar { flex-direction: row; flex-wrap: wrap; align-items: center; margin-bottom: 4px; }
 .mui-dashboard-toolbar > Button { min-height: 24px; margin-right: 4px; margin-bottom: 3px; }
 .mui-dashboard-titlebar { margin-bottom: 8px; }
-.mui-dashboard-language { width: 280px; min-width: 210px; }
-.mui-dashboard-language > .unity-base-field__label { min-width: 80px; }
 .mui-dashboard-hosts { flex-grow: 1; flex-shrink: 1; flex-basis: 200px; min-width: 160px; margin-right: 6px; }
 .mui-dashboard-hosts .unity-base-popup-field__text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .mui-dashboard-hosts > .unity-base-field__label { min-width: 50px; }
@@ -30,4 +28,3 @@
 .mui-dashboard-hidden { display: none; }
 .mui-dashboard-compact .mui-dashboard-sidebar { min-width: 0; padding-right: 0; padding-bottom: 8px; }
 .mui-dashboard-compact .mui-dashboard-details { padding-left: 0; padding-top: 8px; }
-.mui-dashboard-compact .mui-dashboard-language { width: 245px; min-width: 200px; }

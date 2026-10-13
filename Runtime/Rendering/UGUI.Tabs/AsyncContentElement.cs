@@ -4,14 +4,14 @@ using System.Threading.Tasks;
 using MUI.Resources;
 using MUI.Tabs;
 using UnityEngine;
-using UnityEngine.Events;
 using UnityEngine.UI;
 
 namespace MUI.UGUI
 {
     /// <summary>只负责内容区加载和错误表现；TabBar 必须位于独立的兄弟区域。</summary>
     [DisallowMultipleComponent]
-    public sealed class AsyncContentElement : Element, IElementBoundary
+    [GenerateControlEvent(nameof(RetryControl), "onClick", Handler = nameof(Retry), Optional = true)]
+    public sealed partial class AsyncContentElement : Element, IElementBoundary
     {
         [SerializeField]
         private Transform contentRoot;
@@ -125,27 +125,6 @@ namespace MUI.UGUI
             ValidateOverlay(loadingOverlay);
             ValidateOverlay(errorLabel == null ? null : errorLabel.gameObject);
             ValidateOverlay(retryButton == null ? null : retryButton.gameObject);
-            UnityAction retry = () =>
-            {
-                if (!CanReceiveInput(retryButton))
-                {
-                    return;
-                }
-
-                if (controller != null)
-                {
-                    _ = ObserveAsync(controller.RetryAsync());
-                }
-                else
-                {
-                    RetryRequested?.Invoke();
-                }
-            };
-            if (retryButton != null)
-            {
-                retryButton.onClick.AddListener(retry);
-            }
-
             OnDispose(() =>
             {
                 if (model != null)
@@ -153,16 +132,21 @@ namespace MUI.UGUI
                     model.PropertyChanged -= OnStateChanged;
                 }
 
-                if (retryButton != null)
-                {
-                    retryButton.onClick.RemoveListener(retry);
-                }
-
                 model = null;
                 controller = null;
                 RetryRequested = null;
             });
             Render();
+        }
+
+        private Button RetryControl => retryButton;
+
+        private void Retry()
+        {
+            if (controller != null)
+                _ = ObserveAsync(controller.RetryAsync());
+            else
+                RetryRequested?.Invoke();
         }
 
         private void ValidateOverlay(GameObject overlay)

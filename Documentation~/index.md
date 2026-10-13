@@ -2,7 +2,7 @@
 
 ## 安装范围
 
-目标版本为 Unity 2022.3.62f3。通过 Package Manager 的 Add package from disk 选择包根目录的 package.json；运行时代码保留在 Packages 引用中，示例由 Package Manager 的 Samples 独立导入。
+目标版本为 Unity 2022.3.62f3。通过 Package Manager 的 Add package from disk 选择包根目录的 package.json；运行时代码保留在 Packages 引用中，教学示例由 Package Manager 的 Samples 一次导入 MUI Examples；打开 Tools/MUI/示例 按课学习。每课提供配置、源码和练习说明，参见[示例总览](../Samples~/README.md)。
 
 Core 不引用 Unity；Resources、Navigation 与 Widgets 分别定义资源凭证、页面导航和子视图生命周期。MUI.UGUI 提供原生 uGUI 的 Element 适配。TMP 与 Input System 位于独立程序集，项目按需安装对应包；基础页面不要求这些可选依赖。
 
@@ -25,11 +25,11 @@ View Inspector 的转场设置提供 `Inherit`（继承全局）、`Disabled`（
 
 可在项目可选程序集内实现 Tween、Animator 或 Timeline 适配器；MUI 核心不依赖这些播放器，当前包内提供曲线实现和自定义接入协议，未内置第三方适配器。正常打开使用句柄的 `WaitForEnterAsync()` 等待视觉完成，关闭使用 `WaitForExitAsync()`；`OpenAsync()` 仍只等待就绪，不等待动画。
 
-## 从 Basic 开始
+## 从实际页面开始
 
-导入 Basic Example 并打开 Basic.unity。BasicPageViewModel 声明标题绑定与 Confirm 命令，BasicView.prefab 包含名为 Title 和 Confirm 的 Element。导入的 BasicMUISettings 可作为项目唯一全局配置；页面资源标识 BasicView 直接对应 Resources/BasicView.prefab，无需在 UIHost 登记。BasicExampleModule 声明生成注册入口，BasicDemo 负责注册、解析配置策略、初始化 UIHost 的默认提供方并调用 OpenAsync。
+导入 MUI Examples 并打开 Scenes/MUIExamples.unity。SettingsViewModel 声明表单属性、校验与命令，Resources/MUIExamples/Settings.prefab 保存 View、Element 和原生控件引用。ExampleModule 声明生成注册入口，ExampleWorkbench 注册绑定、初始化 UIHost 并打开页面。工作台 Canvas 使用排序 0；页面通过 RenderOrderOptions 使用 100 以上的独立区间，避免被背景覆盖。
 
-普通页面不要求 Presenter；需要跨服务协调时再引入。不要手写或编辑生成的绑定订阅、命令属性和 PageDefinition 接线。若看不到生成类型，先检查 Console 中的声明诊断，以及包内 Analyzers 的 RoslynAnalyzer 导入标签。
+先读[表单教程](../Samples~/Scripts/Settings/README.md)，再学习导航、Widget、集合、资源与各功能组件。界面直接在 Prefab 中编辑；不要把布局构造或自动化巡检混进业务启动脚本。普通页面无需 Presenter，异步准备或跨服务协调时按需引入。
 
 ## 项目 UI 配置
 
@@ -78,7 +78,7 @@ var route = InventoryViewModelDefinition.Create(
 
 ## MUI 调试窗口
 
-打开 `Tools/MUI/控制台 (Dashboard)`，或点击 UIHost Inspector 的“打开控制台”。窗口顶部可切换编辑器语言。选择当前场景的宿主，进入 Play Mode 并完成初始化后点击“采集运行状态”。默认手动采集，可启用每 0.5 秒自动刷新；未初始化时提供引导并禁用运行操作。
+打开 `Tools/MUI/控制台`，或点击 UIHost Inspector 的“打开控制台”。编辑器界面默认中文。选择当前场景的宿主，进入 Play Mode 并完成初始化后点击“采集运行状态”。默认手动采集，可启用每 0.5 秒自动刷新；未初始化时提供引导并禁用运行操作。
 
 UIHost Inspector 只提供只读全局 Settings、View Root、简短状态及 Dashboard 快捷入口；页面资源通过标识加载，不在宿主维护目录；自动更新界面统一在 MUISettings 的“运行设置”中配置，初始化后配置引用不可编辑。完整导航快照与生命周期追踪统一在 Dashboard 操作，快照上限为 1—4096。
 
@@ -88,27 +88,11 @@ UIHost Inspector 只提供只读全局 Settings、View Root、简短状态及 Da
 
 状态采集不启动宿主，也不打开、关闭页面。导航门控反映策略账本，控件实际点击资格需结合原生页面输入与射线检查；快照截断时会标明。页面目录校验仍只覆盖项目通过 `UIBuildValidation.RegisterCatalog` 登记的页面，不会把所有 Prefab 自动视为已验证。
 
-### 编辑器语言
+### 编辑器显示语言
 
-在 Dashboard 的“配置与校验”页选择“编辑器语言”。默认简体中文，内置英文；选择保存在当前用户的 EditorPrefs 中，已打开的 MUI 窗口和 Inspector 随之刷新，不改变 MUISettings 或游戏运行时语言。菜单入口使用固定中英双语，因为 Unity 的 MenuItem 和 CreateAssetMenu 路径必须是编译期常量。Unity 自身的原生控件、对象选择器等继续遵循 Unity 的语言设置。
+MUI 控制台、窗口和 Inspector 固定使用简体中文，不再显示语言下拉框或语言刷新按钮，也不读取旧的 `MUI.Editor.Language` 偏好。Unity 自身的原生控件、对象选择器仍遵循 Unity 的语言设置；代码标识、路由键、资源路径和真实枚举值保持原样。
 
-语言由 `Editor/Localization/Languages/*.mui-language.json` 提供，不使用语言枚举。新增语言可以复制英文资源到项目 Assets 目录，修改 `id`、`displayName` 和词条的 `text`，也可以先提供部分翻译并声明回退语言：
-
-```json
-{
-  "id": "fr-FR",
-  "displayName": "Français",
-  "fallbackLanguageId": "en-US",
-  "entries": [
-    { "key": "language.label", "text": "Langue de l’éditeur" },
-    { "key": "language.reload", "text": "Recharger les langues" }
-  ]
-}
-```
-
-文件名须以 `.mui-language.json` 结尾，导入后自动加入语言下拉框；也可点击“刷新语言资源”。每种语言的 `id`、同一资源内的词条 `key` 必须唯一。保留原词条键及 `{0}`、`{1}` 等格式占位符，参数顺序可调整。缺少的词条沿 `fallbackLanguageId` 查找，最后回退到内置中文；回退循环不会导致无限递归，格式错误的词条也会继续尝试回退。未知字段或枚举使用原名称，路由键、资源名、序列化字段名和真实枚举值不翻译。
-
-自定义编辑器程序集引用 `MUI.Editor.Localization`，通过 `MUIEditorLocalization.Get(key)` 或 `Format(key, args)` 取词；UITK 的 `@key` 文本可用 `BindTree(root)` 绑定，动态内容用 `Track(root, refresh)` 跟踪语言切换。诊断词条可额外声明 `source`，将已有框架消息映射到稳定键；未知项目诊断保持原文。新增语言无需修改 C# 语言列表，也无需安装 Unity Localization 包。
+中文词条仍集中在 `Editor/Localization/Languages/zh-CN.mui-language.json` 中维护，词条文件变化会刷新界面。自定义编辑器继续通过 `MUIEditorLocalization.Get/Format` 取词，通过 `BindTree/Track` 跟踪资源更新。现有回退资源保留供缺词诊断使用，不作为可选语言入口。
 
 ## 异步完成点
 
@@ -133,7 +117,7 @@ InputGate 控制新输入准入；临时关门不自动取消已接纳的业务�
 
 ## 公共文本控件契约
 
-仅绑定公共内容时，使用 Core 的 `ITextElement`、`IInputFieldElement` 和 `IDropdownElement` 声明目标。例如 `[Bind("Title", nameof(ITextElement.Content))]` 与 `[Bind("Name", nameof(IInputFieldElement.Value), bindingMode: BindingMode.TwoWay)]`。Legacy 和 TMP 适配实现同一接口；替换 Prefab 中的原生控件和对应适配后，模型及生成绑定无需修改。标识缺失或同一标识命中多个兼容适配时仍明确报错，不自动添加后端组件。字体、排版及后端输入配置继续使用具体适配类型。
+普通组件成员通过 Prefab 关联生成。少量代码绑定直接声明原生类型，例如 `[Bind("Title", nameof(UnityEngine.UI.Text.text))]` 与 `[Bind("Name", nameof(TMPro.TMP_InputField.text), bindingMode: BindingMode.TwoWay)]`；绑定名与组件类型共同确定目标，不再维护每种控件的属性接口。
 
 输入框 `CommitMode` 默认 `TextInputCommitMode.OnChange`，原生编辑变化立即通知反向绑定；`OnEndEdit` 只在有效的原生编辑结束时发布 Value，再派发 EditingEnded，失去焦点也属于编辑结束。模型到控件的更新始终生效，切换模式不提交已有草稿。门控关闭、换绑或页面退役期间的结束事件不执行业务写入。TMP 的 Submitted 仍是其后端专属通知，不代表输入法组合文本已经提交。
 
@@ -191,7 +175,7 @@ Element 提供稳定 `CleanupResponsibility`；重复 `Dispose` 或 `DisposeAsyn
 
 ```csharp
 [ObservableProperty]
-[Bind("Name", nameof(IInputFieldElement.Value), bindingMode: BindingMode.TwoWay,
+[Bind("Name", nameof(UnityEngine.UI.InputField.text), bindingMode: BindingMode.TwoWay,
     SourcePath = "Profile.Name", NullValue = "")]
 private WidgetModel child;
 ```
@@ -385,7 +369,7 @@ Unity 2022.3.62f3 的真实窗口 IL2CPP 观察已覆盖上述两种 Canvas 模�
 
 ## 页面向导与 Editor 校验
 
-`Tools/MUI/页面向导 (Page Wizard)` 从全局配置读取全部页面行为预设（包括自定义项），通过下拉框选择预设，下方仅显示当前选中项继承项目默认规则后的实际层级、遮挡、输入、焦点、模态及返回策略。无配置时读取框架内置预设列表。预设删除或改名后需重新选择，不能沿用失效名称生成代码。向导自动使用全局 MUISettings 预览策略；生成代码通过 `ViewModelDefinition.CreateDefinition()` 自动读取全局配置，也可传入 `ViewModelDefinition.CreateDefinition(overrides: overrides)` 覆盖该页面的具体行为。不接收输入的预设生成无关闭按钮和射线目标的 Prefab，由业务保存打开句柄并显式关闭；接收输入的预设生成关闭按钮。预设解析为现有 PagePolicy，不引入运行时页面类型；默认只生成 ViewModel 源码，不要求 Presenter。向导将预设记录在 `UIPage.PolicyPreset`，编译时由 Source Generator 生成 `ViewModelDefinition.CreateDefinition()`，不再创建独立的 `Page.cs`。已有目录可复用，目标文件已存在时拒绝覆盖。
+`Tools/MUI/页面向导` 从全局配置读取全部页面行为预设（包括自定义项），通过下拉框选择预设，下方仅显示当前选中项继承项目默认规则后的实际层级、遮挡、输入、焦点、模态及返回策略。无配置时读取框架内置预设列表。预设删除或改名后需重新选择，不能沿用失效名称生成代码。向导自动使用全局 MUISettings 预览策略；生成代码通过 `ViewModelDefinition.CreateDefinition()` 自动读取全局配置，也可传入 `ViewModelDefinition.CreateDefinition(overrides: overrides)` 覆盖该页面的具体行为。不接收输入的预设生成无关闭按钮和射线目标的 Prefab，由业务保存打开句柄并显式关闭；接收输入的预设生成关闭按钮。预设解析为现有 PagePolicy，不引入运行时页面类型；默认只生成 ViewModel 源码，不要求 Presenter。向导将预设记录在 `UIPage.PolicyPreset`，编译时由 Source Generator 生成 `ViewModelDefinition.CreateDefinition()`，不再创建独立的 `Page.cs`。已有目录可复用，目标文件已存在时拒绝覆盖。
 
 新建 UGUI/TMP 页面将标题和关闭按钮的自动绑定声明、初始标题及 Inspector 属性选择保存在 Prefab 中。编译器生成 `Title`、`CloseCommand` 和绑定代码；ViewModel 仅保留 `partial void OnClose(CommandContext context)` 的关闭逻辑，无输入页面不生成关闭命令。已有 Prefab 和自定义 Element 模板仍保留显式绑定，不改写已有资产。普通命名空间直接输出为 `Game.UI`，仅 C# 关键字段使用 `@` 转义。
 
@@ -446,11 +430,34 @@ Inspector 只读取 Prefab 的显式 ViewModel 关联，不使用 GUID、Resourc
 
 ### 原生控件绑定与代码双向声明
 
+代码声明可直接引用原生组件的公开实例属性或字段，生成器推导组件类型并按需生成、缓存强类型访问器：
+
+```csharp
+[ObservableProperty]
+[Bind("PlayerName", nameof(UnityEngine.UI.InputField.lineType))]
+private UnityEngine.UI.InputField.LineType nameLineType;
+
+[ObservableProperty]
+[Bind("PlayerName", nameof(UnityEngine.UI.InputField.text), bindingMode: BindingMode.TwoWay)]
+private string playerName;
+```
+
+View 按“绑定名称 + 组件类型”保存原生组件引用，无需挂 InputFieldElement。同一节点上的不同组件可共用绑定名，例如 `Bind("Preview", nameof(UnityEngine.UI.Text.enabled))` 与 `Bind("Preview", nameof(UnityEngine.UI.LayoutElement.enabled))`。编译器将组件类型传入运行时索引；相同属性名不会串到其他组件。编辑器按名称与类型筛选，唯一候选自动关联；同类型有多个候选时必须手动指定组件引用，已保存的有效引用优先。属性选择、折叠状态和自动声明也按名称与类型隔离；同名控件的默认生成成员名带组件类型，仍可手动修改成员名。
+
+`TMP_Text` 等基类契约可以引用具体派生组件；运行时优先使用明确保存的契约类型，缺少精确条目时只接受唯一的可赋值类型候选。自定义属性扩展的原生类型参与相同的选择流程。命令仍使用事件契约；同名目标存在多个实现时，可通过 `BindCommand.ComponentType = typeof(MyComponent)` 指定组件类型。
+
+普通属性遵循原生 setter 语义；输入值复用内置事件映射与无通知 setter。没有通知映射的原生属性只允许 OneWay / OneTime，避免声称能自动观察任意组件变化。转换器、SourcePath 和 ValidationProperty 仍可组合使用。
+
+自定义行为通过 `[ControlPropertyExtension]` / `ControlPropertyExtension<TComponent>` 暴露属性，代码直接使用 `nameof(MyProperties.CustomValue)`；生成器推导组件类型。双向扩展属性须标记 `[NotifiesChange]` 并实际发送通知。继续支持自定义 NativeControl 注册和手写 Element 的特殊属性。
+
+框架 Element 的普通转发通过 `[GenerateControlProperty(nameof(Target), "lineType", "LineType", NotifyAll = true)]` 声明；类型从 Target 的原生属性推导，不维护重复 getter/setter。可实现 `partial void OnLineTypeChanging(UnityEngine.UI.InputField.LineType value)` 校验和 `partial void OnLineTypeChanged()` 联动；NotifyAll 用于原生 setter 会联动其他属性的情形。自定义 Element 同样可使用此生成入口，需为 partial class 并提供负责存活检查的组件 getter。资源所有权、输入提交时机及自定义 setter 保持显式实现，不通过通用转发绕过它们。
+
+
 全局 MUI Settings 的“控件绑定规则”配置前缀与类型，默认 `Img_` → Image、`Txt_` → Text/TMP、`Btn_` → Button。前缀后的部分作为绑定名称，例如 `Img_Icon` 对应 `Icon`；不带前缀的装饰节点不会收集。每个前缀可多选组件类型；每次取最长前缀并继续解析后续前缀。规则支持修改、添加和删除，名称必须满足生成代码的 C# 标识符要求。
 
 View 的“绑定与校验”统一展示规则扫描结果及 ViewModel 已有 `[Bind]` / `[BindCommand]` 声明。名称、引用、状态、定位、源码放在同一行区域。已有有效引用优先保留；新增目标按前缀、绑定名称和类型自动匹配，不会靠猜测消除重名。代码声明在检查器初始化（含编译后重建）或切换契约时自动同步唯一匹配，可撤销；不在重绘时写入。缺失目标可以拖入并立即记录，已有非空引用不会被自动替换。规则扫描候选在生成绑定时记录，不再提供独立的保存引用按钮。Element 组件契约只读显示，不隐式删除组件或改写源码。
 
-点击“生成绑定”保存控件引用和自动声明，并请求重新编译。匹配到的文本默认生成同名字符串属性，图片生成 Sprite 属性，滑块/开关/输入框/下拉框生成 Value 对应的属性，滚动区域生成 Vector2 属性。输入类默认双向绑定，显示类默认单向绑定。全局命名规则可覆盖属性或 Action 事件名、绑定方向；属性类型从适配器推导，自定义组件需要注册适配器。
+关联 Prefab 后，Inspector 修改绑定配置会自动保存控件引用和生成声明，并请求重新编译；“生成绑定”可用于主动重新同步。匹配到的文本默认生成同名字符串属性，图片生成 Sprite 属性，滑块/开关/输入框/下拉框生成 Value 对应的属性，滚动区域生成 Vector2 属性。输入类默认双向绑定，显示类默认单向绑定。全局命名规则可覆盖属性或 Action 事件名、绑定方向；属性类型从适配器推导，自定义组件需要注册适配器。
 
 声明保存在 Prefab，`.AutoBindings.g.cs` 和 `.Bindings.g.cs` 由编译器生成，不向 Assets 写 C# 文件，也不修改手写 ViewModel。编译后 Presenter 可直接写 `ViewModel.Title = "背包";`、`ViewModel.ItemList = new Vector2(0, 1);`。在 IDE 对属性转到定义可查看生成文档；Unity 的源文件打开接口不能直接打开编译器虚拟文档。生成日志会列出文档名、成员和调用方式；“已请求编译”不等于编译成功。
 
@@ -462,7 +469,7 @@ partial void OnClose(CommandContext context) => context.RequestClose();
 
 没有实现钩子时点击不执行业务操作；可直接手写 `[Command]` / `[BindCommand]` 接管该控件。已有手写绑定按目标属性或事件优先，包括转换器和路径；同一控件的其他属性仍可自动生成。重复控件名、成员名冲突和不支持的适配属性会报错。旧业务中的 UI/Controls 直接调用需要改成更新 ViewModel。
 
-在 View Inspector 展开控件后，点击“添加属性”搜索适配器的可绑定属性或事件。默认只列出已选项，可以编辑 ViewModel 名称、绑定方向，或移除不需要的属性。例如 Title 选择 text → Title、color → TitleColor、fontSize → TitleFontSize；类型沿用实际组件（Text.fontSize 为 int，TMP.fontSize 为 float）。属性名按当前声明精确匹配，不再自动改写旧属性别名。代码声明单独显示并可定位源码。选择保存在 Prefab，支持 Undo；修改选择后点击“生成绑定”更新编译器文档。生成时读取文本、布尔值、int/float、Color 和 Vector2 的控件当前值作为初值；资源引用等其他类型仍需业务赋值。移除已生成成员后，业务中仍使用该成员的代码需要同步调整。
+在 View Inspector 展开控件后，点击“添加属性”搜索适配器的可绑定属性或事件。默认只列出已选项，可以编辑 ViewModel 名称、绑定方向，或移除不需要的属性。例如 Title 选择 text → Title、color → TitleColor、fontSize → TitleFontSize；类型沿用实际组件（Text.fontSize 为 int，TMP.fontSize 为 float）。属性名按当前声明精确匹配，不再自动改写旧属性别名。代码声明单独显示并可定位源码。选择保存在 Prefab，支持 Undo；修改选择后自动同步并编译，编译时校验组件成员、类型、方向及命令契约。生成时读取文本、布尔值、int/float、Color 和 Vector2 的控件当前值作为初值；资源引用等其他类型仍需业务赋值。移除已生成成员后，业务中仍使用该成员的代码需要同步调整。
 
 属性选择器列出原生组件的全部公开实例属性（含继承属性），支持按名称、属性类型和声明类型搜索，多个关键词用空格分隔；只读属性可选择为实时读取入口；索引器和弃用成员默认隐藏，可通过“显示不可用 / 已弃用属性”查看原因。仅选中的原生属性生成强类型属性包装，包装实例由框架缓存并随 View 释放，无需业务 new，也不使用运行时属性反射。全局命名规则可设置默认属性列表（逗号分隔，如 text, color），仅影响未保存选择的控件。
 
@@ -476,23 +483,23 @@ partial void OnClose(CommandContext context) => context.RequestClose();
 
 ```csharp
 [ObservableProperty]
-[Bind("Title", nameof(ITextElement.Content))]
+[Bind("Title", nameof(UnityEngine.UI.Text.text))]
 private string title;
 
 [ObservableProperty]
-[Bind("Volume", nameof(IValueElement<float>.Value), bindingMode: BindingMode.TwoWay)]
+[Bind("Volume", nameof(UnityEngine.UI.Slider.value), bindingMode: BindingMode.TwoWay)]
 private float volume;
 
 [ObservableProperty]
-[Bind("ItemList", nameof(MUI.UGUI.IScrollElement.NormalizedPosition), bindingMode: BindingMode.TwoWay)]
+[Bind("ItemList", nameof(UnityEngine.UI.ScrollRect.normalizedPosition), bindingMode: BindingMode.TwoWay)]
 private UnityEngine.Vector2 listPosition;
 
 [Command]
-[BindCommand("Close", nameof(IButtonElement.Clicked))]
+[BindCommand("Close", nameof(UnityEngine.UI.Button.onClick))]
 private void Close(CommandContext context) => context.RequestClose();
 ```
 
-Presenter 修改 `ViewModel.Title`、`ViewModel.ListPosition` 等状态，也可声明业务命令，不持有原生控件。简单页面可不编写 Presenter。Text/TMP 共享 ITextElement；按钮使用 IButtonElement；Slider/Scrollbar 使用 IValueElement<float>，Toggle 使用 IValueElement<bool>；UGUI/TMP 输入框、下拉框分别使用 IInputFieldElement、IDropdownElement。图片、RawImage、滚动区域契约位于 MUI.UGUI。输入框支持逐字或结束编辑后回写；下拉框支持文本选项。ScrollRect 包含归一化位置、速度和方向；它不是虚拟化列表，列表数据与资源加载继续使用已有列表/资源能力。
+Presenter 修改 `ViewModel.Title`、`ViewModel.ListPosition` 等状态，也可声明业务命令，不持有原生控件。简单页面可不编写 Presenter。Text、TMP、Slider、Toggle、输入框、下拉框、图片和滚动区域均直接按原生组件类型生成成员访问；按钮生成 onClick 订阅与 interactable 状态写入。输入框支持逐字或结束编辑后回写；下拉框支持文本选项。ScrollRect 包含归一化位置、速度和方向；它不是虚拟化列表，列表数据与资源加载继续使用已有列表/资源能力。
 
 模型写入使用无通知原生 setter 或同步保护，不发布用户操作命令。有效交互先发布 PropertyChanged，再发布业务事件；门控检查 View、Host 和控件交互状态。绑定上下文负责激活阶段的业务解绑，适配器负责自身原生事件清理，不通过 RemoveAllListeners 清除他人的监听。绕过适配器直接修改 Text、Image 等原生属性不会自动通知模型。
 
@@ -762,7 +769,7 @@ UIPage 和 UIWidget 共用规则。页面暂停由 PagePolicy.TickPause 控制�
 
 页面向导的“创建类型”可选择 Widget。Widget 生成独立 View Prefab、`[UIWidget]` 模型及可选 Presenter / Args，不生成页面导航和关闭按钮。已有 Widget Prefab 不要求 Title / Close。目标程序集需引用 MUI.Core、MUI.Resources、MUI.Widgets、MUI.UGUI；Page 模式还需要 MUI.Pages。
 
-在父 Prefab 编辑模式选择根 View，将 Widget Prefab 拖入层级，或使用“子 Widget → 添加引用”。父 View 自动发现当前边界内关联了 UIWidget 的子 View；确认绑定名称和父 VM 属性后点击“生成绑定”。这会保存父 View 的子引用和生成声明，不添加包装节点，不改锚点和尺寸，也不改子 Prefab 的内部绑定。多次使用相同 Widget 时为每个引用指定唯一名称和父属性。其他 View、NestedViewElement、动态容器、列表模板均是发现边界。
+在父 Prefab 编辑模式选择根 View，将 Widget Prefab 拖入层级，或使用“子 Widget → 添加引用”。父 View 自动发现当前边界内关联了 UIWidget 的子 View；确认绑定名称和父 VM 属性后自动同步。这会保存父 View 的子引用和生成声明，不添加包装节点，不改锚点和尺寸，也不改子 Prefab 的内部绑定。多次使用相同 Widget 时为每个引用指定唯一名称和父属性。其他 View、NestedViewElement、动态容器、列表模板均是发现边界。
 
 父模型生成具体类型的属性，例如 `ItemViewModel Item`，绑定到父 View 内部的 `WidgetReference.VM`；子模型访问会登记子模型的生成工厂。内部控件继续由子 View 独立索引。已有手写 `[Bind("Item", nameof(WidgetReference.VM))]` 优先，不覆盖源码。手写接线需显式调用子 BindingFactory.Register 或模块 Initialize。生成声明保存在父 Prefab，移除实例后再次生成以清理声明；业务仍使用已删除属性时由编译器报告。
 
@@ -773,3 +780,11 @@ Presenter、BindingContext 和 WidgetHandle 提供 `VM` 简写，原有 ViewMode
 初始化参数可绑定到 `WidgetReference.Args`（应先于 VM 提供），默认使用对应参数类型的 default 值。活动期间的参数更新要求 Presenter 实现 `IArgsUpdatePresenter<TArgs>`；不支持时明确报错。父模型的分阶段换绑保留子参数，不能同时以同一事务改变业务参数和子模型，应分别执行参数更新和父模型换绑。静态引用和动态内容共用已登记的类型化 Widget 工厂；旧 NestedViewElement 保留借用模型的兼容入口，并复用静态子项管理逻辑。
 
 代码构建层级可在父 View 初始化前调用 `ConfigureChildWidgets(...)`，以子 View 对象引用登记，不使用路径查找。Navigation 示例菜单“打开直接 Widget 场景”演示不带包装节点的打开、模型替换、清空、恢复和父级清理。
+
+关联 Prefab 的变化会自动触发脚本编译。普通组件属性和 UnityEvent 命令都可以由 Prefab 声明生成；自定义事件通过原生组件公开的 UnityEvent（0–4 个参数，命令订阅使用触发信号）和可写 bool interactable 属性接入，代码声明可通过 InteractableProperty 指定其他状态属性。已有 [Command] 方法可作为 Prefab 命令源，保留异步、取消、CanExecute 等业务语义。Unity 编译从项目 Assets 读取声明；独立 MSBuild 项目将 Prefab 作为 AdditionalFiles 输入，同样执行生成与契约检查。
+
+普通控件接口与 NativeText/NativeImage 等专用包装已移除。默认 NativeComponent 只保存组件引用和生命周期；原生属性与事件由编译器生成。保留的 Element 用于资源借用、输入提交策略、选项快照、无障碍与自动化、滚动状态合并、布局校验或列表生命周期。纯转发的 MaskElement 已移除，直接关联原生 Mask。
+
+维护特殊行为 Element 时，使用 `[GenerateControlProperty(nameof(Target), "value", "Value", Setter = "SetValueWithoutNotify")]` 生成属性；通过 `OnValueChanging` 实现特殊校验。`[GenerateControlEvent(nameof(Target), "onValueChanged", NotifyProperty = "Value")]` 生成订阅、输入门控、属性通知和释放逻辑；可设置事件名称、bool Condition 提交条件、ForwardArguments 保留参数，并实现 `On{事件名}Invoking` 处理特殊业务。通过 `Handler = nameof(方法)` 接入无参特殊处理，`Optional = true` 允许按钮未配置。业务仍可通过 ControlPropertyExtension 扩展原生绑定。
+
+预制体生成的模型属性提供 `partial void On{属性名}Changed(T previous, T value)` 回调，只有值实际变化才调用。计算属性使用 `[DependsOn(nameof(Volume))]` 声明依赖，生成器会自动通知，无需在 `OnPropertyChanged` 中判断属性名。`DependsOn` 也支持 `ObservableProperty` 生成的源属性；不递归传播依赖，源属性不存在或不是生成属性时编译报错。

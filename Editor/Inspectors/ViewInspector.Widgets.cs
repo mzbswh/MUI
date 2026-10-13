@@ -59,7 +59,7 @@ namespace MUI.Editor
         {
             EditorGUILayout.Space();
             EditorGUILayout.LabelField("子 Widget", EditorStyles.boldLabel);
-            EditorGUILayout.HelpBox("拖入 Widget 预制体或将实例放入当前 View。生成绑定时登记引用，不添加包装节点；子控件由子 View 管理。", MessageType.Info);
+            EditorGUILayout.HelpBox("拖入 Widget 预制体或将实例放入当前 View。配置变化后自动登记引用，不添加包装节点；子控件由子 View 管理。", MessageType.Info);
             using (new EditorGUI.DisabledScope(EditorApplication.isPlayingOrWillChangePlaymode || EditorApplication.isCompiling))
             {
                 using (new EditorGUILayout.HorizontalScope())
@@ -80,7 +80,7 @@ namespace MUI.Editor
                                 parent = selection;
                             var instance = (GameObject)PrefabUtility.InstantiatePrefab(widgetPrefab, parent);
                             Undo.RegisterCreatedObjectUndo(instance, "添加 Widget 引用");
-                            widgetMessage = "已添加实例；确认属性名后点击生成绑定。";
+                            widgetMessage = "已添加实例；确认属性名后自动同步绑定。";
                             QueueBindingValidation();
                         }
                         catch (Exception error) { widgetMessage = error.Message; }
@@ -120,7 +120,7 @@ namespace MUI.Editor
                                     Undo.DestroyObjectImmediate(row.Target.gameObject);
                                 SaveChildWidgets(kept);
                                 Undo.CollapseUndoOperations(undo);
-                                widgetMessage = "已移除；再次生成绑定以更新自动声明。";
+                                widgetMessage = "已移除；将自动更新绑定声明。";
                                 GUIUtility.ExitGUI();
                             }
                         }

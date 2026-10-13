@@ -1,18 +1,18 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Events;
 using UnityEngine.UI;
 
 namespace MUI.UGUI
 {
     [DisallowMultipleComponent, RequireComponent(typeof(Dropdown))]
-    public sealed class DropdownElement : Element, IDropdownElement, IUIAutomationInput<int>
+    [GenerateControlProperty(nameof(Target), "interactable", "Interactable")]
+    [GenerateControlProperty(nameof(Target), "value", "Value", Setter = "SetValueWithoutNotify")]
+    [GenerateControlEvent(nameof(Target), "onValueChanged", "SelectionChanged", NotifyProperty = "Value")]
+    public sealed partial class DropdownElement : Element, IUIAutomationInput<int>
     {
         private Dropdown target;
         private bool inputWasEnabled = true;
-
-        public event Action SelectionChanged;
 
         private Dropdown Target
         {
@@ -29,22 +29,6 @@ namespace MUI.UGUI
         }
 
         UnityEngine.UI.Selectable IUIAutomationInput<int>.InputControl => Target;
-
-        /// <summary>原生零起始索引；空选项使用 Unity 原生值语义。</summary>
-        public int Value
-        {
-            get => Target.value;
-            set
-            {
-                var control = Target;
-                var previous = control.value;
-                control.SetValueWithoutNotify(value);
-                if (previous != control.value)
-                {
-                    NotifyChanged();
-                }
-            }
-        }
 
         /// <summary>仅支持文本选项，赋值时复制；会替换 Inspector 中配置的选项图片。</summary>
         public IReadOnlyList<string> Options
@@ -96,27 +80,6 @@ namespace MUI.UGUI
             }
         }
 
-        public bool Interactable
-        {
-            get => Target.interactable;
-            set
-            {
-                var control = Target;
-                if (control.interactable == value)
-                {
-                    return;
-                }
-
-                control.interactable = value;
-                if (!value)
-                {
-                    control.Hide();
-                }
-
-                NotifyChanged();
-            }
-        }
-
         protected override AccessibilityRole DefaultAccessibilityRole => AccessibilityRole.Dropdown;
 
         bool IUIAutomationInput<int>.TrySetInput(int value)
@@ -135,29 +98,8 @@ namespace MUI.UGUI
         protected override void OnInitialize()
         {
             target = RequireComponent<Dropdown>();
-            UnityAction<int> handler = value =>
-            {
-                if (CanReceiveInput(target))
-                {
-                    NotifyChanged(nameof(Value));
-                    if (CanReceiveInput(target))
-                    {
-                        SelectionChanged?.Invoke();
-                    }
-                }
-            };
-            OnDispose(() =>
-            {
-                SelectionChanged = null;
-                if (target == null)
-                {
-                    return;
-                }
-
-                target.onValueChanged.RemoveListener(handler);
-                target.Hide();
-            });
-            target.onValueChanged.AddListener(handler);
+            // 弹出列表拥有独立原生对象，最终释放必须关闭它。
+            OnDispose(() => { if (target != null) target.Hide(); });
         }
 
         private void LateUpdate()

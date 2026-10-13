@@ -27,12 +27,11 @@ namespace MUI.Editor
             }
         }
 
-        private bool UsesAutomaticPageBindings => existingPrefab == null &&
-            typeof(NativeControl).IsAssignableFrom(PageTextBackend.Find(textBackendId).ElementType);
+        private bool UsesAutomaticPageBindings => existingPrefab == null;
 
         private IReadOnlyDictionary<string, string> CreatePageSources() => createWidget ? CreateWidgetSources() : PageSourceTemplate.Create(
             pageName, targetNamespace, presetName, ReceivesInput, createPresenter, typedContracts,
-            PageTextBackend.Find(textBackendId).ElementType,
+            PageTextBackend.Find(textBackendId).ComponentType,
             existingPrefab == null ? "Title" : titleElementName,
             existingPrefab == null ? "Close" : closeElementName, PageResourceKey, UsesAutomaticPageBindings, settings == null ? "Default" : settings.DefaultPreset);
 

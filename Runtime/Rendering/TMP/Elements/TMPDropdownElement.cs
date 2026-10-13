@@ -3,17 +3,17 @@ using System.Collections.Generic;
 using MUI.UGUI;
 using TMPro;
 using UnityEngine;
-using UnityEngine.Events;
 
 namespace MUI.TMP
 {
     [DisallowMultipleComponent, RequireComponent(typeof(TMP_Dropdown))]
-    public sealed class TMPDropdownElement : Element, IDropdownElement, IUIAutomationInput<int>
+    [GenerateControlProperty(nameof(Target), "interactable", "Interactable")]
+    [GenerateControlProperty(nameof(Target), "value", "Value", Setter = "SetValueWithoutNotify")]
+    [GenerateControlEvent(nameof(Target), "onValueChanged", "SelectionChanged", NotifyProperty = "Value")]
+    public sealed partial class TMPDropdownElement : Element, IUIAutomationInput<int>
     {
         private TMP_Dropdown target;
         private bool inputWasEnabled = true;
-
-        public event Action SelectionChanged;
 
         private TMP_Dropdown Target
         {
@@ -30,22 +30,6 @@ namespace MUI.TMP
         }
 
         UnityEngine.UI.Selectable IUIAutomationInput<int>.InputControl => Target;
-
-        /// <summary>原生索引；配置占位项时，-1 表示未选择。</summary>
-        public int Value
-        {
-            get => Target.value;
-            set
-            {
-                var control = Target;
-                var previous = control.value;
-                control.SetValueWithoutNotify(value);
-                if (previous != control.value)
-                {
-                    NotifyChanged();
-                }
-            }
-        }
 
         /// <summary>仅支持文本选项，赋值时复制；会替换 Inspector 中配置的选项图片。</summary>
         public IReadOnlyList<string> Options
@@ -105,27 +89,6 @@ namespace MUI.TMP
             }
         }
 
-        public bool Interactable
-        {
-            get => Target.interactable;
-            set
-            {
-                var control = Target;
-                if (control.interactable == value)
-                {
-                    return;
-                }
-
-                control.interactable = value;
-                if (!value)
-                {
-                    control.Hide();
-                }
-
-                NotifyChanged();
-            }
-        }
-
         protected override AccessibilityRole DefaultAccessibilityRole => AccessibilityRole.Dropdown;
 
         protected override AccessibilityState NativeAccessibilityState => Target.IsExpanded ? AccessibilityState.Expanded : AccessibilityState.None;
@@ -146,29 +109,8 @@ namespace MUI.TMP
         protected override void OnInitialize()
         {
             target = RequireComponent<TMP_Dropdown>();
-            UnityAction<int> handler = value =>
-            {
-                if (CanReceiveInput(target))
-                {
-                    NotifyChanged(nameof(Value));
-                    if (CanReceiveInput(target))
-                    {
-                        SelectionChanged?.Invoke();
-                    }
-                }
-            };
-            OnDispose(() =>
-            {
-                SelectionChanged = null;
-                if (target == null)
-                {
-                    return;
-                }
-
-                target.onValueChanged.RemoveListener(handler);
-                target.Hide();
-            });
-            target.onValueChanged.AddListener(handler);
+            // 弹出列表拥有独立原生对象，最终释放必须关闭它。
+            OnDispose(() => { if (target != null) target.Hide(); });
         }
 
         private void LateUpdate()

@@ -168,7 +168,7 @@ namespace MUI.Editor
                 return "Scr_";
             }
 
-            if (typeof(MaskElement).IsAssignableFrom(type) || typeof(RectMaskElement).IsAssignableFrom(type))
+            if (typeof(RectMaskElement).IsAssignableFrom(type))
             {
                 return "Msk_";
             }

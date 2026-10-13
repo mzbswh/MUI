@@ -165,6 +165,7 @@ namespace MUI
                     requireCurrent();
                     invoke(Binding.Bind);
                     requireCurrent();
+                    Binding.TrackBoundModel();
                     phase?.Complete();
                 }
                 catch (Exception error)

@@ -43,7 +43,7 @@ namespace MUI.Editor
             var body = new StringBuilder(declaration).Append("    public partial class ").Append(model).Append(" : global::MUI.ViewModel\n    {\n");
             // 已有 Prefab 不要求 Title。新原生骨架由 Prefab 自动声明提供 Title。
             if (existingPrefab == null && !UsesAutomaticPageBindings)
-                body.Append("        [global::MUI.ObservableProperty]\n        [global::MUI.Bind(\"Title\", nameof(global::MUI.ITextElement.Content), ElementType = typeof(global::MUI.ITextElement))]\n        private string title = ").Append(PageSourceTemplate.StringLiteral(pageName)).Append(";\n");
+                body.Append("        [global::MUI.ObservableProperty]\n        [global::MUI.Bind(\"Title\", nameof(global::UnityEngine.UI.Text.text))]\n        private string title = ").Append(PageSourceTemplate.StringLiteral(pageName)).Append(";\n");
             body.Append("    }");
             files.Add(model + ".cs", Wrap(body.ToString()));
             if (createPresenter)

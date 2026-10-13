@@ -28,6 +28,8 @@ namespace MUI.TMP.Editor
 
         private static void ValidateInput(TMPInputFieldElement element, View view, ICollection<string> errors)
         {
+            if (!System.Enum.IsDefined(typeof(TextInputCommitMode), element.CommitMode))
+                errors.Add(element.name + ": Invalid text input commit mode.");
             var input = element.GetComponent<TMP_InputField>();
             if (input == null)
             {

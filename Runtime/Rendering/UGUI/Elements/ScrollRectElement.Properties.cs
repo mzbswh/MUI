@@ -3,6 +3,8 @@ using UnityEngine;
 
 namespace MUI.UGUI
 {
+    [GenerateControlProperty(nameof(Target), "horizontal", "Horizontal")]
+    [GenerateControlProperty(nameof(Target), "vertical", "Vertical")]
     public sealed partial class ScrollRectElement
     {
         /// <summary>内容锚点坐标；不同于归一化位置，不裁剪，可用于程序定位。</summary>
@@ -40,40 +42,6 @@ namespace MUI.UGUI
 
                 control.velocity = value;
                 PublishPosition();
-            }
-        }
-
-        /// <summary>是否允许原生水平滚动。</summary>
-        public bool Horizontal
-        {
-            get => Target.horizontal;
-            set
-            {
-                var control = Target;
-                if (control.horizontal == value)
-                {
-                    return;
-                }
-
-                control.horizontal = value;
-                NotifyChanged();
-            }
-        }
-
-        /// <summary>是否允许原生垂直滚动。</summary>
-        public bool Vertical
-        {
-            get => Target.vertical;
-            set
-            {
-                var control = Target;
-                if (control.vertical == value)
-                {
-                    return;
-                }
-
-                control.vertical = value;
-                NotifyChanged();
             }
         }
 

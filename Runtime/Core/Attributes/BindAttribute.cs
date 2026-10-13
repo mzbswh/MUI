@@ -37,9 +37,12 @@ namespace MUI
             get;
         }
 
-        /// <summary>生成器可从 nameof(Element.Property) 推断类型时，此项可省略。</summary>
+        /// <summary>可从 nameof(Component.property) 或 nameof(Extension.Property) 推断时省略。</summary>
         /// <summary>原生组件类型；生成强类型访问，不使用运行时反射。回写需提供变化通知。</summary>
         public Type ComponentType { get; set; }
+
+        /// <summary>按名称与组件类型选择目标；与属性扩展自身的组件基类可不同。</summary>
+        public Type BindingComponentType { get; set; }
 
         /// <summary>编译器生成的属性包装或外部属性扩展类型。</summary>
         public Type PropertyAdapterType { get; set; }

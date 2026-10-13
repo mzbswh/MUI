@@ -88,6 +88,8 @@ namespace MUI.UGUI
             {
                 OnInitialize();
                 RequireAlive();
+                InitializeGeneratedControlBindings();
+                RequireAlive();
                 elementInitialized = true;
             }
             catch (Exception failure)
@@ -128,6 +130,20 @@ namespace MUI.UGUI
         /// <summary>显示保留结束后应用期间积累的表现状态；不会恢复旧激活。</summary>
         protected virtual void OnVisualRetentionEnded()
         {
+        }
+
+        /// <summary>由生成器实现，所有监听与 Element 的初始化和最终清理共用生命周期。</summary>
+        protected virtual void InitializeGeneratedControlBindings() { }
+
+        protected bool CanReceiveGeneratedInput(UnityEngine.Component control)
+        {
+            if (control is Selectable selectable) return CanReceiveInput(selectable);
+            if (!IsAlive || !isActiveAndEnabled || control == null || !control.gameObject.activeInHierarchy ||
+                control is Behaviour behaviour && !behaviour.isActiveAndEnabled) return false;
+            var owner = GetComponentInParent<View>(true);
+            if (owner != null && !owner.IsInputEnabled) return false;
+            var host = GetComponentInParent<UIHost>(true);
+            return host == null || host.CanReceiveSharedPointerInput();
         }
 
         protected virtual void OnInitialize()

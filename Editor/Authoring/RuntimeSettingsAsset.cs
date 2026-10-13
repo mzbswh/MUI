@@ -42,7 +42,7 @@ namespace MUI.Editor
             }
         }
 
-        [MenuItem("Assets/Create/MUI/配置 (Settings)")]
+        [MenuItem("Assets/Create/MUI/配置")]
         public static void OpenOrCreate()
         {
             try

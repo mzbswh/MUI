@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.IO;
 using System.Collections.Generic;
 using System.Text;
@@ -37,7 +38,7 @@ namespace MUI.Editor
         private GUIStyle policyValueStyle;
         private bool stylesUseDarkSkin;
 
-        [MenuItem("Tools/MUI/页面向导 (Page Wizard)", false, 1)]
+        [MenuItem("Tools/MUI/页面向导", false, 1)]
         private static void Open()
         {
             var window = GetWindow<PageWizard>(L.Get("editor.PageWizard.5a814a8beb"));
@@ -534,10 +535,7 @@ namespace MUI.Editor
                 background.color = new Color(0.12f, 0.14f, 0.18f, 1);
                 var backend = PageTextBackend.Find(textBackendId);
                 var title = backend.CreateText("Title", contentRect, pageName);
-                if (typeof(NativeControl).IsAssignableFrom(backend.ElementType))
-                    AddNativeBinding(view, "Title", title);
-                else
-                    title.gameObject.AddComponent(backend.ElementType);
+                AddNativeBinding(view, "Title", title, backend.ComponentType);
                 title.rectTransform.anchorMin = new Vector2(0, 1);
                 title.rectTransform.anchorMax = Vector2.one;
                 title.rectTransform.pivot = new Vector2(0.5f, 1);
@@ -599,23 +597,21 @@ namespace MUI.Editor
             closeRect.anchoredPosition = new Vector2(-16, -16);
             closeRect.sizeDelta = new Vector2(80, 48);
             close.GetComponent<Button>().targetGraphic = close.GetComponent<Image>();
-            if (typeof(NativeControl).IsAssignableFrom(backend.ElementType))
-                AddNativeBinding(view, "Close", close.GetComponent<Button>());
-            else
-                close.AddComponent<ButtonElement>();
+            AddNativeBinding(view, "Close", close.GetComponent<Button>());
             // 默认模板使用基础字体包含的关闭符号；语义名称独立保留，字体和语言由项目配置。
             var label = backend.CreateText("Label", closeRect, "×");
             label.color = Color.black;
             Stretch(label.rectTransform);
         }
 
-        private static void AddNativeBinding(View view, string name, Component target)
+        private static void AddNativeBinding(View view, string name, Component target, Type componentType = null)
         {
             var serialized = new SerializedObject(view);
             var bindings = serialized.FindProperty("nativeBindings");
             var row = bindings.GetArrayElementAtIndex(bindings.arraySize++);
             row.FindPropertyRelative("Name").stringValue = name;
             row.FindPropertyRelative("Target").objectReferenceValue = target;
+            row.FindPropertyRelative("ComponentType").stringValue = (componentType ?? target.GetType()).AssemblyQualifiedName;
             serialized.ApplyModifiedPropertiesWithoutUndo();
         }
 
@@ -626,10 +622,10 @@ namespace MUI.Editor
             var serialized = new SerializedObject(view);
             var selections = serialized.FindProperty("autoBindingSelections");
             selections.arraySize = ReceivesInput ? 2 : 1;
-            AddSelection(0, "Title", "Content", "Title", typeof(ITextElement), false);
+            AddSelection(0, "Title", "text", "Title", typeof(NativeControl), false);
             metadata.Element("binding").SetAttributeValue("initial", pageName);
             if (ReceivesInput)
-                AddSelection(1, "Close", "Clicked", "CloseCommand", typeof(IButtonElement), true);
+                AddSelection(1, "Close", "onClick", "CloseCommand", typeof(NativeControl), true);
             serialized.FindProperty("muiAutoBindings").stringValue = Convert.ToBase64String(
                 Encoding.UTF8.GetBytes(metadata.ToString(SaveOptions.DisableFormatting)));
             serialized.ApplyModifiedPropertiesWithoutUndo();
@@ -640,15 +636,20 @@ namespace MUI.Editor
                     new XAttribute("contract", contract.FullName), new XAttribute("source", source),
                     new XAttribute("property", property), new XAttribute("mode", "OneWay"),
                     new XAttribute("command", command ? "true" : "false")));
+                var component = command ? typeof(Button) : PageTextBackend.Find(textBackendId).ComponentType;
+                var entry = metadata.Elements("binding").Last();
+                entry.SetAttributeValue("component", component.FullName);
+                entry.SetAttributeValue("targetComponent", component.FullName);
                 var selection = selections.GetArrayElementAtIndex(index);
                 selection.FindPropertyRelative("Control").stringValue = control;
+                selection.FindPropertyRelative("ComponentType").stringValue = component.AssemblyQualifiedName;
                 var properties = selection.FindPropertyRelative("Properties");
                 properties.arraySize = 1;
                 var choice = properties.GetArrayElementAtIndex(0);
                 choice.FindPropertyRelative("Property").stringValue = property;
                 choice.FindPropertyRelative("Source").stringValue = source;
                 choice.FindPropertyRelative("Mode").intValue = (int)BindingMode.OneWay;
-                choice.FindPropertyRelative("Native").boolValue = false;
+                choice.FindPropertyRelative("Native").boolValue = true;
                 choice.FindPropertyRelative("Extension").stringValue = string.Empty;
             }
         }

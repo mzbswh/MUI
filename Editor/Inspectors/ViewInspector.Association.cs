@@ -12,10 +12,65 @@ namespace MUI.Editor
     public sealed partial class ViewInspector
     {
         private string associationError;
+        private Type runtimeModelType;
+        private string runtimeModelSourceError;
+
+        public override bool RequiresConstantRepaint() => EditorApplication.isPlaying;
+
+        private void DrawRuntimeModelAssociation(View view)
+        {
+            var model = view == null ? null : BindingContext.GetBoundModel(view);
+            var type = model == null ? null : model.GetType();
+            if (runtimeModelType != type)
+            {
+                runtimeModelType = type;
+                runtimeModelSourceError = null;
+            }
+            using (new EditorGUILayout.HorizontalScope())
+            {
+                EditorGUILayout.PrefixLabel("运行时 Model");
+                if (type == null)
+                    EditorGUILayout.LabelField("未绑定");
+                else if (GUILayout.Button(new GUIContent(type.FullName,
+                    type.Assembly.GetName().Name + "\n点击定位 Model 源码"), EditorStyles.linkLabel))
+                    OpenRuntimeModelSource(type);
+            }
+            if (!string.IsNullOrEmpty(runtimeModelSourceError))
+                EditorGUILayout.HelpBox(runtimeModelSourceError, MessageType.Warning);
+        }
+
+        private void OpenRuntimeModelSource(Type type)
+        {
+            runtimeModelSourceError = null;
+            try
+            {
+                var definition = type.IsGenericType ? type.GetGenericTypeDefinition() : type;
+                foreach (var script in MonoImporter.GetAllRuntimeMonoScripts())
+                {
+                    if (script == null || script.GetClass() != definition)
+                        continue;
+                    EditorGUIUtility.PingObject(script);
+                    if (!AssetDatabase.OpenAsset(script))
+                        runtimeModelSourceError = "无法打开 Model 源码：" + AssetDatabase.GetAssetPath(script);
+                    return;
+                }
+                runtimeModelSourceError = "未找到 " + type.FullName + " 对应的 MonoScript；请确认源码已导入 Unity，且类名与文件名一致。";
+            }
+            catch (Exception error)
+            {
+                runtimeModelSourceError = "定位 Model 源码失败：" + error.Message;
+            }
+        }
 
         private void DrawModelAssociation()
         {
             var view = (View)target;
+            if (EditorApplication.isPlaying && view != null && !EditorUtility.IsPersistent(view) &&
+                UnityEditor.SceneManagement.PrefabStageUtility.GetPrefabStage(view.gameObject) == null)
+            {
+                DrawRuntimeModelAssociation(view);
+                return;
+            }
             XElement metadata = null;
             try
             {
@@ -53,7 +108,7 @@ namespace MUI.Editor
                             if (PrefabUtility.SaveAsPrefabAsset(stage.prefabContentsRoot, path) == null)
                                 throw new InvalidOperationException("保存 Prefab 关联失败。");
                         }
-                        else if (EditorUtility.IsPersistent(view)) PrefabUtility.SavePrefabAsset(view.gameObject);
+                        else if (EditorUtility.IsPersistent(view)) PrefabUtility.SavePrefabAsset(view.transform.root.gameObject);
                         else throw new InvalidOperationException("请在 Prefab 资产或 Prefab 编辑模式中保存关联。");
                         associationError = null;
                         InitializeInspectorState();

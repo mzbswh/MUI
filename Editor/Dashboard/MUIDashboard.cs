@@ -45,7 +45,7 @@ namespace MUI.Editor
         private double nextRefresh;
         private bool runtimeAvailable;
 
-        [MenuItem("Tools/MUI/控制台 (Dashboard)", false, 0)]
+        [MenuItem("Tools/MUI/控制台", false, 0)]
         public static void Open() => GetWindow<MUIDashboard>(L.Get("editor.MUIDashboard.788f44b794"));
 
         public static void Show(UIHost host)
@@ -86,7 +86,6 @@ namespace MUI.Editor
             hostChoices = null;
             summary = null;
             autoRefresh = null;
-            languageChoices = null;
             displayedSettings = null;
             settingsDisplayed = false;
             var script = MonoScript.FromScriptableObject(this);

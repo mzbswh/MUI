@@ -5,7 +5,9 @@ namespace MUI.UGUI
 {
     /// <summary>适配原生 AspectRatioFitter，通过引擎布局流程更新，不强制即时重建。</summary>
     [DisallowMultipleComponent, RequireComponent(typeof(UnityEngine.UI.AspectRatioFitter))]
-    public sealed class AspectRatioElement : Element
+    [GenerateControlProperty(nameof(Target), "aspectMode", "Mode")]
+    [GenerateControlProperty(nameof(Target), "aspectRatio", "AspectRatio")]
+    public sealed partial class AspectRatioElement : Element
     {
         private UnityEngine.UI.AspectRatioFitter target;
 
@@ -24,52 +26,20 @@ namespace MUI.UGUI
         }
 
         /// <summary>原生宽高比适配模式。</summary>
-        public UnityEngine.UI.AspectRatioFitter.AspectMode Mode
+        partial void OnModeChanging(UnityEngine.UI.AspectRatioFitter.AspectMode value)
         {
-            get => Target.aspectMode;
-            set
+            if (!Enum.IsDefined(typeof(UnityEngine.UI.AspectRatioFitter.AspectMode), value))
             {
-                if (!Enum.IsDefined(typeof(UnityEngine.UI.AspectRatioFitter.AspectMode), value))
-                {
-                    throw new ArgumentOutOfRangeException(nameof(value));
-                }
-
-                var layout = Target;
-                if (layout.aspectMode.Equals(value))
-                {
-                    return;
-                }
-
-                layout.aspectMode = value;
-                if (IsAlive && layout != null)
-                {
-                    NotifyChanged();
-                }
+                throw new ArgumentOutOfRangeException(nameof(value));
             }
         }
 
         /// <summary>目标宽高比，必须为大于零的有限值。</summary>
-        public float AspectRatio
+        partial void OnAspectRatioChanging(float value)
         {
-            get => Target.aspectRatio;
-            set
+            if (float.IsNaN(value) || float.IsInfinity(value) || value <= 0)
             {
-                if (float.IsNaN(value) || float.IsInfinity(value) || value <= 0)
-                {
-                    throw new ArgumentOutOfRangeException(nameof(value));
-                }
-
-                var layout = Target;
-                if (layout.aspectRatio.Equals(value))
-                {
-                    return;
-                }
-
-                layout.aspectRatio = value;
-                if (IsAlive && layout != null)
-                {
-                    NotifyChanged();
-                }
+                throw new ArgumentOutOfRangeException(nameof(value));
             }
         }
 

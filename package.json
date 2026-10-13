@@ -16,44 +16,9 @@
   },
   "samples": [
     {
-      "displayName": "Basic Example",
-      "description": "无需 Presenter 的基础页面：Prefab、生成绑定、统一异步导航和 Done(42) 结果。",
-      "path": "Samples~/BasicExample"
-    },
-    {
-      "displayName": "Resource Integration",
-      "description": "项目资源后端和语言目录接入示例；运行 Navigation 前先导入。",
-      "path": "Samples~/ResourceIntegration"
-    },
-    {
-      "displayName": "Settings",
-      "description": "生成状态与双向 uGUI 绑定；导入后使用 Tools/MUI/Samples/Open Settings Scene。",
-      "path": "Samples~/Settings"
-    },
-    {
-      "displayName": "Navigation",
-      "description": "异步导航、资源归属与虚拟列表示例；先导入 Resource Integration。",
-      "path": "Samples~/Navigation"
-    },
-    {
-      "displayName": "Dialogs",
-      "description": "确认框与提示框：异步打开、类型化结果和宿主清理。",
-      "path": "Samples~/Dialogs"
-    },
-    {
-      "displayName": "Common Patterns",
-      "description": "Toast、Loading、语言和主题切换；先导入 Resource Integration。",
-      "path": "Samples~/CommonPatterns"
-    },
-    {
-      "displayName": "Tabs",
-      "description": "Asynchronous tab selection, content-only loading/error states, retry and cancellation.",
-      "path": "Samples~/Tabs"
-    },
-    {
-      "displayName": "DragDrop",
-      "description": "类型化拖放与异步提交，包含拒绝、失败、悬停反馈和被动影子。",
-      "path": "Samples~/DragDrop"
+      "displayName": "MUI Examples",
+      "description": "可编辑场景与 Prefab 的完整教学工作台：11 项功能、生成绑定、导航和资源生命周期。导入后打开 Tools/MUI/示例。",
+      "path": "Samples~"
     }
   ],
   "license": "MIT"

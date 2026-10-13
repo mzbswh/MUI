@@ -10,9 +10,12 @@ using Component = UnityEngine.Component;
 namespace MUI.UGUI
 {
     /// <summary>由 View 持有的普通 C# 适配器，无需挂载 Element 组件。</summary>
-    public abstract class NativeControl : IElement, IDisposable
+    public abstract class NativeControl : IComponentElement, IDisposable
     {
         private static readonly Dictionary<Type, Func<string, Component, NativeControl>> factories = new Dictionary<Type, Func<string, Component, NativeControl>>();
+        private readonly Dictionary<(UnityEventBase Signal, Action Handler), Action> commandListeners =
+            new Dictionary<(UnityEventBase, Action), Action>();
+
         private bool disposed;
         private Dictionary<Type, object> propertyAdapters;
         private readonly List<Action> cleanup = new List<Action>();
@@ -20,10 +23,12 @@ namespace MUI.UGUI
         {
             if (string.IsNullOrWhiteSpace(name)) throw new ArgumentException("Binding name is required.", nameof(name));
             if (target == null) throw new ArgumentNullException(nameof(target));
-            Name = name; Target = target;
+            Name = name; Target = target; ComponentType = target.GetType();
         }
         public string Name { get; }
         public Component Target { get; }
+        public Type ComponentType { get; internal set; }
+        object IComponentElement.ComponentTarget => Target;
         public bool IsAlive => !disposed && Target != null;
         public event PropertyChangedEventHandler PropertyChanged;
         public bool Visible { get => Target.gameObject.activeSelf; set { if (Target.gameObject.activeSelf == value) return; Target.gameObject.SetActive(value); Changed(); } }
@@ -59,10 +64,77 @@ namespace MUI.UGUI
         internal void ListenExtension(UnityEvent signal, UnityAction callback) => Listen(signal, callback);
         internal void ListenExtension<T>(UnityEvent<T> signal, UnityAction<T> callback) => Listen(signal, callback);
 
+        private Action CommandDispatch(Action handler, bool capturePointer)
+        {
+            return () =>
+            {
+                if (!CanReceiveInput()) return;
+                if (capturePointer)
+                {
+                    var gesture = Target.GetComponent<NativeInputGesture>();
+                    if (gesture != null) gesture.CaptureClickForModal();
+                }
+                handler();
+            };
+        }
+
+        private void RegisterCommandListener(UnityEventBase signal, Action handler, Action subscribe, Action unsubscribe)
+        {
+            if (signal == null || handler == null) throw new ArgumentNullException();
+            if (!IsAlive) throw new ObjectDisposedException(Name);
+            commandListeners.Add((signal, handler), unsubscribe);
+            try { subscribe(); }
+            catch { commandListeners.Remove((signal, handler)); throw; }
+        }
+
+        public void AddCommandListener(UnityEvent signal, Action handler)
+        {
+            var dispatch = CommandDispatch(handler, capturePointer: true);
+            UnityAction listener = () => dispatch();
+            RegisterCommandListener(signal, handler, () => signal.AddListener(listener), () => signal.RemoveListener(listener));
+        }
+
+        public void AddCommandListener<T0>(UnityEvent<T0> signal, Action handler)
+        {
+            var dispatch = CommandDispatch(handler, capturePointer: false);
+            UnityAction<T0> listener = (arg0) => dispatch();
+            RegisterCommandListener(signal, handler, () => signal.AddListener(listener), () => signal.RemoveListener(listener));
+        }
+
+        public void AddCommandListener<T0, T1>(UnityEvent<T0, T1> signal, Action handler)
+        {
+            var dispatch = CommandDispatch(handler, capturePointer: false);
+            UnityAction<T0, T1> listener = (arg0, arg1) => dispatch();
+            RegisterCommandListener(signal, handler, () => signal.AddListener(listener), () => signal.RemoveListener(listener));
+        }
+
+        public void AddCommandListener<T0, T1, T2>(UnityEvent<T0, T1, T2> signal, Action handler)
+        {
+            var dispatch = CommandDispatch(handler, capturePointer: false);
+            UnityAction<T0, T1, T2> listener = (arg0, arg1, arg2) => dispatch();
+            RegisterCommandListener(signal, handler, () => signal.AddListener(listener), () => signal.RemoveListener(listener));
+        }
+
+        public void AddCommandListener<T0, T1, T2, T3>(UnityEvent<T0, T1, T2, T3> signal, Action handler)
+        {
+            var dispatch = CommandDispatch(handler, capturePointer: false);
+            UnityAction<T0, T1, T2, T3> listener = (arg0, arg1, arg2, arg3) => dispatch();
+            RegisterCommandListener(signal, handler, () => signal.AddListener(listener), () => signal.RemoveListener(listener));
+        }
+
+        public void RemoveCommandListener(UnityEventBase signal, Action handler)
+        {
+            if (!commandListeners.TryGetValue((signal, handler), out var unsubscribe)) return;
+            unsubscribe();
+            commandListeners.Remove((signal, handler));
+        }
+
         public virtual void Dispose()
         {
             if (disposed) return;
             disposed = true;
+            foreach (var unsubscribe in commandListeners.Values) unsubscribe();
+            commandListeners.Clear();
             PropertyChanged = null;
             propertyAdapters?.Clear();
             List<Exception> errors = null;
@@ -120,14 +192,7 @@ namespace MUI.UGUI
                     { adapter.Dispose(); throw new InvalidOperationException("Adapter factory changed the binding identity."); }
                     return adapter;
                 }
-            if (target is ScrollRect scroll) return new NativeScrollView(name, scroll);
-            if (target is RawImage raw) return new NativeRawImage(name, raw);
-            if (target is InputField input) return new NativeInputField(name, input);
-            if (target is Dropdown dropdown) return new NativeDropdown(name, dropdown);
-            if (target is Button button) return new NativeButton(name, button);
-            if (target is Text text) return new NativeText(name, text);
-            if (target is Image image) return new NativeImage(name, image);
-            if (target is MonoBehaviour && !(target is Element) && !(target is View)) return new NativeComponent(name, target);
+            if (!(target is Element) && !(target is View)) return new NativeComponent(name, target);
             throw new ArgumentException("不支持的原生绑定组件：" + target.GetType().Name);
         }
     }
@@ -138,59 +203,4 @@ namespace MUI.UGUI
         public NativeComponent(string name, Component target) : base(name, target) { }
     }
 
-    public sealed class NativeButton : NativeControl, IButtonElement
-    {
-        private readonly Button button;
-        private readonly Dictionary<Action, UnityAction> listeners = new Dictionary<Action, UnityAction>();
-        public NativeButton(string name, Button target) : base(name, target) { button = target; }
-        public bool Interactable { get => button.interactable; set { if (button.interactable == value) return; button.interactable = value; Changed(); } }
-        public event Action Clicked
-        {
-            add
-            {
-                UnityAction listener = () =>
-                {
-                    var owner = button == null ? null : button.GetComponentInParent<View>(true);
-                    if (!IsAlive || owner == null || !owner.IsInputEnabled || !button.isActiveAndEnabled || !button.IsInteractable()) return;
-                    var host = owner.GetComponentInParent<UIHost>(true);
-                    if (host != null && !host.CanReceiveSharedPointerInput()) return;
-                    var gesture = button.GetComponent<NativeInputGesture>();
-                    if (gesture != null) gesture.CaptureClickForModal();
-                    value();
-                };
-                listeners.Add(value, listener);
-                button.onClick.AddListener(listener);
-            }
-            remove
-            {
-                if (!listeners.TryGetValue(value, out var listener)) return;
-                if (button != null) button.onClick.RemoveListener(listener);
-                listeners.Remove(value);
-            }
-        }
-        public override void Dispose()
-        {
-            if (button != null) foreach (var listener in listeners.Values) button.onClick.RemoveListener(listener);
-            listeners.Clear();
-            base.Dispose();
-        }
-    }
-
-    public sealed class NativeText : NativeControl, ITextStyleElement
-    {
-        private readonly Text text;
-        public float FontSize { get => text.fontSize; set { var size = Mathf.RoundToInt(value); if (text.fontSize == size) return; text.fontSize = size; Changed(); } }
-        public NativeText(string name, Text target) : base(name, target) { text = target; }
-        public string Content { get => text.text; set { if (text.text == value) return; text.text = value; Changed(); } }
-        public Color Color { get => text.color; set { if (text.color == value) return; text.color = value; Changed(); } }
-    }
-
-    public sealed class NativeImage : NativeControl, IImageElement
-    {
-        private readonly Image image;
-        public NativeImage(string name, Image target) : base(name, target) { image = target; }
-        public Sprite Sprite { get => image.sprite; set { if (image.sprite == value) return; image.sprite = value; Changed(); } }
-        public Color Color { get => image.color; set { if (image.color == value) return; image.color = value; Changed(); } }
-        public float FillAmount { get => image.fillAmount; set { if (image.fillAmount == value) return; image.fillAmount = value; Changed(); } }
-    }
 }

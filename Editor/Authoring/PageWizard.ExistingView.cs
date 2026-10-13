@@ -87,7 +87,7 @@ namespace MUI.Editor
             }
             var entries = new List<BindingEntry>
             {
-                new BindingEntry("Title", titleElementName, (typeof(ITextElement).IsAssignableFrom(backend.ElementType) ? typeof(ITextElement) : backend.ElementType), "Content", BindingMode.OneWay)
+                new BindingEntry("Title", titleElementName, typeof(NativeControl), "text", BindingMode.OneWay) { ComponentType = backend.ComponentType }
             };
             if (!ReceivesInput)
             {
@@ -105,8 +105,8 @@ namespace MUI.Editor
             }
             else
             {
-                entries.Add(new BindingEntry("Close", closeElementName, typeof(IButtonElement), nameof(ButtonElement.Clicked),
-                    BindingMode.OneWay, BindingEntryKind.Command));
+                entries.Add(new BindingEntry("Close", closeElementName, typeof(NativeControl), nameof(UnityEngine.UI.Button.onClick),
+                    BindingMode.OneWay, BindingEntryKind.Command, nameof(UnityEngine.UI.Button.interactable)) { ComponentType = typeof(UnityEngine.UI.Button) });
             }
             var manifest = new BindingManifest(typeof(ViewModel), entries);
             var errors = ViewContractValidator.Validate(view, manifest);

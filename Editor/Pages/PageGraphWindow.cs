@@ -29,7 +29,7 @@ namespace MUI.Pages.Editor
 
         private PageGraphSnapshot Current => graphs.Count == 0 ? null : graphs[selectedGraph];
 
-        [MenuItem("Tools/MUI/检查 (Inspect)/路由依赖图 (PageDefinition Graph)", false, 62)]
+        [MenuItem("Tools/MUI/检查/路由依赖图", false, 62)]
         public static void Open() => GetWindow<PageGraphWindow>(L.Get("editor.PageGraphWindow.be20609b83"));
 
         /// <summary>在编辑器主线程显式采集并展示一个根；不执行参数、模型、绑定或资源工厂。</summary>

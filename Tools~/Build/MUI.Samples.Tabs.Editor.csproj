@@ -7,7 +7,7 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="MUI.Editor.Localization.csproj" />
-    <Compile Include="../../Samples~/Tabs/Editor/*.cs" />
+    <Compile Include="../Diagnostics/Samples/Tabs/Editor/*.cs" />
     <ProjectReference Include="MUI.Samples.Tabs.csproj" />
     <Reference Include="UnityEngine.CoreModule"><HintPath>$(UnityManagedPath)/UnityEngine.CoreModule.dll</HintPath><Private>false</Private></Reference>
     <Reference Include="UnityEditor.CoreModule"><HintPath>$(UnityManagedPath)/UnityEditor.CoreModule.dll</HintPath><Private>false</Private></Reference>

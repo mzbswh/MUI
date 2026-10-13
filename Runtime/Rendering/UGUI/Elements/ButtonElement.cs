@@ -1,18 +1,17 @@
-using System;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityEngine.Events;
 using UnityEngine.UI;
 
 namespace MUI.UGUI
 {
     [DisallowMultipleComponent, RequireComponent(typeof(Button))]
-    public sealed class ButtonElement : Element, IPointerDownHandler, IButtonElement
+    [GenerateControlProperty(nameof(Target), "interactable", "Interactable")]
+    [GenerateControlEvent(nameof(Target), "onClick", "Clicked")]
+    public sealed partial class ButtonElement : Element, IPointerDownHandler
     {
         private Button target;
         private PointerEventData pressedPointer;
 
-        public event Action Clicked;
 
         private Button Target
         {
@@ -28,21 +27,6 @@ namespace MUI.UGUI
             }
         }
 
-        public bool Interactable
-        {
-            get => Target.interactable;
-            set
-            {
-                if (Target.interactable == value)
-                {
-                    return;
-                }
-
-                Target.interactable = value;
-                NotifyChanged();
-            }
-        }
-
         protected override AccessibilityRole DefaultAccessibilityRole => AccessibilityRole.Button;
 
         public void OnPointerDown(PointerEventData eventData)
@@ -53,36 +37,20 @@ namespace MUI.UGUI
             }
         }
 
+        // 只有弹窗指针捕获需要额外适配，事件订阅和清理由生成器完成。
+        partial void OnClickedInvoking()
+        {
+            if (pressedPointer != null && pressedPointer.eligibleForClick && pressedPointer.pointerPress == gameObject)
+            {
+                var owner = GetComponentInParent<View>(true);
+                if (owner != null) owner.CaptureModalPointer(pressedPointer);
+            }
+        }
+
         protected override void OnInitialize()
         {
             target = RequireComponent<Button>();
-            UnityAction handler = () =>
-            {
-                if (CanReceiveInput(target))
-                {
-                    if (pressedPointer != null && pressedPointer.eligibleForClick && pressedPointer.pointerPress == gameObject)
-                    {
-                        var owner = GetComponentInParent<View>(true);
-                        if (owner != null)
-                        {
-                            owner.CaptureModalPointer(pressedPointer);
-                        }
-                    }
-
-                    Clicked?.Invoke();
-                }
-            };
-            OnDispose(() =>
-            {
-                if (target != null)
-                {
-                    target.onClick.RemoveListener(handler);
-                }
-
-                Clicked = null;
-                pressedPointer = null;
-            });
-            target.onClick.AddListener(handler);
+            OnDispose(() => pressedPointer = null);
         }
     }
 }

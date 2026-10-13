@@ -1,0 +1,22 @@
+{
+  "name": "MUI.Examples",
+  "references": [
+    "MUI.Core",
+    "MUI.Pages",
+    "MUI.Resources",
+    "MUI.Widgets",
+    "MUI.UGUI",
+    "MUI.Tabs",
+    "MUI.UGUI.Tabs",
+    "MUI.Dialogs",
+    "MUI.UGUI.Dialogs",
+    "MUI.DragDrop",
+    "MUI.UGUI.DragDrop",
+    "MUI.Loading",
+    "MUI.Notifications",
+    "MUI.Themes",
+    "MUI.UGUI.Themes",
+    "Unity.ugui"
+  ],
+  "autoReferenced": true
+}

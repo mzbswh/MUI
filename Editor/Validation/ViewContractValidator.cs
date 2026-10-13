@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using MUI.UGUI;
 using UnityEngine;
 using UnityEngine.UI;
@@ -42,10 +43,11 @@ namespace MUI.Editor
                 }
             }
 
+            var exactComponent = entry.ComponentType != null && view.NativeBindings.Any(binding => binding != null && binding.Name == entry.ElementName && binding.BindingType == entry.ComponentType);
             if (typeof(NativeControl).IsAssignableFrom(entry.ElementType) || entry.ElementType.IsInterface)
                 foreach (var binding in view.NativeBindings)
                     if (binding != null && binding.Target != null && binding.Name == entry.ElementName &&
-                        view.OwnsNativeControl(binding.Target) && (entry.ComponentType == null || entry.ComponentType.IsInstanceOfType(binding.Target)))
+                        view.OwnsNativeControl(binding.Target) && (entry.ComponentType == null || (exactComponent ? binding.BindingType == entry.ComponentType : entry.ComponentType.IsInstanceOfType(binding.Target))))
                     {
                         using (var adapter = NativeControl.Create(binding.Name, binding.Target))
                             if (entry.ElementType.IsInstanceOfType(adapter))
@@ -253,7 +255,7 @@ namespace MUI.Editor
             }
 
             var nativeTargets = new HashSet<Component>();
-            var nativeNames = new HashSet<string>(StringComparer.Ordinal);
+            var nativeNames = new HashSet<(string, Type)>();
             var widgetNames = new HashSet<string>(StringComparer.Ordinal);
             var widgetTargets = new HashSet<View>();
             foreach (var widget in view.ChildWidgets)
@@ -263,9 +265,10 @@ namespace MUI.Editor
             foreach (var binding in view.NativeBindings)
             {
                 if (binding == null || string.IsNullOrWhiteSpace(binding.Name) || !view.OwnsNativeControl(binding.Target) ||
-                    !nativeTargets.Add(binding.Target) || !nativeNames.Add(binding.Name) || binding.Target.GetComponent<Element>() != null)
+                    binding.BindingType == null || !binding.BindingType.IsInstanceOfType(binding.Target) ||
+                    !nativeTargets.Add(binding.Target) || !nativeNames.Add((binding.Name, binding.BindingType)) || binding.Target.GetComponent<Element>() != null)
                 {
-                    errors.Add("原生控件绑定名称和引用必须唯一、属于当前页面，且不能与 Element 重复绑定。");
+                    errors.Add("原生控件绑定的名称与组件类型组合及引用必须唯一、属于当前页面，且不能与 Element 重复绑定。");
                     continue;
                 }
                 try
@@ -320,7 +323,7 @@ namespace MUI.Editor
                     ValidateInputField(element, view, errors);
                 }
 
-                if (element is IInputFieldElement input && !Enum.IsDefined(typeof(TextInputCommitMode), input.CommitMode))
+                if (element is InputFieldElement input && !Enum.IsDefined(typeof(TextInputCommitMode), input.CommitMode))
                 {
                     errors.Add(L.Format("editor.ViewContractValidator.70a6c57f8d", Path(element.transform, view.transform)));
                 }

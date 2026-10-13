@@ -15,13 +15,11 @@ namespace MUI.Editor.Localization
     [InitializeOnLoad]
     public static class MUIEditorLocalization
     {
-        private const string PreferenceKey = "MUI.Editor.Language";
         private const string DefaultLanguageId = "zh-CN";
         internal const string ResourceSuffix = ".mui-language.json";
         private static readonly Dictionary<string, Language> languages = new Dictionary<string, Language>(StringComparer.Ordinal);
         private static readonly Dictionary<string, string> diagnosticKeys = new Dictionary<string, string>(StringComparer.Ordinal);
         private static readonly List<DiagnosticTemplate> diagnosticTemplates = new List<DiagnosticTemplate>();
-        private static string requestedLanguage = EditorPrefs.GetString(PreferenceKey, DefaultLanguageId);
         private static bool loaded;
         private static bool reloadScheduled;
 
@@ -38,25 +36,8 @@ namespace MUI.Editor.Localization
             }
         }
 
-        public static string LanguageId
-        {
-            get
-            {
-                EnsureLoaded();
-                return languages.ContainsKey(requestedLanguage) ? requestedLanguage : DefaultLanguageId;
-            }
-            set
-            {
-                EnsureLoaded();
-                if (string.IsNullOrEmpty(value) || !languages.ContainsKey(value) || value == LanguageId)
-                {
-                    return;
-                }
-                EditorPrefs.SetString(PreferenceKey, value);
-                requestedLanguage = value;
-                NotifyChanged();
-            }
-        }
+        // 固定中文，不再读取历史 EditorPrefs 中的英文选择。
+        public static string LanguageId => DefaultLanguageId;
 
         public static string Get(string key) => Get(key, "[" + key + "]");
 
@@ -365,13 +346,25 @@ namespace MUI.Editor.Localization
                 Entries = entries;
             }
 
-            public string Id { get; }
+            public string Id
+            {
+                get;
+            }
 
-            public string DisplayName { get; }
+            public string DisplayName
+            {
+                get;
+            }
 
-            internal string FallbackLanguageId { get; }
+            internal string FallbackLanguageId
+            {
+                get;
+            }
 
-            internal Dictionary<string, string> Entries { get; }
+            internal Dictionary<string, string> Entries
+            {
+                get;
+            }
         }
 
         [Serializable]

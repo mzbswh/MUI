@@ -5,6 +5,7 @@ using UnityEngine.UI;
 namespace MUI.UGUI
 {
     [DisallowMultipleComponent, RequireComponent(typeof(Image))]
+    [GenerateControlProperty(nameof(Target), "fillAmount", "FillAmount")]
     public sealed partial class ImageElement : GraphicElement
     {
         private Image target;
@@ -52,26 +53,10 @@ namespace MUI.UGUI
         }
 
         /// <summary>归一化填充值限制在 [0, 1]；可提前设置，只有 Filled 类型实际使用此值。</summary>
-        public float FillAmount
+        partial void OnFillAmountChanging(float value)
         {
-            get => Target.fillAmount;
-            set
-            {
-                if (float.IsNaN(value) || float.IsInfinity(value))
-                {
-                    throw new ArgumentOutOfRangeException(nameof(value), "Image fill must be finite.");
-                }
-
-                var image = Target;
-                var next = Mathf.Clamp01(value);
-                if (image.fillAmount.Equals(next))
-                {
-                    return;
-                }
-
-                image.fillAmount = next;
-                NotifyChanged();
-            }
+            if (float.IsNaN(value) || float.IsInfinity(value))
+                throw new ArgumentOutOfRangeException(nameof(value), "Image fill must be finite.");
         }
 
         protected override UnityEngine.UI.MaskableGraphic GraphicComponent => Target;

@@ -7,7 +7,7 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="MUI.Editor.Localization.csproj" />
-    <Compile Include="../../Samples~/BasicExample/Editor/*.cs" />
+    <Compile Include="../Diagnostics/Samples/BasicExample/Editor/*.cs" />
     <ProjectReference Include="MUI.BasicExample.csproj" />
     <ProjectReference Include="MUI.Core.csproj" />
     <ProjectReference Include="MUI.Pages.csproj" />

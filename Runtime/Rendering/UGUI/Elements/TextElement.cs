@@ -4,7 +4,8 @@ using UnityEngine.UI;
 namespace MUI.UGUI
 {
     [DisallowMultipleComponent, RequireComponent(typeof(Text))]
-    public sealed partial class TextElement : GraphicElement, ITextElement
+    [GenerateControlProperty(nameof(Target), "text", "Content")]
+    public sealed partial class TextElement : GraphicElement
     {
         private Text target;
 
@@ -19,21 +20,6 @@ namespace MUI.UGUI
                 }
 
                 return target;
-            }
-        }
-
-        public string Content
-        {
-            get => Target.text;
-            set
-            {
-                if (Target.text == value)
-                {
-                    return;
-                }
-
-                Target.text = value;
-                NotifyChanged();
             }
         }
 

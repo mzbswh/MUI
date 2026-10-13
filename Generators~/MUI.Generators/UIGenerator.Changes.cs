@@ -86,6 +86,23 @@ namespace MUI.Generators
         /// <summary>依赖通知只来自生成字段，目标必须是模型上可读取的实例属性。</summary>
         private static void ValidateDependentNotifications(INamedTypeSymbol type)
         {
+            var generatedNames = new HashSet<string>(type.GetMembers().OfType<IFieldSymbol>()
+                .Where(field => Attribute(field, "MUI.ObservablePropertyAttribute") != null)
+                .Select(field => ObservablePropertyName(field, Attribute(field, "MUI.ObservablePropertyAttribute"))));
+            foreach (var property in type.GetMembers().OfType<IPropertySymbol>())
+                if (property.DeclaringSyntaxReferences.Any(reference => reference.SyntaxTree.FilePath.EndsWith(".AutoBindings.g.cs", StringComparison.Ordinal)) && property.SetMethod != null)
+                    generatedNames.Add(property.Name);
+            foreach (var property in type.GetMembers().OfType<IPropertySymbol>())
+            {
+                var sources = new HashSet<string>(StringComparer.Ordinal);
+                foreach (var attribute in property.GetAttributes().Where(a => a.AttributeClass?.ToDisplayString() == "MUI.DependsOnAttribute"))
+                {
+                    var source = attribute.ConstructorArguments[0].Value as string;
+                    if (property.IsStatic || property.IsIndexer || !Accessible(property.GetMethod) || string.IsNullOrWhiteSpace(source) ||
+                        source == property.Name || !sources.Add(source) || !generatedNames.Contains(source))
+                        Fail(property, "DependsOn requires a readable instance property and a distinct ObservableProperty or Prefab-generated source: " + source);
+                }
+            }
             foreach (var field in type.GetMembers().OfType<IFieldSymbol>())
             {
                 var targets = GetDependentNotifications(field);
@@ -131,9 +148,14 @@ namespace MUI.Generators
 
         private static string[] GetDependentNotifications(IFieldSymbol field)
         {
+            var observable = Attribute(field, "MUI.ObservablePropertyAttribute");
             return field.GetAttributes()
                 .Where(a => a.AttributeClass?.ToDisplayString() == "MUI.NotifyPropertyChangedForAttribute")
                 .Select(a => a.ConstructorArguments.Length == 0 ? null : a.ConstructorArguments[0].Value as string)
+                .Concat(field.ContainingType.GetMembers().OfType<IPropertySymbol>()
+                    .Where(property => property.GetAttributes().Any(attribute => attribute.AttributeClass?.ToDisplayString() == "MUI.DependsOnAttribute" &&
+                        observable != null && attribute.ConstructorArguments[0].Value as string == ObservablePropertyName(field, observable)))
+                    .Select(property => property.Name))
                 .ToArray();
         }
 

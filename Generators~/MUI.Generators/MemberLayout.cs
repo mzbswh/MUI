@@ -63,8 +63,8 @@ namespace MUI.Generators
                     leading.Insert(0, indentation);
                 }
 
-                // 相邻字段同组，其余成员及组边界用一个空行隔开；保留附属于成员的注释。
-                var blank = i > 0 && !(Rank(ordered[i - 1]) == 0 && Rank(member) == 0);
+                // 每个独立成员之间保留空行，包括带绑定声明的字段。
+                var blank = i > 0;
                 if (blank)
                 {
                     leading.Insert(0, SyntaxFactory.EndOfLine("\n"));

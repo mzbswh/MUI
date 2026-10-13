@@ -721,7 +721,7 @@
     },
     {
       "key": "editor.PageTextBackend.36e1635db2",
-      "text": "文本 Element 必须是公开、非嵌套、非泛型的具体类型，并有可读写的 string Content 属性。"
+      "text": "文本后端必须是公开、非嵌套、非泛型的 Graphic 组件类型，并有可读写的 string text 属性。"
     },
     {
       "key": "editor.PageTextBackend.865c6e02de",

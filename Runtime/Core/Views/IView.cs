@@ -1,3 +1,5 @@
+using System;
+
 namespace MUI
 {
     /// <summary>渲染边界，宿主门控始终优先于局部可见性请求。</summary>
@@ -15,5 +17,16 @@ namespace MUI
 
         /// <summary>设置宿主可见性和输入限制；局部状态不能绕过宿主限制。</summary>
         void SetHostState(bool visible, bool interactable);
+    }
+    /// <summary>按绑定名与原生组件契约类型查找，歧义必须显式解决。</summary>
+    public interface IComponentView : IView
+    {
+        TElement GetElement<TElement>(string name, Type componentType) where TElement : class, IElement;
+    }
+
+    public interface IComponentElement : IElement
+    {
+        Type ComponentType { get; }
+        object ComponentTarget { get; }
     }
 }

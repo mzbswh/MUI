@@ -4,6 +4,9 @@ using UnityEngine;
 namespace MUI.UGUI
 {
     /// <summary>图形控件共用的颜色、材质、射线和遮罩适配，不负责具体图像内容。</summary>
+    [GenerateControlProperty(nameof(Graphic), "color", "Color")]
+    [GenerateControlProperty(nameof(Graphic), "raycastTarget", "RaycastTarget")]
+    [GenerateControlProperty(nameof(Graphic), "maskable", "Maskable")]
     public abstract partial class GraphicElement : Element
     {
         private UnityEngine.UI.MaskableGraphic graphic;
@@ -33,23 +36,6 @@ namespace MUI.UGUI
             }
         }
 
-        /// <summary>原生图形的颜色与透明度。</summary>
-        public Color Color
-        {
-            get => Graphic.color;
-            set
-            {
-                var target = Graphic;
-                if (target.color == value)
-                {
-                    return;
-                }
-
-                target.color = value;
-                NotifyChanged();
-            }
-        }
-
         /// <summary>借用材质；null 恢复原生默认材质，不转移持有权或修改材质内容。</summary>
         public Material Material
         {
@@ -74,40 +60,6 @@ namespace MUI.UGUI
                 }
 
                 WriteMaterial(target, value);
-                NotifyChanged();
-            }
-        }
-
-        /// <summary>是否参与 uGUI 射线检测。</summary>
-        public bool RaycastTarget
-        {
-            get => Graphic.raycastTarget;
-            set
-            {
-                var target = Graphic;
-                if (target.raycastTarget == value)
-                {
-                    return;
-                }
-
-                target.raycastTarget = value;
-                NotifyChanged();
-            }
-        }
-
-        /// <summary>是否受父级遮罩影响。</summary>
-        public bool Maskable
-        {
-            get => Graphic.maskable;
-            set
-            {
-                var target = Graphic;
-                if (target.maskable == value)
-                {
-                    return;
-                }
-
-                target.maskable = value;
                 NotifyChanged();
             }
         }

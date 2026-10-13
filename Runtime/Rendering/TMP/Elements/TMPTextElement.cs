@@ -5,7 +5,8 @@ using UnityEngine;
 namespace MUI.TMP
 {
     [DisallowMultipleComponent, RequireComponent(typeof(TextMeshProUGUI))]
-    public sealed partial class TMPTextElement : GraphicElement, ITextElement
+    [GenerateControlProperty(nameof(Target), "text", "Content")]
+    public sealed partial class TMPTextElement : GraphicElement
     {
         private TextMeshProUGUI target;
 
@@ -20,21 +21,6 @@ namespace MUI.TMP
                 }
 
                 return target;
-            }
-        }
-
-        public string Content
-        {
-            get => Target.text;
-            set
-            {
-                if (Target.text == value)
-                {
-                    return;
-                }
-
-                Target.text = value;
-                NotifyChanged();
             }
         }
 

@@ -1,3 +1,4 @@
+using MUI.Unity;
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -47,7 +48,14 @@ namespace MUI.UGUI
         public UIThreadDispatcher Dispatcher => dispatcher ?? throw new InvalidOperationException("UIHost has not been initialized.");
 
         /// <summary>自动模式每帧传入 Unity 缩放与非缩放时间；关闭后由项目调用 AdvanceFrame。</summary>
-        public bool AutomaticFramePump => Settings == null || Settings.AutomaticFramePump;
+        public bool AutomaticFramePump
+        {
+            get
+            {
+                var backend = Settings as UGUIHostSettings;
+                return backend == null || backend.AutomaticFramePump;
+            }
+        }
 
         public PagePolicy ResolvePolicy(string preset = null, string layer = null, PagePolicyOverrides overrides = null)
         {

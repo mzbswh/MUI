@@ -5,7 +5,8 @@
     "MUI.Core",
     "MUI.Resources",
     "MUI.UGUI",
-    "MUI.Unity"
+    "MUI.Unity",
+    "MUI.Unity.Pages"
   ],
   "autoReferenced": false
 }

@@ -87,7 +87,7 @@ Unity 2022.3.62f3 编辑器内已运行 2000 条动态尺寸演示：初次定�
 
 借用归还之后，原生节点最终销毁还须确认包装 Element 和内部 View 的最终监听。普通/虚拟列表的最终回调分别保留各节点责任，一项失败仍继续独立节点；显式恢复只检查已登记节点，不重新退订来源、重复原生清理或猜测完成。先处理允许重试的叶责任，再确认 Element、View、ViewHierarchy、列表节点、列表最终回调及父 View；未知来源退订或原生收尾失败持续保留。
 
-Unity Play Mode 与 macOS IL2CPP Player 已验证普通/虚拟列表换绑、迟到取消、来源/布局失效、命令排空、提交故障及代表性回滚清理故障；100、1,000、10,000 条固定尺寸单列候选保持视口物化上限。另有双轴双模板测量批次通过 14 组、102 项断言，覆盖内容版本、局部尺寸失效、动态锚点、位置恢复、Grid/视口切换、末尾跟随和原生滚轮/开始拖动事件取消，远距离 Start/Center/End 对齐误差不超过 1 Canvas 单位。详细配置和证据见 `docs/IMPLEMENTATION-STATUS.md`。
+Unity Play Mode 与 macOS IL2CPP Player 已验证普通/虚拟列表换绑、迟到取消、来源/布局失效、命令排空、提交故障及代表性回滚清理故障；100、1,000、10,000 条固定尺寸单列候选保持视口物化上限。另有双轴双模板测量批次通过 14 组、102 项断言，覆盖内容版本、局部尺寸失效、动态锚点、位置恢复、Grid/视口切换、末尾跟随和原生滚轮/开始拖动事件取消，远距离 Start/Center/End 对齐误差不超过 1 Canvas 单位。详细配置和证据见 `Documentation~/Architecture/IMPLEMENTATION-STATUS.md`。
 
 ## 性能观察
 
@@ -109,7 +109,7 @@ Unity Profiler 提供以下标记：
 
 使用 ProfilerRecorder 时按 `SumAllSamplesInFrame` 汇总单帧调用，容量须大于零，在下一帧读取 `LastValue`。具体语义参见 Unity 的 [帧内汇总](https://docs.unity3d.com/2022.3/Documentation/ScriptReference/Unity.Profiling.ProfilerRecorderOptions.SumAllSamplesInFrame.html) 和 [LastValue](https://docs.unity3d.com/2022.3/Documentation/ScriptReference/Unity.Profiling.ProfilerRecorder.LastValue.html)。GC 每帧总量还包含 Unity、输入、渲染及其他脚本，应记录采样环境，不直接归因于列表。
 
-100/1,000/10,000 项、固定/测量尺寸和双模板的桌面 IL2CPP 基线见 [性能记录](../docs/VIRTUAL-LIST-BASELINE.md)。该记录不包含目标设备预算或异步资源加载性能。
+100/1,000/10,000 项、固定/测量尺寸和双模板的桌面 IL2CPP 基线见 [性能记录](Architecture/VIRTUAL-LIST-BASELINE.md)。该记录不包含目标设备预算或异步资源加载性能。
 
 ## 当前限制
 

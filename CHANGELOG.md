@@ -5,6 +5,8 @@
 
 ## [Unreleased]
 
+- 按职责统一目录：通用页面配置及策略解析归入 Pages，Unity 资产与预加载归入 Unity 接入层，uGUI/TMP 的运行时与 Editor 模块分别归档。旧 uGUI 配置资产保留脚本 GUID，具体配置类型迁移为 UGUIHostSettings；生成器支持无 Unity 的预设解析。
+
 - 2026-10-13 破坏性重构：删除 17 类基础控件 Element 包装；通用组件绑定迁入仅依赖 Core/UnityEngine 的 MUI.Unity，资源槽迁入纯 Resources 模块，弹窗工厂改为注入 View 绑定。生成器、当前及诊断示例、Prefab、向导、原生自动化和无障碍读取同步迁移。uGUI 改为可选包依赖，具体接入由程序集版本条件启用。旧项目需把基础包装组件替换为 View 的原生组件引用，资源键使用属性扩展；已有生成器 DLL 同步更新。
 
 
@@ -17,7 +19,7 @@
 
 - 2026-10-10 修复本地化 Inspector 的数组折叠，层级、预设及本地 Prefab 目录可正常展开。重做配置 Inspector 的层级表格、预设覆盖编辑、分组与即时校验；统一控制台及宿主 Inspector 的视觉样式，语言入口移到顶部，增加空状态、操作可用性、窄窗口适配和折叠状态保留。编译与语言资源检查通过，并在 MUITest 的 Unity 编辑模式核对配置显示、新增预设与语言切换；运行采集与追踪交互未在本轮完整验收。
 
-2026-10-09 完成当前设计的运行验收；各条源码变化按实现阶段保留，最终状态与证据见 docs/IMPLEMENTATION-STATUS.md。本节仍为未发布记录。
+2026-10-09 完成当前设计的运行验收；各条源码变化按实现阶段保留，最终状态与证据见 Documentation~/Architecture/IMPLEMENTATION-STATUS.md。本节仍为未发布记录。
 
 - 同层导航顺序改为在 Open、PostOpen 和 Replace 请求接纳时预留，异步加载、准备和显示提交不再决定上下关系。新依赖继承父请求顺序，依赖相对位置与 Layer 边界继续生效；打开历史按请求顺序插入，替换保留源历史位置，显式置前不改写历史。本项尚未纳入 Unity 运行验收。
 
@@ -99,7 +101,7 @@
 - 虚拟列表增加横向单列、视口通知、索引与对齐定位、平滑滚动、输入中断和末尾跟随。原 Height 尺寸 API 改为 Extent；测量入口改为 ConfigureSizeMeasurement 和 InvalidateSizeMeasurements。旧 Prefab 尺寸配置通过字段迁移保留。
 - 增补 UPM 入门、列表接入、实现与验收说明；保留原 MIT 授权内容，许可证文件规范为 LICENSE.md。
 
-离线编译、Editor 运行与 Player 验收的具体覆盖见 docs/IMPLEMENTATION-STATUS.md。
+离线编译、Editor 运行与 Player 验收的具体覆盖见 Documentation~/Architecture/IMPLEMENTATION-STATUS.md。
 
 - UnityResourcesLoader 仅保留 IResourceLoader / LoadAsync 和统一 ResourceLease；ResourceImageDemo 删除模式开关，统一准备、绑定和清理，延迟为零时仍允许立即完成。
 - View 与 Image/RawImage/Text/Graphic 删除同步资源配置入口，资源上下文只借用一份 IResourceLoader；准备诊断和 Inspector 删除旧加载器模式字段。

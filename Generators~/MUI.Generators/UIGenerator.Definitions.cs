@@ -65,10 +65,6 @@ namespace MUI.Generators
                     {
                         Fail(model, "UIPage.PolicyPreset 不能为空。");
                     }
-                    if (context.Compilation.GetTypeByMetadataName("MUI.UGUI.MUISettings") == null)
-                    {
-                        Fail(model, "UIPage.PolicyPreset 需要引用 MUI.UGUI。");
-                    }
                 }
             }
             if (string.IsNullOrWhiteSpace(key))
@@ -154,11 +150,8 @@ namespace MUI.Generators
                 .Append("                key ?? Key, resource ?? Resource, modelFactory, presenterFactory, ").Append(model.Name).Append("BindingFactory").Append(typeParameters).Append(".Create,\n")
                 .Append("                policy: policy, argsEqual: argsEqual, estimatedRetainedBytes: estimatedRetainedBytes")
                 .Append(", dependencies: dependencies);\n        }\n");
-            if (context.Compilation.GetTypeByMetadataName("MUI.UGUI.MUISettings") != null)
-            {
-                AppendPageDefinitionFactory(context, model, output, modelName, argsName, resultName,
-                    presenterBase, requirePresenterFactory, policyPreset);
-            }
+            AppendPageDefinitionFactory(context, model, output, modelName, argsName, resultName,
+                presenterBase, requirePresenterFactory, policyPreset);
             if (automaticArgs) AppendOpenEntryCalls(output, model, presenter, argsName, resultName);
             output.Append("    }\n");
             GeneratePageFacade(context, model, presenter, args, result, policyPreset, requirePresenterFactory, automaticArgs);
@@ -178,7 +171,9 @@ namespace MUI.Generators
             // 有业务依赖的类型必须显式传入工厂；普通页面可以直接 CreateDefinition()。
             if (!canConstructModel) output.Append(modelParameter).Append(",\n");
             if (requirePresenterFactory) output.Append(presenterParameter).Append(",\n");
-            output.Append("            global::MUI.UGUI.MUISettings settings = null,\n")
+            var hasUnitySettings = context.Compilation.GetTypeByMetadataName("MUI.Unity.MUISettings") != null;
+            output.Append(hasUnitySettings ? "            global::MUI.Unity.MUISettings settings = null,\n"
+                : "            global::MUI.Pages.PageConfiguration settings = null,\n")
                 .Append("            global::MUI.Pages.PagePolicyOverrides overrides = null,\n");
             if (canConstructModel) output.Append(modelParameter).Append(" = null,\n");
             if (!requirePresenterFactory) output.Append(presenterParameter).Append(" = null,\n");
@@ -192,7 +187,8 @@ namespace MUI.Generators
             }
             output.Append("            return Create(modelFactory, presenterFactory,\n")
                 .Append("                policy: settings == null\n")
-                .Append("                    ? global::MUI.UGUI.MUISettings.ResolveGlobalPolicy(").Append(policyPreset == null ? "null" : Literal(policyPreset)).Append(", overrides: overrides)\n")
+                .Append(hasUnitySettings ? "                    ? global::MUI.Unity.MUISettings.ResolveGlobalPolicy("
+                    : "                    ? global::MUI.Pages.PageConfiguration.ResolveBuiltInPolicy(").Append(policyPreset == null ? "null" : Literal(policyPreset)).Append(", overrides: overrides)\n")
                 .Append("                    : settings.ResolvePolicy(").Append(policyPreset == null ? "null" : Literal(policyPreset)).Append(", overrides: overrides),\n")
                 .Append("                argsEqual: argsEqual, dependencies: dependencies, key: key, resource: resource,\n")
                 .Append("                estimatedRetainedBytes: estimatedRetainedBytes);\n        }\n");

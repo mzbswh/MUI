@@ -11,6 +11,7 @@
     <Compile Include="../Diagnostics/Samples/Settings/*.cs" />
     <ProjectReference Include="MUI.Resources.csproj" />
     <ProjectReference Include="MUI.Core.csproj" />
+    <ProjectReference Include="MUI.Unity.Pages.csproj" />
     <ProjectReference Include="MUI.UGUI.csproj" />
     <ProjectReference Include="MUI.Unity.csproj" />
     <ProjectReference Include="../../Generators~/MUI.Generators/MUI.Generators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />

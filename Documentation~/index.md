@@ -80,7 +80,7 @@ var route = InventoryViewModelDefinition.Create(
 
 打开 `Tools/MUI/控制台`，或点击 UIHost Inspector 的“打开控制台”。编辑器界面默认中文。选择当前场景的宿主，进入 Play Mode 并完成初始化后点击“采集运行状态”。默认手动采集，可启用每 0.5 秒自动刷新；未初始化时提供引导并禁用运行操作。
 
-UIHost Inspector 只提供只读全局 Settings、View Root、简短状态及 Dashboard 快捷入口；页面资源通过标识加载，不在宿主维护目录；自动更新界面统一在 MUISettings 的“运行设置”中配置，初始化后配置引用不可编辑。完整导航快照与生命周期追踪统一在 Dashboard 操作，快照上限为 1—4096。
+UIHost Inspector 只提供只读全局 Settings、View Root、简短状态及 Dashboard 快捷入口；页面资源通过标识加载，不在宿主维护目录；自动更新界面统一在 UGUIHostSettings 的“运行设置”中配置，初始化后配置引用不可编辑。完整导航快照与生命周期追踪统一在 Dashboard 操作，快照上限为 1—4096。
 
 - 页面与宿主：按最终显示顺序查看状态、层级、解析后的策略及配置来源、焦点、隐藏和输入阻挡来源、返回历史、依赖及清理责任。支持定位原生 View、单独采集页面输入与资源准备、复制状态报告。绑定和射线检查继续通过 View Inspector 操作。
 - 生命周期：开始新一轮记录、停止、清除、筛选和复制已有时间线；记录容量为 1—8192，满时覆盖最旧事件。关闭窗口不会停止导航器记录，需要显式停止。
@@ -154,7 +154,7 @@ TwoWay 默认用模型初始化控件，路径缺失期间忽略反向写入。�
 
 ## 验证状态
 
-2026-10-09 已在 Unity Hub 新建的 Unity 2022.3.62f3 工程完成设计验收，覆盖八项 Sample 导入、Basic 实体鼠标/键盘、Editor 定位和必要 IL2CPP 运行。完整标准见 [设计目标](../docs/DESIGN-GOALS.md)，后端、操作与证据范围见 [实现记录](../docs/IMPLEMENTATION-STATUS.md)。目标设备预算未指定，列表性能交付可复现基线；Player 退出的 allocator 提示未归因，不声明完整内存证明。
+2026-10-09 已在 Unity Hub 新建的 Unity 2022.3.62f3 工程完成设计验收，覆盖八项 Sample 导入、Basic 实体鼠标/键盘、Editor 定位和必要 IL2CPP 运行。完整标准见 [设计目标](Architecture/DESIGN-GOALS.md)，后端、操作与证据范围见 [实现记录](Architecture/IMPLEMENTATION-STATUS.md)。目标设备预算未指定，列表性能交付可复现基线；Player 退出的 allocator 提示未归因，不声明完整内存证明。
 
 命令统一实现 `IUICommand`；立即完成的业务可传给 `new AsyncCommand(context => { /* 业务操作 */ })`，不需要独立同步命令。绑定入口要求可等待清理的激活作用域，以保证关闭或换绑时撤销命令来源并等待在途工作。
 
@@ -329,7 +329,7 @@ UIHost 的 `ownsProvider: true` 将提供方最终释放交给宿主；默认资
 
 UIHost 默认随场景销毁。项目切换场景前等待 `ShutdownAsync()`，确认资源归还后再卸载；框架不接管场景加载。持久宿主由项目显式调用 DontDestroyOnLoad，并把 View 挂在同一个兼容持久层级，EventSystem 也由项目明确管理。持久缓存只保存独立原生 View 凭证，重新激活注入当前加载器，不能保留待卸载场景对象或旧业务激活。
 
-Unity 2022.3.62f3 的真实窗口 IL2CPP 观察已覆盖上述两种 Canvas 模式、CanvasScaler、1000×700/700×1000 分辨率、安全区/键盘坐标、跨场景活动/缓存内容及 Unity Resources 后端归还。配置和完整证据见 `docs/IMPLEMENTATION-STATUS.md`；该结果不代表任意项目后端、实体输入或目标设备性能达标。
+Unity 2022.3.62f3 的真实窗口 IL2CPP 观察已覆盖上述两种 Canvas 模式、CanvasScaler、1000×700/700×1000 分辨率、安全区/键盘坐标、跨场景活动/缓存内容及 Unity Resources 后端归还。配置和完整证据见 `Documentation~/Architecture/IMPLEMENTATION-STATUS.md`；该结果不代表任意项目后端、实体输入或目标设备性能达标。
 
 ## 页面向导与 Editor 校验
 
@@ -686,7 +686,7 @@ public partial class InventoryViewModel : ViewModel { }
 
 ### 配置和生命周期边界
 
-`MUISettings` 只保存运行时页面策略、容量、输入与显示配置。控件命名、绑定生成规则、页面生成目录和 IDE 源码输出开关保存于 `ProjectSettings/MUIEditorSettings.asset`，由 `MUIEditorSettings` 管理，只在编辑器加载。同一个 MUISettings Inspector 同时编辑两份配置，编辑器配置不加入 Player 预加载。`RuntimeSettingsAsset` 负责运行时资产发现、创建与构建接入。不会从旧运行时字段自动迁移配置。
+`MUI.Unity.MUISettings` 保存通用页面策略和容量；`MUI.UGUI.UGUIHostSettings` 继承它并保存 uGUI 遮罩、动画、排序层及帧驱动配置。控件命名、绑定生成规则、页面生成目录和 IDE 源码输出开关保存于 `ProjectSettings/MUIEditorSettings.asset`，由 `MUIEditorSettings` 管理，只在编辑器加载。同一个 MUISettings Inspector 同时编辑两份配置，编辑器配置不加入 Player 预加载。`RuntimeSettingsAsset` 负责运行时资产发现、创建与构建接入。不会从旧运行时字段自动迁移配置。
 
 页面预设为 `PagePolicyPreset`，序列化配置值为 `PagePolicySettings`，最终运行策略为 `PagePolicy`。通用清理仍称 `ViewInstanceCleanup`，页面与 Widget 共享它。
 

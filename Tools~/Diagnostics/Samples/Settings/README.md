@@ -1,6 +1,6 @@
 # Settings sample
 
-> 最终验收：2026-10-09 的设计必需条件已闭合，具体后端、输入方式及证据见包内 `docs/IMPLEMENTATION-STATUS.md`。本文中“尚未验收/离线编译”等开发阶段说明保留当时范围；当前状态以该记录顶部的最终审计为准，未列入原设计的补充操作不扩展完成门槛。
+> 最终验收：2026-10-09 的设计必需条件已闭合，具体后端、输入方式及证据见包内 `Documentation~/Architecture/IMPLEMENTATION-STATUS.md`。本文中“尚未验收/离线编译”等开发阶段说明保留当时范围；当前状态以该记录顶部的最终审计为准，未列入原设计的补充操作不扩展完成门槛。
 
 1. Import **Settings** from the MUI package in Unity Package Manager.
 2. Choose **Tools → MUI → Samples → Open Settings Scene**, then enter Play mode. The launcher keeps the scene camera. Alternatively add `SettingsDemo` to an empty GameObject in a scene with an active Camera; the camera prevents Unity's “No cameras rendering” message from covering the Overlay UI.

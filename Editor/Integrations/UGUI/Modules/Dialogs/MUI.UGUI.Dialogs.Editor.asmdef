@@ -1,0 +1,29 @@
+{
+  "name": "MUI.UGUI.Dialogs.Editor",
+  "rootNamespace": "MUI.UGUI.Dialogs.Editor",
+  "references": [
+    "MUI.Core",
+    "MUI.UGUI",
+    "MUI.Editor",
+    "MUI.UGUI.Dialogs",
+    "Unity.ugui",
+    "MUI.Dialogs",
+    "MUI.Editor.Localization",
+    "MUI.Unity",
+    "MUI.Unity.Pages"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "autoReferenced": true,
+  "defineConstraints": [
+    "MUI_HAS_UGUI"
+  ],
+  "versionDefines": [
+    {
+      "name": "com.unity.ugui",
+      "expression": "0.0.0",
+      "define": "MUI_HAS_UGUI"
+    }
+  ]
+}

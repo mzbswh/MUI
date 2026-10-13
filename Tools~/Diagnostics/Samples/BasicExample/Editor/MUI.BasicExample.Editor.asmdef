@@ -9,7 +9,8 @@
     "MUI.UGUI",
     "MUI.Editor",
     "MUI.Editor.Localization",
-    "MUI.Unity"
+    "MUI.Unity",
+    "MUI.Unity.Pages"
   ],
   "includePlatforms": [
     "Editor"

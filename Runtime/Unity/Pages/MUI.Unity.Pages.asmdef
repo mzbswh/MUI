@@ -1,0 +1,10 @@
+{
+  "name": "MUI.Unity.Pages",
+  "rootNamespace": "MUI.Unity",
+  "references": [
+    "MUI.Core",
+    "MUI.Pages",
+    "MUI.Resources"
+  ],
+  "autoReferenced": true
+}

@@ -6,8 +6,9 @@
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="../../Runtime/Integrations/UGUI.Automation/**/*.cs" />
+    <Compile Include="../../Runtime/Integrations/UGUI/Automation/**/*.cs" />
     <ProjectReference Include="MUI.Core.csproj" />
+    <ProjectReference Include="MUI.Unity.Pages.csproj" />
     <ProjectReference Include="MUI.Pages.csproj" />
     <ProjectReference Include="MUI.UGUI.csproj" />
     <ProjectReference Include="MUI.Unity.csproj" />

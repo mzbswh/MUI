@@ -8,7 +8,8 @@
     "MUI.Dialogs",
     "MUI.UGUI",
     "MUI.UGUI.Dialogs",
-    "MUI.Unity"
+    "MUI.Unity",
+    "MUI.Unity.Pages"
   ],
   "autoReferenced": true
 }

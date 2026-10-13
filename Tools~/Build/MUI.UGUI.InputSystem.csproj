@@ -6,7 +6,7 @@
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="../../Runtime/Integrations/UGUI.InputSystem/**/*.cs" />
+    <Compile Include="../../Runtime/Integrations/UGUI/InputSystem/**/*.cs" />
     <ProjectReference Include="MUI.UGUI.csproj" />
     <ProjectReference Include="MUI.Unity.csproj" />
     <Reference Include="UnityEngine.CoreModule"><HintPath>$(UnityManagedPath)/UnityEngine.CoreModule.dll</HintPath><Private>false</Private></Reference>

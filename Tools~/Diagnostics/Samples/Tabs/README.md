@@ -1,6 +1,6 @@
 # Tabs 示例
 
-> 最终验收：2026-10-09 的设计必需条件已闭合，具体后端、输入方式及证据见包内 `docs/IMPLEMENTATION-STATUS.md`。本文中“尚未验收/离线编译”等开发阶段说明保留当时范围；当前状态以该记录顶部的最终审计为准，未列入原设计的补充操作不扩展完成门槛。
+> 最终验收：2026-10-09 的设计必需条件已闭合，具体后端、输入方式及证据见包内 `Documentation~/Architecture/IMPLEMENTATION-STATUS.md`。本文中“尚未验收/离线编译”等开发阶段说明保留当时范围；当前状态以该记录顶部的最终审计为准，未列入原设计的补充操作不扩展完成门槛。
 
 导入 **Tabs**，选择 **Tools → MUI → Samples → Open Tabs Scene**，进入 Play 模式。点击 Inventory 或 Quests；Quests 首次准备故意失败，点击 Retry 后成功。Locked 不可用。加载提示只覆盖内容区域，底部 TabBar 保持可用。
 

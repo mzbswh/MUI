@@ -10,6 +10,7 @@
     <Compile Include="../Diagnostics/Samples/BasicExample/Editor/*.cs" />
     <ProjectReference Include="MUI.BasicExample.csproj" />
     <ProjectReference Include="MUI.Core.csproj" />
+    <ProjectReference Include="MUI.Unity.Pages.csproj" />
     <ProjectReference Include="MUI.Pages.csproj" />
     <ProjectReference Include="MUI.Resources.csproj" />
     <ProjectReference Include="MUI.UGUI.csproj" />

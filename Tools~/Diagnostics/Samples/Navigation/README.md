@@ -1,6 +1,6 @@
 # Navigation sample
 
-> 最终验收：2026-10-09 的设计必需条件已闭合，具体后端、输入方式及证据见包内 `docs/IMPLEMENTATION-STATUS.md`。本文中“尚未验收/离线编译”等开发阶段说明保留当时范围；当前状态以该记录顶部的最终审计为准，未列入原设计的补充操作不扩展完成门槛。
+> 最终验收：2026-10-09 的设计必需条件已闭合，具体后端、输入方式及证据见包内 `Documentation~/Architecture/IMPLEMENTATION-STATUS.md`。本文中“尚未验收/离线编译”等开发阶段说明保留当时范围；当前状态以该记录顶部的最终审计为准，未列入原设计的补充操作不扩展完成门槛。
 
 1. Import **Resource Integration**, then **Navigation** from the package samples.
 2. Choose **Tools → MUI → Samples → Open Navigation Scene** and enter Play mode.
@@ -379,7 +379,7 @@ private static void RegisterUIBuildCatalog()
 {
     MUI.Editor.UIBuildValidation.RegisterCatalog("GameUI", catalog =>
     {
-        var settings = UnityEditor.AssetDatabase.LoadAssetAtPath<MUI.UGUI.MUISettings>("Assets/UI/MUISettings.asset");
+        var settings = UnityEditor.AssetDatabase.LoadAssetAtPath<MUI.Unity.MUISettings>("Assets/UI/MUISettings.asset");
         var route = InventoryPage.CreateDefinition(settings);
         var prefab = UnityEditor.AssetDatabase.LoadAssetAtPath<UnityEngine.GameObject>(
             "Assets/UI/Inventory/Prefabs/InventoryView.prefab");

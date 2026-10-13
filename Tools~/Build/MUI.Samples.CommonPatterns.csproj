@@ -7,6 +7,7 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="MUI.Core.csproj" />
+    <ProjectReference Include="MUI.Unity.Pages.csproj" />
     <ProjectReference Include="MUI.Loading.csproj" />
     <ProjectReference Include="MUI.Notifications.csproj" />
     <ProjectReference Include="MUI.Themes.csproj" />

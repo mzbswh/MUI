@@ -1,0 +1,29 @@
+{
+  "name": "MUI.Editor",
+  "rootNamespace": "MUI.Editor",
+  "references": [
+    "MUI.Core",
+    "MUI.Resources",
+    "MUI.UGUI",
+    "MUI.Pages",
+    "Unity.ugui",
+    "MUI.Editor.Localization",
+    "MUI.Unity",
+    "MUI.Unity.Pages",
+    "MUI.Unity.Pages.Editor"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "autoReferenced": true,
+  "defineConstraints": [
+    "MUI_HAS_UGUI"
+  ],
+  "versionDefines": [
+    {
+      "name": "com.unity.ugui",
+      "expression": "0.0.0",
+      "define": "MUI_HAS_UGUI"
+    }
+  ]
+}

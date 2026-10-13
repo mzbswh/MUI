@@ -7,8 +7,9 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="../../Generators~/MUI.Generators/MUI.Generators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
-    <Compile Include="../../Runtime/Integrations/UGUI/**/*.cs" />
+    <Compile Include="../../Runtime/Integrations/UGUI/**/*.cs" Exclude="../../Runtime/Integrations/UGUI/InputSystem/**/*.cs;../../Runtime/Integrations/UGUI/Automation/**/*.cs;../../Runtime/Integrations/UGUI/Modules/Tabs/**/*.cs;../../Runtime/Integrations/UGUI/Modules/Loading/**/*.cs;../../Runtime/Integrations/UGUI/Modules/DragDrop/**/*.cs;../../Runtime/Integrations/UGUI/Modules/Dialogs/**/*.cs;../../Runtime/Integrations/UGUI/Modules/Themes/**/*.cs;../../Runtime/Integrations/UGUI/Modules/Notifications/**/*.cs" />
     <ProjectReference Include="MUI.Core.csproj" />
+    <ProjectReference Include="MUI.Unity.Pages.csproj" />
     <ProjectReference Include="MUI.Unity.csproj" />
     <ProjectReference Include="MUI.Resources.csproj" />
     <ProjectReference Include="MUI.Pages.csproj" />

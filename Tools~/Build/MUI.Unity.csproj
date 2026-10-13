@@ -6,7 +6,7 @@
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="../../Runtime/Unity/**/*.cs" />
+    <Compile Include="../../Runtime/Unity/Binding/**/*.cs" />
     <ProjectReference Include="MUI.Core.csproj" />
     <Reference Include="UnityEngine.CoreModule"><HintPath>$(UnityManagedPath)/UnityEngine.CoreModule.dll</HintPath><Private>false</Private></Reference>
   </ItemGroup>

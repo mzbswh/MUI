@@ -7,8 +7,10 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="MUI.Editor.Localization.csproj" />
-    <Compile Include="../../Editor/**/*.cs" Exclude="../../Editor/Localization/**/*.cs;../../Editor/Pages/**/*.cs;../../Editor/TMP/**/*.cs;../../Editor/Loading/**/*.cs;../../Editor/Notifications/**/*.cs;../../Editor/DragDrop/**/*.cs;../../Editor/Dialogs/**/*.cs;../../Editor/Tabs/**/*.cs" />
+    <Compile Include="../../Editor/Integrations/UGUI/**/*.cs" Exclude="../../Editor/Integrations/UGUI/Modules/Tabs/**/*.cs;../../Editor/Integrations/UGUI/Modules/Loading/**/*.cs;../../Editor/Integrations/UGUI/Modules/DragDrop/**/*.cs;../../Editor/Integrations/UGUI/Modules/Dialogs/**/*.cs;../../Editor/Integrations/UGUI/Modules/Notifications/**/*.cs" />
     <ProjectReference Include="MUI.Core.csproj" />
+    <ProjectReference Include="MUI.Unity.Pages.csproj" />
+    <ProjectReference Include="MUI.Unity.Pages.Editor.csproj" />
     <ProjectReference Include="MUI.Resources.csproj" />
     <ProjectReference Include="MUI.Pages.csproj" />
     <ProjectReference Include="MUI.UGUI.csproj" />

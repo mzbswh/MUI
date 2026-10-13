@@ -1,3 +1,4 @@
+using MUI.Unity;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -17,9 +18,9 @@ namespace MUI.Samples.Navigation
         private ResourceImageViewModel model;
         private DemoLoader loader;
         private View view;
-        private ImageElement icon;
-        private RawImageElement preview;
-        private TextElement fontPreview;
+        private UnityEngine.UI.Image icon;
+        private UnityEngine.UI.RawImage preview;
+        private UnityEngine.UI.Text fontPreview;
         private GameObject canvasObject;
         private GameObject eventSystemObject;
         private UnityEngine.UI.Text status;
@@ -100,9 +101,9 @@ namespace MUI.Samples.Navigation
                 return;
             }
 
-            var iconSource = icon == null ? "destroyed" : icon.SpriteSource ?? "empty";
-            var previewSource = preview == null ? "destroyed" : preview.TextureSource ?? "empty";
-            var fontSource = fontPreview == null ? "destroyed" : fontPreview.FontSource ?? "empty";
+            var iconSource = icon == null ? "destroyed" : view.GetElement<NativeControl>(icon.name, icon.GetType()).GetPropertyAdapter(owner => new ImageResources(owner)).SpriteSource ?? "empty";
+            var previewSource = preview == null ? "destroyed" : view.GetElement<NativeControl>(preview.name, preview.GetType()).GetPropertyAdapter(owner => new TextureResources(owner)).TextureSource ?? "empty";
+            var fontSource = fontPreview == null ? "destroyed" : view.GetElement<NativeControl>(fontPreview.name, fontPreview.GetType()).GetPropertyAdapter(owner => new TextResources(owner)).FontSource ?? "empty";
             status.text = "Resource loading\n" +
                 $"Icon: {iconSource}   Preview: {previewSource}   Font: {fontSource}\n" +
                 $"Loading: {loader.Pending}   Held resources: {loader.HeldResources}\n" +

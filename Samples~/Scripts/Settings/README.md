@@ -29,4 +29,4 @@
 
 普通状态（Volume、Status、NameReadOnly）和按钮入口配置在 Prefab 的 View 绑定列表。输入限制、Slider 范围等固定值直接编辑原生组件。代码只保留转换校验、计算属性、异步保存和业务行为；生成按钮可实现 partial 方法，也可关联已有 [Command] 方法（SaveCommand 保留 CanExecute）。
 
-绑定配置修改后自动同步并请求编译；编译器检查属性、组件类型、命令事件、成员冲突和绑定方向。无需逐次点击“生成绑定”。命令直接连接 Button.onClick / interactable，不再经过 IButtonElement 或 NativeButton。
+绑定配置修改后自动同步并请求编译；编译器检查属性、组件类型、命令事件、成员冲突和绑定方向。无需逐次点击“生成绑定”。命令直接连接 Button.onClick / interactable，不再经过 IButton 或 NativeButton。

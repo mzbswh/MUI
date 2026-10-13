@@ -5,6 +5,8 @@
 
 ## [Unreleased]
 
+- 2026-10-13 破坏性重构：删除 17 类基础控件 Element 包装；通用组件绑定迁入仅依赖 Core/UnityEngine 的 MUI.Unity，资源槽迁入纯 Resources 模块，弹窗工厂改为注入 View 绑定。生成器、当前及诊断示例、Prefab、向导、原生自动化和无障碍读取同步迁移。uGUI 改为可选包依赖，具体接入由程序集版本条件启用。旧项目需把基础包装组件替换为 View 的原生组件引用，资源键使用属性扩展；已有生成器 DLL 同步更新。
+
 
 
 - 2026-10-13 恢复 Unity 标准 Samples 导入目录，移除自动搬移到 Assets/MUI Examples 的逻辑，保留 Package Manager 的导入状态识别与 Reimport。独立示例项目生成脚本按包名和版本生成同样的标准目录。

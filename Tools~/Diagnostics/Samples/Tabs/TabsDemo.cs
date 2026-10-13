@@ -99,7 +99,7 @@ namespace MUI.Samples.Tabs
                 var prefab = Node("TabPage", canvasObject.transform, new Vector2(650, 220), Vector2.zero);
                 prefab.gameObject.SetActive(false);
                 prefab.gameObject.AddComponent<Image>().color = new Color(0.17f, 0.24f, 0.32f);
-                AddText("Title", "Preparing", prefab, new Vector2(600, 80), Vector2.zero).gameObject.AddComponent<TextElement>();
+                AddText("Title", "Preparing", prefab, new Vector2(600, 80), Vector2.zero).gameObject.BindControl<UnityEngine.UI.Text>();
                 prefab.gameObject.AddComponent<View>();
                 var questPrefab = UnityEngine.Object.Instantiate(prefab.gameObject, canvasObject.transform);
                 questPrefab.name = "QuestTab";

@@ -2,7 +2,7 @@
 
 [返回总览](../../README.md)
 
-`Feedback.prefab` 已配置通知文本、进度、四个操作按钮和 PreviewCard ImageElement。[FeedbackViewModel.cs](FeedbackViewModel.cs) 使用 NotificationQueue、LoadingScope、InputGate、ThemeService；生成绑定负责同步文字和命令状态。
+`Feedback.prefab` 已配置通知文本、进度、四个操作按钮和 PreviewCard 原生 Image。[FeedbackViewModel.cs](FeedbackViewModel.cs) 使用 NotificationQueue、LoadingScope、InputGate、ThemeService；生成绑定负责同步文字和命令状态。
 
 显示通知 发布通知；工作台用非缩放时间 Advance 推进队列。同步偏好设置 创建 LoadingOperation，立即阻挡重复业务输入，0.15 秒后显示 Loading。异步操作上报进度，结束时 Dispose 操作，页面退出由模型 LifetimeScope 兜底。
 

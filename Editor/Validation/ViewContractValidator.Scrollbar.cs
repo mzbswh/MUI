@@ -1,3 +1,4 @@
+using UnityEngine;
 using System.Collections.Generic;
 using MUI.UGUI;
 using UnityEngine.UI;
@@ -8,7 +9,7 @@ namespace MUI.Editor
     public static partial class ViewContractValidator
     {
         /// <summary>检查滚动条原生手柄及其 View 归属，不运行布局或创建控件。</summary>
-        private static void ValidateScrollbar(Element element, View view, ICollection<string> errors)
+        private static void ValidateScrollbar(Component element, View view, ICollection<string> errors)
         {
             var path = Path(element.transform, view.transform);
             var scrollbar = element.GetComponent<Scrollbar>();
@@ -36,12 +37,12 @@ namespace MUI.Editor
             }
         }
 
-        private static void ValidateScrollbarWriter(ScrollbarElement element, BindingEntry entry,
+        private static void ValidateScrollbarWriter(Scrollbar element, BindingEntry entry,
             ScrollRect[] owners, View view, ICollection<string> errors)
         {
             if (entry.Mode == BindingMode.OneWayToSource ||
-                (entry.TargetProperty != nameof(ScrollbarElement.Value) &&
-                 entry.TargetProperty != nameof(ScrollbarElement.Size)))
+                (entry.TargetProperty != nameof(Scrollbar.value) &&
+                 entry.TargetProperty != nameof(Scrollbar.size)))
             {
                 return;
             }

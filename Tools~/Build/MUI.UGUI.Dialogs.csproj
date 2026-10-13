@@ -6,9 +6,10 @@
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="../../Runtime/Rendering/UGUI.Dialogs/**/*.cs" />
+    <Compile Include="../../Runtime/Integrations/UGUI.Dialogs/**/*.cs" />
     <ProjectReference Include="MUI.Core.csproj" />
     <ProjectReference Include="MUI.UGUI.csproj" />
+    <ProjectReference Include="MUI.Unity.csproj" />
     <ProjectReference Include="MUI.Dialogs.csproj" />
     <ProjectReference Include="MUI.Pages.csproj" />
     <ProjectReference Include="MUI.Resources.csproj" />

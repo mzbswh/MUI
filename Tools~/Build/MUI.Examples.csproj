@@ -15,6 +15,7 @@
     <ProjectReference Include="MUI.Resources.csproj" />
     <ProjectReference Include="MUI.Widgets.csproj" />
     <ProjectReference Include="MUI.UGUI.csproj" />
+    <ProjectReference Include="MUI.Unity.csproj" />
     <ProjectReference Include="MUI.Tabs.csproj" />
     <ProjectReference Include="MUI.UGUI.Tabs.csproj" />
     <ProjectReference Include="MUI.Dialogs.csproj" />

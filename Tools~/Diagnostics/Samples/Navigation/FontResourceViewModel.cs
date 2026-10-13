@@ -7,10 +7,10 @@ namespace MUI.Samples.Navigation
     public partial class FontResourceViewModel : ViewModel
     {
         [ObservableProperty]
-        [Bind("Label", nameof(TextElement.Content))]
+        [Bind("Label", nameof(UnityEngine.UI.Text.text))]
         private string content = "Font resource binding";
         [ObservableProperty]
-        [Bind("Label", nameof(TextElement.FontSource))]
+        [Bind("Label", nameof(TextResources.FontSource))]
         private string fontKey;
     }
 }

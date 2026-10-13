@@ -11,6 +11,7 @@
     <ProjectReference Include="MUI.Notifications.csproj" />
     <ProjectReference Include="MUI.Themes.csproj" />
     <ProjectReference Include="MUI.UGUI.csproj" />
+    <ProjectReference Include="MUI.Unity.csproj" />
     <ProjectReference Include="MUI.UGUI.Themes.csproj" />
     <ProjectReference Include="MUI.Samples.ResourceIntegration.csproj" />
     <Compile Include="../Diagnostics/Samples/CommonPatterns/*.cs" />

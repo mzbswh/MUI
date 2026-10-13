@@ -10,6 +10,7 @@
     <Compile Include="../../Editor/Loading/**/*.cs" />
     <ProjectReference Include="MUI.Core.csproj" />
     <ProjectReference Include="MUI.UGUI.csproj" />
+    <ProjectReference Include="MUI.Unity.csproj" />
     <ProjectReference Include="MUI.Editor.csproj" />
     <ProjectReference Include="MUI.UGUI.Loading.csproj" />
     <Reference Include="UnityEngine.CoreModule"><HintPath>$(UnityManagedPath)/UnityEngine.CoreModule.dll</HintPath><Private>false</Private></Reference>

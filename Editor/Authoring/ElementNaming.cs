@@ -1,4 +1,6 @@
+using UnityEngine;
 using System;
+using UnityEngine.UI;
 using System.Text;
 using MUI.UGUI;
 using L = MUI.Editor.Localization.MUIEditorLocalization;
@@ -47,7 +49,7 @@ namespace MUI.Editor
             {
                 throw new ArgumentNullException(nameof(name));
             }
-            if (type == null || !typeof(Element).IsAssignableFrom(type))
+            if (type == null || !typeof(Component).IsAssignableFrom(type))
             {
                 throw new ArgumentException(L.Get("editor.ElementNaming.621399f171"), nameof(type));
             }
@@ -123,57 +125,57 @@ namespace MUI.Editor
                 return "Lst_";
             }
 
-            if (typeof(ButtonElement).IsAssignableFrom(type))
+            if (typeof(Button).IsAssignableFrom(type))
             {
                 return "Btn_";
             }
 
-            if (typeof(TextElement).IsAssignableFrom(type) || type.FullName == "MUI.TMP.TMPTextElement")
+            if (typeof(Text).IsAssignableFrom(type) || type.FullName == "TMPro.TextMeshProUGUI")
             {
                 return "Txt_";
             }
 
-            if (typeof(ImageElement).IsAssignableFrom(type) || typeof(RawImageElement).IsAssignableFrom(type))
+            if (typeof(Image).IsAssignableFrom(type) || typeof(RawImage).IsAssignableFrom(type))
             {
                 return "Img_";
             }
 
-            if (typeof(SliderElement).IsAssignableFrom(type))
+            if (typeof(Slider).IsAssignableFrom(type))
             {
                 return "Sld_";
             }
 
-            if (typeof(ScrollbarElement).IsAssignableFrom(type))
+            if (typeof(Scrollbar).IsAssignableFrom(type))
             {
                 return "Sbr_";
             }
 
-            if (typeof(ToggleElement).IsAssignableFrom(type))
+            if (typeof(Toggle).IsAssignableFrom(type))
             {
                 return "Tog_";
             }
 
-            if (typeof(InputFieldElement).IsAssignableFrom(type) || type.FullName == "MUI.TMP.TMPInputFieldElement")
+            if (typeof(InputField).IsAssignableFrom(type) || type.FullName == "TMPro.TMP_InputField")
             {
                 return "Inp_";
             }
 
-            if (typeof(DropdownElement).IsAssignableFrom(type) || type.FullName == "MUI.TMP.TMPDropdownElement")
+            if (typeof(Dropdown).IsAssignableFrom(type) || type.FullName == "TMPro.TMP_Dropdown")
             {
                 return "Ddp_";
             }
 
-            if (typeof(ScrollRectElement).IsAssignableFrom(type))
+            if (typeof(ScrollRect).IsAssignableFrom(type))
             {
                 return "Scr_";
             }
 
-            if (typeof(RectMaskElement).IsAssignableFrom(type))
+            if (typeof(RectMask2D).IsAssignableFrom(type))
             {
                 return "Msk_";
             }
 
-            if (typeof(LayoutSizeElement).IsAssignableFrom(type) || typeof(AspectRatioElement).IsAssignableFrom(type))
+            if (typeof(LayoutElement).IsAssignableFrom(type) || typeof(AspectRatioFitter).IsAssignableFrom(type))
             {
                 return "Lyt_";
             }

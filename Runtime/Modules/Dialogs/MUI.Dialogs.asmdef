@@ -1,7 +1,11 @@
 {
   "name": "MUI.Dialogs",
   "rootNamespace": "MUI.Dialogs",
-  "references": ["MUI.Core", "MUI.Pages"],
+  "references": [
+    "MUI.Core",
+    "MUI.Pages",
+    "MUI.Resources"
+  ],
   "autoReferenced": true,
   "noEngineReferences": true
 }

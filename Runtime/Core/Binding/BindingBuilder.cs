@@ -68,7 +68,7 @@ namespace MUI
                     Func<TTarget, BindingConversionResult<TSource>> tryConvertBack = null,
                     Action<TViewModel, BindingValidationState> writeValidation = null,
                     BindingSourcePath<TViewModel, TSource> sourcePath = null,
-                    TTarget nullValue = default, Type componentType = null)
+                    TTarget nullValue = default, Type componentType = null, Action<TElement> prepareTarget = null)
                     where TElement : class, IElement
         {
             if (string.IsNullOrEmpty(sourceProperty))
@@ -125,6 +125,7 @@ namespace MUI
             }
 
             var element = ResolveElement<TElement>(elementName, componentType);
+            prepareTarget?.Invoke(element);
             session.RegisterPropertyWriter(element, sourceProperty, targetProperty, mode);
             TSource ReadSource(INotifyPropertyChanged owner) => sourcePath == null ? readSource(model) : sourcePath.Read(owner);
             void WriteSource(INotifyPropertyChanged owner, TSource value)

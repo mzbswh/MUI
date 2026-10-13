@@ -7,7 +7,7 @@ namespace MUI.Examples
     {
         private bool alternate;
 
-        [ObservableProperty, Bind("Artwork", nameof(ImageElement.SpriteSource), ElementType = typeof(ImageElement))]
+        [ObservableProperty, Bind("Artwork", nameof(ImageResources.SpriteSource))]
         private string artwork = "MUIExamples/Artwork/Forest";
 
         [Command]

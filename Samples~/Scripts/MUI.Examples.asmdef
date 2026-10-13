@@ -16,7 +16,18 @@
     "MUI.Notifications",
     "MUI.Themes",
     "MUI.UGUI.Themes",
-    "Unity.ugui"
+    "Unity.ugui",
+    "MUI.Unity"
   ],
-  "autoReferenced": true
+  "autoReferenced": true,
+  "defineConstraints": [
+    "MUI_HAS_UGUI"
+  ],
+  "versionDefines": [
+    {
+      "name": "com.unity.ugui",
+      "expression": "0.0.0",
+      "define": "MUI_HAS_UGUI"
+    }
+  ]
 }

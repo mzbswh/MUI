@@ -10,18 +10,18 @@ namespace MUI.Samples.Navigation
     public partial class ResourceImageViewModel : ViewModel
     {
         [ObservableProperty]
-        [Bind("Icon", nameof(ImageElement.SpriteSource), ElementType = typeof(ImageElement))]
+        [Bind("Icon", nameof(ImageResources.SpriteSource))]
         private string iconKey;
         [ObservableProperty]
-        [Bind("Preview", nameof(RawImageElement.TextureSource), ElementType = typeof(RawImageElement))]
+        [Bind("Preview", nameof(TextureResources.TextureSource))]
         private string previewKey;
         [ObservableProperty]
-        [Bind("FontPreview", nameof(TextElement.FontSource))]
+        [Bind("FontPreview", nameof(TextResources.FontSource))]
         [NotifyPropertyChangedFor(nameof(FontCaption))]
         private string fontKey;
 
         /// <summary>说明文字从资源键计算，生成的依赖通知负责刷新绑定，不存储重复状态。</summary>
-        [Bind("FontPreview", nameof(TextElement.Content))]
+        [Bind("FontPreview", nameof(UnityEngine.UI.Text.text))]
         public string FontCaption => string.IsNullOrEmpty(FontKey) ? "Font cleared" : "Requested font: " + FontKey;
 
         /// <summary>显式通知同一字体键，演示失败后的重新加载。</summary>

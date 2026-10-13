@@ -1,0 +1,27 @@
+{
+  "name": "MUI.UGUI.InputSystem",
+  "rootNamespace": "MUI.UGUI.InputSystem",
+  "references": [
+    "MUI.UGUI",
+    "Unity.InputSystem",
+    "Unity.ugui",
+    "MUI.Unity"
+  ],
+  "defineConstraints": [
+    "MUI_INPUT_SYSTEM",
+    "MUI_HAS_UGUI"
+  ],
+  "versionDefines": [
+    {
+      "name": "com.unity.inputsystem",
+      "expression": "1.0.0",
+      "define": "MUI_INPUT_SYSTEM"
+    },
+    {
+      "name": "com.unity.ugui",
+      "expression": "0.0.0",
+      "define": "MUI_HAS_UGUI"
+    }
+  ],
+  "autoReferenced": true
+}

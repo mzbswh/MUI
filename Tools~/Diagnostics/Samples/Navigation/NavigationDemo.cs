@@ -303,7 +303,7 @@ namespace MUI.Samples.Navigation
                 }
 
                 await Task.Delay(150, cancellation.Token);
-                FindFrontView().GetElement<ButtonElement>("Confirm").GetComponent<Button>().onClick.Invoke();
+                FindFrontView().GetControl<UnityEngine.UI.Button>("Confirm").GetComponent<Button>().onClick.Invoke();
                 var selection = await second.Handle.WaitForResultAsync(cancellation.Token);
                 Debug.Log($"MUI Navigation result: {selection.Status}, value={selection.Value}, cleanup={selection.Cleanup}");
                 var duplicate = await pages.CloseAsync(second.Handle);
@@ -372,14 +372,14 @@ namespace MUI.Samples.Navigation
             root.gameObject.SetActive(false);
             root.gameObject.AddComponent<Image>().color = new Color(0.13f, 0.17f, 0.23f);
             var title = AddText("Title", "Preparing", root, new Vector2(460, 70), new Vector2(0, 160));
-            title.gameObject.AddComponent<TextElement>();
+            title.gameObject.BindControl<UnityEngine.UI.Text>();
             var item = Node("ThingItem", root, new Vector2(360, 70), new Vector2(0, 70));
             item.gameObject.AddComponent<Image>().color = new Color(0.18f, 0.24f, 0.3f);
-            AddText("ItemLabel", "Wood", item, new Vector2(330, 60), Vector2.zero).gameObject.AddComponent<TextElement>();
+            AddText("ItemLabel", "Wood", item, new Vector2(330, 60), Vector2.zero).gameObject.BindControl<UnityEngine.UI.Text>();
             item.gameObject.AddComponent<View>();
             var nestedView = Node("NestedItemView", root, new Vector2(360, 70), new Vector2(0, -20));
             nestedView.gameObject.AddComponent<Image>().color = new Color(0.22f, 0.28f, 0.32f);
-            AddText("ItemLabel", "Stone", nestedView, new Vector2(330, 60), Vector2.zero).gameObject.AddComponent<TextElement>();
+            AddText("ItemLabel", "Stone", nestedView, new Vector2(330, 60), Vector2.zero).gameObject.BindControl<UnityEngine.UI.Text>();
             var directChild = nestedView.gameObject.AddComponent<View>();
             Node("DynamicItem", root, new Vector2(360, 70), new Vector2(0, -95)).gameObject.AddComponent<DynamicViewElement>();
             AddButton("Confirm", "Confirm", root, new Vector2(-110, -155));
@@ -417,7 +417,7 @@ namespace MUI.Samples.Navigation
             var image = node.gameObject.AddComponent<Image>();
             image.color = new Color(0.2f, 0.4f, 0.6f);
             node.gameObject.AddComponent<Button>().targetGraphic = image;
-            node.gameObject.AddComponent<ButtonElement>();
+            node.gameObject.BindControl<UnityEngine.UI.Button>();
             AddText("Label", caption, node, new Vector2(170, 45), Vector2.zero);
         }
 

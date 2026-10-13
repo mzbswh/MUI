@@ -8,10 +8,21 @@
     "MUI.UGUI.Dialogs",
     "Unity.ugui",
     "MUI.Dialogs",
-    "MUI.Editor.Localization"
+    "MUI.Editor.Localization",
+    "MUI.Unity"
   ],
   "includePlatforms": [
     "Editor"
   ],
-  "autoReferenced": true
+  "autoReferenced": true,
+  "defineConstraints": [
+    "MUI_HAS_UGUI"
+  ],
+  "versionDefines": [
+    {
+      "name": "com.unity.ugui",
+      "expression": "0.0.0",
+      "define": "MUI_HAS_UGUI"
+    }
+  ]
 }

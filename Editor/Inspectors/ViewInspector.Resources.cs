@@ -130,28 +130,12 @@ namespace MUI.Editor
                 return null;
             }
 
-            // 按控件类型及属性共同识别，避免把项目同名业务属性误认为框架资源槽。
-            if (entry.TargetProperty == nameof(ImageElement.SpriteSource) &&
-                typeof(ImageElement).IsAssignableFrom(entry.ElementType))
-            {
-                return "Sprite";
-            }
-
-            if (entry.TargetProperty == nameof(RawImageElement.TextureSource) &&
-                typeof(RawImageElement).IsAssignableFrom(entry.ElementType))
-            {
-                return "Texture";
-            }
-
-            if (entry.TargetProperty == nameof(TextElement.FontSource) &&
-                typeof(TextElement).IsAssignableFrom(entry.ElementType))
-            {
-                return "Font";
-            }
-
-            // TMP 等可选文本控件继承公共图形层，无需编辑器反向依赖 TMP。
-            return entry.TargetProperty == nameof(GraphicElement.MaterialSource) &&
-                typeof(GraphicElement).IsAssignableFrom(entry.ElementType) ? "Material" : null;
+            var adapter = entry.PropertyAdapterType;
+            if (adapter == typeof(ImageResources)) return "Sprite";
+            if (adapter == typeof(TextureResources)) return "Texture";
+            if (adapter == typeof(TextResources)) return "Font";
+            if (adapter == typeof(GraphicResources)) return "Material";
+            return null;
         }
     }
 }

@@ -51,7 +51,6 @@ namespace MUI.Editor
                 rect.sizeDelta = new Vector2(640, 420);
                 root.GetComponent<Image>().color = new Color(0.12f, 0.14f, 0.18f, 1);
                 var title = PrefabAuthoring.CreateText("Title", rect, alert ? L.Get("editor.ConfirmationDialogWizard.f56c6c8220") : "Confirmation");
-                title.gameObject.AddComponent<TextElement>();
                 title.rectTransform.anchorMin = new Vector2(0, 1);
                 title.rectTransform.anchorMax = Vector2.one;
                 title.rectTransform.pivot = new Vector2(0.5f, 1);
@@ -66,7 +65,6 @@ namespace MUI.Editor
                 viewportRect.offsetMax = new Vector2(-24, -80);
                 viewport.GetComponent<Image>().color = Color.clear;
                 var message = PrefabAuthoring.CreateText("Message", viewportRect, alert ? L.Get("editor.ConfirmationDialogWizard.df3021fd73") : L.Get("editor.ConfirmationDialogWizard.b736b1be54"));
-                message.gameObject.AddComponent<TextElement>();
                 message.alignment = TextAnchor.UpperLeft;
                 message.horizontalOverflow = HorizontalWrapMode.Wrap;
                 message.verticalOverflow = VerticalWrapMode.Overflow;
@@ -112,8 +110,12 @@ namespace MUI.Editor
                 serializedView.FindProperty("defaultSelection").objectReferenceValue = defaultSelection;
                 serializedView.ApplyModifiedPropertiesWithoutUndo();
                 root.SetActive(true);
+                foreach (var text in root.GetComponentsInChildren<UnityEngine.UI.Text>(true))
+                    NativeBindingAuthoring.Register(root.GetComponent<View>(), text);
+                foreach (var button in root.GetComponentsInChildren<UnityEngine.UI.Button>(true))
+                    NativeBindingAuthoring.Register(root.GetComponent<View>(), button);
                 var issues = ViewContractValidator.Validate(root.GetComponent<View>(),
-                    alert ? AlertDialog.Manifest : ConfirmationDialog.Manifest);
+                    alert ? AlertDialogBindings.Manifest : ConfirmationDialogBindings.Manifest);
                 if (issues.Count > 0)
                 {
                     throw new InvalidOperationException(string.Join("\n", issues));
@@ -145,7 +147,7 @@ namespace MUI.Editor
 
         private static Button AddButton(RectTransform parent, string name, string labelName, float x, string content)
         {
-            var node = new GameObject(name, typeof(RectTransform), typeof(Image), typeof(Button), typeof(ButtonElement));
+            var node = new GameObject(name, typeof(RectTransform), typeof(Image), typeof(Button));
             node.transform.SetParent(parent, false);
             var rect = (RectTransform)node.transform;
             rect.anchorMin = rect.anchorMax = new Vector2(0.5f, 0);
@@ -153,9 +155,7 @@ namespace MUI.Editor
             rect.sizeDelta = new Vector2(192, 48);
             var button = node.GetComponent<Button>();
             button.targetGraphic = node.GetComponent<Image>();
-            node.GetComponent<ButtonElement>().AccessibilityLabel = content;
             var label = PrefabAuthoring.CreateText(labelName, rect, content);
-            label.gameObject.AddComponent<TextElement>();
             label.color = Color.black;
             label.rectTransform.anchorMin = Vector2.zero;
             label.rectTransform.anchorMax = Vector2.one;

@@ -6,7 +6,8 @@
     "MUI.DragDrop",
     "MUI.UGUI",
     "Unity.ugui",
-    "MUI.UGUI.DragDrop"
+    "MUI.UGUI.DragDrop",
+    "MUI.Unity"
   ],
   "autoReferenced": true
 }

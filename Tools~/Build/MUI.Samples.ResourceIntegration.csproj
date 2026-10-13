@@ -10,6 +10,7 @@
     <ProjectReference Include="MUI.Core.csproj" />
     <ProjectReference Include="MUI.Resources.csproj" />
     <ProjectReference Include="MUI.UGUI.csproj" />
+    <ProjectReference Include="MUI.Unity.csproj" />
     <Reference Include="UnityEngine.CoreModule"><HintPath>$(UnityManagedPath)/UnityEngine.CoreModule.dll</HintPath><Private>false</Private></Reference>
     <Reference Include="UnityEngine.JSONSerializeModule"><HintPath>$(UnityManagedPath)/UnityEngine.JSONSerializeModule.dll</HintPath><Private>false</Private></Reference>
   </ItemGroup>

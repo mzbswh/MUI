@@ -168,8 +168,8 @@ namespace MUI.Examples
             var page = host.ResolvePolicy();
             var popup = host.ResolvePolicy("Popup");
             details = DetailViewModelDefinition.Create(() => new DetailViewModel(), policy: popup);
-            confirmation = ConfirmationDialog.CreateDefinition(new ViewResource("MUIExamples/Confirmation"), policy: popup);
-            alertDialog = AlertDialog.CreateDefinition(new ViewResource("MUIExamples/Alert"), policy: popup);
+            confirmation = ConfirmationDialog.CreateDefinition(new ViewResource("MUIExamples/Confirmation"), ConfirmationDialogBindings.Create, policy: popup);
+            alertDialog = AlertDialog.CreateDefinition(new ViewResource("MUIExamples/Alert"), AlertDialogBindings.Create, policy: popup);
             lessons = new[]
             {
                 Lesson(SettingsViewModelDefinition.Create(() => new SettingsViewModel(), policy: page)),
@@ -197,7 +197,7 @@ namespace MUI.Examples
 
         private static BindingContext<FeedbackViewModel> BindFeedback(IView view, FeedbackViewModel model)
         {
-            var preview = ((View)view).GetElement<ImageElement>("PreviewCard").GetComponent<Image>();
+            var preview = (Image)((IComponentView)view).GetElement<IComponentElement>("PreviewCard", typeof(Image)).ComponentTarget;
             ThemeBindings.BindColor(model.Themes, model.Lifetime, preview, FeedbackViewModel.Surface);
             return FeedbackViewModelBindingFactory.Create(view, model);
         }

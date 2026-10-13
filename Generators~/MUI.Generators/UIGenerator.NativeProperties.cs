@@ -55,9 +55,9 @@ namespace MUI.Generators
                 write = "control." + Escape(setterName) + "(value);";
             }
             var body = new StringBuilder("internal sealed class ").Append(adapterName)
-                .Append(" : global::MUI.UGUI.GeneratedPropertyAdapter<").Append(TypeName(component)).Append("> {\n")
+                .Append(" : global::MUI.Unity.GeneratedPropertyAdapter<").Append(TypeName(component)).Append("> {\n")
                 .Append(signalName == null ? "" : "private bool writing;\n")
-                .Append("public ").Append(adapterName).Append("(global::MUI.UGUI.NativeControl owner) : base(owner) {").Append(listen).Append("}\n")
+                .Append("public ").Append(adapterName).Append("(global::MUI.Unity.NativeControl owner) : base(owner) {").Append(listen).Append("}\n")
                 .Append("public ").Append(TypeName(valueType)).Append(' ').Append(Escape(name)).Append(" {\n");
             if (readable) body.Append("get => base.Component.").Append(Escape(name)).Append(";\n");
             if (writable)
@@ -85,7 +85,7 @@ namespace MUI.Generators
                 var component = ResolveElement(context, attribute);
                 if (component == null || !DerivesFrom(component, "UnityEngine.Component")) continue;
                 // Element bindings retain their own semantics; only raw Unity components use generated access.
-                if (DerivesFrom(component, "MUI.UGUI.Element")) continue;
+                if (component.AllInterfaces.Any(contract => contract.ToDisplayString() == "MUI.IElement")) continue;
                 try
                 {
                     var name = attribute.ConstructorArguments[1].Value as string;

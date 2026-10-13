@@ -37,7 +37,7 @@ var definition = SettingsViewModelDefinition.Create(
 var opened = await host.Pages.OpenAsync(definition, Unit.Value, token);
 ```
 
-`SettingsViewModel` 的 UIPage 声明指向 `MUIExamples/Settings`，对应 `Resources/MUIExamples/Settings.prefab`。根挂 View；普通控件保留原生 Slider、InputField、Text、Button，View 的 nativeBindings 保存名称与组件引用。Bind 直接使用 nameof(InputField.lineType)、nameof(Slider.value) 等原生属性，生成器接线；按钮使用 IButtonElement.Clicked 命令契约。无需挂普通 Element 包装组件或手写 onValueChanged 更新业务状态。
+`SettingsViewModel` 的 UIPage 声明指向 `MUIExamples/Settings`，对应 `Resources/MUIExamples/Settings.prefab`。根挂 View；普通控件保留原生 Slider、InputField、Text、Button，View 的 nativeBindings 保存名称与组件引用。Bind 直接使用 nameof(InputField.lineType)、nameof(Slider.value) 等原生属性，生成器接线；按钮使用 IButton.Clicked 命令契约。无需挂普通 Element 包装组件或手写 onValueChanged 更新业务状态。
 
 工作台的导航按钮是项目启动层，用原生 Unity Button 连接页面路由；各页面内的业务按钮用生成命令。切换课程先关闭当前页面并等待实际 Cleanup，再打开下一页。项目切换场景前应等待 `ExampleWorkbench.ShutdownAsync()`，OnDestroy 只是不能阻止场景销毁的兜底。
 

@@ -45,7 +45,7 @@ namespace MUI.Samples.Settings
             text.fontSize = 22;
             text.alignment = TextAnchor.MiddleCenter;
             text.color = Color.white;
-            label.gameObject.AddComponent<TextElement>();
+            label.gameObject.BindControl<UnityEngine.UI.Text>();
 
             var sliderRoot = Node("Volume", root, new Vector2(400, 36), new Vector2(0, 55));
             sliderRoot.gameObject.AddComponent<Image>().color = new Color(0.24f, 0.28f, 0.34f);
@@ -57,7 +57,7 @@ namespace MUI.Samples.Settings
             graphic.color = new Color(0.3f, 0.75f, 1f);
             slider.handleRect = handle;
             slider.targetGraphic = graphic;
-            sliderRoot.gameObject.AddComponent<SliderElement>();
+            sliderRoot.gameObject.BindControl<UnityEngine.UI.Slider>();
             AddNameInput(root);
             AddButton("ToggleNameLock", "Lock / Unlock", root, new Vector2(0, -85));
             AddButton("Save", "Save", root, new Vector2(-110, -145));
@@ -89,9 +89,9 @@ namespace MUI.Samples.Settings
                     return;
                 }
 
-                view.GetElement<SliderElement>("Volume").GetComponent<Slider>().value = 0.8f;
+                view.GetControl<UnityEngine.UI.Slider>("Volume").GetComponent<Slider>().value = 0.8f;
                 Debug.Log($"MUI Settings slider: {model.Status}");
-                view.GetElement<ButtonElement>("Save").GetComponent<Button>().onClick.Invoke();
+                view.GetControl<UnityEngine.UI.Button>("Save").GetComponent<Button>().onClick.Invoke();
                 await Task.Delay(500, token);
                 if (view == null)
                 {
@@ -99,11 +99,11 @@ namespace MUI.Samples.Settings
                 }
 
                 Debug.Log($"MUI Settings save: {model.Status}; executing={model.SaveCommand.IsExecuting}");
-                view.GetElement<ButtonElement>("Reset").GetComponent<Button>().onClick.Invoke();
+                view.GetControl<UnityEngine.UI.Button>("Reset").GetComponent<Button>().onClick.Invoke();
                 Debug.Log($"MUI Settings reset: {model.Status}");
                 if (Application.isBatchMode)
                 {
-                    view.GetElement<ButtonElement>("Save").GetComponent<Button>().onClick.Invoke();
+                    view.GetControl<UnityEngine.UI.Button>("Save").GetComponent<Button>().onClick.Invoke();
                     Debug.Log($"MUI Settings closing while saving: executing={model.SaveCommand.IsExecuting}");
                     Destroy(gameObject);
                 }
@@ -125,7 +125,7 @@ namespace MUI.Samples.Settings
             image.color = new Color(0.2f, 0.4f, 0.6f);
             var button = node.gameObject.AddComponent<Button>();
             button.targetGraphic = image;
-            node.gameObject.AddComponent<ButtonElement>();
+            node.gameObject.BindControl<UnityEngine.UI.Button>();
             var label = Node("Label", node, new Vector2(170, 40), Vector2.zero).gameObject.AddComponent<Text>();
             label.font = UnityEngine.Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
             label.fontSize = 22;

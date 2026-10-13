@@ -8,7 +8,8 @@
     "MUI.Tabs",
     "MUI.UGUI",
     "Unity.ugui",
-    "MUI.UGUI.Tabs"
+    "MUI.UGUI.Tabs",
+    "MUI.Unity"
   ],
   "autoReferenced": true
 }

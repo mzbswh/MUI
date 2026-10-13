@@ -12,7 +12,7 @@ namespace MUI.Samples.Navigation
         [ObservableProperty]
         private TItem item;
         [ObservableProperty]
-        [Bind("ItemLabel", nameof(TextElement.Content))]
+        [Bind("ItemLabel", nameof(UnityEngine.UI.Text.text))]
         private string label = string.Empty;
     }
 }

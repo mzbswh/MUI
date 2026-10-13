@@ -2,7 +2,7 @@
 
 [返回总览](../../README.md)
 
-`Resources.prefab` 的 Artwork 是 Image + ImageElement；[ResourcesViewModel.cs](ResourcesViewModel.cs) 的 Artwork 字段绑定 SpriteSource。实际图片在 `Resources/MUIExamples/Artwork/Forest.png` 与 `Dunes.png`，不是运行时生成的纹理或假加载器。
+`Resources.prefab` 的 Artwork 是 原生 Image 和 ImageResources 属性扩展；[ResourcesViewModel.cs](ResourcesViewModel.cs) 的 Artwork 字段绑定 SpriteSource。实际图片在 `Resources/MUIExamples/Artwork/Forest.png` 与 `Dunes.png`，不是运行时生成的纹理或假加载器。
 
 UIHost 默认 UnityResourcesLoader 同时注入页面资源上下文，资源键使用 `MUIExamples/Artwork/Forest`，不包含 Resources 和扩展名。Change landscape 改键，Release artwork 赋 null。框架接管每次获取的凭证，旧资源和页面退出时按生命周期归还。
 

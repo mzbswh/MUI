@@ -3,7 +3,7 @@
     {
       "title": "01 / 属性、输入与命令",
       "overview": "<b>演示什么</b>\n通过生成绑定连接模型和原生输入框、滑条、文本与按钮。包含双向绑定、转换校验、计算属性和异步命令。\n\n<b>动手观察</b>\n修改名称：预览与头像同步更新。\n清空名称：显示错误，保存按钮禁用。\n音量归零：保存不可用。\n保存过程中：按钮阻止重复提交。\n锁定名称：输入框变为只读。\n\n保存只模拟延迟，不写磁盘或服务器。",
-      "setup": "<b>Prefab 配置</b>\n1. 根节点挂 View。\n2. PlayerName 挂 InputFieldElement，关联原生 Text 和 Placeholder。\n3. Volume 挂 SliderElement，设置 Fill 和 Handle 引用。\n4. 文本挂 TextElement，按钮挂 ButtonElement；节点名与 Bind 声明一致。\n\n<b>使用方法</b>\n用 ObservableProperty 声明模型状态；用 Bind 的 TwoWay 回写输入。\nPlayerNameConverter 负责校验。\nBindCommand 接入保存、重置和锁定。\n异步保存使用 CommandContext.Token 和 Apply，避免页面退出后写入旧状态。",
+      "setup": "<b>Prefab 配置</b>\n1. 根节点挂 View。\n2. PlayerName 使用原生 InputField，关联原生 Text 和 Placeholder。\n3. Volume 使用原生 Slider，设置 Fill 和 Handle 引用。\n4. 文本挂 Text，按钮挂 Button；在 View 中登记原生组件引用，绑定名与 Bind 声明一致。\n\n<b>使用方法</b>\n用 ObservableProperty 声明模型状态；用 Bind 的 TwoWay 回写输入。\nPlayerNameConverter 负责校验。\nBindCommand 接入保存、重置和锁定。\n异步保存使用 CommandContext.Token 和 Apply，避免页面退出后写入旧状态。",
       "code": "<b>先看模型</b>\nScripts/Settings/SettingsViewModel.cs\n查看 PlayerName、Volume、CanSave、SaveAsync 和 Initials。\n\n<b>再看校验</b>\nScripts/Settings/PlayerNameConverter.cs\nTryConvertBack：失败时保留草稿。\n\n<b>最后看接入</b>\nScripts/ExampleWorkbench.cs\nStart 注册生成绑定；ConfigureRoutes 只创建一次路由；Open 打开页面。\n\n下方按钮可直接打开源码、Prefab 和中文教程。",
       "source": "Scripts/Settings/SettingsViewModel.cs",
       "prefab": "Resources/MUIExamples/Settings.prefab",
@@ -12,7 +12,7 @@
     {
       "title": "02 / 页面导航与结果",
       "overview": "<b>演示什么</b>\n用 PageDefinition 和 UIHost 打开详情页，通过类型化句柄接收结果。\n\n<b>动手观察</b>\n点击“查看探索详情”。\n选择“完成 / 42”：返回整数 42。\n选择“返回”：关闭页面，不伪造业务结果。\n重复打开：复用同一页面定义，每次创建新的模型。\n\n弹窗显示时下层输入被阻挡；结果提交后还需等待资源清理。",
-      "setup": "<b>Prefab 配置</b>\nNavigation 的 OpenDetails 挂 ButtonElement，Result 挂 TextElement。\nDetail 的 Complete、Back 分别绑定完成与无结果返回命令。\n\n<b>使用方法</b>\n1. ConfigureRoutes 创建并保存路由。\n2. OpenAsync 成功后保存页面句柄。\n3. 等待 WaitForResultAsync 读取结果。\n4. 等待 WaitForCleanupAsync 再继续切页。\n\n同一 Host 中相同 Key 的 PageDefinition 必须复用，不能每次点击重新创建。",
+      "setup": "<b>Prefab 配置</b>\nNavigation 的 OpenDetails 挂 Button，Result 挂 Text。\nDetail 的 Complete、Back 分别绑定完成与无结果返回命令。\n\n<b>使用方法</b>\n1. ConfigureRoutes 创建并保存路由。\n2. OpenAsync 成功后保存页面句柄。\n3. 等待 WaitForResultAsync 读取结果。\n4. 等待 WaitForCleanupAsync 再继续切页。\n\n同一 Host 中相同 Key 的 PageDefinition 必须复用，不能每次点击重新创建。",
       "code": "<b>模型与命令</b>\nScripts/Navigation/NavigationViewModel.cs\nNavigationViewModel.OpenAsync 调用注入的导航服务。\nDetailViewModel.Complete 返回 42；Back 无结果关闭。\n\n<b>路由与调用方</b>\nScripts/ExampleWorkbench.cs\nConfigureRoutes、OpenDetailsAsync、WaitForCleanup。\n\n<b>界面</b>\nResources/MUIExamples/Navigation.prefab\nResources/MUIExamples/Detail.prefab",
       "source": "Scripts/Navigation/NavigationViewModel.cs",
       "prefab": "Resources/MUIExamples/Navigation.prefab",
@@ -21,7 +21,7 @@
     {
       "title": "03 / 子视图与模型替换",
       "overview": "<b>演示什么</b>\n父页面持有已制作的子 View；父模型通过 WidgetReference.VM 提供子模型。父子保持各自的绑定边界。\n\n<b>动手观察</b>\n“替换物品”：使用新模型更新同一子视图。\n“清空模型”：结束子激活。\n再次替换：复用已有节点并恢复绑定。\n\n这适合物品卡片、角色信息块等独立 UI 单元。",
-      "setup": "<b>Prefab 配置</b>\n打开 Widgets.prefab。\n父 View 的 Child Widgets 登记 ItemCard，Target 指向子 View。\n关闭 CreateVM，由父模型提供实例。\n子 View 内 Title、Detail 挂 TextElement。\n\n<b>使用方法</b>\nItem 属性绑定 ItemCard 的 VM。\n替换时给 Item 赋一个新 ItemViewModel；清空时赋 null。\n\n父绑定不跨越子 View 查找控件。父页面退出时由框架清理子激活，不需要手动遍历解绑。",
+      "setup": "<b>Prefab 配置</b>\n打开 Widgets.prefab。\n父 View 的 Child Widgets 登记 ItemCard，Target 指向子 View。\n关闭 CreateVM，由父模型提供实例。\n子 View 内 Title、Detail 挂 Text。\n\n<b>使用方法</b>\nItem 属性绑定 ItemCard 的 VM。\n替换时给 Item 赋一个新 ItemViewModel；清空时赋 null。\n\n父绑定不跨越子 View 查找控件。父页面退出时由框架清理子激活，不需要手动遍历解绑。",
       "code": "<b>模型与替换命令</b>\nScripts/Widgets/WidgetsViewModel.cs\nWidgetsViewModel.Item、Replace、Clear。\nItemViewModel.Title、Detail 是子视图独立契约。\n\n<b>界面设置</b>\nResources/MUIExamples/Widgets.prefab\n检查父 View 的 Child Widgets 配置，以及 ItemCard 内的子 View。\n\n虚拟列表课程也复用了 ItemViewModel 的文本契约。",
       "source": "Scripts/Widgets/WidgetsViewModel.cs",
       "prefab": "Resources/MUIExamples/Widgets.prefab",
@@ -56,8 +56,8 @@
     },
     {
       "title": "07 / 资源键与资源归还",
-      "overview": "<b>演示什么</b>\n模型提供资源键，ImageElement 负责获取图片并持有本次资源凭证。图片是实际导入资源。\n\n<b>动手观察</b>\n点击“切换风景”：森林与沙丘切换。\n点击“释放图片”：图片清空，凭证归还。\n再次切换：重新获取对应资源。\n\n退出页面时归还资源；模型不直接创建 Texture 或调用 Destroy。",
-      "setup": "<b>Prefab 配置</b>\nArtwork 节点挂 Image 和 ImageElement。\n图片位于 Resources/MUIExamples/Artwork。\n\n<b>使用方法</b>\nArtwork 属性绑定 SpriteSource，资源键填写 MUIExamples/Artwork/Forest，不包含 Resources 和扩展名。\n更换键切换图片，赋 null 清空。\n\nUIHost 默认注入 UnityResourcesLoader。接入项目后端时实现 IResourceLoader，在 Initialize(resourceLoader: loader) 注入，并让后端活到资源归还完成。",
+      "overview": "<b>演示什么</b>\n模型提供资源键，Image 负责获取图片并持有本次资源凭证。图片是实际导入资源。\n\n<b>动手观察</b>\n点击“切换风景”：森林与沙丘切换。\n点击“释放图片”：图片清空，凭证归还。\n再次切换：重新获取对应资源。\n\n退出页面时归还资源；模型不直接创建 Texture 或调用 Destroy。",
+      "setup": "<b>Prefab 配置</b>\nArtwork 节点挂 Image 和 Image。\n图片位于 Resources/MUIExamples/Artwork。\n\n<b>使用方法</b>\nArtwork 属性绑定 SpriteSource，资源键填写 MUIExamples/Artwork/Forest，不包含 Resources 和扩展名。\n更换键切换图片，赋 null 清空。\n\nUIHost 默认注入 UnityResourcesLoader。接入项目后端时实现 IResourceLoader，在 Initialize(resourceLoader: loader) 注入，并让后端活到资源归还完成。",
       "code": "<b>模型与命令</b>\nScripts/Resources/ResourcesViewModel.cs\nArtwork、Switch、Clear。\n\n<b>宿主初始化</b>\nScripts/ExampleWorkbench.cs\nStart 中初始化 Host，默认使用 Resources 后端。\n\n<b>资源</b>\nResources/MUIExamples/Resources.prefab\nResources/MUIExamples/Artwork/Forest.png\nResources/MUIExamples/Artwork/Dunes.png",
       "source": "Scripts/Resources/ResourcesViewModel.cs",
       "prefab": "Resources/MUIExamples/Resources.prefab",
@@ -75,7 +75,7 @@
     {
       "title": "09 / 确认框与提示框",
       "overview": "<b>演示什么</b>\n使用框架标准 ConfirmationDialog 和 AlertDialog，区分确认、取消与无结果关闭。\n\n<b>动手观察</b>\n点击“请求确认”：选择开始或暂不开始。\n确认返回 true，取消返回 false。\n点击“显示提示”，再点击“知道了”。\n结果直接显示在页面中。\n\n弹窗遮罩阻止下层操作，焦点默认放在安全的取消按钮。",
-      "setup": "<b>Prefab 配置</b>\nConfirmation 的 Title、Message、ConfirmLabel、CancelLabel 挂 TextElement。\nConfirm、Cancel 挂 ButtonElement。默认焦点指向 Cancel；DialogCancelInput 指向取消按钮。\nAlert 使用 Title、Message、AcknowledgeLabel 和 Acknowledge。\n\n<b>使用方法</b>\n启动时创建并缓存标准弹窗路由，使用 Popup 策略。\n打开时传入标题、正文和按钮文案。\n等待结果后仍需等待清理完成。",
+      "setup": "<b>Prefab 配置</b>\nConfirmation 的 Title、Message、ConfirmLabel、CancelLabel 挂 Text。\nConfirm、Cancel 挂 Button。默认焦点指向 Cancel；DialogCancelInput 指向取消按钮。\nAlert 使用 Title、Message、AcknowledgeLabel 和 Acknowledge。\n\n<b>使用方法</b>\n启动时创建并缓存标准弹窗路由，使用 Popup 策略。\n打开时传入标题、正文和按钮文案。\n等待结果后仍需等待清理完成。",
       "code": "<b>页面命令</b>\nScripts/Navigation/NavigationViewModel.cs\nDialogsViewModel 的 ConfirmAsync 和 AlertAsync。\n\n<b>标准弹窗调用</b>\nScripts/ExampleWorkbench.cs\nConfigureRoutes 创建标准路由；ShowDialogAsync 传入请求、读取结果并等待清理。\n\n<b>界面</b>\nResources/MUIExamples/Dialogs.prefab\nConfirmation.prefab / Alert.prefab",
       "source": "Scripts/Navigation/NavigationViewModel.cs",
       "prefab": "Resources/MUIExamples/Dialogs.prefab",
@@ -84,7 +84,7 @@
     {
       "title": "10 / 通知、任务与主题",
       "overview": "<b>演示什么</b>\n通知队列、延迟 Loading、任务进度、输入门控与 ThemeService。界面默认中文，不做多语言。\n\n<b>动手观察</b>\n“显示通知”：提示显示后自动消失。\n“清空通知”：立即清空队列。\n“同步偏好”：显示进度，任务期间阻挡重复业务操作。\n“切换主题”：预览卡片在深夜和海洋主题之间切换。\n\n任务用短延迟模拟，不发起网络请求。",
-      "setup": "<b>Prefab 配置</b>\nToastMessage、Progress、Greeting 等节点挂 TextElement；按钮挂 ButtonElement。\nPreviewCard 挂 ImageElement。\n\n<b>使用方法</b>\nNotificationQueue 管理通知；工作台 Update 使用非缩放时间 Advance。\nLoadingScope.Begin 创建操作，上报进度后 Dispose。InputGate 阻挡重复任务。\nThemeCatalog 提供 surface Token，ThemeBindings 将其绑定到卡片颜色。\n模型作用域统一清理服务与订阅。",
+      "setup": "<b>Prefab 配置</b>\nToastMessage、Progress、Greeting 等节点挂 Text；按钮挂 Button。\nPreviewCard 挂 Image。\n\n<b>使用方法</b>\nNotificationQueue 管理通知；工作台 Update 使用非缩放时间 Advance。\nLoadingScope.Begin 创建操作，上报进度后 Dispose。InputGate 阻挡重复任务。\nThemeCatalog 提供 surface Token，ThemeBindings 将其绑定到卡片颜色。\n模型作用域统一清理服务与订阅。",
       "code": "<b>业务表现模型</b>\nScripts/Feedback/FeedbackViewModel.cs\nToast、ClearNotifications、RunAsync、RenderProgress、Theme。\n\n<b>宿主接线</b>\nScripts/ExampleWorkbench.cs\nCreateFeedback、BindFeedback、Update。\n\n<b>界面</b>\nResources/MUIExamples/Feedback.prefab\n通知与进度服务本身不创建 UI。",
       "source": "Scripts/Feedback/FeedbackViewModel.cs",
       "prefab": "Resources/MUIExamples/Feedback.prefab",

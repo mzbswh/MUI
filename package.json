@@ -9,7 +9,6 @@
     "name": "mzbswh"
   },
   "dependencies": {
-    "com.unity.ugui": "1.0.0",
     "com.unity.modules.screencapture": "1.0.0",
     "com.unity.modules.imageconversion": "1.0.0",
     "com.unity.modules.jsonserialize": "1.0.0"

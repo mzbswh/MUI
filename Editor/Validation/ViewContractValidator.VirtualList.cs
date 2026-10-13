@@ -139,10 +139,6 @@ namespace MUI.Editor
                 errors.Add(L.Format("editor.ViewContractValidator.VirtualList.68fc07fd71", path));
             }
 
-            if (scroll.GetComponent<ScrollRectElement>() != null)
-            {
-                errors.Add(L.Format("editor.ViewContractValidator.VirtualList.f8192fe74e", Path(scroll.transform, root)));
-            }
 
             var content = scroll.content;
             if (content == null)

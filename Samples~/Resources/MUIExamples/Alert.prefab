@@ -70,7 +70,19 @@ MonoBehaviour:
   modalBarrierColor: {r: 0, g: 0, b: 0, a: 0.45}
   useGlobalModalBackdrop: 0
   modalBackdropStyle: {fileID: 0}
-  nativeBindings: []
+  nativeBindings:
+  - Name: AcknowledgeLabel
+    Target: {fileID: 4413834517364368077}
+    ComponentType: UnityEngine.UI.Text, UnityEngine.UI, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
+  - Name: Title
+    Target: {fileID: 6972968459170330460}
+    ComponentType: UnityEngine.UI.Text, UnityEngine.UI, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
+  - Name: Acknowledge
+    Target: {fileID: 8090893993015642597}
+    ComponentType: UnityEngine.UI.Button, UnityEngine.UI, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
+  - Name: Message
+    Target: {fileID: 8122202764603314178}
+    ComponentType: UnityEngine.UI.Text, UnityEngine.UI, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
   muiAutoBindings: 
   autoBindingSelections: []
   renderOrderTargets: []
@@ -94,7 +106,6 @@ GameObject:
   - component: {fileID: 1235441743530842628}
   - component: {fileID: 426712441980818680}
   - component: {fileID: 4413834517364368077}
-  - component: {fileID: 8216858472577718739}
   m_Layer: 0
   m_Name: AcknowledgeLabel
   m_TagString: Untagged
@@ -163,25 +174,6 @@ MonoBehaviour:
     m_VerticalOverflow: 0
     m_LineSpacing: 1
   m_Text: "\u77E5\u9053\u4E86"
---- !u!114 &8216858472577718739
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1804110594358184675}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 97b65fd885bc41c585524125247d1171, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  accessibilityLabel: 
-  accessibilityDescription: 
-  accessibilityValue: 
-  semanticRole: 0
-  semanticState: 0
-  accessibilityOrder: 0
-  accessibilityHidden: 0
 --- !u!1 &3343399821448013769
 GameObject:
   m_ObjectHideFlags: 0
@@ -193,7 +185,6 @@ GameObject:
   - component: {fileID: 7671527449239674303}
   - component: {fileID: 5714160302824709514}
   - component: {fileID: 6972968459170330460}
-  - component: {fileID: 3425042408894645402}
   m_Layer: 0
   m_Name: Title
   m_TagString: Untagged
@@ -262,25 +253,6 @@ MonoBehaviour:
     m_VerticalOverflow: 0
     m_LineSpacing: 1
   m_Text: "\u5F00\u59CB\u65B0\u7684\u63A2\u7D22\uFF1F"
---- !u!114 &3425042408894645402
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3343399821448013769}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 97b65fd885bc41c585524125247d1171, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  accessibilityLabel: 
-  accessibilityDescription: 
-  accessibilityValue: 
-  semanticRole: 0
-  semanticState: 0
-  accessibilityOrder: 0
-  accessibilityHidden: 0
 --- !u!1 &6181240199695767501
 GameObject:
   m_ObjectHideFlags: 0
@@ -293,7 +265,6 @@ GameObject:
   - component: {fileID: 3091512371013529073}
   - component: {fileID: 5592319876551139480}
   - component: {fileID: 8090893993015642597}
-  - component: {fileID: 3731607229791295680}
   m_Layer: 0
   m_Name: Acknowledge
   m_TagString: Untagged
@@ -403,25 +374,6 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
---- !u!114 &3731607229791295680
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6181240199695767501}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 798ea9cb30da4a8d931397a3cde0f936, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  accessibilityLabel: 
-  accessibilityDescription: 
-  accessibilityValue: 
-  semanticRole: 0
-  semanticState: 0
-  accessibilityOrder: 0
-  accessibilityHidden: 0
 --- !u!1 &6270308185305400831
 GameObject:
   m_ObjectHideFlags: 0
@@ -512,7 +464,6 @@ GameObject:
   - component: {fileID: 8699920702394870993}
   - component: {fileID: 6078009160254877931}
   - component: {fileID: 8122202764603314178}
-  - component: {fileID: 1031077421087112953}
   m_Layer: 0
   m_Name: Message
   m_TagString: Untagged
@@ -581,25 +532,6 @@ MonoBehaviour:
     m_VerticalOverflow: 0
     m_LineSpacing: 1
   m_Text: "\u7EE7\u7EED\u4E4B\u524D\uFF0C\u8BF7\u786E\u8BA4\u7269\u8D44\u5DF2\u7ECF\u51C6\u5907\u9F50\u5168\u3002"
---- !u!114 &1031077421087112953
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6736602306606073791}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 97b65fd885bc41c585524125247d1171, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  accessibilityLabel: 
-  accessibilityDescription: 
-  accessibilityValue: 
-  semanticRole: 0
-  semanticState: 0
-  accessibilityOrder: 0
-  accessibilityHidden: 0
 --- !u!1 &6748148416859760443
 GameObject:
   m_ObjectHideFlags: 0

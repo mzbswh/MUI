@@ -132,11 +132,11 @@ namespace MUI.Generators
                         var extensionName = (string)entry.Attribute("extension");
                         var extension = extensionName == null ? null : compilation.GetTypeByMetadataName(extensionName);
                         if (extensionName != null && (extension == null || extension.IsAbstract || extension.ContainingType != null || extension.Arity != 0 ||
-                            !extension.GetAttributes().Any(a => a.AttributeClass?.ToDisplayString() == "MUI.UGUI.ControlPropertyExtensionAttribute") ||
-                            !extension.InstanceConstructors.Any(c => c.DeclaredAccessibility == Accessibility.Public && c.Parameters.Length == 1 && c.Parameters[0].Type.ToDisplayString() == "MUI.UGUI.NativeControl")))
+                            !extension.GetAttributes().Any(a => a.AttributeClass?.ToDisplayString() == "MUI.Unity.ControlPropertyExtensionAttribute") ||
+                            !extension.InstanceConstructors.Any(c => c.DeclaredAccessibility == Accessibility.Public && c.Parameters.Length == 1 && c.Parameters[0].Type.ToDisplayString() == "MUI.Unity.NativeControl")))
                             Fail(type, "Invalid property extension: " + extensionName);
                         var target = FindElementMember<IPropertySymbol>(extension ?? componentType ?? contract, property);
-                        var extensionNotifies = extension != null && target != null && target.GetAttributes().Any(a => a.AttributeClass?.ToDisplayString() == "MUI.UGUI.NotifiesChangeAttribute");
+                        var extensionNotifies = extension != null && target != null && target.GetAttributes().Any(a => a.AttributeClass?.ToDisplayString() == "MUI.Unity.NotifiesChangeAttribute");
                         if (!command && target != null && (target.SetMethod == null || !Accessible(target.SetMethod)))
                         {
                             if (!Accessible(target.GetMethod) || target.IsStatic || target.IsIndexer || target.GetAttributes().Any(a => a.AttributeClass?.ToDisplayString() == "System.ObsoleteAttribute"))
@@ -261,7 +261,7 @@ namespace MUI.Generators
             if (explicitType == null && resolved != null && DerivesFrom(resolved, "UnityEngine.Component")) explicitType = resolved;
             if (explicitType == null && resolved != null)
                 for (var parent = resolved.BaseType; parent != null; parent = parent.BaseType)
-                    if (parent.OriginalDefinition.ToDisplayString() == "MUI.UGUI.ControlPropertyExtension<TComponent>")
+                    if (parent.OriginalDefinition.ToDisplayString() == "MUI.Unity.ControlPropertyExtension<TComponent>")
                         explicitType = parent.TypeArguments[0] as INamedTypeSymbol;
             if (explicitType != null) return SymbolEqualityComparer.Default.Equals(explicitType, lookup);
             var contract = context.Compilation.GetTypeByMetadataName(contractName);

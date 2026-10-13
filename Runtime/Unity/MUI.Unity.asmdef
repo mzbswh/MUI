@@ -1,0 +1,8 @@
+{
+  "name": "MUI.Unity",
+  "rootNamespace": "MUI.Unity",
+  "references": [
+    "MUI.Core"
+  ],
+  "autoReferenced": true
+}

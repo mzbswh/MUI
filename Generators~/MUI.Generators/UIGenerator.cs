@@ -271,15 +271,15 @@ namespace MUI.Generators
                         Fail(member, "Use nameof(Component.property), nameof(ElementType.Property), or set Bind.ElementType explicitly.");
                     }
 
-                    var inferredExtension = elementType.GetAttributes().Any(a => a.AttributeClass?.ToDisplayString() == "MUI.UGUI.ControlPropertyExtensionAttribute") ? elementType : null;
+                    var inferredExtension = elementType.GetAttributes().Any(a => a.AttributeClass?.ToDisplayString() == "MUI.Unity.ControlPropertyExtensionAttribute") ? elementType : null;
                     var extensionComponent = inferredExtension?.BaseType;
-                    while (extensionComponent != null && extensionComponent.OriginalDefinition.ToDisplayString() != "MUI.UGUI.ControlPropertyExtension<TComponent>")
+                    while (extensionComponent != null && extensionComponent.OriginalDefinition.ToDisplayString() != "MUI.Unity.ControlPropertyExtension<TComponent>")
                         extensionComponent = extensionComponent.BaseType;
-                    var inferredComponent = DerivesFrom(elementType, "UnityEngine.Component") && !DerivesFrom(elementType, "MUI.UGUI.Element") ? elementType : null;
+                    var inferredComponent = DerivesFrom(elementType, "UnityEngine.Component") && !elementType.AllInterfaces.Any(contract => contract.ToDisplayString() == "MUI.IElement") ? elementType : null;
                     if (inferredExtension != null)
                         inferredComponent = extensionComponent?.TypeArguments[0] as INamedTypeSymbol;
                     if (inferredComponent != null)
-                        elementType = context.Compilation.GetTypeByMetadataName("MUI.UGUI.NativeControl");
+                        elementType = context.Compilation.GetTypeByMetadataName("MUI.Unity.NativeControl");
                     var componentType = inferredComponent ?? attribute.NamedArguments.FirstOrDefault(pair => pair.Key == "ComponentType").Value.Value as INamedTypeSymbol;
                     var lookupComponentType = attribute.NamedArguments.FirstOrDefault(pair => pair.Key == "BindingComponentType").Value.Value as INamedTypeSymbol ?? componentType;
                     if (lookupComponentType != null && !DerivesFrom(lookupComponentType, "UnityEngine.Component"))
@@ -291,12 +291,12 @@ namespace MUI.Generators
                     }
 
                     var hasNativeNotifications = inferredExtension != null
-                        ? FindElementMember<IPropertySymbol>(inferredExtension, targetName)?.GetAttributes().Any(a => a.AttributeClass?.ToDisplayString() == "MUI.UGUI.NotifiesChangeAttribute") == true
+                        ? FindElementMember<IPropertySymbol>(inferredExtension, targetName)?.GetAttributes().Any(a => a.AttributeClass?.ToDisplayString() == "MUI.Unity.NotifiesChangeAttribute") == true
                         : inferredComponent != null && TryBuiltInNotification(inferredComponent, targetName, out _);
                     hasNativeNotifications |= attribute.NamedArguments.Any(pair => pair.Key == "NativeNotifications" && pair.Value.Value is bool enabled && enabled);
                     if (componentType != null && (mode == 1 || mode == 2) && !hasNativeNotifications)
                         Fail(member, "Native component properties without notifications support OneWay or OneTime only.");
-                    if (componentType != null && (!DerivesFrom(componentType, "UnityEngine.Component") || !DerivesFrom(elementType, "MUI.UGUI.NativeControl") && elementType.ToDisplayString() != "MUI.UGUI.NativeControl"))
+                    if (componentType != null && (!DerivesFrom(componentType, "UnityEngine.Component") || !DerivesFrom(elementType, "MUI.Unity.NativeControl") && elementType.ToDisplayString() != "MUI.Unity.NativeControl"))
                         Fail(member, "ComponentType requires a Unity component and NativeControl element.");
                     var targetReceiver = componentType == null ? "element" : "((" + TypeName(componentType) + ")element.Target)";
                     var propertyAdapterType = inferredExtension ?? (inferredComponent == null
@@ -307,10 +307,10 @@ namespace MUI.Generators
                     if (propertyAdapterType != null)
                     {
                         var adapterBase = propertyAdapterType.BaseType;
-                        while (adapterBase != null && !adapterBase.OriginalDefinition.ToDisplayString().StartsWith("MUI.UGUI.GeneratedPropertyAdapter<", StringComparison.Ordinal))
+                        while (adapterBase != null && !adapterBase.OriginalDefinition.ToDisplayString().StartsWith("MUI.Unity.GeneratedPropertyAdapter<", StringComparison.Ordinal))
                             adapterBase = adapterBase.BaseType;
                         if (componentType == null || adapterBase == null || !SymbolEqualityComparer.Default.Equals(adapterBase.TypeArguments[0], componentType) || propertyAdapterType.IsAbstract ||
-                            !propertyAdapterType.InstanceConstructors.Any(c => c.DeclaredAccessibility == Accessibility.Public && c.Parameters.Length == 1 && c.Parameters[0].Type.ToDisplayString() == "MUI.UGUI.NativeControl"))
+                            !propertyAdapterType.InstanceConstructors.Any(c => c.DeclaredAccessibility == Accessibility.Public && c.Parameters.Length == 1 && c.Parameters[0].Type.ToDisplayString() == "MUI.Unity.NativeControl"))
                             Fail(member, "Invalid generated property adapter.");
                         targetReceiver = "element.GetPropertyAdapter<" + TypeName(propertyAdapterType) + ">(owner => new " + TypeName(propertyAdapterType) + "(owner))";
                     }
@@ -396,7 +396,7 @@ namespace MUI.Generators
                             Fail(member, "Reverse types require an explicit binding converter.");
                         }
                     }
-                    var notificationName = propertyAdapterType != null && propertyAdapterType.GetAttributes().Any(a => a.AttributeClass?.ToDisplayString() == "MUI.UGUI.ControlPropertyExtensionAttribute")
+                    var notificationName = propertyAdapterType != null && propertyAdapterType.GetAttributes().Any(a => a.AttributeClass?.ToDisplayString() == "MUI.Unity.ControlPropertyExtensionAttribute")
                         ? propertyAdapterType.ToDisplayString() + "." + targetName : targetName;
                     var modeName = mode == 3 ? "OneTime" : mode == 0 ? "OneWay" : mode == 1 ? "TwoWay" : "OneWayToSource";
                     bindings.Append("            builder.Property<").Append(TypeName(elementType)).Append(", ").Append(TypeName(source.Type)).Append(", ").Append(TypeName(target.Type)).Append(">(\n")
@@ -417,13 +417,15 @@ namespace MUI.Generators
                     {
                         bindings.Append(", sourcePath: ").Append(source.Definition).Append(", nullValue: ").Append(nullValue);
                     }
+                    if (propertyAdapterType != null)
+                        bindings.Append(", prepareTarget: element => { _ = ").Append(targetReceiver).Append("; }");
                     if (lookupComponentType != null) bindings.Append(", componentType: typeof(").Append(TypeName(lookupComponentType)).Append(")");
                     bindings.Append(");\n");
                     manifest.Append("                new global::MUI.BindingEntry(").Append(Literal(source.Name)).Append(", ").Append(Literal(elementName))
                         .Append(", typeof(").Append(TypeName(elementType)).Append("), ").Append(Literal(targetName)).Append(", global::MUI.BindingMode.").Append(modeName)
                         .Append(", global::MUI.BindingEntryKind.Property, \"Interactable\"");
                     AppendSourceLocation(manifest, attribute, member);
-                    manifest.Append(lookupComponentType == null ? "),\n" : ") { ComponentType = typeof(" + TypeName(lookupComponentType) + ") },\n");
+                    manifest.Append(lookupComponentType == null ? "),\n" : ") { ComponentType = typeof(" + TypeName(lookupComponentType) + ")" + (propertyAdapterType == null ? "" : ", PropertyAdapterType = typeof(" + TypeName(propertyAdapterType) + ")") + " },\n");
                     bindingCount++;
                 }
             }

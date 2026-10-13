@@ -4,7 +4,8 @@
   "references": [
     "MUI.Core",
     "MUI.Resources",
-    "MUI.UGUI"
+    "MUI.UGUI",
+    "MUI.Unity"
   ],
   "autoReferenced": false
 }

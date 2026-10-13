@@ -1,3 +1,4 @@
+using MUI.Unity;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -95,10 +96,15 @@ namespace MUI.Editor
                             if (entry.IsReadAccess)
                                 continue;
                             var property = entry.Kind == BindingEntryKind.Command ? entry.InteractableProperty : entry.TargetProperty;
+                            if (entry.PropertyAdapterType == typeof(ImageResources) && property == nameof(ImageResources.SpriteSource)) property = "sprite";
+                            if (entry.PropertyAdapterType == typeof(TextureResources) && property == nameof(TextureResources.TextureSource)) property = "texture";
+                            if (entry.PropertyAdapterType == typeof(TextResources) && property == nameof(TextResources.FontSource)) property = "font";
+                            if (entry.PropertyAdapterType == typeof(GraphicResources) && property == nameof(GraphicResources.MaterialSource)) property = "material";
+                            if (found[0] is Scrollbar scrollbar) ValidateScrollbarWriter(scrollbar, entry, scrollOwners, view, errors);
                             if (entry.Mode != BindingMode.OneWayToSource && !nativeWriters.Add((found[0], property)))
                                 errors.Add(entry.ElementName + "." + property + ": 重复写入绑定。");
-                            if (found[0] is Image image && property == "FillAmount" && image.type != Image.Type.Filled)
-                                errors.Add(entry.ElementName + ": FillAmount 绑定需要 Filled 图片。");
+                            if (found[0] is Image image && property == "fillAmount" && image.type != Image.Type.Filled)
+                                errors.Add(entry.ElementName + ": fillAmount 绑定需要 Filled 图片。");
                             if (entry.Mode == BindingMode.TwoWay || entry.Mode == BindingMode.OneWayToSource)
                             {
                                 if (sourceWriters.ContainsKey(entry.Source))
@@ -133,14 +139,6 @@ namespace MUI.Editor
                     errors.Add(L.Format("editor.ViewContractValidator.7d3464be21", entry.Source, entry.ElementName, entry.ElementType.Name, string.Join(", ", matches)));
                 }
 
-                if (count == 1 && matched is ImageElement && entry.Kind == BindingEntryKind.Property && entry.TargetProperty == nameof(ImageElement.FillAmount) && entry.Mode != BindingMode.OneWayToSource)
-                {
-                    var image = matched.GetComponent<Image>();
-                    if (image == null || (image.type != Image.Type.Filled && !HasImageTypeWriter(matched, manifest)))
-                    {
-                        errors.Add(L.Format("editor.ViewContractValidator.654d03c722", Path(matched.transform, view.transform)));
-                    }
-                }
 
                 if (entry.Kind == BindingEntryKind.Command)
                 {
@@ -160,10 +158,6 @@ namespace MUI.Editor
                     continue;
                 }
 
-                if (count == 1 && matched is ScrollbarElement scrollbar)
-                {
-                    ValidateScrollbarWriter(scrollbar, entry, scrollOwners, view, errors);
-                }
 
                 var targetProperty = entry.TargetProperty;
                 if (count == 1 && matched is IBindingPropertyPolicy policy)
@@ -220,7 +214,7 @@ namespace MUI.Editor
             foreach (var entry in manifest.Entries)
             {
                 if (entry.Kind == BindingEntryKind.Property && entry.Mode != BindingMode.OneWayToSource &&
-                    entry.TargetProperty == nameof(ImageElement.ImageType) && entry.ElementName == element.Name &&
+                    entry.TargetProperty == "type" && entry.ElementName == element.Name &&
                     entry.ElementType.IsInstanceOfType(element))
                 {
                     return true;
@@ -271,6 +265,11 @@ namespace MUI.Editor
                     errors.Add("原生控件绑定的名称与组件类型组合及引用必须唯一、属于当前页面，且不能与 Element 重复绑定。");
                     continue;
                 }
+                if (binding.Target is Dropdown) ValidateDropdown(binding.Target, view.transform, errors);
+                if (binding.Target is InputField) ValidateInputField(binding.Target, view, errors);
+                if (binding.Target is ScrollRect scroll) ValidateScroll(scroll, scroll.transform, view.transform, errors);
+                if (binding.Target is Scrollbar) ValidateScrollbar(binding.Target, view, errors);
+                ValidateExtensions(binding.Target, view, errors, SnapshotElementValidators());
                 try
                 {
                     using (NativeControl.Create(binding.Name, binding.Target))
@@ -311,31 +310,6 @@ namespace MUI.Editor
                 else
                 {
                     keys.Add(key, element);
-                }
-
-                if (element is DropdownElement)
-                {
-                    ValidateDropdown(element, view.transform, errors);
-                }
-
-                if (element is InputFieldElement)
-                {
-                    ValidateInputField(element, view, errors);
-                }
-
-                if (element is InputFieldElement input && !Enum.IsDefined(typeof(TextInputCommitMode), input.CommitMode))
-                {
-                    errors.Add(L.Format("editor.ViewContractValidator.70a6c57f8d", Path(element.transform, view.transform)));
-                }
-
-                if (element is ScrollRectElement)
-                {
-                    ValidateScroll(element.GetComponent<ScrollRect>(), element.transform, view.transform, errors);
-                }
-
-                if (element is ScrollbarElement)
-                {
-                    ValidateScrollbar(element, view, errors);
                 }
 
                 if (element is VirtualListElement)
@@ -383,7 +357,7 @@ namespace MUI.Editor
             }
         }
 
-        private static void ValidateDropdown(Element element, Transform root, List<string> errors)
+        private static void ValidateDropdown(Component element, Transform root, List<string> errors)
         {
             var dropdown = element.GetComponent<Dropdown>();
             if (dropdown == null)

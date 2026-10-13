@@ -24,13 +24,13 @@ namespace MUI.Samples.Navigation
             var panel = CreateNode("ResourceImage", canvasObject.transform, new Vector2(620, 460), Vector2.zero);
             panel.gameObject.AddComponent<UnityEngine.UI.Image>().color = new Color(0.08f, 0.1f, 0.14f);
             var fontText = CreateText("FontPreview", panel, new Vector2(590, 36), new Vector2(0, 190), "Font resource preview");
-            fontPreview = fontText.gameObject.AddComponent<TextElement>();
+            fontPreview = fontText.gameObject.BindControl<UnityEngine.UI.Text>();
             var iconNode = CreateNode("Icon", panel, new Vector2(130, 130), new Vector2(-130, 90));
             iconNode.gameObject.AddComponent<UnityEngine.UI.Image>().raycastTarget = false;
-            icon = iconNode.gameObject.AddComponent<ImageElement>();
+            icon = iconNode.gameObject.BindControl<UnityEngine.UI.Image>();
             var previewNode = CreateNode("Preview", panel, new Vector2(180, 130), new Vector2(120, 90));
             previewNode.gameObject.AddComponent<UnityEngine.UI.RawImage>().raycastTarget = false;
-            preview = previewNode.gameObject.AddComponent<RawImageElement>();
+            preview = previewNode.gameObject.BindControl<UnityEngine.UI.RawImage>();
             status = CreateText("Status", panel, new Vector2(590, 130), new Vector2(0, -55), string.Empty);
             CreateButton("Next", panel, -240, NextImage);
             CreateButton("Fail", panel, -120, FailNextImages);

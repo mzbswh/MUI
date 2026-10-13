@@ -6,11 +6,11 @@ namespace MUI.Samples.Navigation
     public abstract partial class PageViewModelBase : ViewModel
     {
         [ObservableProperty]
-        [Bind("Title", nameof(TextElement.Content))]
+        [Bind("Title", nameof(UnityEngine.UI.Text.text))]
         private string title;
 
         [Command]
-        [BindCommand("Close", nameof(ButtonElement.Clicked))]
+        [BindCommand("Close", nameof(UnityEngine.UI.Button.onClick))]
         private void Close(CommandContext context) => context.RequestClose();
     }
 }

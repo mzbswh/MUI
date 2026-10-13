@@ -27,7 +27,7 @@ namespace MUI.Samples.Navigation
             var input = view.InputGate;
             var inputSnapshot = view.CaptureInputSnapshot(maxBlockerReasons: 1);
             Debug.Log($"输入快照：View 资格={inputSnapshot.ViewInputEnabled}，限制={inputSnapshot.Restrictions}，局部阻挡={inputSnapshot.InputGate.BlockerCount}，已收录原因={inputSnapshot.InputGate.Reasons.Count}，截断={inputSnapshot.InputGate.IsTruncated}");
-            var confirm = view.GetElement<ButtonElement>("Confirm").GetComponent<Button>();
+            var confirm = view.GetControl<UnityEngine.UI.Button>("Confirm").GetComponent<Button>();
             confirm.onClick.Invoke();
             Debug.Log($"MUI Input blocked: count={input.BlockerCount}; enabled={view.IsInputEnabled}; state={pages.GetState(opened.Handle.Identity)}; back={(await pages.BackAsync()).Status}");
             presenter.ExerciseTransientBlocks();

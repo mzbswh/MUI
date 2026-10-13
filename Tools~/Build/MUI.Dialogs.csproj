@@ -8,6 +8,7 @@
   <ItemGroup>
     <Compile Include="../../Runtime/Modules/Dialogs/**/*.cs" />
     <ProjectReference Include="MUI.Core.csproj" />
+    <ProjectReference Include="MUI.Resources.csproj" />
     <ProjectReference Include="MUI.Pages.csproj" />
   </ItemGroup>
 </Project>

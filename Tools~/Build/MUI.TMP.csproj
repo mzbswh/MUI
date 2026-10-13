@@ -7,9 +7,12 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="../../Generators~/MUI.Generators/MUI.Generators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
-    <Compile Include="../../Runtime/Rendering/TMP/**/*.cs" />
+    <Compile Include="../../Runtime/Integrations/TMP/**/*.cs" />
     <ProjectReference Include="MUI.Core.csproj" />
+    <ProjectReference Include="MUI.Resources.csproj" />
     <ProjectReference Include="MUI.UGUI.csproj" />
+    <ProjectReference Include="MUI.Unity.csproj" />
+    <Reference Include="UnityEngine.UIModule"><HintPath>$(UnityManagedPath)/UnityEngine.UIModule.dll</HintPath><Private>false</Private></Reference>
     <Reference Include="UnityEngine.CoreModule"><HintPath>$(UnityManagedPath)/UnityEngine.CoreModule.dll</HintPath><Private>false</Private></Reference>
     <Reference Include="UnityEngine.UI"><HintPath>$(UnityUIAssemblyPath)</HintPath><Private>false</Private></Reference>
     <Reference Include="Unity.TextMeshPro"><HintPath>$(UnityTMPAssemblyPath)</HintPath><Private>false</Private></Reference>

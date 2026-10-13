@@ -13,6 +13,7 @@
     <ProjectReference Include="MUI.Pages.csproj" />
     <ProjectReference Include="MUI.Resources.csproj" />
     <ProjectReference Include="MUI.UGUI.csproj" />
+    <ProjectReference Include="MUI.Unity.csproj" />
     <ProjectReference Include="MUI.Editor.csproj" />
     <Reference Include="UnityEngine.CoreModule"><HintPath>$(UnityManagedPath)/UnityEngine.CoreModule.dll</HintPath><Private>false</Private></Reference>
     <Reference Include="UnityEditor.CoreModule"><HintPath>$(UnityManagedPath)/UnityEditor.CoreModule.dll</HintPath><Private>false</Private></Reference>

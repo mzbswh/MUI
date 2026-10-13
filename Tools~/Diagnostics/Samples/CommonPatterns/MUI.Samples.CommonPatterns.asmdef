@@ -9,7 +9,8 @@
     "MUI.UGUI",
     "MUI.UGUI.Themes",
     "MUI.Samples.ResourceIntegration",
-    "Unity.ugui"
+    "Unity.ugui",
+    "MUI.Unity"
   ],
   "autoReferenced": true
 }

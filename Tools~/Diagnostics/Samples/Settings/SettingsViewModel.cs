@@ -7,19 +7,19 @@ namespace MUI.Samples.Settings
     public partial class SettingsViewModel : ViewModel
     {
         [ObservableProperty]
-        [Bind("PlayerName", nameof(InputFieldElement.ContentType))]
+        [Bind("PlayerName", nameof(UnityEngine.UI.InputField.contentType))]
         private UnityEngine.UI.InputField.ContentType nameContentType = UnityEngine.UI.InputField.ContentType.Standard;
         [ObservableProperty]
-        [Bind("PlayerName", nameof(InputFieldElement.LineType))]
+        [Bind("PlayerName", nameof(UnityEngine.UI.InputField.lineType))]
         private UnityEngine.UI.InputField.LineType nameLineType = UnityEngine.UI.InputField.LineType.SingleLine;
         [ObservableProperty]
-        [Bind("PlayerName", nameof(InputFieldElement.CharacterLimit), bindingMode: BindingMode.OneTime)]
+        [Bind("PlayerName", nameof(UnityEngine.UI.InputField.characterLimit), bindingMode: BindingMode.OneTime)]
         private int nameCharacterLimit = 16;
         [ObservableProperty]
-        [Bind("PlayerName", nameof(InputFieldElement.ReadOnly))]
+        [Bind("PlayerName", nameof(UnityEngine.UI.InputField.readOnly))]
         private bool nameReadOnly;
         [ObservableProperty]
-        [Bind("PlayerName", nameof(InputFieldElement.Value), typeof(PlayerNameConverter),
+        [Bind("PlayerName", nameof(UnityEngine.UI.InputField.text), typeof(PlayerNameConverter),
             BindingMode.TwoWay, ValidationProperty = nameof(NameValidation))]
         private string playerName = "Player";
         [ObservableProperty]
@@ -27,28 +27,28 @@ namespace MUI.Samples.Settings
         private BindingValidationState nameValidation;
         // 先建立范围，再推送当前值；范围写入会沿用原生 Slider 的裁剪行为。
         [ObservableProperty]
-        [Bind("Volume", nameof(SliderElement.MinValue))]
+        [Bind("Volume", nameof(UnityEngine.UI.Slider.minValue))]
         private float minimumVolume;
         [ObservableProperty]
-        [Bind("Volume", nameof(SliderElement.MaxValue))]
+        [Bind("Volume", nameof(UnityEngine.UI.Slider.maxValue))]
         private float maximumVolume = 1;
         [ObservableProperty]
-        [Bind("Volume", nameof(SliderElement.WholeNumbers))]
+        [Bind("Volume", nameof(UnityEngine.UI.Slider.wholeNumbers))]
         private bool discreteVolume;
         [ObservableProperty]
-        [Bind("Volume", nameof(SliderElement.Value), bindingMode: BindingMode.TwoWay)]
+        [Bind("Volume", nameof(UnityEngine.UI.Slider.value), bindingMode: BindingMode.TwoWay)]
         private float volume = 0.5f;
         [ObservableProperty]
-        [Bind("Status", nameof(TextElement.Content))]
+        [Bind("Status", nameof(UnityEngine.UI.Text.text))]
         private string status = "Volume: 50%";
 
-        [Bind("NameError", nameof(TextElement.Content))]
+        [Bind("NameError", nameof(UnityEngine.UI.Text.text))]
         public string NameError => NameValidation.Message ?? string.Empty;
 
         private bool CanSave => Volume > 0 && NameValidation.IsValid;
 
         [Command]
-        [BindCommand("ToggleNameLock", nameof(ButtonElement.Clicked))]
+        [BindCommand("ToggleNameLock", nameof(UnityEngine.UI.Button.onClick))]
         private void ToggleNameLock()
         {
             NameReadOnly = !NameReadOnly;
@@ -56,7 +56,7 @@ namespace MUI.Samples.Settings
         }
 
         [Command(CanExecute = nameof(CanSave))]
-        [BindCommand("Save", nameof(ButtonElement.Clicked))]
+        [BindCommand("Save", nameof(UnityEngine.UI.Button.onClick))]
         private async ValueTask SaveAsync(CommandContext context)
         {
             context.Apply(() => Status = "Saving...");
@@ -65,7 +65,7 @@ namespace MUI.Samples.Settings
         }
 
         [Command]
-        [BindCommand("Reset", nameof(ButtonElement.Clicked))]
+        [BindCommand("Reset", nameof(UnityEngine.UI.Button.onClick))]
         private void ResetVolume()
         {
             Volume = 0.5f;

@@ -8,7 +8,8 @@
     "MUI.Resources",
     "MUI.UGUI",
     "MUI.Editor",
-    "MUI.Editor.Localization"
+    "MUI.Editor.Localization",
+    "MUI.Unity"
   ],
   "includePlatforms": [
     "Editor"

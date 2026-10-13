@@ -1385,7 +1385,7 @@
     },
     {
       "key": "editor.ViewContractValidator.1c85e45608",
-      "text": "DropdownElement 需要原生 Dropdown：{0}。"
+      "text": "Dropdown 需要原生 Dropdown：{0}。"
     },
     {
       "key": "editor.ViewContractValidator.36fab33a6d",
@@ -1749,7 +1749,7 @@
     },
     {
       "key": "editor.ViewContractValidator.VirtualList.f8192fe74e",
-      "text": "虚拟列表与 ScrollRectElement 不能共同拥有同一个 ScrollRect：{0}。"
+      "text": "虚拟列表与 ScrollRect 不能共同拥有同一个 ScrollRect：{0}。"
     },
     {
       "key": "editor.ViewContractValidator.a2c70aba3a",
@@ -5877,7 +5877,7 @@
     },
     {
       "key": "wizard.closeHint",
-      "text": "已有 Prefab 中关闭按钮 ButtonElement 的名称。"
+      "text": "已有 Prefab 中关闭按钮 Button 的名称。"
     },
     {
       "key": "wizard.settingsHint",

@@ -4,7 +4,7 @@
 
 目标版本为 Unity 2022.3.62f3。通过 Package Manager 的 Add package from disk 选择包根目录的 package.json；运行时代码保留在 Packages 引用中，教学示例由 Package Manager 的 Samples 一次导入 MUI Examples；打开 Tools/MUI/示例 按课学习。每课提供配置、源码和练习说明，参见[示例总览](../Samples~/README.md)。
 
-Core 不引用 Unity；Resources、Navigation 与 Widgets 分别定义资源凭证、页面导航和子视图生命周期。MUI.UGUI 提供原生 uGUI 的 Element 适配。TMP 与 Input System 位于独立程序集，项目按需安装对应包；基础页面不要求这些可选依赖。
+Core 不引用 Unity；Resources、Navigation 与 Widgets 分别定义资源凭证、页面导航和子视图生命周期。MUI.Unity 提供不依赖 uGUI/TMP 的通用组件绑定；MUI.UGUI 只负责 Canvas、输入门控、焦点和容器等具体后端接入。TMP 与 Input System 位于独立程序集，项目按需安装对应包；基础页面不要求这些可选依赖。
 
 ## 页面打开、关闭动画
 
@@ -119,55 +119,13 @@ InputGate 控制新输入准入；临时关门不自动取消已接纳的业务�
 
 普通组件成员通过 Prefab 关联生成。少量代码绑定直接声明原生类型，例如 `[Bind("Title", nameof(UnityEngine.UI.Text.text))]` 与 `[Bind("Name", nameof(TMPro.TMP_InputField.text), bindingMode: BindingMode.TwoWay)]`；绑定名与组件类型共同确定目标，不再维护每种控件的属性接口。
 
-输入框 `CommitMode` 默认 `TextInputCommitMode.OnChange`，原生编辑变化立即通知反向绑定；`OnEndEdit` 只在有效的原生编辑结束时发布 Value，再派发 EditingEnded，失去焦点也属于编辑结束。模型到控件的更新始终生效，切换模式不提交已有草稿。门控关闭、换绑或页面退役期间的结束事件不执行业务写入。TMP 的 Submitted 仍是其后端专属通知，不代表输入法组合文本已经提交。
+原生输入框和选择控件的双向绑定使用实际变化事件，模型写入通过无通知 setter 避免反馈循环。需要编辑结束提交时，在原生事件上绑定命令，或使用属性扩展定义明确的提交语义；框架不再提供逐控件的 CommitMode 包装。
 
-下拉框公共接口提供文本 Options、原生 Value、Interactable 和 SelectionChanged；模型赋值不发布用户选择事件。空选项和 TMP 占位项保留各原生后端的值语义。
+## 自定义属性与组合组件
 
-## 自定义 Element
+普通属性直接绑定原生成员，不再为 Slider、Image 或 TMP 文本创建 Element 子类。确有额外业务语义时，继承 `MUI.Unity.ControlPropertyExtension<TComponent>`，并加 `[ControlPropertyExtension]`。扩展是普通 C# 对象，由绑定适配器按需创建，监听通过 `Listen`、`TrackCleanup` 随 View 最终释放。
 
-继承 `MUI.UGUI.Element`，在 `OnInitialize()` 中通过 `CreateProperty` 创建属性状态，以公开属性转发 `Value`。通知名称使用对应公开属性的 `nameof`；初始值不会调用赋值回调，相等值不重复赋值或通知。以下适配保留 Prefab 的 Slider 初值，模型写入不派发原生用户事件：
-
-```csharp
-using MUI.UGUI;
-using UnityEngine.UI;
-
-public sealed class AmountElement : Element
-{
-    private Slider slider;
-    private ElementProperty<float> amount;
-
-    public float Amount
-    {
-        get => amount.Value;
-        set => amount.Value = value;
-    }
-
-    protected override void OnInitialize()
-    {
-        slider = RequireComponent<Slider>();
-        amount = CreateProperty(nameof(Amount), slider.value,
-            (_, next) => slider.SetValueWithoutNotify(next));
-        slider.onValueChanged.AddListener(OnNativeValueChanged);
-        TrackCleanup(() => slider.onValueChanged.RemoveListener(OnNativeValueChanged));
-    }
-
-    private void OnNativeValueChanged(float value)
-    {
-        if (CanReceiveInput(slider))
-        {
-            amount.Value = value;
-        }
-    }
-}
-```
-
-模型可声明 `[Bind("Amount", nameof(AmountElement.Amount), bindingMode: BindingMode.TwoWay, ElementType = typeof(AmountElement))]`；Prefab 对应节点命名为 Amount 并挂载该适配。原生用户回调须先检查 `CanReceiveInput`，门控期间忽略的事件不在恢复后回放。显式属性写入继续更新原生状态。
-
-`Track(resource)` 仅在登记成功时接管同步 `IDisposable`，同一对象不能重复登记。`TrackCleanup(callback)` 登记同步收尾；它与属性、原生监听共用最终 `LifetimeScope`，按登记逆序释放，一项失败仍继续处理独立项。初始化失败也沿同一路径收尾，结束后禁止新登记和属性读写。属性赋值先保存值再调用项目回调；回调抛错时不会回滚任意原生副作用。
-
-这三个入口管理控件最终拥有的资源。每次打开或换绑取得的模型、命令及异步资源仍登记到该次激活的显式 `LifetimeScope`。缓存复用不会执行最终收尾；自定义活动引用沿 `OnResetForCache()` 解除。
-
-Element 提供稳定 `CleanupResponsibility`；重复 `Dispose` 或 `DisposeAsync` 观察同一次首次结果。未知清理失败保留回调，不能通过重复调用猜测归还；完整回调确实幂等时可在 `TrackCleanup` 显式声明重试能力。先恢复允许重试的叶责任，再确认 Element 容器责任，容器不重新执行未知回调。这里的控件责任不代表外层 View 或原生节点已完成归还。
+`Element` 只用于列表、子视图等具有独立生命周期和行为的组合组件。它的 `CreateProperty`、`TrackCleanup` 和激活生命周期仍适用于这些组件。
 
 ## 嵌套属性路径
 
@@ -241,7 +199,7 @@ public partial class ShopPresenter : Presenter<ShopViewModel, ShopArgs, bool>
     private bool CanBuy => ViewModel.Quantity > 0;
 
     [Command(CanExecute = nameof(CanBuy))]
-    [BindCommand("Buy", nameof(MUI.UGUI.ButtonElement.Clicked))]
+    [BindCommand("Buy", nameof(UnityEngine.UI.Button.onClick))]
     private async System.Threading.Tasks.ValueTask BuyAsync(CommandContext context)
     {
         var model = ViewModel;
@@ -283,9 +241,15 @@ Navigation 示例的 Confirm 现位于 PagePresenter，Close 仍位于 PageViewM
 
 ## 资源键与直接对象
 
-ImageElement.Sprite、RawImageElement.Texture、TextElement.Font 和 GraphicElement.Material 可在资源键槽存在时直接赋值。赋值立即使旧请求失效，成功替换显示后归还旧凭证；异步归还仍由同一激活生命周期跟踪。直接 null 清空，直接对象只借用，不自动销毁。调用方必须覆盖整个显示期间的持有权；即使赋予槽已显示的同一对象，也须有独立持有权。
+图片、纹理、字体和材质资源分别通过 `ImageResources.SpriteSource`、`TextureResources.TextureSource`、`TextResources.FontSource`、`GraphicResources.MaterialSource` 扩展绑定。TMP 共享材质使用可选 `TMPMaterialResources.MaterialSource`，普通 TMP 属性直接绑定原生成员。
 
-直接对象赋值将请求键和显示键都置空，非空对象的 Snapshot.State 为 Displayed，清空为 Empty；查询实际对象使用控件属性。被取代请求即使忽略取消，其迟到凭证也归还。Snapshot.CleanupFailure 和 CleanupFailureCount 保留旧归还、回滚及最终清空失败的诊断，不改写新资源的显示结果。释放失败仍使最终生命周期清理失败，重复等待不会自动重试。
+```csharp
+[ObservableProperty]
+[Bind("Artwork", nameof(MUI.UGUI.ImageResources.SpriteSource))]
+private string artwork = "Artwork/Forest";
+```
+
+资源键只支持 OneWay/OneTime。空键清空显示，失败保留旧资源，迟到请求归还凭证；`SpriteSourceSnapshot` 等属性提供请求、显示及清理状态。资源扩展从所属 View 取得当前激活的加载器和生命周期，首次准备等待仍受 `WaitForResourceSources` 控制。不要让资源键和原生资源属性同时写同一个目标，绑定会拒绝重复写入。纯借用资源直接绑定原生 `sprite`、`texture`、`font` 等属性，持有权由调用方负责。
 
 旧凭证的责任属性抛错或返回 null 时，仍执行一次真实归还；属性错误保留于清理诊断，不覆盖新资源的显示状态。归还失败采用不可安全重试的回退责任，不能根据内部叶凭证或原生对象已销毁猜测外层 callback 完成。加载异常附带 `ResourceLoadException.CleanupCompletion` 时，操作继续等待实际回滚；失败任务保存为独立未知责任，不重新执行后端回滚。
 
@@ -442,7 +406,7 @@ private UnityEngine.UI.InputField.LineType nameLineType;
 private string playerName;
 ```
 
-View 按“绑定名称 + 组件类型”保存原生组件引用，无需挂 InputFieldElement。同一节点上的不同组件可共用绑定名，例如 `Bind("Preview", nameof(UnityEngine.UI.Text.enabled))` 与 `Bind("Preview", nameof(UnityEngine.UI.LayoutElement.enabled))`。编译器将组件类型传入运行时索引；相同属性名不会串到其他组件。编辑器按名称与类型筛选，唯一候选自动关联；同类型有多个候选时必须手动指定组件引用，已保存的有效引用优先。属性选择、折叠状态和自动声明也按名称与类型隔离；同名控件的默认生成成员名带组件类型，仍可手动修改成员名。
+View 按“绑定名称 + 组件类型”保存原生组件引用，无需附加输入框包装组件。同一节点上的不同组件可共用绑定名，例如 `Bind("Preview", nameof(UnityEngine.UI.Text.enabled))` 与 `Bind("Preview", nameof(UnityEngine.UI.LayoutElement.enabled))`。编译器将组件类型传入运行时索引；相同属性名不会串到其他组件。编辑器按名称与类型筛选，唯一候选自动关联；同类型有多个候选时必须手动指定组件引用，已保存的有效引用优先。属性选择、折叠状态和自动声明也按名称与类型隔离；同名控件的默认生成成员名带组件类型，仍可手动修改成员名。
 
 `TMP_Text` 等基类契约可以引用具体派生组件；运行时优先使用明确保存的契约类型，缺少精确条目时只接受唯一的可赋值类型候选。自定义属性扩展的原生类型参与相同的选择流程。命令仍使用事件契约；同名目标存在多个实现时，可通过 `BindCommand.ComponentType = typeof(MyComponent)` 指定组件类型。
 
@@ -540,7 +504,7 @@ public interface IProgressDisplay : IElement
 }
 
 // MyGauge 是项目已有组件，此例假设它具有 Value 属性。
-public sealed class GaugeAdapter : MUI.UGUI.NativeControl<MyGauge>, IProgressDisplay
+public sealed class GaugeAdapter : MUI.Unity.NativeControl<MyGauge>, IProgressDisplay
 {
     public GaugeAdapter(string name, MyGauge target) : base(name, target) { }
     public float Progress
@@ -556,7 +520,7 @@ public static class GaugeBindingSetup
 #if UNITY_EDITOR
     [UnityEditor.InitializeOnLoadMethod]
 #endif
-    public static void Register() => MUI.UGUI.NativeControl.Register<MyGauge>(
+    public static void Register() => MUI.Unity.NativeControl.Register<MyGauge>(
         (name, component) => new GaugeAdapter(name, component));
 }
 ```

@@ -57,7 +57,7 @@ namespace MUI.Samples.Navigation
                 layout.childForceExpandHeight = false;
             }
 
-            label.gameObject.AddComponent<TextElement>();
+            label.gameObject.BindControl<UnityEngine.UI.Text>();
             var view = template.gameObject.AddComponent<View>();
             var list = boundary.gameObject.AddComponent<VirtualListElement>();
             list.Configure(scroll, view, 40, 1);

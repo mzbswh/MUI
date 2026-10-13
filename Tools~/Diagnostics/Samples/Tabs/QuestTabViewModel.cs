@@ -5,7 +5,7 @@ namespace MUI.Samples.Tabs
     public partial class QuestTabViewModel : ViewModel
     {
         [ObservableProperty]
-        [Bind("Title", nameof(TextElement.Content))]
+        [Bind("Title", nameof(UnityEngine.UI.Text.text))]
         private string title;
     }
 }

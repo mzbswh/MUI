@@ -9,7 +9,8 @@
     "MUI.Widgets",
     "MUI.Themes",
     "MUI.UGUI",
-    "Unity.ugui"
+    "Unity.ugui",
+    "MUI.Unity"
   ],
   "autoReferenced": true
 }

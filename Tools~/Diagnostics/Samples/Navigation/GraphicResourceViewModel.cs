@@ -11,53 +11,53 @@ namespace MUI.Samples.Navigation
     public partial class GraphicResourceViewModel : ViewModel
     {
         [ObservableProperty]
-        [Bind("Icon", nameof(ImageElement.MaterialSource))]
-        [Bind("Preview", nameof(RawImageElement.MaterialSource))]
+        [Bind("Icon", nameof(GraphicResources.MaterialSource))]
+        [Bind("Preview", nameof(GraphicResources.MaterialSource))]
         private string materialKey;
         [ObservableProperty]
-        [Bind("Label", nameof(TextElement.MaterialSource))]
+        [Bind("Label", nameof(GraphicResources.MaterialSource))]
         private string textMaterialKey;
         [ObservableProperty]
-        [Bind("Label", nameof(TextElement.Font))]
+        [Bind("Label", nameof(UnityEngine.UI.Text.font))]
         private Font labelFont;
         [ObservableProperty]
-        [Bind("Label", nameof(TextElement.FontSize))]
+        [Bind("Label", nameof(UnityEngine.UI.Text.fontSize))]
         private int labelFontSize = 24;
         [ObservableProperty]
-        [Bind("Label", nameof(TextElement.Alignment))]
+        [Bind("Label", nameof(UnityEngine.UI.Text.alignment))]
         private TextAnchor labelAlignment = TextAnchor.MiddleCenter;
         [ObservableProperty]
-        [Bind("Label", nameof(TextElement.RichText))]
+        [Bind("Label", nameof(UnityEngine.UI.Text.supportRichText))]
         private bool labelRichText;
         [ObservableProperty]
-        [Bind("Label", nameof(TextElement.MinFontSize))]
+        [Bind("Label", nameof(UnityEngine.UI.Text.resizeTextMinSize))]
         private int labelMinFontSize = 12;
         [ObservableProperty]
-        [Bind("Label", nameof(TextElement.MaxFontSize))]
+        [Bind("Label", nameof(UnityEngine.UI.Text.resizeTextMaxSize))]
         private int labelMaxFontSize = 32;
         [ObservableProperty]
-        [Bind("Label", nameof(TextElement.BestFit))]
+        [Bind("Label", nameof(UnityEngine.UI.Text.resizeTextForBestFit))]
         private bool labelBestFit;
         [ObservableProperty]
-        [Bind("Icon", nameof(ImageElement.ImageType))]
+        [Bind("Icon", nameof(UnityEngine.UI.Image.type))]
         private UnityEngine.UI.Image.Type iconImageType = UnityEngine.UI.Image.Type.Simple;
         [ObservableProperty]
-        [Bind("Icon", nameof(ImageElement.PreserveAspect))]
+        [Bind("Icon", nameof(UnityEngine.UI.Image.preserveAspect))]
         private bool iconPreserveAspect = true;
         [ObservableProperty]
-        [Bind("Icon", nameof(ImageElement.Color))]
-        [Bind("Preview", nameof(RawImageElement.Color))]
-        [Bind("Label", nameof(TextElement.Color))]
+        [Bind("Icon", nameof(UnityEngine.UI.Image.color))]
+        [Bind("Preview", nameof(UnityEngine.UI.RawImage.color))]
+        [Bind("Label", nameof(UnityEngine.UI.Text.color))]
         private Color tint = Color.white;
         [ObservableProperty]
-        [Bind("Icon", nameof(ImageElement.RaycastTarget))]
-        [Bind("Preview", nameof(RawImageElement.RaycastTarget))]
-        [Bind("Label", nameof(TextElement.RaycastTarget))]
+        [Bind("Icon", nameof(UnityEngine.UI.Image.raycastTarget))]
+        [Bind("Preview", nameof(UnityEngine.UI.RawImage.raycastTarget))]
+        [Bind("Label", nameof(UnityEngine.UI.Text.raycastTarget))]
         private bool receiveRaycasts;
         [ObservableProperty]
-        [Bind("Icon", nameof(ImageElement.Maskable))]
-        [Bind("Preview", nameof(RawImageElement.Maskable))]
-        [Bind("Label", nameof(TextElement.Maskable))]
+        [Bind("Icon", nameof(UnityEngine.UI.Image.maskable))]
+        [Bind("Preview", nameof(UnityEngine.UI.RawImage.maskable))]
+        [Bind("Label", nameof(UnityEngine.UI.Text.maskable))]
         private bool useMask = true;
     }
 }

@@ -1385,7 +1385,7 @@
     },
     {
       "key": "editor.ViewContractValidator.1c85e45608",
-      "text": "DropdownElement requires a native Dropdown: {0}."
+      "text": "Dropdown requires a native Dropdown: {0}."
     },
     {
       "key": "editor.ViewContractValidator.36fab33a6d",
@@ -1749,7 +1749,7 @@
     },
     {
       "key": "editor.ViewContractValidator.VirtualList.f8192fe74e",
-      "text": "Virtual list and ScrollRectElement cannot own the same ScrollRect: {0}."
+      "text": "Virtual list and ScrollRect cannot own the same ScrollRect: {0}."
     },
     {
       "key": "editor.ViewContractValidator.a2c70aba3a",
@@ -5877,7 +5877,7 @@
     },
     {
       "key": "wizard.closeHint",
-      "text": "The close ButtonElement name in the existing Prefab."
+      "text": "The close Button name in the existing Prefab."
     },
     {
       "key": "wizard.settingsHint",

@@ -1,0 +1,22 @@
+{
+  "name": "MUI.UGUI.Notifications",
+  "rootNamespace": "MUI.UGUI",
+  "references": [
+    "MUI.Core",
+    "MUI.UGUI",
+    "MUI.Notifications",
+    "Unity.ugui",
+    "MUI.Unity"
+  ],
+  "autoReferenced": true,
+  "defineConstraints": [
+    "MUI_HAS_UGUI"
+  ],
+  "versionDefines": [
+    {
+      "name": "com.unity.ugui",
+      "expression": "0.0.0",
+      "define": "MUI_HAS_UGUI"
+    }
+  ]
+}

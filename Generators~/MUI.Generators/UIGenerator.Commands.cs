@@ -241,7 +241,7 @@ namespace MUI.Generators
             if (!events.Add(key + signal) || !writers.Add(key + interactable))
                 Fail(member, "Duplicate command signal or state writer: " + name + "." + signal);
             var target = "((" + TypeName(component) + ")element.Target)";
-            bindings.Append("            builder.Command<global::MUI.UGUI.NativeControl>(\n                ").Append(Literal(name))
+            bindings.Append("            builder.Command<global::MUI.Unity.NativeControl>(\n                ").Append(Literal(name))
                 .Append(", model => ").Append(receiver).Append('.').Append(Escape(propertyName))
                 .Append(",\n                (element, handler) => element.AddCommandListener(").Append(target).Append('.').Append(Escape(signal))
                 .Append(", handler),\n                (element, handler) => element.RemoveCommandListener(").Append(target).Append('.').Append(Escape(signal))
@@ -249,7 +249,7 @@ namespace MUI.Generators
                 .Append(" = value, ").Append(Literal(interactable)).Append(", ").Append(Literal(signal))
                 .Append(", componentType: typeof(").Append(TypeName(selector)).Append("));\n");
             manifest.Append("                new global::MUI.BindingEntry(").Append(Literal(propertyName)).Append(", ").Append(Literal(name))
-                .Append(", typeof(global::MUI.UGUI.NativeControl), ").Append(Literal(signal))
+                .Append(", typeof(global::MUI.Unity.NativeControl), ").Append(Literal(signal))
                 .Append(", global::MUI.BindingMode.OneWay, global::MUI.BindingEntryKind.Command, ").Append(Literal(interactable));
             AppendSourceLocation(manifest, attribute, member);
             manifest.Append(") { ComponentType = typeof(").Append(TypeName(selector)).Append(") },\n");

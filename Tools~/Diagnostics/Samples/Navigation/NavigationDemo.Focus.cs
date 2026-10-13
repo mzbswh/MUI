@@ -15,7 +15,7 @@ namespace MUI.Samples.Navigation
             Func<IView, PageViewModel, BindingContext<PageViewModel>> binding, View lower, PageHandle lowerHandle)
         {
             var system = EventSystem.current;
-            var lowerClose = lower.GetElement<ButtonElement>("Close").gameObject;
+            var lowerClose = lower.GetControl<UnityEngine.UI.Button>("Close").gameObject;
             system.SetSelectedGameObject(lowerClose);
             var route = new PageDefinition<PageViewModel, PageArgs, int>("focus.modal", resource,
                 () => new PageViewModel(), _ => new PagePresenter(), binding,
@@ -27,7 +27,7 @@ namespace MUI.Samples.Navigation
             }
 
             var modal = FindFrontView();
-            var confirm = modal.GetElement<ButtonElement>("Confirm").GetComponent<Button>();
+            var confirm = modal.GetControl<UnityEngine.UI.Button>("Confirm").GetComponent<Button>();
             Debug.Log($"MUI Focus initial: selected={system.currentSelectedGameObject.name}; modalFocused={pages.FocusedHandle == opened.Handle.Identity}");
             system.SetSelectedGameObject(lowerClose);
             pages.Pump();

@@ -1,4 +1,5 @@
 using System;
+using UnityEngine;
 using System.Collections.Generic;
 using MUI.UGUI;
 using L = MUI.Editor.Localization.MUIEditorLocalization;
@@ -11,7 +12,7 @@ namespace MUI.Editor
 
         /// <summary>每个域注册一次只读编辑器校验器，通常在 InitializeOnLoad 中调用。</summary>
         public static void RegisterElementValidator<TElement>(Action<TElement, View, ICollection<string>> validator)
-            where TElement : Element
+            where TElement : Component
         {
             if (validator == null)
             {
@@ -39,7 +40,7 @@ namespace MUI.Editor
             return snapshot;
         }
 
-        private static void ValidateExtensions(Element element,
+        private static void ValidateExtensions(Component element,
                     View view,
                     List<string> errors,
                     List<KeyValuePair<Type, ElementValidator>> snapshot)
@@ -65,7 +66,7 @@ namespace MUI.Editor
         private sealed class ElementValidator
         {
             internal Delegate Identity;
-            internal Action<Element, View, ICollection<string>> Validate;
+            internal Action<Component, View, ICollection<string>> Validate;
         }
     }
 }

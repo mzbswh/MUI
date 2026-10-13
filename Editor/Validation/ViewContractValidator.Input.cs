@@ -1,3 +1,4 @@
+using UnityEngine;
 using System.Collections.Generic;
 using MUI.UGUI;
 using UnityEngine.UI;
@@ -8,7 +9,7 @@ namespace MUI.Editor
     public static partial class ViewContractValidator
     {
         /// <summary>只检查原生序列化引用，不初始化控件或执行字符校验委托。</summary>
-        private static void ValidateInputField(Element element, View view, ICollection<string> errors)
+        private static void ValidateInputField(Component element, View view, ICollection<string> errors)
         {
             var path = Path(element.transform, view.transform);
             var input = element.GetComponent<InputField>();

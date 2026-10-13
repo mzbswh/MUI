@@ -6,7 +6,8 @@
     "MUI.Pages",
     "MUI.Pages.Editor",
     "MUI.UGUI",
-    "MUI.Editor.Localization"
+    "MUI.Editor.Localization",
+    "MUI.Unity"
   ],
   "includePlatforms": [
     "Editor"

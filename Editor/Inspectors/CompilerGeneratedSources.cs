@@ -60,7 +60,7 @@ namespace MUI.Editor
                 return;
             EditorApplication.update -= SyncProjects;
             SessionState.SetBool(PendingProjectSync, false);
-            Unity.CodeEditor.CodeEditor.CurrentEditor.SyncAll();
+            global::Unity.CodeEditor.CodeEditor.CurrentEditor.SyncAll();
         }
 
         private static string ConfiguredDirectory()

@@ -146,7 +146,7 @@ namespace MUI.Editor.Localization
 
         public static void BindTree(VisualElement root)
         {
-            var bindings = root.Query<TextElement>().ToList().Where(item => item.text != null && item.text.StartsWith("@", StringComparison.Ordinal))
+            var bindings = root.Query<UnityEngine.UIElements.TextElement>().ToList().Where(item => item.text != null && item.text.StartsWith("@", StringComparison.Ordinal))
                 .Select(item => (element: item, key: item.text.Substring(1))).ToArray();
             void Refresh()
             {

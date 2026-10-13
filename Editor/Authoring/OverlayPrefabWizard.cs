@@ -69,6 +69,10 @@ namespace MUI.Editor
 
                 root.SetActive(true);
                 var view = root.GetComponent<View>();
+                foreach (var text in root.GetComponentsInChildren<UnityEngine.UI.Text>(true))
+                    NativeBindingAuthoring.Register(root.GetComponent<View>(), text);
+                foreach (var button in root.GetComponentsInChildren<UnityEngine.UI.Button>(true))
+                    NativeBindingAuthoring.Register(root.GetComponent<View>(), button);
                 var issues = ViewContractValidator.ValidateStructure(view);
                 if (issues.Count > 0)
                 {
@@ -135,10 +139,8 @@ namespace MUI.Editor
             graphic.color = new Color(0.25f, 0.28f, 0.34f, 1);
             var button = rect.gameObject.AddComponent<Button>();
             button.targetGraphic = graphic;
-            rect.gameObject.AddComponent<ButtonElement>().AccessibilityLabel = title;
             rect.gameObject.AddComponent<ContextMenuItemInput>();
             var label = PrefabAuthoring.CreateText(name + "Label", rect, title);
-            label.gameObject.AddComponent<TextElement>();
             Stretch(label.rectTransform);
         }
 
@@ -149,7 +151,6 @@ namespace MUI.Editor
             group.interactable = false;
             content.GetComponent<Image>().raycastTarget = false;
             var label = PrefabAuthoring.CreateText("Message", content, L.Get("editor.OverlayPrefabWizard.613a9a6df1"));
-            label.gameObject.AddComponent<TextElement>();
             label.alignment = TextAnchor.MiddleLeft;
             label.horizontalOverflow = HorizontalWrapMode.Wrap;
             Stretch(label.rectTransform);

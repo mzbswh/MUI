@@ -14,7 +14,7 @@ namespace MUI.Samples.Navigation
         {
             foreach (var name in new[] { "Confirm", "Close" })
             {
-                var button = view.GetElement<ButtonElement>(name);
+                var button = view.GetControl<UnityEngine.UI.Button>(name);
                 var input = button.GetComponent<UIBackInput>();
                 if (input == null)
                 {

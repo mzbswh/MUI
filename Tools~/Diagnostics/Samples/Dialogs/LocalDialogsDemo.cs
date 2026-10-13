@@ -40,8 +40,8 @@ namespace MUI.Samples.Dialogs
                     MaxInstances = 1,
                     ExistingInstance = ExistingInstancePolicy.Reject
                 });
-                confirmationRoute = ConfirmationDialog.CreateDefinition(new ViewResource(confirmationKey), policy: policy);
-                alertRoute = AlertDialog.CreateDefinition(new ViewResource(alertKey), policy: policy);
+                confirmationRoute = ConfirmationDialog.CreateDefinition(new ViewResource(confirmationKey), ConfirmationDialogBindings.Create, policy: policy);
+                alertRoute = AlertDialog.CreateDefinition(new ViewResource(alertKey), AlertDialogBindings.Create, policy: policy);
                 host.Initialize();
                 initialized = true;
                 ShowConfirmation();

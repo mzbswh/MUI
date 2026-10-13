@@ -91,7 +91,6 @@ GameObject:
   - component: {fileID: 1553887565615983581}
   - component: {fileID: 6165322149665465726}
   - component: {fileID: 7029357596051137938}
-  - component: {fileID: 2777096457046079673}
   - component: {fileID: 6222265430150566497}
   m_Layer: 0
   m_Name: Confirm
@@ -216,25 +215,6 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
---- !u!114 &2777096457046079673
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4315793722450660987}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 798ea9cb30da4a8d931397a3cde0f936, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  accessibilityLabel: Complete
-  accessibilityDescription: 
-  accessibilityValue: 
-  semanticRole: 0
-  semanticState: 0
-  accessibilityOrder: 0
-  accessibilityHidden: 0
 --- !u!1 &5585269923075176462
 GameObject:
   m_ObjectHideFlags: 0
@@ -306,6 +286,13 @@ MonoBehaviour:
   modalBarrierColor: {r: 0, g: 0, b: 0, a: 0.45}
   inheritParentResources: 1
   waitForResourceSources: 0
+  nativeBindings:
+  - Name: Confirm
+    Target: {fileID: 7029357596051137938}
+    ComponentType: UnityEngine.UI.Button, UnityEngine.UI, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
+  - Name: Title
+    Target: {fileID: 6095128241355194254}
+    ComponentType: UnityEngine.UI.Text, UnityEngine.UI, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
 --- !u!222 &7319142832376496299
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -355,7 +342,6 @@ GameObject:
   - component: {fileID: 4800915378294012601}
   - component: {fileID: 6282344965956578248}
   - component: {fileID: 6095128241355194254}
-  - component: {fileID: 4257123043658246683}
   m_Layer: 0
   m_Name: Title
   m_TagString: Untagged
@@ -424,22 +410,3 @@ MonoBehaviour:
     m_VerticalOverflow: 0
     m_LineSpacing: 1
   m_Text: Acceptance
---- !u!114 &4257123043658246683
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8548045883068282007}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 97b65fd885bc41c585524125247d1171, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  accessibilityLabel: 
-  accessibilityDescription: 
-  accessibilityValue: 
-  semanticRole: 0
-  semanticState: 0
-  accessibilityOrder: 0
-  accessibilityHidden: 0

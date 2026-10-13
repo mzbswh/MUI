@@ -13,12 +13,12 @@ namespace MUI.TMP.Editor
     {
         static TMPElementValidation()
         {
-            ViewContractValidator.RegisterElementValidator<TMPTextElement>(ValidateText);
-            ViewContractValidator.RegisterElementValidator<TMPInputFieldElement>(ValidateInput);
-            ViewContractValidator.RegisterElementValidator<TMPDropdownElement>(ValidateDropdown);
+            ViewContractValidator.RegisterElementValidator<TextMeshProUGUI>(ValidateText);
+            ViewContractValidator.RegisterElementValidator<TMP_InputField>(ValidateInput);
+            ViewContractValidator.RegisterElementValidator<TMP_Dropdown>(ValidateDropdown);
         }
 
-        private static void ValidateText(TMPTextElement element, View view, ICollection<string> errors)
+        private static void ValidateText(TextMeshProUGUI element, View view, ICollection<string> errors)
         {
             if (element.GetComponent<TextMeshProUGUI>() == null)
             {
@@ -26,10 +26,8 @@ namespace MUI.TMP.Editor
             }
         }
 
-        private static void ValidateInput(TMPInputFieldElement element, View view, ICollection<string> errors)
+        private static void ValidateInput(TMP_InputField element, View view, ICollection<string> errors)
         {
-            if (!System.Enum.IsDefined(typeof(TextInputCommitMode), element.CommitMode))
-                errors.Add(element.name + ": Invalid text input commit mode.");
             var input = element.GetComponent<TMP_InputField>();
             if (input == null)
             {
@@ -91,7 +89,7 @@ namespace MUI.TMP.Editor
             }
         }
 
-        private static void ValidateDropdown(TMPDropdownElement element, View view, ICollection<string> errors)
+        private static void ValidateDropdown(TMP_Dropdown element, View view, ICollection<string> errors)
         {
             var dropdown = element.GetComponent<TMP_Dropdown>();
             if (dropdown == null)
@@ -103,9 +101,9 @@ namespace MUI.TMP.Editor
             DropdownTemplateValidation.Validate(dropdown.template, dropdown.itemText, dropdown.itemImage, ElementPath(element, view), errors);
         }
 
-        private static void Report(Element element, View view, ICollection<string> errors, string message) => errors.Add(message + ": " + ElementPath(element, view) + ".");
+        private static void Report(Component element, View view, ICollection<string> errors, string message) => errors.Add(message + ": " + ElementPath(element, view) + ".");
 
-        private static string ElementPath(Element element, View view)
+        private static string ElementPath(Component element, View view)
         {
             var segments = new List<string>();
             for (var node = element.transform; node != null; node = node.parent)

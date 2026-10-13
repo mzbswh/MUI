@@ -8,13 +8,13 @@ namespace MUI.Samples.Navigation
     public partial class RewardItemViewModel : ViewModel
     {
         [ObservableProperty]
-        [Bind("ItemLabel", nameof(TextElement.Content))]
+        [Bind("ItemLabel", nameof(UnityEngine.UI.Text.text))]
         private string label;
         [ObservableProperty]
-        [Bind("Icon", nameof(ImageElement.SpriteSource))]
+        [Bind("Icon", nameof(ImageResources.SpriteSource))]
         private string iconKey = "Warm";
         [ObservableProperty]
-        [Bind("ItemLabel", nameof(TextElement.FontSource))]
+        [Bind("ItemLabel", nameof(TextResources.FontSource))]
         private string fontKey = "DefaultFont";
 
         public Action<RewardItemViewModel> RemoveRequested
@@ -29,7 +29,7 @@ namespace MUI.Samples.Navigation
         }
 
         [Command]
-        [BindCommand("Remove", nameof(ButtonElement.Clicked))]
+        [BindCommand("Remove", nameof(UnityEngine.UI.Button.onClick))]
         private void Remove()
         {
             var handler = RemoveRequested;

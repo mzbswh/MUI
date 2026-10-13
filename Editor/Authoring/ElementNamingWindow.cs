@@ -1,3 +1,4 @@
+using System.Linq;
 using System;
 using System.Collections.Generic;
 using MUI.UGUI;
@@ -123,7 +124,7 @@ namespace MUI.Editor
             }
 
             protectedPrefab |= !isRoot && PrefabUtility.IsAnyPrefabInstanceRoot(node.gameObject);
-            var elements = node.GetComponents<Element>();
+            var elements = node.GetComponents<Component>().Where(component => component is Element || root.NativeBindings.Any(binding => binding != null && binding.Target == component)).ToArray();
             if (elements.Length > 0)
             {
                 result.Add(new Entry
@@ -333,7 +334,7 @@ namespace MUI.Editor
         private sealed class Entry
         {
             internal GameObject Target;
-            internal Element[] Elements;
+            internal Component[] Elements;
             internal Transform Parent;
             internal int SiblingIndex;
             internal string Original;

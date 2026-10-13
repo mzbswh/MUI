@@ -32,7 +32,7 @@ namespace MUI.Samples.Settings
             placeholder.text = "Player name";
             placeholder.raycastTarget = false;
             field.placeholder = placeholder;
-            root.gameObject.AddComponent<InputFieldElement>();
+            root.gameObject.BindControl<UnityEngine.UI.InputField>();
 
             var error = Node("NameError", parent, new Vector2(400, 24), new Vector2(0, -53));
             var errorText = error.gameObject.AddComponent<Text>();
@@ -41,7 +41,7 @@ namespace MUI.Samples.Settings
             errorText.alignment = TextAnchor.MiddleLeft;
             errorText.color = new Color(1f, 0.65f, 0.45f);
             errorText.raycastTarget = false;
-            error.gameObject.AddComponent<TextElement>();
+            error.gameObject.BindControl<UnityEngine.UI.Text>();
         }
     }
 }

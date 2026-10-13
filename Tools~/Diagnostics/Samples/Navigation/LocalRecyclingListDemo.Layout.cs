@@ -102,18 +102,18 @@ namespace MUI.Samples.Navigation
             var image = icon.gameObject.AddComponent<UnityEngine.UI.Image>();
             image.raycastTarget = false;
             image.preserveAspect = true;
-            icon.gameObject.AddComponent<ImageElement>();
+            icon.gameObject.BindControl<UnityEngine.UI.Image>();
             var label = CreateText("ItemLabel", item, "Reward", new Vector2(430, 48));
             label.rectTransform.anchorMin = label.rectTransform.anchorMax = new Vector2(0, 0.5f);
             label.rectTransform.pivot = new Vector2(0, 0.5f);
             label.rectTransform.anchoredPosition = new Vector2(72, 0);
-            label.gameObject.AddComponent<TextElement>();
+            label.gameObject.BindControl<UnityEngine.UI.Text>();
             var remove = CreateButton("Remove", item, "Remove", new Vector2(130, 42));
             var removeRect = (RectTransform)remove.transform;
             removeRect.anchorMin = removeRect.anchorMax = new Vector2(1, 0.5f);
             removeRect.pivot = new Vector2(1, 0.5f);
             removeRect.anchoredPosition = new Vector2(-12, 0);
-            remove.gameObject.AddComponent<ButtonElement>();
+            remove.gameObject.BindControl<UnityEngine.UI.Button>();
             item.gameObject.AddComponent<View>();
             var nested = template.gameObject.AddComponent<NestedViewElement>();
             if (list is SlotListElement fixedList)

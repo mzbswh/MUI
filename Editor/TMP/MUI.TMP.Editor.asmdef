@@ -8,19 +8,26 @@
     "MUI.Editor",
     "Unity.TextMeshPro",
     "Unity.ugui",
-    "MUI.Editor.Localization"
+    "MUI.Editor.Localization",
+    "MUI.Unity"
   ],
   "includePlatforms": [
     "Editor"
   ],
   "defineConstraints": [
-    "MUI_TEXTMESHPRO"
+    "MUI_TEXTMESHPRO",
+    "MUI_HAS_UGUI"
   ],
   "versionDefines": [
     {
       "name": "com.unity.textmeshpro",
       "expression": "3.0.0",
       "define": "MUI_TEXTMESHPRO"
+    },
+    {
+      "name": "com.unity.ugui",
+      "expression": "0.0.0",
+      "define": "MUI_HAS_UGUI"
     }
   ],
   "autoReferenced": true

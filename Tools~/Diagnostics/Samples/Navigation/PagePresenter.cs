@@ -7,7 +7,7 @@ namespace MUI.Samples.Navigation
     {
         // 命令直接声明在 Presenter，框架将其接入当前页面的绑定会话。
         [Command]
-        [BindCommand("Confirm", nameof(ButtonElement.Clicked))]
+        [BindCommand("Confirm", nameof(UnityEngine.UI.Button.onClick))]
         private void Confirm(CommandContext context) => context.RequestClose(ViewModel.Selection);
 
         protected override void OnCreate() => Debug.Log("MUI Navigation OnCreate");
